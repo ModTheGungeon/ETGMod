@@ -36,6 +36,12 @@ public static class ETGMod {
         CallInEachModule("Start");
     }
 
+    public static void Update() {
+        // TODO
+
+        CallInEachModule("Update");
+    }
+
     public static void Exit() {
         // TODO
 

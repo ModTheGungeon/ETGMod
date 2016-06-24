@@ -51,6 +51,12 @@ public abstract class ETGModule {
     public virtual void Start() { }
 
     /// <summary>
+    /// This method gets called each update.
+    /// Do not depend on any specific order in which the mods get poked.
+    /// </summary>
+    public virtual void Update() { }
+
+    /// <summary>
     /// This method gets called when ETGMod exits.
     /// </summary>
     public virtual void Exit() { }
