@@ -7,10 +7,11 @@
     <ProjectGuid>{363A46E8-D9DD-4F31-9307-73B664E71D45}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Assembly_CSharp.Base.mm</RootNamespace>
+    <RootNamespace></RootNamespace>
     <AssemblyName>Assembly-CSharp.Base.mm</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
