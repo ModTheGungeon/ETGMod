@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 /// </summary>
 public static class ETGMod {
 
+    public readonly static Version BaseVersion = new Version(1, 0);
+
     /// <summary>
     /// Used for CallInEachModule to call a method in each type of mod.
     /// </summary>
@@ -22,6 +24,14 @@ public static class ETGMod {
 
     public static void Start() {
         // TODO Detect all modules and backends
+
+        ModuleTypes = new Type[AllMods.Count];
+        ModuleMethods = new Dictionary<string, MethodInfo>[ModuleTypes.Length];
+        for (int i = 0; i < ModuleTypes.Length; i++) {
+            ETGModule module = AllMods[i];
+            ModuleTypes[i] = module.GetType();
+            ModuleMethods[i] = new Dictionary<string, MethodInfo>();
+        }
 
         CallInEachModule("Start");
     }
