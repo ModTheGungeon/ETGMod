@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Game mod class. All game mods should have a class / type extending this.
