@@ -58,14 +58,14 @@ public static class ETGMod {
         }
 
         Type[] argsTypes = { typeof(T) };
-        T[] args = { val };
+        object[] args = { val };
 
         Delegate[] ds = md.GetInvocationList();
         for (int i = 0; i < ds.Length; i++) {
-            args[0] = (T) ds[i].DynamicInvoke(args);
+            args[0] = ds[i].DynamicInvoke(args);
         }
 
-        return args[0];
+        return (T) args[0];
     }
 
     // A shared object a day keeps the GC away!
