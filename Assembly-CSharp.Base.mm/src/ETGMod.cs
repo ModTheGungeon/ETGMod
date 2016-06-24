@@ -48,9 +48,37 @@ public static class ETGMod {
         CallInEachModule("Exit");
     }
 
+    /// <summary>
+    /// Invokes all delegates in the invocation list, passing on the result to the next.
+    /// </summary>
+    /// <typeparam name="T">Type of the result.</typeparam>
+    /// <param name="md">The multicast delegate.</param>
+    /// <param name="val">The initial value.</param>
+    /// <returns>The result of all delegates, or the initial value if md == null.</returns>
+    public static T RunHooks<T>(this MulticastDelegate md, T val) {
+        if (md == null) {
+            return val;
+        }
+
+        Type[] argsTypes = { typeof(T) };
+        T[] args = { val };
+
+        Delegate[] ds = md.GetInvocationList();
+        for (int i = 0; i < ds.Length; i++) {
+            args[0] = (T) ds[i].DynamicInvoke(args);
+        }
+
+        return args[0];
+    }
+
     // A shared object a day keeps the GC away!
     private static object[] _object_0 = new object[0];
     private static Type[] _type_0 = new Type[0];
+    /// <summary>
+    /// Calls a method in every module.
+    /// </summary>
+    /// <param name="methodName">Method name of the method to call.</param>
+    /// <param name="args">Arguments to pass - null for none.</param>
     public static void CallInEachModule(string methodName, object[] args = null) {
         Type[] argsTypes = null;
         if (args == null) {
@@ -80,9 +108,15 @@ public static class ETGMod {
         }
     }
 
+    /// <summary>
+    /// Calls a method in every module, passing down the result to the next call.
+    /// </summary>
+    /// <typeparam name="T">Type of the result.</typeparam>
+    /// <param name="methodName">Method name of the method to call.</param>
+    /// <param name="arg">Argument to pass.</param>
     public static T CallInEachModule<T>(string methodName, T arg) {
         Type[] argsTypes = { typeof(T) };
-        object[] args = { arg };
+        T[] args = { arg };
         for (int i = 0; i < AllMods.Count; i++) {
             ETGModule module = AllMods[i];
             //TODO use module method cache
@@ -90,9 +124,9 @@ public static class ETGMod {
             if (method == null) {
                 continue;
             }
-            arg = (T) ReflectionHelper.InvokeMethod(method, module, args);
+            args[0] = (T) ReflectionHelper.InvokeMethod(method, module, args);
         }
-        return arg;
+        return args[0];
     }
 
 }
