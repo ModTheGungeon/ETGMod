@@ -145,6 +145,24 @@ public class ETGModuleMetadata {
         }
     }
 
+    private string _dll;
+    /// <summary>
+    /// The DLL of the mod in the ZIP. In case of backends, an empty string.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual string DLL {
+        get {
+            return _dll;
+        }
+        set {
+            if (_dll != null) {
+                throw new InvalidOperationException("The ETGModuleMetadata DLL is read-only!");
+            }
+            _dll = value;
+        }
+    }
+
     private List<ETGModuleMetadata> _dependencies;
     /// <summary>
     /// The dependencies of the mod. In case of backends, this will return null.
@@ -184,10 +202,13 @@ public class ETGModuleMetadata {
                 if (prop == "Name") {
                     metadata._name = data[1];
 
+                } else if (prop == "DLL") {
+                    metadata._dll = data[1].Replace("\\", "/");
+
                 } else if (prop == "Version") {
                     metadata._version = new Version(data[1]);
 
-                } else if (prop == "Depends") {
+                } else if (prop == "Depends" || prop == "Dependency") {
                     ETGModuleMetadata dep = new ETGModuleMetadata();
                     dep._name = data[1];
                     dep._version = new Version(0, 0);

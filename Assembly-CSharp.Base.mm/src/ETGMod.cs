@@ -121,10 +121,12 @@ public static class ETGMod {
         // Fallback metadata in case none is found
         ETGModuleMetadata metadata = new ETGModuleMetadata() {
             Name = Path.GetFileNameWithoutExtension(archive),
-            Version = new Version(0, 0)
+            Version = new Version(0, 0),
+            DLL = "mod.dll"
         };
         Assembly asm = null;
 
+        // First read the metadata, ...
         using (ZipFile zip = ZipFile.Read(archive)) {
             foreach (ZipEntry entry in zip.Entries) {
                 if (entry.FileName == "metadata.txt") {
@@ -133,7 +135,15 @@ public static class ETGMod {
                         ms.Seek(0, SeekOrigin.Begin);
                         metadata = ETGModuleMetadata.Parse(ms);
                     }
-                } else if (entry.FileName == "mod.dll") {
+                    break;
+                }
+            }
+        }
+
+        // ... then everything else
+        using (ZipFile zip = ZipFile.Read(archive)) {
+            foreach (ZipEntry entry in zip.Entries) {
+                if (entry.FileName.Replace("\\", "/") == metadata.DLL) {
                     using (MemoryStream ms = new MemoryStream()) {
                         entry.Extract(ms);
                         asm = Assembly.Load(ms.GetBuffer());
