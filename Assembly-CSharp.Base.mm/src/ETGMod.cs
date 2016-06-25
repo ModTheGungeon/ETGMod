@@ -30,8 +30,11 @@ public static class ETGMod {
     public static List<ETGModule> GameMods = new List<ETGModule>();
     public static List<ETGBackend> Backends = new List<ETGBackend>();
 
-    private static bool _started;
+    private static bool _started = false;
     public static void Start() {
+        if (_started) {
+            return;
+        }
         _started = true;
 
         Debug.Log("ETGMod " + BaseVersion);
@@ -165,11 +168,6 @@ public static class ETGMod {
     }
 
     public static void Update() {
-        // TODO: Find better start point.
-        if (!_started) {
-            Start();
-        }
-
         // TODO
 
         CallInEachModule("Update");

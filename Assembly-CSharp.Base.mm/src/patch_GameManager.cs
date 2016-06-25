@@ -5,11 +5,18 @@ using UnityEngine;
 
 public class patch_GameManager : GameManager {
 
+    protected extern void orig_Awake();
+    private void Awake() {
+        orig_Awake();
+
+        // Gets called more than once in the game's lifetime...
+        ETGMod.Start();
+    }
+
     protected extern void orig_Update();
     protected new void Update() {
         orig_Update();
 
-        // TODO: Find better start injection point (ETGMod's being started in Update if not started already.)
         ETGMod.Update();
     }
 
