@@ -1,10 +1,10 @@
 ﻿using System;
+using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Ionic.Zip;
-
-using Debug = UnityEngine.Debug;
+using Mono.Cecil;
 
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
@@ -19,6 +19,7 @@ public static class ETGMod {
     public readonly static string GameFolder = ".";
     public readonly static string ModsDirectory = Path.Combine(GameFolder, "Mods");
     public readonly static string ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
+    public readonly static string RelinkCacheDirectory = Path.Combine(ModsDirectory, "RelinkCache");
 
     /// <summary>
     /// Used for CallInEachModule to call a method in each type of mod.
@@ -126,27 +127,30 @@ public static class ETGMod {
         };
         Assembly asm = null;
 
-        // First read the metadata, ...
         using (ZipFile zip = ZipFile.Read(archive)) {
+            // First read the metadata, ...
             foreach (ZipEntry entry in zip.Entries) {
                 if (entry.FileName == "metadata.txt") {
                     using (MemoryStream ms = new MemoryStream()) {
                         entry.Extract(ms);
                         ms.Seek(0, SeekOrigin.Begin);
-                        metadata = ETGModuleMetadata.Parse(ms);
+                        metadata = ETGModuleMetadata.Parse(archive, ms);
                     }
                     break;
                 }
             }
-        }
 
-        // ... then everything else
-        using (ZipFile zip = ZipFile.Read(archive)) {
+            // ... then everything else
             foreach (ZipEntry entry in zip.Entries) {
                 if (entry.FileName.Replace("\\", "/") == metadata.DLL) {
                     using (MemoryStream ms = new MemoryStream()) {
                         entry.Extract(ms);
-                        asm = Assembly.Load(ms.GetBuffer());
+                        ms.Seek(0, SeekOrigin.Begin);
+                        if (metadata.Prelinked) {
+                            asm = Assembly.Load(ms.GetBuffer());
+                        } else {
+                            asm = metadata.GetRelinkedAssembly(zip, ms);
+                        }
                     }
                 }
             }

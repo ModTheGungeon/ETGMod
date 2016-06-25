@@ -97,6 +97,21 @@ public abstract class ETGBackend : ETGModule {
 
 public class ETGModuleMetadata {
 
+    private string _archive = "";
+    /// <summary>
+    /// The path to the ZIP of the mod. In case of backends, an empty string.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual string Archive {
+        get {
+            return _archive;
+        }
+        set {
+            throw new InvalidOperationException("The ETGModuleMetadata ZIP path is read-only!");
+        }
+    }
+
     private string _name;
     /// <summary>
     /// The name of the mod. In case of backends, the name of the API (f.e. ExampleAPI) without spaces.
@@ -157,9 +172,24 @@ public class ETGModuleMetadata {
         }
         set {
             if (_dll != null) {
-                throw new InvalidOperationException("The ETGModuleMetadata DLL is read-only!");
+                throw new InvalidOperationException("The ETGModuleMetadata DLL path is read-only!");
             }
             _dll = value;
+        }
+    }
+
+    private bool _prelinked = true;
+    /// <summary>
+    /// Whether the mod has been prelinked or not. In case of backends, always true.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual bool Prelinked {
+        get {
+            return _prelinked;
+        }
+        set {
+            throw new InvalidOperationException("The ETGModuleMetadata Prelinked flag is read-only!");
         }
     }
 
@@ -181,8 +211,10 @@ public class ETGModuleMetadata {
         }
     }
 
-    public static ETGModuleMetadata Parse(Stream stream) {
+    internal static ETGModuleMetadata Parse(string archive, Stream stream) {
         ETGModuleMetadata metadata = new ETGModuleMetadata();
+        metadata._archive = archive;
+        metadata._prelinked = false;
         metadata._dependencies = new List<ETGModuleMetadata>();
 
         using (StreamReader reader = new StreamReader(stream)) {
@@ -202,11 +234,14 @@ public class ETGModuleMetadata {
                 if (prop == "Name") {
                     metadata._name = data[1];
 
+                } else if (prop == "Version") {
+                    metadata._version = new Version(data[1]);
+
                 } else if (prop == "DLL") {
                     metadata._dll = data[1].Replace("\\", "/");
 
-                } else if (prop == "Version") {
-                    metadata._version = new Version(data[1]);
+                } else if (prop == "Prelinked") {
+                    metadata._prelinked = data[1].ToLowerInvariant() == "true";
 
                 } else if (prop == "Depends" || prop == "Dependency") {
                     ETGModuleMetadata dep = new ETGModuleMetadata();

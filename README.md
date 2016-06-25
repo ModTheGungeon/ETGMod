@@ -9,6 +9,8 @@ The "base backend" will be installed before anything else in [the ETGMod.Install
 
 It is still in its early phases. Do not expect anything usable for end-users here for quite a while.
 
+For compatibility reasons, it contains its own copy of Mono.Cecil (it's not a submodule).
+
 # Helpful resources
 
 * [Example API mod ("backend")](https://github.com/ModTheGungeon/ETGMod.ExampleAPI)

@@ -47,9 +47,24 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\ETGMod.cs" />
+    <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
+    <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
+    <Compile Include="src\MonoMod\MonoModConstructor.cs" />
+    <Compile Include="src\MonoMod\MonoModEnumReplace.cs" />
+    <Compile Include="src\MonoMod\MonoModIgnore.cs" />
+    <Compile Include="src\MonoMod\MonoModInline.cs" />
+    <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
+    <Compile Include="src\MonoMod\MonoModRemove.cs" />
+    <Compile Include="src\MonoMod\MonoModReplace.cs" />
     <Compile Include="src\patch_GameManager.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cecil\Mono.Cecil.csproj">
+      <Project>{d68133bd-1e63-496e-9ede-4fbdbf77b486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
