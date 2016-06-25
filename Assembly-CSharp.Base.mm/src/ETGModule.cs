@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Ionic.Zip;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 /// <summary>
 /// Game mod class. All game mods should have a class / type extending this.
@@ -27,7 +29,6 @@ public abstract class ETGModule {
         }
     }
 
-    private ETGModuleMetadata _metadata;
     /// <summary>
     /// Used by ETGMod itself and other mods to cache the metadata of the mod in RAM.
     /// 
@@ -35,8 +36,8 @@ public abstract class ETGModule {
     /// 
     /// ETGBackends will have a preset metadata.
     /// 
-    /// This property can be overriden to mimic other mods in case of multi-mods if required.
-    /// (Mimicing other mods is currently only possible by analyzing the current stacktrace and getting the getter that way.)
+    /// This property can be overriden or set to mimic other mods in case of multi-mods if required.
+    /// (Truly mimicing other mods is currently only possible by analyzing the current stacktrace and getting the getter that way.)
     /// </summary>
     public virtual ETGModuleMetadata Metadata { get; set; }
 
@@ -142,6 +143,65 @@ public class ETGModuleMetadata {
             }
             _version = value;
         }
+    }
+
+    private List<ETGModuleMetadata> _dependencies;
+    /// <summary>
+    /// The dependencies of the mod. In case of backends, this will return null.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual ICollection<ETGModuleMetadata> Dependencies {
+        get {
+            if (_dependencies == null) {
+                return null;
+            }
+            return _dependencies.AsReadOnly();
+        }
+        set {
+            throw new InvalidOperationException("The ETGModuleMetadata dependency list is read-only!");
+        }
+    }
+
+    public static ETGModuleMetadata Parse(Stream stream) {
+        ETGModuleMetadata metadata = new ETGModuleMetadata();
+        metadata._dependencies = new List<ETGModuleMetadata>();
+
+        using (StreamReader reader = new StreamReader(stream)) {
+            while (!reader.EndOfStream) {
+                string line = reader.ReadLine();
+                if (string.IsNullOrEmpty(line)) {
+                    continue;
+                }
+                line = line.Trim();
+                if (line[0] == '#') {
+                    continue;
+                }
+                string[] data = line.Split(':');
+                string prop = data[0].Trim();
+                data[1] = data[1].Trim();
+
+                if (prop == "Name") {
+                    metadata._name = data[1];
+
+                } else if (prop == "Version") {
+                    metadata._version = new Version(data[1]);
+
+                } else if (prop == "Depends") {
+                    ETGModuleMetadata dep = new ETGModuleMetadata();
+                    dep._name = data[1];
+                    dep._version = new Version(0, 0);
+                    if (data[1].Contains(" ")) {
+                        string[] depData = data[1].Split(' ');
+                        dep._name = depData[0].Trim();
+                        dep._version = new Version(depData[1].Trim());
+                    }
+                    metadata._dependencies.Add(dep);
+
+                }
+            }
+        }
+        return metadata;
     }
 
 }
