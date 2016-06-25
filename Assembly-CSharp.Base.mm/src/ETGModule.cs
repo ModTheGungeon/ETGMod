@@ -1,4 +1,5 @@
-﻿using Ionic.Zip;
+﻿using Debug = UnityEngine.Debug;
+using Ionic.Zip;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -211,6 +212,10 @@ public class ETGModuleMetadata {
         }
     }
 
+    public override string ToString() {
+        return Name + " " + Version;
+    }
+
     internal static ETGModuleMetadata Parse(string archive, Stream stream) {
         ETGModuleMetadata metadata = new ETGModuleMetadata();
         metadata._archive = archive;
@@ -218,7 +223,9 @@ public class ETGModuleMetadata {
         metadata._dependencies = new List<ETGModuleMetadata>();
 
         using (StreamReader reader = new StreamReader(stream)) {
+            int lineN = -1;
             while (!reader.EndOfStream) {
+                ++lineN;
                 string line = reader.ReadLine();
                 if (string.IsNullOrEmpty(line)) {
                     continue;
@@ -227,7 +234,15 @@ public class ETGModuleMetadata {
                 if (line[0] == '#') {
                     continue;
                 }
+                if (!line.Contains(":")) {
+                    Debug.LogWarning("INVALID METADATA LINE #" + lineN);
+                    continue;
+                }
                 string[] data = line.Split(':');
+                if (data.Length != 2) {
+                    Debug.LogWarning("INVALID METADATA LINE #" + lineN);
+                    continue;
+                }
                 string prop = data[0].Trim();
                 data[1] = data[1].Trim();
 

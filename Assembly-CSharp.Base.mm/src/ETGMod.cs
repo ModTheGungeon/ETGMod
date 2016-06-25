@@ -140,6 +140,14 @@ public static class ETGMod {
                 }
             }
 
+            // ... then check if the dependencies are loaded ...
+            foreach (ETGModuleMetadata dependency in metadata.Dependencies) {
+                if (!DependencyLoaded(dependency)) {
+                    Debug.LogWarning("DEPENDENCY " + dependency + " OF " + metadata + " NOT LOADED!");
+                    return;
+                }
+            }
+
             // ... then everything else
             foreach (ZipEntry entry in zip.Entries) {
                 if (entry.FileName.Replace("\\", "/") == metadata.DLL) {
@@ -191,6 +199,33 @@ public static class ETGMod {
         // TODO
 
         CallInEachModule("Exit");
+    }
+
+    /// <summary>
+    /// Checks if an dependency is loaded.
+    /// Can be used by mods manually to f.e. activate / disable functionality if an API's (not) existing.
+    /// Currently only checks the backends.
+    /// </summary>
+    /// <param name="dependency">Dependency to check for. Name and Version will be checked.</param>
+    /// <returns></returns>
+    public static bool DependencyLoaded(ETGModuleMetadata dependency) {
+        string dependencyName = dependency.Name;
+        Version dependencyVersion = dependency.Version;
+        foreach (ETGBackend backend in Backends) {
+            ETGModuleMetadata metadata = backend.Metadata;
+            if (metadata.Name != dependencyName) {
+                continue;
+            }
+            Version version = metadata.Version;
+            if (version.Major != dependencyVersion.Major) {
+                return false;
+            }
+            if (version.Minor < dependencyVersion.Minor) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /// <summary>
