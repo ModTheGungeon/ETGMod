@@ -11,6 +11,9 @@ public class patch_CharacterSelectController : CharacterSelectController {
     /// <param name="character">Character to stringify.</param>
     /// <returns>"Player" + character.ToString()</returns>
     public static new string smethod_0(PlayableCharacters character) {
+        if (character == PlayableCharacters.Pilot) {
+            return "PlayerRogue";
+        }
         return "Player" + character.ToString();
     }
 
@@ -21,6 +24,9 @@ public class patch_CharacterSelectController : CharacterSelectController {
     /// <returns>Preferred quick start character (last used or configured).</returns>
     public static new string smethod_1() {
         if (GameManager.GameOptions_0.PreferredQuickstartCharacter == GameOptions.QuickstartCharacter.LAST_USED) {
+            if (GameManager.GameOptions_0.LastPlayedCharacter == PlayableCharacters.Pilot) {
+                return "PlayerRogue";
+            }
             return smethod_0(GameManager.GameOptions_0.LastPlayedCharacter);
         }
 
