@@ -11,6 +11,10 @@ using Mono.Cecil;
 /// </summary>
 public static class ETGMod {
 
+    public static string QuickstartReplacement = "PlayerNinja";
+    public static string CoopReplacement = "PlayerCosmonaut";
+
+
     private readonly static Type[] a_Type_0 = new Type[0];
     private readonly static object[] a_object_0 = new object[0];
 

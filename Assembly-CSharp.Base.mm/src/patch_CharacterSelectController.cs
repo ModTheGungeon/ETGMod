@@ -23,6 +23,10 @@ public class patch_CharacterSelectController : CharacterSelectController {
     /// </summary>
     /// <returns>Preferred quick start character (last used or configured).</returns>
     public static new string smethod_1() {
+        if (ETGMod.QuickstartReplacement != null) {
+            return ETGMod.QuickstartReplacement;
+        }
+
         if (GameManager.GameOptions_0.PreferredQuickstartCharacter == GameOptions.QuickstartCharacter.LAST_USED) {
             if (GameManager.GameOptions_0.LastPlayedCharacter == PlayableCharacters.Pilot) {
                 return "PlayerRogue";
