@@ -28,4 +28,11 @@ public class patch_GameManager : GameManager {
         ETGMod.Update();
     }
 
+
+    //This is for GUI stuff.
+    public void OnGUI() {
+        if (this.PlayerController_1!=null)
+            GUILayout.Label(this.PlayerController_1.transform.position.ToString());
+    }
+
 }
