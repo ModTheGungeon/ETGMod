@@ -148,6 +148,9 @@ public static class ETGMod {
                 }
             }
 
+            // ... then add an AssemblyResolve handler for all the .zip-ped libraries
+            AppDomain.CurrentDomain.AssemblyResolve += metadata.GenerateModAssemblyResolver();
+
             // ... then everything else
             foreach (ZipEntry entry in zip.Entries) {
                 if (entry.FileName.Replace("\\", "/") == metadata.DLL) {
@@ -187,6 +190,25 @@ public static class ETGMod {
         }
 
         Debug.Log("Mod " + metadata.Name + " initialized.");
+    }
+
+    private static ResolveEventHandler GenerateModAssemblyResolver(this ETGModuleMetadata metadata) {
+        return delegate (object sender, ResolveEventArgs args) {
+            string asmName = new AssemblyName(args.Name).Name + ".dll";
+            using (ZipFile zip = ZipFile.Read(metadata.Archive)) {
+                foreach (ZipEntry entry in zip.Entries) {
+                    if (entry.FileName != asmName) {
+                        continue;
+                    }
+                    using (MemoryStream ms = new MemoryStream()) {
+                        entry.Extract(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        return Assembly.Load(ms.GetBuffer());
+                    }
+                }
+            }
+            return null;
+        };
     }
 
     public static void Update() {
