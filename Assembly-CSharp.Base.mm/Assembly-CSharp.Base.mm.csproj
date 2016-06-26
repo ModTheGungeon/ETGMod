@@ -49,6 +49,7 @@
     <Compile Include="src\ETGMod.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
+    <Compile Include="src\MonoMod\ETGModManager.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />
     <Compile Include="src\MonoMod\MonoModEnumReplace.cs" />
