@@ -20,6 +20,10 @@ public static class ETGMod {
 
     public readonly static Version BaseVersion = new Version(1, 0);
 
+	public static class Player {
+		public static bool? InfiniteKeys;
+	}
+
     public readonly static string GameFolder = ".";
     public readonly static string ModsDirectory = Path.Combine(GameFolder, "Mods");
     public readonly static string ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
