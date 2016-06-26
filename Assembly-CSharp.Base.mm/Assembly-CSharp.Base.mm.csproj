@@ -57,6 +57,7 @@
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
     <Compile Include="src\MonoMod\MonoModRemove.cs" />
     <Compile Include="src\MonoMod\MonoModReplace.cs" />
+    <Compile Include="src\patch_CharacterSelectController.cs" />
     <Compile Include="src\patch_GameManager.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
   </ItemGroup>
