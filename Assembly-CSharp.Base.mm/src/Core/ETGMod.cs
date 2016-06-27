@@ -11,9 +11,7 @@ using Mono.Cecil;
 /// </summary>
 public static partial class ETGMod {
 
-    private readonly static Type[] a_Type_0 = new Type[0];
-    private readonly static object[] a_object_0 = new object[0];
-
+    public readonly static string BaseVersionString = "1.0"; // Used by the installer
     public readonly static Version BaseVersion = new Version(1, 0);
 
     public readonly static string GameFolder = ".";
@@ -455,5 +453,8 @@ public static partial class ETGMod {
         }
         return args[0];
     }
+
+    private readonly static Type[] a_Type_0 = new Type[0];
+    private readonly static object[] a_object_0 = new object[0];
 
 }
