@@ -64,6 +64,8 @@
     <Compile Include="src\MonoMod\MonoModIgnore.cs" />
     <Compile Include="src\MonoMod\MonoModInline.cs" />
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
+    <Compile Include="src\MonoMod\MonoModOriginal.cs" />
+    <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
     <Compile Include="src\MonoMod\MonoModRemove.cs" />
     <Compile Include="src\MonoMod\MonoModReplace.cs" />
     <Compile Include="src\patch_CharacterSelectController.cs" />
