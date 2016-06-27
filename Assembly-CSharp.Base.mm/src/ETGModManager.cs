@@ -13,7 +13,7 @@ class ETGModManager : MonoBehaviour{
 
     public void Start() {
         ETGMod.Start();
-
+        ModMenu.Create();
     }
 
     public void Update() {
