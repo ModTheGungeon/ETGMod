@@ -348,6 +348,16 @@ public static partial class ETGMod {
     public static bool DependencyLoaded(ETGModuleMetadata dependency) {
         string dependencyName = dependency.Name;
         Version dependencyVersion = dependency.Version;
+
+        if (dependencyName == "Base") {
+            if (BaseVersion.Major != dependencyVersion.Major) {
+                return false;
+            }
+            if (BaseVersion.Minor < dependencyVersion.Minor) {
+                return false;
+            }
+        }
+
         foreach (ETGBackend backend in Backends) {
             ETGModuleMetadata metadata = backend.Metadata;
             if (metadata.Name != dependencyName) {

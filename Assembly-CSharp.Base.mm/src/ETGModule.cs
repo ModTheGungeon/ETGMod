@@ -278,9 +278,28 @@ public class ETGModuleMetadata {
                 }
             }
         }
+
+        // Set the DLL path to be absolute in folder mods if not already absolute
         if (!string.IsNullOrEmpty(directory) && !File.Exists(metadata._dll)) {
             metadata._dll = Path.Combine(directory, metadata._dll.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
         }
+
+        // Add dependency to Base 1.0 if missing.
+        bool dependsOnBase = false;
+        foreach (ETGModuleMetadata dependency in metadata.Dependencies) {
+            if (dependency.Name == "Base") {
+                dependsOnBase = true;
+                break;
+            }
+        }
+        if (!dependsOnBase) {
+            Debug.Log("WARNING: No dependency to Base found in " + metadata + "! Adding dependency to Base 1.0...");
+            metadata._dependencies.Insert(0, new ETGModuleMetadata() {
+                _name = "Base",
+                _version = new Version(1, 0)
+            });
+        }
+
         return metadata;
     }
 
