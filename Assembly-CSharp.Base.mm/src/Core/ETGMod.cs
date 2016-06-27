@@ -45,6 +45,8 @@ public static partial class ETGMod {
         LoadMods();
 
         CallInEachModule("Start");
+
+        UnityEngine.ETGModAssetMetadata.LogHook = (string text) => ETGModDebugLogMenu.LoggedText.Add(text);
     }
     
     private static void ScanBackends() {

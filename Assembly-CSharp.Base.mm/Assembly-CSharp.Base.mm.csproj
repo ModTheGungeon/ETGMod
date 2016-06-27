@@ -73,6 +73,12 @@
     <Compile Include="src\ReflectionHelper.cs" />
     <Compile Include="src\patch_PlayerConsumables.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
+      <Project>{3c105af3-d405-4536-b45e-c764d6ed84c7}</Project>
+      <Name>UnityEngine.Base.mm</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
