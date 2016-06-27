@@ -23,6 +23,7 @@ class ModConsole {
         AddCommand("Log", Debug.Log);
         AddCommand("RollDistance", DodgeRollDistance);
         AddCommand("RollSpeed", DodgeRollSpeed);
+        AddCommand("tp",tp);
     }
 
     public void Update() {
@@ -101,5 +102,17 @@ class ModConsole {
             }
         }
     }
+
+    void tp(string[] param) {
+        if (param.Length!=3)
+            return;
+
+        if (GameManager.GameManager_0) {
+            if (GameManager.GameManager_0.PlayerController_1) {
+                GameManager.GameManager_0.PlayerController_1.transform.position=new Vector3(float.Parse(param[0]), float.Parse(param[1]), float.Parse(param[2]));
+            }
+        }
+    }
+
 }
 

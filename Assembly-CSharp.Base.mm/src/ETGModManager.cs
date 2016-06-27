@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 
 //This class is responsible for all mod managment 
-class ETGModManager : MonoBehaviour{
+class ETGModManager: MonoBehaviour {
 
     public void Awake() {
 
@@ -14,7 +14,10 @@ class ETGModManager : MonoBehaviour{
     public void Start() {
         ETGMod.Start();
         ModMenu.Create();
+        DontDestroyOnLoad(gameObject);
     }
+
+    GameObject MoneyPickup;
 
     public void Update() {
         ETGMod.Update();
@@ -22,9 +25,7 @@ class ETGModManager : MonoBehaviour{
 
     //This is for GUI stuff.
     public void OnGUI() {
-        if(patch_GameManager.GameManager_0)
-            if (patch_GameManager.GameManager_0.PlayerController_1!=null)
-                GUILayout.Label(patch_GameManager.GameManager_0.PlayerController_1.transform.position.ToString());
+
     }
 
 }

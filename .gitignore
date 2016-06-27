@@ -243,3 +243,7 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# Dumbass protection - all stripped libs
+libs/UnityEngine.dll
+libs/Assembly-CSharp.dll

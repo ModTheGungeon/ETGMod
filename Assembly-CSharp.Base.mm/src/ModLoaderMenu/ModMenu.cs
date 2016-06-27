@@ -25,6 +25,7 @@ class ModMenu: MonoBehaviour {
 
         newObject.name="ModLoaderMenu";
         newObject.AddComponent<ModMenu>();
+        DontDestroyOnLoad(newObject);
     }
 
     public void Start() {
@@ -94,12 +95,14 @@ class ModMenu: MonoBehaviour {
     }
 
     public void OnGUI() {
+
         if (currentMenu==MenuOpened.Logger)
             mainLogger.OnGUI();
         else if (currentMenu==MenuOpened.Console)
             mainConsole.OnGUI();
         else if (currentMenu==MenuOpened.Loader)
             mainLoaderMenu.OnGUI();
+
     }
 
 
