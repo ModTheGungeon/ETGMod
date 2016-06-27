@@ -7,3 +7,4 @@ Feel free to replace the .dlls **locally** though.
 Files that are not stripped as their full functionality is required:
 
 * Ionic.Zip.dll
+* Mono.Cecil.dll
