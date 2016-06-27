@@ -78,8 +78,8 @@ internal static class ETGModRelinker {
         foreach (TypeDefinition nested in type.NestedTypes) {
             RelinkType(nested);
         }
-
         
+
         type.BaseType = type.BaseType.Relinked(type);
         for (int i = 0; i < type.Interfaces.Count; i++) {
             type.Interfaces[i] = type.Interfaces[i].Relinked(type);
@@ -161,6 +161,7 @@ internal static class ETGModRelinker {
 
         // TODO Generic types? Array types? My blood when I summoned Brent? --0x0ade
         TypeReference relink = new TypeReference(type.Namespace, type.Name, ETGModule, ETGModule, type.IsValueType);
+        relink.DeclaringType = type.DeclaringType.Relinked(context);
 
         return context.Module.ImportReference(relink) as T;
     }

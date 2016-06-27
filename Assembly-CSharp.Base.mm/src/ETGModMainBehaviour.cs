@@ -7,9 +7,9 @@ using UnityEngine;
 /// <summary>
 /// This class is responsible for handling basic Unity events for all mods (Awake, Start, Update, ...).
 /// </summary>
-public class ETGModManager : MonoBehaviour {
+public class ETGModMainBehaviour : MonoBehaviour {
 
-    public static ETGModManager Instance;
+    public static ETGModMainBehaviour Instance;
 
     public void Awake() {
         DontDestroyOnLoad(gameObject);

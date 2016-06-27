@@ -54,7 +54,7 @@
     <Compile Include="src\GUI\IETGModMenu.cs" />
     <Compile Include="src\GUI\ETGModLoaderMenu.cs" />
     <Compile Include="src\GUI\ETGModMenu.cs" />
-    <Compile Include="src\ETGModManager.cs" />
+    <Compile Include="src\ETGModMainBehaviour.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />
     <Compile Include="src\MonoMod\MonoModEnumReplace.cs" />

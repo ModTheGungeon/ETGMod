@@ -12,7 +12,7 @@ public static partial class ETGMod {
     /// ETGMod player configuration.
     /// </summary>
     public static class Player {
-		public static bool? InfiniteKeys;
+        public static bool? InfiniteKeys;
         public static string QuickstartReplacement = "PlayerNinja";
         public static string CoopReplacement = "PlayerCosmonaut";
     }
