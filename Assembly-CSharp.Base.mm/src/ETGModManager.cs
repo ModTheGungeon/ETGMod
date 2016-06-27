@@ -4,26 +4,26 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-//This class is responsible for all mod managment 
-class ETGModManager: MonoBehaviour {
+/// <summary>
+/// This class is responsible for handling basic Unity events for all mods (Awake, Start, Update, ...).
+/// </summary>
+public class ETGModManager : MonoBehaviour {
+
+    public static ETGModManager Instance;
 
     public void Awake() {
-
+        DontDestroyOnLoad(gameObject);
     }
 
     public void Start() {
         ETGMod.Start();
-        ModMenu.Create();
-        DontDestroyOnLoad(gameObject);
+        ETGModGUI.Create();
     }
-
-    GameObject MoneyPickup;
 
     public void Update() {
         ETGMod.Update();
     }
 
-    //This is for GUI stuff.
     public void OnGUI() {
 
     }

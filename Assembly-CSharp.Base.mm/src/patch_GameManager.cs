@@ -7,22 +7,19 @@ public class patch_GameManager : GameManager {
 
     public static extern GameObject orig_get_GameObject_1();
     public static GameObject get_GameObject_1() {
-        if (ETGMod.CoopReplacement != null) {
-            return Resources.Load(ETGMod.CoopReplacement) as GameObject;
+        if (ETGMod.Player.CoopReplacement != null) {
+            return Resources.Load(ETGMod.Player.CoopReplacement) as GameObject;
         }
         return orig_get_GameObject_1();
     }
-
-    public static GameObject ModManagerObject;
 
     protected extern void orig_Awake();
     private void Awake() {
         orig_Awake();
 
-        GameObject ModManagerObject = new GameObject();
-
-        ModManagerObject.name="ModManager";
-        ModManagerObject.AddComponent<ETGModManager>();
+        if (ETGModManager.Instance == null) {
+            new GameObject("ETGMod Manager").AddComponent<ETGModManager>();
+        }
     }
 
 }

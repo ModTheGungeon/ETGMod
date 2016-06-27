@@ -9,20 +9,12 @@ using Mono.Cecil;
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
 /// </summary>
-public static class ETGMod {
-
-    public static string QuickstartReplacement = "PlayerNinja";
-    public static string CoopReplacement = "PlayerCosmonaut";
-
+public static partial class ETGMod {
 
     private readonly static Type[] a_Type_0 = new Type[0];
     private readonly static object[] a_object_0 = new object[0];
 
     public readonly static Version BaseVersion = new Version(1, 0);
-
-	public static class Player {
-		public static bool? InfiniteKeys;
-	}
 
     public readonly static string GameFolder = ".";
     public readonly static string ModsDirectory = Path.Combine(GameFolder, "Mods");

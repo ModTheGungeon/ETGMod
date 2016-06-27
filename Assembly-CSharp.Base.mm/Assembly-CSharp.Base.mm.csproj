@@ -45,13 +45,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\ETGMod.cs" />
+    <Compile Include="src\Core\Player.cs" />
+    <Compile Include="src\Core\ETGMod.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
-    <Compile Include="src\ModLoaderMenu\ModConsole.cs" />
-    <Compile Include="src\ModLoaderMenu\ModDebugLogMenu.cs" />
-    <Compile Include="src\ModLoaderMenu\ModLoaderMenu.cs" />
-    <Compile Include="src\ModLoaderMenu\ModMenu.cs" />
+    <Compile Include="src\GUI\ETGModConsole.cs" />
+    <Compile Include="src\GUI\ETGModDebugLogMenu.cs" />
+    <Compile Include="src\GUI\IETGModMenu.cs" />
+    <Compile Include="src\GUI\ETGModLoaderMenu.cs" />
+    <Compile Include="src\GUI\ETGModMenu.cs" />
     <Compile Include="src\ETGModManager.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />

@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿#pragma warning disable 0626
+#pragma warning disable 0649
 
-class ModLoaderMenu {
+using UnityEngine;
+using System.Collections.Generic;
+
+public class ETGModLoaderMenu : IETGModMenu {
+
     public void Start() {
 
     }
@@ -20,4 +21,5 @@ class ModLoaderMenu {
     public void OnDestroy() {
 
     }
+
 }
