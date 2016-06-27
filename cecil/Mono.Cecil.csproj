@@ -8,7 +8,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'pcl_Release'">
-    <DefineConstants>;TRACE;;NET_3_5;NET_4_0;PCL;</DefineConstants>
+    <DefineConstants>;TRACE;;NET_3_5;PCL;</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Mono.Cecil.Cil\Code.cs" />
