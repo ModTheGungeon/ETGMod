@@ -38,6 +38,8 @@ public static partial class ETGMod {
         }
         _started = true;
 
+        ETGModGUI.Create();
+
         Debug.Log("ETGMod " + BaseVersion);
 
         ScanBackends();
@@ -62,7 +64,6 @@ public static partial class ETGMod {
         ETGBackend module = (ETGBackend) type.GetConstructor(a_Type_0).Invoke(a_object_0);
         Debug.Log("Initializing backend " + type.FullName);
 
-        module.ArchivePath = "";
         // Metadata is pre-set in backends
 
         Backends.Add(module);
@@ -80,8 +81,9 @@ public static partial class ETGMod {
             Directory.CreateDirectory(ModsDirectory);
         }
 
+        CreateModsListFile:
         if (!File.Exists(ModsListFile)) {
-            Debug.Log("Mod list file not existing, creating...");
+            Debug.Log("Mod list file not existing or invalid, creating...");
             using (StreamWriter writer = File.CreateText(ModsListFile)) {
                 writer.WriteLine("# Lines beginning with # are comment lines and thus ignored.");
                 writer.WriteLine("# Each line here should either be the name of a mod .zip or the path to it.");
@@ -95,24 +97,59 @@ public static partial class ETGMod {
                     }
                     writer.WriteLine(file);
                 }
+                files = Directory.GetDirectories(ModsDirectory);
+                for (int i = 0; i < files.Length; i++) {
+                    string file = Path.GetFileName(files[i]);
+                    if (file == "RelinkCache") {
+                        continue;
+                    }
+                    writer.WriteLine(file);
+                }
             }
         }
 
-        string[] archives = File.ReadAllLines(ModsListFile);
-        for (int i = 0; i < archives.Length; i++) {
-            string archive = archives[i];
-            if (string.IsNullOrEmpty(archive)) {
+        // Pre-run all lines to check if something's invalid
+        string[] paths = File.ReadAllLines(ModsListFile);
+        for (int i = 0; i < paths.Length; i++) {
+            string path = paths[i];
+            if (string.IsNullOrEmpty(path)) {
                 continue;
             }
-            if (archive[0] == '#') {
+            if (path[0] == '#') {
                 continue;
             }
-            InitMod(archive.Trim());
+            path = path.Trim();
+            string absolutePath = Path.Combine(ModsDirectory, path);
+            if (!File.Exists(path) && !File.Exists(absolutePath) &&
+                !Directory.Exists(path) && !Directory.Exists(absolutePath)) {
+                File.Delete(ModsListFile);
+                goto CreateModsListFile;
+            }
+        }
+
+        for (int i = 0; i < paths.Length; i++) {
+            string path = paths[i];
+            if (string.IsNullOrEmpty(path)) {
+                continue;
+            }
+            if (path[0] == '#') {
+                continue;
+            }
+            InitMod(path.Trim());
         }
 
     }
-    public static void InitMod(string archive) {
-        Debug.Log("Initializing mod " + archive);
+
+    public static void InitMod(string path) {
+        if (path.EndsWith(".zip")) {
+            InitModZIP(path);
+        } else {
+            InitModDir(path);
+        }
+    }
+
+    public static void InitModZIP(string archive) {
+        Debug.Log("Initializing mod ZIP " + archive);
 
         if (!File.Exists(archive)) {
             // Probably a mod in the mod directory
@@ -134,7 +171,7 @@ public static partial class ETGMod {
                     using (MemoryStream ms = new MemoryStream()) {
                         entry.Extract(ms);
                         ms.Seek(0, SeekOrigin.Begin);
-                        metadata = ETGModuleMetadata.Parse(archive, ms);
+                        metadata = ETGModuleMetadata.Parse(archive, "", ms);
                     }
                     break;
                 }
@@ -160,7 +197,7 @@ public static partial class ETGMod {
                         if (metadata.Prelinked) {
                             asm = Assembly.Load(ms.GetBuffer());
                         } else {
-                            asm = metadata.GetRelinkedAssembly(zip, ms);
+                            asm = metadata.GetRelinkedAssembly(ms);
                         }
                     }
                 }
@@ -180,7 +217,73 @@ public static partial class ETGMod {
 
             ETGModule module = (ETGModule) type.GetConstructor(a_Type_0).Invoke(a_object_0);
 
-            module.ArchivePath = archive;
+            module.Metadata = metadata;
+
+            GameMods.Add(module);
+            AllMods.Add(module);
+            ModuleTypes.Add(type);
+            ModuleMethods.Add(new Dictionary<string, MethodInfo>());
+        }
+
+        Debug.Log("Mod " + metadata.Name + " initialized.");
+    }
+
+    public static void InitModDir(string dir) {
+        Debug.Log("Initializing mod directory " + dir);
+
+        if (!Directory.Exists(dir)) {
+            // Probably a mod in the mod directory
+            dir = Path.Combine(ModsDirectory, dir);
+        }
+
+        // Fallback metadata in case none is found
+        ETGModuleMetadata metadata = new ETGModuleMetadata() {
+            Name = Path.GetFileName(dir),
+            Version = new Version(0, 0),
+            DLL = "mod.dll"
+        };
+        Assembly asm = null;
+
+        // First read the metadata, ...
+        string metadataPath = Path.Combine(dir, "metadata.txt");
+        if (File.Exists(metadataPath)) {
+            using (FileStream fs = File.OpenRead(metadataPath)) {
+                metadata = ETGModuleMetadata.Parse("", dir, fs);
+            }
+        }
+
+        // ... then check if the dependencies are loaded ...
+        foreach (ETGModuleMetadata dependency in metadata.Dependencies) {
+            if (!DependencyLoaded(dependency)) {
+                Debug.LogWarning("DEPENDENCY " + dependency + " OF " + metadata + " NOT LOADED!");
+                return;
+            }
+        }
+
+        // ... then add an AssemblyResolve handler for all the .zip-ped libraries
+        AppDomain.CurrentDomain.AssemblyResolve += metadata.GenerateModAssemblyResolver();
+
+        // ... then everything else
+        if (!File.Exists(metadata.DLL)) {
+            return;
+        }
+        if (metadata.Prelinked) {
+            asm = Assembly.LoadFrom(metadata.DLL);
+        } else {
+            using (FileStream fs = File.OpenRead(metadata.DLL)) {
+                asm = metadata.GetRelinkedAssembly(fs);
+            }
+        }
+
+        Type[] types = asm.GetTypes();
+        for (int i = 0; i < types.Length; i++) {
+            Type type = types[i];
+            if (!typeof(ETGModule).IsAssignableFrom(type) || type.IsAbstract) {
+                continue;
+            }
+
+            ETGModule module = (ETGModule) type.GetConstructor(a_Type_0).Invoke(a_object_0);
+
             module.Metadata = metadata;
 
             GameMods.Add(module);
@@ -193,22 +296,34 @@ public static partial class ETGMod {
     }
 
     private static ResolveEventHandler GenerateModAssemblyResolver(this ETGModuleMetadata metadata) {
-        return delegate (object sender, ResolveEventArgs args) {
-            string asmName = new AssemblyName(args.Name).Name + ".dll";
-            using (ZipFile zip = ZipFile.Read(metadata.Archive)) {
-                foreach (ZipEntry entry in zip.Entries) {
-                    if (entry.FileName != asmName) {
-                        continue;
-                    }
-                    using (MemoryStream ms = new MemoryStream()) {
-                        entry.Extract(ms);
-                        ms.Seek(0, SeekOrigin.Begin);
-                        return Assembly.Load(ms.GetBuffer());
+        if (!string.IsNullOrEmpty(metadata.Archive)) {
+            return delegate (object sender, ResolveEventArgs args) {
+                string asmName = new AssemblyName(args.Name).Name + ".dll";
+                using (ZipFile zip = ZipFile.Read(metadata.Archive)) {
+                    foreach (ZipEntry entry in zip.Entries) {
+                        if (entry.FileName != asmName) {
+                            continue;
+                        }
+                        using (MemoryStream ms = new MemoryStream()) {
+                            entry.Extract(ms);
+                            ms.Seek(0, SeekOrigin.Begin);
+                            return Assembly.Load(ms.GetBuffer());
+                        }
                     }
                 }
-            }
-            return null;
-        };
+                return null;
+            };
+        }
+        if (!string.IsNullOrEmpty(metadata.Directory)) {
+            return delegate (object sender, ResolveEventArgs args) {
+                string asmPath = Path.Combine(metadata.Directory, new AssemblyName(args.Name).Name + ".dll");
+                if (!File.Exists(asmPath)) {
+                    return null;
+                }
+                return Assembly.LoadFrom(asmPath);
+            };
+        }
+        return null;
     }
 
     public static void Update() {

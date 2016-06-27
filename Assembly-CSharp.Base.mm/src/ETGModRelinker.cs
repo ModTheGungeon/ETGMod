@@ -13,7 +13,7 @@ internal static class ETGModRelinker {
     internal static ModuleDefinition ETGModule;
     internal static string ETGChecksum;
 
-    internal static Assembly GetRelinkedAssembly(this ETGModuleMetadata metadata, ZipFile zip, Stream stream) {
+    internal static Assembly GetRelinkedAssembly(this ETGModuleMetadata metadata, Stream stream) {
         if (ETGModule == null) {
             ETGModule = ModuleDefinition.ReadModule(Assembly.GetAssembly(typeof(ETGModRelinker)).Location, new ReaderParameters(ReadingMode.Immediate));
         }
@@ -40,7 +40,12 @@ internal static class ETGModRelinker {
                 }
             }
             checksums[0] = ETGChecksum;
-            using (FileStream fs = File.OpenRead(metadata.Archive)) {
+
+            string modPath = metadata.Archive;
+            if (modPath.Length == 0) {
+                modPath = metadata.DLL;
+            }
+            using (FileStream fs = File.OpenRead(modPath)) {
                 checksums[1] = md5.ComputeHash(fs).ToHexadecimalString();
             }
         }

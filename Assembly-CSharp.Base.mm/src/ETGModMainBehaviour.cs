@@ -17,7 +17,6 @@ public class ETGModMainBehaviour : MonoBehaviour {
 
     public void Start() {
         ETGMod.Start();
-        ETGModGUI.Create();
     }
 
     public void Update() {

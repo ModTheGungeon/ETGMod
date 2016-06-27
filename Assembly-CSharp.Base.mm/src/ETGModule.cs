@@ -3,32 +3,12 @@ using Ionic.Zip;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 /// <summary>
 /// Game mod class. All game mods should have a class / type extending this.
 /// </summary>
 public abstract class ETGModule {
-
-    private string _archivePath;
-    /// <summary>
-    /// Used by ETGMod itself and other mods to find the archive of the mod.
-    /// The archive must contain a metadata file and can contain additional resources.
-    /// 
-    /// ETGBackends will have an empty path.
-    /// 
-    /// This property can only be set by ETGMod itself.
-    /// </summary>
-    public string ArchivePath {
-        get {
-            return _archivePath;
-        }
-        set {
-            if (_archivePath != null) {
-                throw new InvalidOperationException("The ETGModule archive path is read-only!");
-            }
-            _archivePath = value;
-        }
-    }
 
     /// <summary>
     /// Used by ETGMod itself and other mods to cache the metadata of the mod in RAM.
@@ -113,6 +93,21 @@ public class ETGModuleMetadata {
         }
     }
 
+    private string _directory = "";
+    /// <summary>
+    /// The path to the directory of the mod. In case of backends, an empty string.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual string Directory {
+        get {
+            return _directory;
+        }
+        set {
+            throw new InvalidOperationException("The ETGModuleMetadata directory path is read-only!");
+        }
+    }
+
     private string _name;
     /// <summary>
     /// The name of the mod. In case of backends, the name of the API (f.e. ExampleAPI) without spaces.
@@ -163,7 +158,7 @@ public class ETGModuleMetadata {
 
     private string _dll;
     /// <summary>
-    /// The DLL of the mod in the ZIP. In case of backends, an empty string.
+    /// The DLL of the mod in the ZIP or the absolute DLL path with folder mods. In case of backends, an empty string.
     /// 
     /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
     /// </summary>
@@ -216,9 +211,10 @@ public class ETGModuleMetadata {
         return Name + " " + Version;
     }
 
-    internal static ETGModuleMetadata Parse(string archive, Stream stream) {
+    internal static ETGModuleMetadata Parse(string archive, string directory, Stream stream) {
         ETGModuleMetadata metadata = new ETGModuleMetadata();
         metadata._archive = archive;
+        metadata._directory = directory;
         metadata._prelinked = false;
         metadata._dependencies = new List<ETGModuleMetadata>();
 
@@ -239,9 +235,19 @@ public class ETGModuleMetadata {
                     continue;
                 }
                 string[] data = line.Split(':');
-                if (data.Length != 2) {
+                if (data.Length < 2) {
                     Debug.LogWarning("INVALID METADATA LINE #" + lineN);
                     continue;
+                }
+                if (2 < data.Length) {
+                    StringBuilder newData = new StringBuilder();
+                    for (int i = 1; i < data.Length; i++) {
+                        newData.Append(data[i]);
+                        if (i < data.Length - 1) {
+                            newData.Append(':');
+                        }
+                    }
+                    data = new string[] { data[0], newData.ToString() };
                 }
                 string prop = data[0].Trim();
                 data[1] = data[1].Trim();
@@ -271,6 +277,9 @@ public class ETGModuleMetadata {
 
                 }
             }
+        }
+        if (!string.IsNullOrEmpty(directory) && !File.Exists(metadata._dll)) {
+            metadata._dll = Path.Combine(directory, metadata._dll.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
         }
         return metadata;
     }
