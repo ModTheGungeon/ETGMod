@@ -354,6 +354,7 @@ public static partial class ETGMod {
             if (BaseVersion.Minor < dependencyVersion.Minor) {
                 return false;
             }
+            return true;
         }
 
         foreach (ETGBackend backend in Backends) {
