@@ -38,22 +38,53 @@ public static partial class ETGMod {
             // ETGModUnityEngineHooks.UnloadAsset = UnloadAsset;
         }
 
-        private readonly static Type t_Texture2D = typeof(Texture2D);
+        private readonly static Type t_Texture = typeof(Texture);
         public static UnityEngine.Object Load(string path, Type type) {
+            if (path == "PlayerCoopCultist") {
+                Debug.Log("LOADHOOK Loading resource \"" + path + "\" of (requested) type " + type);
+
+                GameObject obj = Resources.Load(Player.CoopReplacement ?? (path + ETGModUnityEngineHooks.SkipSuffix), type) as GameObject;
+
+                PlayerController pc = obj.GetComponent<PlayerController>();
+
+                return obj;
+            }
+
             ETGModAssetMetadata metadata;
             if (!Map.TryGetValue(path, out metadata)) {
                 return null;
             }
-            
-            if (type == t_Texture2D) {
-                Texture2D tex = new Texture2D(2, 2);
-                tex.LoadImage(metadata.Data);
-                return tex;
-            }
 
+            // TODO load and parse data from metadata
+            
             return null;
         }
 
+        public static void HandleSprite(tk2dBaseSprite sprite) {
+            Material[] materials = sprite.Collection.material_1;
+            for (int i = 0; i < materials.Length; i++) {
+                Texture2D texOrig = materials[i].mainTexture as Texture2D;
+                Texture2D tex = new Texture2D(texOrig.width, texOrig.height, texOrig.format, 1 < texOrig.mipmapCount, texOrig.filterMode != FilterMode.Point);
+                Color[] data = tex.GetPixels();
+
+                for (int y = 0; y < tex.height; y++) {
+                    for (int x = 0; x < tex.width; x++) {
+                        int p = x + y * tex.width;
+                        data[p] = new Color(x / (float) tex.width, y / (float) tex.height, 1f, 1f);
+                    }
+                }
+
+                tex.SetPixels(data);
+                tex.Apply(true, false);
+                materials[i].mainTexture = tex;
+            }
+        }
+
+    }
+
+    public static tk2dBaseSprite Handle(this tk2dBaseSprite sprite) {
+        Assets.HandleSprite(sprite);
+        return sprite;
     }
 
 }

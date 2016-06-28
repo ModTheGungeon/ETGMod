@@ -7,6 +7,7 @@ public class patch_GameManager : GameManager {
 
     public static extern GameObject orig_get_GameObject_1();
     public static GameObject get_GameObject_1() {
+        // Doesn't actually replace the Cultist
         if (ETGMod.Player.CoopReplacement != null) {
             return Resources.Load(ETGMod.Player.CoopReplacement) as GameObject;
         }

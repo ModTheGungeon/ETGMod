@@ -11,7 +11,6 @@ public class patch_MainMenuFoyerController : MainMenuFoyerController {
 
         dfLabel_0.Text += " | Mod the Gungeon " + ETGMod.BaseVersion;
 
-        // TODO add mod menu button here
     }
 
 }

@@ -13,8 +13,8 @@ public static partial class ETGMod {
     /// </summary>
     public static class Player {
         public static bool? InfiniteKeys;
-        public static string QuickstartReplacement = "PlayerNinja";
-        public static string CoopReplacement = "PlayerCosmonaut";
+        public static string QuickstartReplacement;
+        public static string CoopReplacement;
     }
 
 }

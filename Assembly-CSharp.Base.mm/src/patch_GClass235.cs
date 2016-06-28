@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using MonoMod;
 
 /// <summary>
-/// Character cache?
+/// Character / enemy cache?
 /// </summary>
 public static class patch_GClass235 {
     public static extern Object orig_smethod_0(string name);
