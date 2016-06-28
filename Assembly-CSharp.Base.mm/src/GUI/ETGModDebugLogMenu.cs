@@ -16,7 +16,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
     private Rect viewRect =    new Rect(16, 16, Screen.width - 32, Screen.height - 32);
 
     public void Start() {
-        // Application.logMessageReceived += Logger;
+        Application.logMessageReceived += Logger;
     }
 
     public void Update() {
