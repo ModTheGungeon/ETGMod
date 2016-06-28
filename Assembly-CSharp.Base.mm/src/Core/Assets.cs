@@ -50,6 +50,8 @@ public static partial class ETGMod {
                 return obj;
             }
 
+            // @RIOKU / TODO crawl through an assets / resource folder and assembly-stored assets, FEZ style
+
             ETGModAssetMetadata metadata;
             if (!Map.TryGetValue(path, out metadata)) {
                 return null;
