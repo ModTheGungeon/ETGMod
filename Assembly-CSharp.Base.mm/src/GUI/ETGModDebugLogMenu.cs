@@ -16,7 +16,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
     private Rect viewRect =    new Rect(16, 16, Screen.width - 32, Screen.height - 32);
 
     public void Start() {
-        Application.logMessageReceived += Logger;
+        // Application.logMessageReceived += Logger;
     }
 
     public void Update() {
@@ -43,7 +43,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
     }
 
     private void DrawLoggedText() {
-        viewRect = new Rect(0, 0, mainBoxRect.width, 34 * LoggedText.Count);
+        viewRect = new Rect(0, 0, mainBoxRect.width, 25 * LoggedText.Count);
         scrollPos = GUI.BeginScrollView(mainBoxRect, scrollPos, viewRect);
 
         for (int i = 0; i < LoggedText.Count; i++) {
@@ -54,9 +54,13 @@ public class ETGModDebugLogMenu : IETGModMenu {
     }
 
     public void Logger(string text, string stackTrace, LogType type) {
-        LoggedText.Add(text);
+        if (text.Contains("\n")) {
+            LoggedText.AddRange(text.Split('\n'));
+        } else {
+            LoggedText.Add(text);
+        }
         if (type == LogType.Error || type == LogType.Exception) {
-            LoggedText.Add(stackTrace);
+            LoggedText.AddRange(stackTrace.Split('\n'));
         }
         scrollPos = new Vector2(scrollPos.x, viewRect.height);
     }

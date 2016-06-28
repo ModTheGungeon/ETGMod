@@ -18,7 +18,7 @@ public class patch_GameManager : GameManager {
         orig_Awake();
 
         if (ETGModMainBehaviour.Instance == null) {
-            new GameObject("ETGMod Manager").AddComponent<ETGModMainBehaviour>();
+            ETGModMainBehaviour.Instance = new GameObject("ETGMod Manager").AddComponent<ETGModMainBehaviour>();
         }
     }
 

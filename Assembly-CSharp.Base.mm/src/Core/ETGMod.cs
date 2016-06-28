@@ -40,6 +40,8 @@ public static partial class ETGMod {
 
         Debug.Log("ETGMod " + BaseVersion);
 
+        Assets.Hook();
+
         ScanBackends();
 
         LoadMods();
@@ -188,7 +190,8 @@ public static partial class ETGMod {
 
             // ... then everything else
             foreach (ZipEntry entry in zip.Entries) {
-                if (entry.FileName.Replace("\\", "/") == metadata.DLL) {
+                string entryName = entry.FileName.Replace("\\", "/");
+                if (entryName == metadata.DLL) {
                     using (MemoryStream ms = new MemoryStream()) {
                         entry.Extract(ms);
                         ms.Seek(0, SeekOrigin.Begin);
@@ -198,6 +201,8 @@ public static partial class ETGMod {
                             asm = metadata.GetRelinkedAssembly(ms);
                         }
                     }
+                } else {
+                    Assets.Map[Assets.RemoveExtension(entryName)] = new ETGModAssetMetadata(archive, entryName);
                 }
             }
         }
@@ -272,6 +277,8 @@ public static partial class ETGMod {
                 asm = metadata.GetRelinkedAssembly(fs);
             }
         }
+
+        Assets.Crawl(dir);
 
         Type[] types = asm.GetTypes();
         for (int i = 0; i < types.Length; i++) {
