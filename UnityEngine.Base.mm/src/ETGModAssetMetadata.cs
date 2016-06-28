@@ -8,8 +8,6 @@ namespace UnityEngine {
     /// </summary>
     public class ETGModAssetMetadata {
 
-        public static System.Action<string> LogHook;
-
         public static Dictionary<string, ETGModAssetMetadata> Map = new Dictionary<string, ETGModAssetMetadata>();
 
         public string Zip;

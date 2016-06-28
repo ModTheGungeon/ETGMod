@@ -43,7 +43,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
     }
 
     private void DrawLoggedText() {
-        viewRect = new Rect(0, 0, mainBoxRect.width, 36 * LoggedText.Count);
+        viewRect = new Rect(0, 0, mainBoxRect.width, 34 * LoggedText.Count);
         scrollPos = GUI.BeginScrollView(mainBoxRect, scrollPos, viewRect);
 
         for (int i = 0; i < LoggedText.Count; i++) {
