@@ -48,15 +48,16 @@ public class ETGModConsole : IETGModMenu {
         inputBox =    new Rect(16, Screen.height - 32 -  8, Screen.width - 32,                      24);
 
         GUI.Box(mainBoxRect, string.Empty);
+        GUILayout.BeginArea(mainBoxRect);
         CurrentCommand = GUI.TextArea(inputBox, CurrentCommand);
-        viewRect = new Rect(0, 0, mainBoxRect.width, 25 * LoggedText.Count);
-        ScrollPos = GUI.BeginScrollView(mainBoxRect, ScrollPos, viewRect);
+        ScrollPos = GUILayout.BeginScrollView(ScrollPos);
 
         for (int i = 0; i < LoggedText.Count; i++) {
             GUILayout.Label(LoggedText[i]);
         }
 
-        GUI.EndScrollView();
+        GUILayout.EndScrollView();
+        GUILayout.EndArea();
 
         if (ranCommand || Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.Return) {
             // No new line when we ran a command.

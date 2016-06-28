@@ -4,7 +4,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class ETGModGUI : MonoBehaviour {
+public class ETGModGUI: MonoBehaviour {
 
     public enum MenuOpened {
         None,
@@ -20,9 +20,6 @@ public class ETGModGUI : MonoBehaviour {
     private static ETGModLoaderMenu loaderMenu;
     private static ETGModConsole consoleMenu;
     private static ETGModDebugLogMenu loggerMenu;
-
-    //Main UI controller.
-    private static dfControl mainControl;
 
     private static IETGModMenu currentMenuScript {
         get {
@@ -42,58 +39,57 @@ public class ETGModGUI : MonoBehaviour {
     /// Creates a new object with this script on it.
     /// </summary>
     public static void Create() {
-        if (menuObj != null) {
+        if (menuObj!=null) {
             return;
         }
-        menuObj = new GameObject();
-        menuObj.name = "ModLoaderMenu";
+        menuObj=new GameObject();
+        menuObj.name="ModLoaderMenu";
         menuObj.AddComponent<ETGModGUI>();
         DontDestroyOnLoad(menuObj);
     }
 
     public void Start() {
-        loaderMenu = new ETGModLoaderMenu();
+        loaderMenu=new ETGModLoaderMenu();
         loaderMenu.Start();
 
-        consoleMenu = new ETGModConsole();
+        consoleMenu=new ETGModConsole();
         consoleMenu.Start();
 
-        loggerMenu = new ETGModDebugLogMenu();
+        loggerMenu=new ETGModDebugLogMenu();
         loggerMenu.Start();
 
-        mainControl = FindObjectOfType<dfControl>();
     }
 
     public void Update() {
         if (Input.GetKeyDown(KeyCode.F1)) {
-            if (CurrentMenu == MenuOpened.Loader)
-                CurrentMenu = MenuOpened.None;
+            if (CurrentMenu==MenuOpened.Loader)
+                CurrentMenu=MenuOpened.None;
             else
-                CurrentMenu = MenuOpened.Loader;
+                CurrentMenu=MenuOpened.Loader;
 
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F2)) {
-            if (CurrentMenu == MenuOpened.Console)
-                CurrentMenu = MenuOpened.None;
+            if (CurrentMenu==MenuOpened.Console)
+                CurrentMenu=MenuOpened.None;
             else
-                CurrentMenu = MenuOpened.Console;
+                CurrentMenu=MenuOpened.Console;
 
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F3)) {
-            if (CurrentMenu == MenuOpened.Logger)
-                CurrentMenu = MenuOpened.None;
+            if (CurrentMenu==MenuOpened.Logger)
+                CurrentMenu=MenuOpened.None;
             else
-                CurrentMenu = MenuOpened.Logger;
+                CurrentMenu=MenuOpened.Logger;
 
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F4)) {
-            CurrentMenu = MenuOpened.None;
+            CurrentMenu=MenuOpened.None;
 
             UpdatePlayerState();
         }
@@ -103,8 +99,10 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     private void UpdatePlayerState() {
-        if (GameManager.GameManager_0 != null && GameManager.GameManager_0.PlayerController_1 != null) {
-            GameManager.GameManager_0.PlayerController_1.enabled = CurrentMenu == MenuOpened.None;
+        if (GameManager.GameManager_0!=null&&GameManager.GameManager_0.PlayerController_1!=null) {
+            bool set = CurrentMenu==MenuOpened.None;
+            GameManager.GameManager_0.PlayerController_1.enabled=set;
+            Camera.main.GetComponent<CameraController>().enabled=set;
         }
     }
 
@@ -112,7 +110,7 @@ public class ETGModGUI : MonoBehaviour {
 
         //For seeing about UI stuff, ignore.
         //foreach (Transform t in mainControl.GetComponentsInChildren<Transform>())
-            //GUILayout.Label(t.name);
+        //GUILayout.Label(t.name);
 
         currentMenuScript.OnGUI();
     }
