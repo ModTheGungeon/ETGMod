@@ -57,10 +57,12 @@
     <Compile Include="src\ETGModule.cs" />
     <Compile Include="src\GUI\ETGModConsole.cs" />
     <Compile Include="src\GUI\ETGModDebugLogMenu.cs" />
+    <Compile Include="src\GUI\ETGModInspector.cs" />
     <Compile Include="src\GUI\IETGModMenu.cs" />
     <Compile Include="src\GUI\ETGModLoaderMenu.cs" />
     <Compile Include="src\GUI\ETGModGUI.cs" />
     <Compile Include="src\ETGModMainBehaviour.cs" />
+    <Compile Include="src\GUI\Inspector\GenericInspector.cs" />
     <Compile Include="src\LimitedStream.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />

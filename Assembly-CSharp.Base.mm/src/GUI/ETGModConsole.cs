@@ -4,6 +4,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 public class ETGModConsole : IETGModMenu {
 
@@ -26,12 +27,16 @@ public class ETGModConsole : IETGModMenu {
     private Rect inputBox =    new Rect(16, Screen.height - 32, Screen.width - 32,                 32);
     private Rect viewRect =    new Rect(16,                 16, Screen.width - 32, Screen.height - 32);
 
+    GUISkin skin;
+
     public void Start() {
         Commands["exit"] = Commands["hide"] = Commands["quit"] = (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
         Commands["log"] = Commands["echo"] = Echo;
         Commands["rollDistance"] = DodgeRollDistance;
         Commands["rollSpeed"] = DodgeRollSpeed;
         Commands["tp"] = Commands["teleport"] = Teleport;
+
+        LoadGUISkin();
     }
 
     public void Update() {
@@ -39,6 +44,8 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public void OnGUI() {
+        GUI.skin=skin;
+
         bool ranCommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentCommand.Length > 0;
         if (ranCommand) {
             RunCommand();
@@ -67,6 +74,24 @@ public class ETGModConsole : IETGModMenu {
 
     public void OnDestroy() {
     
+    }
+
+    public void LoadGUISkin() {
+        skin = new GUISkin();
+
+        string modFolder = Path.Combine(Application.dataPath, "/...")+"/Mods";
+
+        //Generate box
+        {
+            Texture2D txt = new Texture2D(1,1);
+
+            txt.LoadRawTextureData(File.ReadAllBytes(modFolder+"/ETGMod/BOX.png"));
+            txt.filterMode=FilterMode.Point;
+
+            skin.box.normal.background=txt;
+        }
+
+
     }
     
     /// <summary>

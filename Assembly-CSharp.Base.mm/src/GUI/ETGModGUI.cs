@@ -10,7 +10,8 @@ public class ETGModGUI: MonoBehaviour {
         None,
         Loader,
         Logger,
-        Console
+        Console,
+        Inspector
     };
 
     public static MenuOpened CurrentMenu;
@@ -20,6 +21,7 @@ public class ETGModGUI: MonoBehaviour {
     private static ETGModLoaderMenu loaderMenu;
     private static ETGModConsole consoleMenu;
     private static ETGModDebugLogMenu loggerMenu;
+    private static ETGModInspector inspectorMenu;
 
     private static IETGModMenu currentMenuScript {
         get {
@@ -30,6 +32,9 @@ public class ETGModGUI: MonoBehaviour {
                     return consoleMenu;
                 case MenuOpened.Logger:
                     return loggerMenu;
+                case MenuOpened.Inspector:
+                    return inspectorMenu;
+
             }
             return nullMenu;
         }
@@ -89,7 +94,10 @@ public class ETGModGUI: MonoBehaviour {
         }
 
         if (Input.GetKeyDown(KeyCode.F4)) {
-            CurrentMenu=MenuOpened.None;
+            if (CurrentMenu==MenuOpened.Inspector)
+                CurrentMenu=MenuOpened.None;
+            else
+                CurrentMenu=MenuOpened.Inspector;
 
             UpdatePlayerState();
         }
