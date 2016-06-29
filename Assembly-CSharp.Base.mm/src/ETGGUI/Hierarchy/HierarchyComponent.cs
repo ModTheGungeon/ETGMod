@@ -32,7 +32,10 @@ namespace src.ETGGUI.Hierarchy {
                         continue;
                     GUILayout.BeginHorizontal();
                     GUILayout.Space(spaceAmount*20);
-                    c.showChildren=GUILayout.Button(c.reference.name) ? !c.showChildren : c.showChildren;
+                    bool isButton = GUILayout.Button(c.reference.name);
+                    c.showChildren=isButton ? !c.showChildren : c.showChildren;
+                    if (isButton)
+                        ETGModInspector.targetObject=c.reference;
                     GUILayout.EndHorizontal();
                     c.OnGUI();
                 }

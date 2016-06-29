@@ -52,6 +52,9 @@
     <Compile Include="src\Core\Assets.cs" />
     <Compile Include="src\Core\Player.cs" />
     <Compile Include="src\Core\ETGMod.cs" />
+    <Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" />
+    <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
+    <Compile Include="src\ETGGUI\Inspector\GenericComponentInspector.cs" />
     <Compile Include="src\ETGModAssetMetadata.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
@@ -64,7 +67,6 @@
     <Compile Include="src\ETGGUI\ETGModLoaderMenu.cs" />
     <Compile Include="src\ETGGUI\ETGModGUI.cs" />
     <Compile Include="src\ETGModMainBehaviour.cs" />
-    <Compile Include="src\ETGGUI\Inspector\GenericInspector.cs" />
     <Compile Include="src\LimitedStream.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />

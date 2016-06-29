@@ -30,7 +30,10 @@ namespace src.ETGGUI.Hierarchy {
         private static void WindowFunction(int windowID) {
             scrollPos=GUILayout.BeginScrollView(scrollPos);
             foreach (HierarchyComponent c in fullHierarchy.Values) {
-                c.showChildren=GUILayout.Button(c.reference.name) ? !c.showChildren : c.showChildren;
+                bool isButton = GUILayout.Button(c.reference.name);
+                c.showChildren=isButton ? !c.showChildren : c.showChildren;
+                if (isButton)
+                    ETGModInspector.targetObject=c.reference;
                 c.OnGUI();
             }
             GUILayout.EndScrollView();
@@ -54,7 +57,6 @@ namespace src.ETGGUI.Hierarchy {
                 }
             }
 
-            Debug.Log("Done compiling transforms.");
         }
 
         private static void CompileIntoTransform(HierarchyComponent comp) {
