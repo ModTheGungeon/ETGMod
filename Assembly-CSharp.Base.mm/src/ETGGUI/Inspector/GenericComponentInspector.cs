@@ -15,7 +15,7 @@ namespace src.ETGGUI.Inspector {
             foreach (PropertyInfo inf in allProperties) {
                 if (inf.MemberType==MemberTypes.Method)
                     continue;
-                //object getProperty = ReflectionHelper.GetValue(inf, instance);
+                object getProperty = ReflectionHelper.GetValue(inf, instance);
 
 
                 GUILayout.Label(inf.ToString());
