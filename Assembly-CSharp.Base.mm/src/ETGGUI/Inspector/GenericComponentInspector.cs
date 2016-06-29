@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 
 namespace src.ETGGUI.Inspector {
-    class GenericComponentInspector {
+    public class GenericComponentInspector {
 
         public void OnGUI(object instance) {
 

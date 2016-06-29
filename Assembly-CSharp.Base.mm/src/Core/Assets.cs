@@ -43,11 +43,7 @@ public static partial class ETGMod {
             if (path == "PlayerCoopCultist") {
                 Debug.Log("LOADHOOK Loading resource \"" + path + "\" of (requested) type " + type);
 
-                GameObject obj = Resources.Load(Player.CoopReplacement ?? (path + ETGModUnityEngineHooks.SkipSuffix), type) as GameObject;
-
-                PlayerController pc = obj.GetComponent<PlayerController>();
-
-                return obj;
+                return Resources.Load(Player.CoopReplacement ?? (path + ETGModUnityEngineHooks.SkipSuffix), type) as GameObject;
             }
 
             // @RIOKU / TODO crawl through an assets / resource folder and assembly-stored assets, FEZ style
