@@ -7,11 +7,11 @@ using src.ETGGUI.Hierarchy;
 using src.ETGGUI.Inspector;
 using UnityEngine;
 
-class ETGModInspector : IETGModMenu {
+public class ETGModInspector : IETGModMenu {
 
-    public static Dictionary<System.Type, GenericComponentInspector> ComponentInspectorRegistry = new Dictionary<Type, GenericComponentInspector>();
+    //public static Dictionary<System.Type, GenericComponentInspector> ComponentInspectorRegistry = new Dictionary<Type, GenericComponentInspector>();
     public static Dictionary<System.Type, IBasePropertyInspector> PropertyInspectorRegistry = new Dictionary<Type, IBasePropertyInspector>();
-    public static GenericComponentInspector baseInspector;
+    //public static GenericComponentInspector baseInspector;
     public static GameObject targetObject;
 
     static Rect WindowRect;
@@ -22,7 +22,7 @@ class ETGModInspector : IETGModMenu {
         ETGHierarchy.Start();
 
         WindowRect=new Rect(500, 0, 450, 900);
-        baseInspector=new GenericComponentInspector();
+        //baseInspector=new GenericComponentInspector();
     }
 
     public void Update() {
@@ -39,11 +39,11 @@ class ETGModInspector : IETGModMenu {
         scrollPos=GUILayout.BeginScrollView(scrollPos);
         if (targetObject) {
             foreach (Component c in targetObject.GetComponents<Component>()) {
-                if (ComponentInspectorRegistry.ContainsKey(c.GetType())) {
-                    ComponentInspectorRegistry[c.GetType()].OnGUI(c);
-                } else {
-                    baseInspector.OnGUI(c);
-                }
+                //if (ComponentInspectorRegistry.ContainsKey(c.GetType())) {
+                //    ComponentInspectorRegistry[c.GetType()].OnGUI(c);
+                //} else {
+                //    baseInspector.OnGUI(c);
+                //}
             }
         }
         GUILayout.EndScrollView();

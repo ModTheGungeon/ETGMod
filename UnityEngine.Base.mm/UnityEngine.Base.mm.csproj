@@ -47,6 +47,7 @@
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
     <Compile Include="src\MonoMod\MonoModOriginal.cs" />
     <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
+    <Compile Include="src\patch_Object.cs" />
     <Compile Include="src\patch_Resources.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
