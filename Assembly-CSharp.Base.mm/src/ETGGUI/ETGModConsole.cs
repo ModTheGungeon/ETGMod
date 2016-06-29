@@ -27,24 +27,23 @@ public class ETGModConsole : IETGModMenu {
     private Rect inputBox =    new Rect(16, Screen.height - 32, Screen.width - 32,                 32);
     private Rect viewRect =    new Rect(16,                 16, Screen.width - 32, Screen.height - 32);
 
-    GUISkin skin;
-
     bool closeConsoleOnCommand = false;
     bool cutInputFocusOnCommand = true;
 
     public void Start() {
+
+        Commands["help"]=delegate (string[] args) { foreach (KeyValuePair<string, System.Action<string[]>> kvp in Commands) LoggedText.Add(kvp.Key); };
+
         Commands["exit"] = Commands["hide"] = Commands["quit"] = (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
         Commands["log"] = Commands["echo"] = Echo;
         Commands["rollDistance"] = DodgeRollDistance;
         Commands["rollSpeed"] = DodgeRollSpeed;
         Commands["tp"] = Commands["teleport"] = Teleport;
 
-        Commands["closeConsoleOnCommand"]=delegate (string[] args) { closeConsoleOnCommand=SetBool(args, closeConsoleOnCommand); };
-        Commands["cutInputFocusOnCommand"]=delegate (string[] args) { cutInputFocusOnCommand=SetBool(args, cutInputFocusOnCommand); };
+        Commands["closeConsoleOnCommand"]  = delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); };
+        Commands["cutInputFocusOnCommand"] = delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); };
+        Commands["enableDamageIndicators"] = delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); };
 
-        Commands["help"]=delegate (string[] args) { foreach (KeyValuePair<string, System.Action<string[]>> kvp in Commands) LoggedText.Add(kvp.Key); };
-
-        //LoadGUISkin();
     }
 
     public void Update() {
@@ -89,24 +88,6 @@ public class ETGModConsole : IETGModMenu {
 
     public void OnDestroy() {
     
-    }
-
-    public void LoadGUISkin() {
-        skin = new GUISkin();
-
-        string modFolder = Path.Combine(Application.dataPath, "/...")+"/Mods";
-
-        //Generate box
-        {
-            Texture2D txt = new Texture2D(1,1);
-
-            txt.LoadRawTextureData(File.ReadAllBytes(modFolder+"/ETGMod/BOX.png"));
-            txt.filterMode=FilterMode.Point;
-
-            skin.box.normal.background=txt;
-        }
-
-
     }
     
     /// <summary>

@@ -22,6 +22,8 @@ public class ETGModGUI: MonoBehaviour {
     private static ETGModConsole consoleMenu;
     private static ETGModDebugLogMenu loggerMenu;
     private static ETGModInspector inspectorMenu;
+    
+    public static bool UseDamageIndicators = false;
 
     private static IETGModMenu currentMenuScript {
         get {
@@ -66,6 +68,8 @@ public class ETGModGUI: MonoBehaviour {
         inspectorMenu=new ETGModInspector();
         inspectorMenu.Start();
 
+        ETGDamageIndicatorGUI.Create();
+
     }
 
     public void Update() {
@@ -78,7 +82,7 @@ public class ETGModGUI: MonoBehaviour {
             UpdatePlayerState();
         }
 
-        if (Input.GetKeyDown(KeyCode.F2)) {
+        if (Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.Slash) || Input.GetKeyDown(KeyCode.BackQuote)) {
             if (CurrentMenu==MenuOpened.Console)
                 CurrentMenu=MenuOpened.None;
             else

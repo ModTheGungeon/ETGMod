@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace src.ETGGUI.Hierarchy {
+namespace ETGGUI.Hierarchy {
     class ETGHierarchy {
 
         private static Dictionary<Transform, HierarchyComponent> fullHierarchy = new Dictionary<Transform, HierarchyComponent>();

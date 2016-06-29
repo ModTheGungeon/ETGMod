@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace src.ETGGUI.Hierarchy {
+namespace ETGGUI.Hierarchy {
     class HierarchyComponent {
         public GameObject reference;
         public bool showChildren;

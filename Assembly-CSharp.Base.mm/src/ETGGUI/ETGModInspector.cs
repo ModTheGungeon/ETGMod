@@ -3,8 +3,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using src.ETGGUI.Hierarchy;
-using src.ETGGUI.Inspector;
+using ETGGUI.Hierarchy;
+using ETGGUI.Inspector;
 using UnityEngine;
 
 public class ETGModInspector : IETGModMenu {

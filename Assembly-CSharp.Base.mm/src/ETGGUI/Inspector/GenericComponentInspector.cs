@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace src.ETGGUI.Inspector {
+namespace ETGGUI.Inspector {
     public class GenericComponentInspector {
 
         public void OnGUI(object instance) {
@@ -15,11 +15,11 @@ namespace src.ETGGUI.Inspector {
             foreach (PropertyInfo inf in allProperties) {
                 if (inf.MemberType==MemberTypes.Method)
                     continue;
-                object getProperty = ReflectionHelper.GetValue(inf, instance);
+                //object getProperty = ReflectionHelper.GetValue(inf, instance);
 
-                object setProperty = ETGModInspector.DrawProperty(inf, getProperty);
+                //object setProperty = ETGModInspector.DrawProperty(inf, getProperty);
 
-                ReflectionHelper.SetValue(inf,instance,setProperty);
+                //ReflectionHelper.SetValue(inf,instance,setProperty);
             }
 
         }
