@@ -16,7 +16,7 @@ public class ETGModGUI: MonoBehaviour {
 
     public static MenuOpened CurrentMenu;
 
-    private static GameObject menuObj;
+    public static GameObject menuObj;
     private readonly static ETGModNullMenu nullMenu = new ETGModNullMenu();
     private static ETGModLoaderMenu loaderMenu;
     private static ETGModConsole consoleMenu;
@@ -62,6 +62,9 @@ public class ETGModGUI: MonoBehaviour {
 
         loggerMenu=new ETGModDebugLogMenu();
         loggerMenu.Start();
+
+        inspectorMenu=new ETGModInspector();
+        inspectorMenu.Start();
 
     }
 

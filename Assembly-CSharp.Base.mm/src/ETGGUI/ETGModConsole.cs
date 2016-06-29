@@ -36,7 +36,7 @@ public class ETGModConsole : IETGModMenu {
         Commands["rollSpeed"] = DodgeRollSpeed;
         Commands["tp"] = Commands["teleport"] = Teleport;
 
-        LoadGUISkin();
+        //LoadGUISkin();
     }
 
     public void Update() {
@@ -44,7 +44,7 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public void OnGUI() {
-        GUI.skin=skin;
+        //GUI.skin=skin;
 
         bool ranCommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentCommand.Length > 0;
         if (ranCommand) {

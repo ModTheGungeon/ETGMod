@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using src.ETGGUI.Hierarchy;
 
 class ETGModInspector: IETGModMenu {
 
@@ -9,6 +10,8 @@ class ETGModInspector: IETGModMenu {
 
     public void Start() {
 
+        //Init the hierarchy.
+        ETGHierarchy.Start();
     }
 
     public void Update() {
@@ -16,7 +19,7 @@ class ETGModInspector: IETGModMenu {
     }
 
     public void OnGUI() {
-
+        ETGHierarchy.OnGUI();
     }
 
     public void OnDestroy() {

@@ -9,7 +9,7 @@ public class patch_PlayerController : PlayerController {
     public new void Awake() {
         orig_Awake();
 
-        Tk2dBaseSprite_0.Handle();
+        //Tk2dBaseSprite_0.Handle();
     }
 
 }
