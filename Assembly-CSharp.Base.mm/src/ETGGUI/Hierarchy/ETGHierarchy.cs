@@ -16,45 +16,51 @@ namespace src.ETGGUI.Hierarchy {
         public static void Start() {
 
             Debug.Log("Compiling transforms into a hierarchy.");
-            //ETGModGUI.menuObj.GetComponent<ETGModGUI>().StartCoroutine(CompileExistingTransforms());
+            
 
-            windowRect=new Rect(0,0,450,450);
+            windowRect=new Rect(0,0,450,900);
         }
 
 
         public static void OnGUI() {
+            CompileExistingTransforms();
             windowRect=GUILayout.Window(15, windowRect, WindowFunction, "Hierarchy");
         }
 
         private static void WindowFunction(int windowID) {
             scrollPos=GUILayout.BeginScrollView(scrollPos);
-            foreach (HierarchyComponent c in fullHierarchy.Values)
+            foreach (HierarchyComponent c in fullHierarchy.Values) {
+                c.showChildren=GUILayout.Button(c.reference.name) ? !c.showChildren : c.showChildren;
                 c.OnGUI();
+            }
             GUILayout.EndScrollView();
-            //GUI.DragWindow();
+            GUI.DragWindow();
         }
 
         //Compiles all transforms currently in the scene into the dictionary.
-        public static IEnumerator CompileExistingTransforms() {
+        public static void CompileExistingTransforms() {
             Transform[] allTransforms = GameObject.FindObjectsOfType<Transform>();
 
             foreach (Transform t in allTransforms) {
                 //If this object is on the root of the scene, we iterate downward through all it's children and add them all.
-                if (t.parent==null) {
-                    fullHierarchy[t]=new HierarchyComponent(t.gameObject, false);
+                if (t.root==t) {
+                    if(t==null)
+                        continue;
+
+                    if(!fullHierarchy.ContainsKey(t))
+                        fullHierarchy[t]=new HierarchyComponent(t.gameObject, false);
 
                     CompileIntoTransform(fullHierarchy[t]);
-                    yield return new WaitForEndOfFrame();
                 }
             }
 
             Debug.Log("Done compiling transforms.");
         }
 
-        private static IEnumerator CompileIntoTransform(HierarchyComponent comp) {
+        private static void CompileIntoTransform(HierarchyComponent comp) {
             for(int i = 0; i < comp.reference.transform.childCount; i++) {
-                yield return new WaitForEndOfFrame();
-                comp.children[comp.reference.transform.GetChild(i)]=new HierarchyComponent(comp.reference.transform.GetChild(i).gameObject,false);
+                if(!comp.children.ContainsKey(comp.reference.transform.GetChild(i)))
+                    comp.children[comp.reference.transform.GetChild(i)]=new HierarchyComponent(comp.reference.transform.GetChild(i).gameObject,false);
                 CompileIntoTransform(comp.children[comp.reference.transform.GetChild(i)]);
             }
         }

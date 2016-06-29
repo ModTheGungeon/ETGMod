@@ -16,14 +16,30 @@ namespace src.ETGGUI.Hierarchy {
             showChildren=show;
         }
 
+        public static int spaceAmount = 0;
+
         public void OnGUI() {
-            if (!showChildren)
+
+            if (reference==null)
                 return;
-            GUILayout.BeginArea(new Rect(15,15,15,15));
-            GUILayout.Label(reference.name);
-            foreach (HierarchyComponent c in children.Values)
-                c.OnGUI();
-            GUILayout.EndArea();
+
+            spaceAmount++;
+
+            GUILayout.BeginVertical();
+            if (showChildren) {
+                foreach (HierarchyComponent c in children.Values) {
+                    if (c.reference==null)
+                        continue;
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Space(spaceAmount*20);
+                    c.showChildren=GUILayout.Button(c.reference.name) ? !c.showChildren : c.showChildren;
+                    GUILayout.EndHorizontal();
+                    c.OnGUI();
+                }
+            }
+            GUILayout.EndVertical();
+
+            spaceAmount--;
         }
     }
 }
