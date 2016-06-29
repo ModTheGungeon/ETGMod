@@ -17,8 +17,9 @@ namespace src.ETGGUI.Inspector {
                     continue;
                 object getProperty = ReflectionHelper.GetValue(inf, instance);
 
+                object setProperty = ETGModInspector.DrawProperty(inf, getProperty);
 
-                GUILayout.Label(inf.ToString());
+                ReflectionHelper.SetValue(inf,instance,setProperty);
             }
 
         }
