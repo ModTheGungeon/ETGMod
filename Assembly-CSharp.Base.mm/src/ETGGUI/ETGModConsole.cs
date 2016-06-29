@@ -29,12 +29,20 @@ public class ETGModConsole : IETGModMenu {
 
     GUISkin skin;
 
+    bool closeConsoleOnCommand = false;
+    bool cutInputFocusOnCommand = true;
+
     public void Start() {
         Commands["exit"] = Commands["hide"] = Commands["quit"] = (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
         Commands["log"] = Commands["echo"] = Echo;
         Commands["rollDistance"] = DodgeRollDistance;
         Commands["rollSpeed"] = DodgeRollSpeed;
         Commands["tp"] = Commands["teleport"] = Teleport;
+
+        Commands["closeConsoleOnCommand"]=delegate (string[] args) { closeConsoleOnCommand=SetBool(args, closeConsoleOnCommand); };
+        Commands["cutInputFocusOnCommand"]=delegate (string[] args) { cutInputFocusOnCommand=SetBool(args, cutInputFocusOnCommand); };
+
+        Commands["help"]=delegate (string[] args) { foreach (KeyValuePair<string, System.Action<string[]>> kvp in Commands) LoggedText.Add(kvp.Key); };
 
         //LoadGUISkin();
     }
@@ -46,13 +54,14 @@ public class ETGModConsole : IETGModMenu {
     public void OnGUI() {
         //GUI.skin=skin;
 
+
         bool ranCommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentCommand.Length > 0;
         if (ranCommand) {
             RunCommand();
         }
 
-        mainBoxRect = new Rect(16,                      16, Screen.width - 32, Screen.height - 32 -  8);
-        inputBox =    new Rect(16, Screen.height - 32 -  8, Screen.width - 32,                      24);
+        mainBoxRect = new Rect(16,                      16, Screen.width - 32, Screen.height - 32 -  16);
+        inputBox =    new Rect(16, Screen.height - 32 -  8, Screen.width - 32,                       24);
 
         GUI.Box(mainBoxRect, string.Empty);
         CurrentCommand=GUI.TextArea(inputBox, CurrentCommand);
@@ -69,6 +78,12 @@ public class ETGModConsole : IETGModMenu {
         if (ranCommand || Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.Return) {
             // No new line when we ran a command.
             CurrentCommand = "";
+            if (cutInputFocusOnCommand)
+                GUI.FocusControl("");
+            if (closeConsoleOnCommand) {
+                ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
+                ETGModGUI.UpdatePlayerState();
+            }
         }
     }
 
@@ -180,6 +195,18 @@ public class ETGModConsole : IETGModMenu {
                 float.Parse(args[2])
             );
         }
+    }
+
+    public bool SetBool(string[] args, bool fallbackValue) {
+        if (args.Length!=1)
+            return fallbackValue;
+
+        if (args[0].ToLower()=="true") 
+            return true;
+         else if (args[0].ToLower()=="false") 
+            return false;
+         else
+            return fallbackValue;
     }
 
 }

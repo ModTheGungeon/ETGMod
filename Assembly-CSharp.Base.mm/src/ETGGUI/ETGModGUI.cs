@@ -109,7 +109,7 @@ public class ETGModGUI: MonoBehaviour {
         currentMenuScript.Update();
     }
 
-    private void UpdatePlayerState() {
+    public static void UpdatePlayerState() {
         if (GameManager.GameManager_0!=null&&GameManager.GameManager_0.PlayerController_1!=null) {
             bool set = CurrentMenu==MenuOpened.None;
             GameManager.GameManager_0.PlayerController_1.enabled=set;
