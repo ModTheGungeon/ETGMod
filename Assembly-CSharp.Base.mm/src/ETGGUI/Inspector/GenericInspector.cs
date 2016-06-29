@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class GenericInspector {
 
-    public virtual void OnGUI(object instance) {
+    public virtual void OnGUI(Component instance) {
 
 
 
