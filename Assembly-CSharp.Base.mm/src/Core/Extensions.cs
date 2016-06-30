@@ -9,7 +9,14 @@ public static partial class ETGMod {
     // ETGMod helper extension methods.
 
     public static string ToStringIfNoString(this object o) {
-        return o==null ? null : o is string ? (string)o : o.ToString();
+        return o == null ? null : o is string ? (string) o : o.ToString();
+    }
+
+    public static T GetFirst<T>(this IEnumerable<T> e) {
+        foreach (T t in e) {
+            return t;
+        }
+        return default(T);
     }
 
 }

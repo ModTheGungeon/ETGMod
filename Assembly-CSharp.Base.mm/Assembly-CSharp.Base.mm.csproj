@@ -56,8 +56,11 @@
     <Compile Include="src\Cross\Cross.cs" />
     <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
     <Compile Include="src\ETGGUI\FontConverter.cs" />
+<!--<<<<<<< HEAD-->
 	<!--Something went wrong while time-traveling... whoops!-->
     <!--Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" /-->
+<!--=======-->
+<!-->>>>>>> 056ab26... Added fontconverter to the csproj-->
     <Compile Include="src\ETGGUI\Inspector\Properties\StringPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
@@ -101,7 +104,6 @@
       <Name>UnityEngine.Base.mm</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

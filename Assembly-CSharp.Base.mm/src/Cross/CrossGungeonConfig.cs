@@ -11,8 +11,6 @@ using Mono.Cecil;
 /// </summary>
 public class CrossGungeonConfig : ICrossConfig {
 
-    private readonly static char[] c_GClass = { 'G', 'C', 'l', 'a', 's', 's' };
-
     private static List<Assembly> _Assemblies = new List<Assembly>() {
         Assembly.GetCallingAssembly()
     };
@@ -28,8 +26,9 @@ public class CrossGungeonConfig : ICrossConfig {
         }
         Platform from = (Platform) from_;
         Platform to = (Platform) to_;
-        string[] split = name.Split(c_GClass);
-        int id = int.Parse(split[1]);
+        int split = name.LastIndexOf("GClass");
+        string pre = name.Substring(0, split);
+        int id = int.Parse(name.Substring(split + 6));
 
         // TODO where do the shifts begin?
         // TODO mac?
@@ -40,7 +39,7 @@ public class CrossGungeonConfig : ICrossConfig {
             id -= 2;
         }
 
-        return split[0] + "GClass" + id;
+        return pre + "GClass" + id;
     }
 
 }

@@ -14,6 +14,8 @@ public static partial class ETGMod {
 
         public static Dictionary<string, ETGModAssetMetadata> Map = new Dictionary<string, ETGModAssetMetadata>();
 
+        public static Font MainFont;
+
         public static string RemoveExtension(string file) {
             return file.Substring(0, file.LastIndexOf('.'));
         }
