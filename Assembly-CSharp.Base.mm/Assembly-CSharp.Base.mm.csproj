@@ -54,9 +54,12 @@
     <Compile Include="src\Core\ETGMod.cs" />
     <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
     <Compile Include="src\ETGGUI\FontConverter.cs" />
-    <Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" />
+	<!--Something went wrong while time-traveling... whoops!-->
+    <!--Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" /-->
+    <Compile Include="src\ETGGUI\Inspector\Properties\StringPropertyInspector.cs" />
+    <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
-    <Compile Include="src\ETGGUI\Inspector\GenericComponentInspector.cs" />
+    <Compile Include="src\ETGGUI\Inspector\Components\GenericComponentInspector.cs" />
     <Compile Include="src\ETGModAssetMetadata.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />

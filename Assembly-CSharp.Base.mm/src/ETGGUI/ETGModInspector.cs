@@ -9,8 +9,14 @@ using UnityEngine;
 
 public class ETGModInspector : IETGModMenu {
 
-    public static Dictionary<System.Type, GenericComponentInspector> ComponentInspectorRegistry = new Dictionary<Type, GenericComponentInspector>();
-    public static Dictionary<System.Type, IBasePropertyInspector> PropertyInspectorRegistry = new Dictionary<Type, IBasePropertyInspector>();
+    public static Dictionary<Type, GenericComponentInspector> ComponentInspectorRegistry = new Dictionary<Type, GenericComponentInspector>() {
+
+    };
+
+    public static Dictionary<Type, IBasePropertyInspector> PropertyInspectorRegistry = new Dictionary<Type, IBasePropertyInspector>() {
+        { typeof(string), new StringPropertyInspector() }
+    };
+
     public static GenericComponentInspector baseInspector;
     public static GameObject targetObject;
 
@@ -37,10 +43,14 @@ public class ETGModInspector : IETGModMenu {
     public void WindowFunction(int windowID) {
 
         scrollPos=GUILayout.BeginScrollView(scrollPos);
-        if (targetObject) {
+        if (targetObject != null) {
             foreach (Component c in targetObject.GetComponents<Component>()) {
-                if (ComponentInspectorRegistry.ContainsKey(c.GetType())) {
-                    ComponentInspectorRegistry[c.GetType()].OnGUI(c);
+                if (c == null) {
+                    continue;
+                }
+                GenericComponentInspector inspector;
+                if (ComponentInspectorRegistry.TryGetValue(c.GetType(), out inspector)) {
+                    inspector.OnGUI(c);
                 } else {
                     baseInspector.OnGUI(c);
                 }
@@ -56,10 +66,14 @@ public class ETGModInspector : IETGModMenu {
     }
 
     public static object DrawProperty(PropertyInfo inf, object input) {
-
-        if (PropertyInspectorRegistry.ContainsKey(input.GetType())) {
-            return PropertyInspectorRegistry[input.GetType()].OnGUI(inf, input);
+        if (input == null) {
+            return null;
+        }
+        IBasePropertyInspector inspector;
+        if (PropertyInspectorRegistry.TryGetValue(input.GetType(), out inspector)) {
+            return inspector.OnGUI(inf, input);
         } else {
+            GUILayout.Label(inf.Name + ": " + input.ToStringIfNoString());
             return input;
         }
 

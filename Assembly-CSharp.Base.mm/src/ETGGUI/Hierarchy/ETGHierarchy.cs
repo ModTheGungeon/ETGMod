@@ -30,6 +30,9 @@ namespace ETGGUI.Hierarchy {
         private static void WindowFunction(int windowID) {
             scrollPos=GUILayout.BeginScrollView(scrollPos);
             foreach (HierarchyComponent c in fullHierarchy.Values) {
+                if (c.reference == null) {
+                    continue;
+                }
                 bool isButton = GUILayout.Button(c.reference.name);
                 c.showChildren=isButton ? !c.showChildren : c.showChildren;
                 if (isButton)
