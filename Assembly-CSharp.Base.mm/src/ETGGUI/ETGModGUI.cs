@@ -24,6 +24,8 @@ public class ETGModGUI : MonoBehaviour {
     private static ETGModDebugLogMenu loggerMenu;
     private static ETGModInspector inspectorMenu;
 
+    public static float? timeScale = null;
+
     public static bool UseDamageIndicators = false;
 
     private static IETGModMenu currentMenuScript {
@@ -126,6 +128,10 @@ public class ETGModGUI : MonoBehaviour {
             bool set = CurrentMenu==MenuOpened.None;
             GameManager.GameManager_0.PlayerController_1.enabled=set;
             Camera.main.GetComponent<CameraController>().enabled=set;
+            if (timeScale.HasValue) {
+                Time.timeScale = (float)timeScale;
+                timeScale = null;
+            }
         }
     }
 
@@ -134,6 +140,19 @@ public class ETGModGUI : MonoBehaviour {
     public void OnGUI() {
 
         //GUI.skin.font=f;
+
+        // sorry for the if block
+        if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
+            if (!timeScale.HasValue && (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None)) {
+                timeScale = Time.timeScale;
+                Time.timeScale = 0;
+            }
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) {
+                ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
+                ETGModGUI.UpdatePlayerState();
+            }
+        }
 
         currentMenuScript.OnGUI();
 

@@ -28,7 +28,8 @@ public class ETGModConsole : IETGModMenu {
     private Rect viewRect =    new Rect(16,                 16, Screen.width - 32, Screen.height - 32);
 
     bool closeConsoleOnCommand = false;
-    bool cutInputFocusOnCommand = true;
+    bool cutInputFocusOnCommand = false;
+    bool stopTimeDuringConsoleOpen = true;
 
     public void Start() {
 
@@ -36,18 +37,22 @@ public class ETGModConsole : IETGModMenu {
 
         Commands["exit"] = Commands["hide"] = Commands["quit"] = (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
         Commands["log"] = Commands["echo"] = Echo;
-        Commands["rollDistance"] = DodgeRollDistance;
-        Commands["rollSpeed"] = DodgeRollSpeed;
+        Commands["roll_distance"] = DodgeRollDistance;
+        Commands["roll_speed"] = DodgeRollSpeed;
         Commands["tp"] = Commands["teleport"] = Teleport;
 
-        Commands["closeConsoleOnCommand"]  = delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); };
-        Commands["cutInputFocusOnCommand"] = delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); };
-        Commands["enableDamageIndicators"] = delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); };
+        Commands["close_console_on_command"]  = delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); };
+        Commands["cut_input_focus_on_command"] = delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); };
+        Commands["enable_damage_indicators"] = delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); };
+        Commands["console_time_stop"] = delegate (string[] args) { stopTimeDuringConsoleOpen  = SetBool(args, stopTimeDuringConsoleOpen); };
+
+        Commands["give"] = GiveItem;
+        Commands["set_shake"] = SetShake;
 
     }
 
     public void Update() {
-        
+
     }
 
     public void OnGUI() {
@@ -87,9 +92,9 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public void OnDestroy() {
-    
+
     }
-    
+
     /// <summary>
     /// Runs the currently typed in command.
     /// </summary>
@@ -97,6 +102,7 @@ public class ETGModConsole : IETGModMenu {
         RunCommand(CurrentCommand);
         CurrentCommand = string.Empty;
     }
+
 
     private readonly static string[] a_string_0 = new string[0];
     /// <summary>
@@ -184,10 +190,33 @@ public class ETGModConsole : IETGModMenu {
 
         if (args[0].ToLower()=="true") 
             return true;
-         else if (args[0].ToLower()=="false") 
+        else if (args[0].ToLower()=="false") 
             return false;
-         else
+        else
             return fallbackValue;
+    }
+
+    void GiveItem(string[] args) {
+        if (args.Length < 1 || args.Length > 2) {
+            LoggedText.Add ("Command requires 1-2 arguments (int, int)");
+            return;
+        }
+        if (!GameManager.GameManager_0.PlayerController_1) {
+            LoggedText.Add ("Coudln't access Player Controller");
+            return;
+        }
+        int id = int.Parse (args [0]);
+        LoggedText.Add ("Attempting to spawn item ID " + args[0] + ", class " + PickupObjectDatabase.GetById (id).GetType());
+        ETGMod.Player.GiveItemID (id);
+    }
+
+    void SetShake(string[] args) {
+        if (args.Length != 1) {
+            LoggedText.Add ("Command requires 1 argument (int)");
+            return;
+        }
+        LoggedText.Add ("Vlambeer set to " + args[0]);
+        ScreenShakeSettings.GLOBAL_SHAKE_MULTIPLIER = float.Parse (args [0]);
     }
 
 }
