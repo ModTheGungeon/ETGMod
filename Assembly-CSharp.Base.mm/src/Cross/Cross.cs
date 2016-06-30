@@ -62,6 +62,13 @@ public static class Cross {
         return TypeMap[name_] = type;
     }
 
+    public static object Xs(this MethodInfo method, params object[] args) {
+        return method.X(instance: null, args: args);
+    }
+    public static object X(this MethodInfo method, object instance, params object[] args) {
+        return ReflectionHelper.InvokeMethod(method, instance, args);
+    }
+
 }
 
 /// <summary>
