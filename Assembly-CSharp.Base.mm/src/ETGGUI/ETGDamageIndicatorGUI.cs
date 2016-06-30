@@ -10,6 +10,12 @@ class ETGDamageIndicatorGUI : MonoBehaviour{
     private static List<DamageIndicator> usedPool = new List<DamageIndicator>();
     private static List<DamageIndicator> toRemove = new List<DamageIndicator>();
 
+    public static List<HealthHaver> allHealthHavers = new List<HealthHaver>();
+    public static Dictionary<HealthHaver, float> maxHP = new Dictionary<HealthHaver, float>();
+    public static Dictionary<HealthHaver, float> currentHP = new Dictionary<HealthHaver, float>();
+
+    public static bool RenderHealthBars = true;
+
     public static void Create() {
         GameObject newObject = new GameObject();
         newObject.name="Damage Indicators";
@@ -33,6 +39,8 @@ class ETGDamageIndicatorGUI : MonoBehaviour{
     public void OnGUI() {
         foreach (DamageIndicator i in indicators)
             i.OnGUI();
+        foreach (HealthHaver HH in allHealthHavers)
+            RenderHealthBar(HH);
     }
 
     public static void CreateIndicator(Vector3 worldPosOrigin, object content) {
@@ -56,6 +64,23 @@ class ETGDamageIndicatorGUI : MonoBehaviour{
 
             indicators.Add(pickedIndicator);
         }
+    }
+
+    public void RenderHealthBar(HealthHaver hh) {
+        GUILayout.Label(currentHP[hh].ToString());
+        Vector3 wPos = (Vector3)hh.SpeculativeRigidbody_0.Vector2_4+(hh.transform.up*hh.GetComponentInChildren<tk2dAnimatedSprite>().CurrentSprite.boundsDataExtents.y)+(hh.transform.up);
+        Vector2 screenPos = Camera.main.WorldToScreenPoint(wPos);
+        screenPos=new Vector2(screenPos.x,Screen.height-screenPos.y);
+
+        int hpMaxBar = (int)Mathf.Max(0, 15-(maxHP[hh]))+100;
+
+        Rect totalBarRect = new Rect(screenPos.x-(hpMaxBar/2),screenPos.y-10,hpMaxBar,20);
+        Rect filledBarRect = new Rect(screenPos.x-(hpMaxBar/2),screenPos.y-10,currentHP[hh],20);
+
+        GUI.Box(totalBarRect,"");
+        GUI.color=Color.red;
+        GUI.Box(filledBarRect, "");
+
     }
 
     private class DamageIndicator{

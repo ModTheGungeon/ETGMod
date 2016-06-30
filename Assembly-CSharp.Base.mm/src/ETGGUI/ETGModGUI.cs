@@ -3,8 +3,9 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using ETGGUI;
 
-public class ETGModGUI: MonoBehaviour {
+public class ETGModGUI : MonoBehaviour {
 
     public enum MenuOpened {
         None,
@@ -22,7 +23,7 @@ public class ETGModGUI: MonoBehaviour {
     private static ETGModConsole consoleMenu;
     private static ETGModDebugLogMenu loggerMenu;
     private static ETGModInspector inspectorMenu;
-    
+
     public static bool UseDamageIndicators = false;
 
     private static IETGModMenu currentMenuScript {
@@ -70,6 +71,13 @@ public class ETGModGUI: MonoBehaviour {
 
         ETGDamageIndicatorGUI.Create();
 
+        try {
+           f=FontConverter.GetFontFromdfFont((dfFont)GameUIRoot.GameUIRoot_0.dfLabel_2.Font);
+        }
+        catch (System.Exception e) {
+            GUILayout.Label(e.ToString());
+        }
+
     }
 
     public void Update() {
@@ -82,7 +90,7 @@ public class ETGModGUI: MonoBehaviour {
             UpdatePlayerState();
         }
 
-        if (Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.Slash) || Input.GetKeyDown(KeyCode.BackQuote)) {
+        if (Input.GetKeyDown(KeyCode.F2)||Input.GetKeyDown(KeyCode.Slash)||Input.GetKeyDown(KeyCode.BackQuote)) {
             if (CurrentMenu==MenuOpened.Console)
                 CurrentMenu=MenuOpened.None;
             else
@@ -121,13 +129,15 @@ public class ETGModGUI: MonoBehaviour {
         }
     }
 
+    Font f;
+
     public void OnGUI() {
 
-        //For seeing about UI stuff, ignore.
-        //foreach (Transform t in mainControl.GetComponentsInChildren<Transform>())
-        //GUILayout.Label(t.name);
+        //GUI.skin.font=f;
 
         currentMenuScript.OnGUI();
+
+
     }
 
 }

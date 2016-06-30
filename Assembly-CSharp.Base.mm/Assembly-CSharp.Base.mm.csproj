@@ -53,6 +53,7 @@
     <Compile Include="src\Core\Player.cs" />
     <Compile Include="src\Core\ETGMod.cs" />
     <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
+    <Compile Include="src\ETGGUI\FontConverter.cs" />
     <Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
     <Compile Include="src\ETGGUI\Inspector\GenericComponentInspector.cs" />
