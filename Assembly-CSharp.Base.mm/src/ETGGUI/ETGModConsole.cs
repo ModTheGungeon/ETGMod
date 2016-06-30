@@ -63,7 +63,7 @@ public class ETGModConsole : IETGModMenu {
         inputBox =    new Rect(16, Screen.height - 32 -  8, Screen.width - 32,                       24);
 
         GUI.Box(mainBoxRect, string.Empty);
-        CurrentCommand=GUI.TextArea(inputBox, CurrentCommand);
+        CurrentCommand=GUI.TextField(inputBox, CurrentCommand);
         GUILayout.BeginArea(mainBoxRect);
         ScrollPos = GUILayout.BeginScrollView(ScrollPos);
 

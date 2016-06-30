@@ -52,6 +52,8 @@
     <Compile Include="src\Core\Assets.cs" />
     <Compile Include="src\Core\Player.cs" />
     <Compile Include="src\Core\ETGMod.cs" />
+    <Compile Include="src\Cross\CrossGungeonConfig.cs" />
+    <Compile Include="src\Cross\Cross.cs" />
     <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
     <Compile Include="src\ETGGUI\FontConverter.cs" />
 	<!--Something went wrong while time-traveling... whoops!-->
