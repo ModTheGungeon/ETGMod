@@ -73,13 +73,6 @@ public class ETGModGUI : MonoBehaviour {
 
         ETGDamageIndicatorGUI.Create();
 
-        try {
-           f=FontConverter.GetFontFromdfFont((dfFont)GameUIRoot.GameUIRoot_0.dfLabel_2.Font);
-        }
-        catch (System.Exception e) {
-            GUILayout.Label(e.ToString());
-        }
-
     }
 
     public void Update() {

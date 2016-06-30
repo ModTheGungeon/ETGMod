@@ -11,7 +11,7 @@ public class ETGModConsole : IETGModMenu {
     /// <summary>
     /// All commands supported by the ETGModConsole. Add your own commands here!
     /// </summary>
-    public static Dictionary<string, System.Action<string[]>> Commands = new Dictionary<string, System.Action<string[]>>();
+    public static Dictionary<string, ConsoleCommand> Commands = new Dictionary<string, ConsoleCommand>();
     /// <summary>
     /// All console logged text lines. Feel free to add your lines here!
     /// </summary>
@@ -26,6 +26,7 @@ public class ETGModConsole : IETGModMenu {
     private Rect mainBoxRect = new Rect(16,                 16, Screen.width - 32, Screen.height - 32);
     private Rect inputBox =    new Rect(16, Screen.height - 32, Screen.width - 32,                 32);
     private Rect viewRect =    new Rect(16,                 16, Screen.width - 32, Screen.height - 32);
+    private Rect autoCorrectBox;
 
     bool closeConsoleOnCommand = false;
     bool cutInputFocusOnCommand = false;
@@ -33,21 +34,21 @@ public class ETGModConsole : IETGModMenu {
 
     public void Start() {
 
-        Commands["help"]=delegate (string[] args) { foreach (KeyValuePair<string, System.Action<string[]>> kvp in Commands) LoggedText.Add(kvp.Key); };
+        Commands["help"]=new ConsoleCommand("help",delegate (string[] args) { foreach (KeyValuePair<string, ConsoleCommand> kvp in Commands) LoggedText.Add(kvp.Key); });
 
-        Commands["exit"] = Commands["hide"] = Commands["quit"] = (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
-        Commands["log"] = Commands["echo"] = Echo;
-        Commands["roll_distance"] = DodgeRollDistance;
-        Commands["roll_speed"] = DodgeRollSpeed;
-        Commands["tp"] = Commands["teleport"] = Teleport;
+        Commands["exit"] = Commands["hide"] = Commands["quit"]   = new ConsoleCommand("<exit, hide, quit>", (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None  );
+        Commands["log"] = Commands["echo"]                       = new ConsoleCommand("<log, echo>"       , Echo                                                                  );
+        Commands["roll_distance"]                                = new ConsoleCommand("roll_distance"     , DodgeRollDistance                                                     );
+        Commands["roll_speed"]                                   = new ConsoleCommand("roll_speed"        , DodgeRollSpeed                                                        );
+        Commands["tp"] = Commands["teleport"]                    = new ConsoleCommand("<tp, teleport>"    , Teleport                                                              );
 
-        Commands["close_console_on_command"]  = delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); };
-        Commands["cut_input_focus_on_command"] = delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); };
-        Commands["enable_damage_indicators"] = delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); };
-        Commands["console_time_stop"] = delegate (string[] args) { stopTimeDuringConsoleOpen  = SetBool(args, stopTimeDuringConsoleOpen); };
+        Commands["close_console_on_command"]   = new ConsoleCommand("close_console_on_command",   delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); });
+        Commands["cut_input_focus_on_command"] = new ConsoleCommand("cut_input_focus_on_command", delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); });
+        Commands["enable_damage_indicators"]   = new ConsoleCommand("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); });
+        Commands["console_time_stop"]          = new ConsoleCommand("console_time_stop",          delegate (string[] args) { stopTimeDuringConsoleOpen      = SetBool(args, stopTimeDuringConsoleOpen    ); });
 
-        Commands["give"] = GiveItem;
-        Commands["set_shake"] = SetShake;
+        Commands["set_shake"] = new ConsoleCommand("set_shake" ,SetShake );
+        Commands["give"]      = new ConsoleCommand("give"      ,GiveItem );
 
     }
 
@@ -68,7 +69,13 @@ public class ETGModConsole : IETGModMenu {
         inputBox =    new Rect(16, Screen.height - 32 -  8, Screen.width - 32,                       24);
 
         GUI.Box(mainBoxRect, string.Empty);
-        CurrentCommand=GUI.TextField(inputBox, CurrentCommand);
+        string changedCommand=GUI.TextField(inputBox, CurrentCommand);
+
+        if(changedCommand != CurrentCommand) {
+            CurrentCommand=changedCommand;
+            OnTextChanged();
+        }
+
         GUILayout.BeginArea(mainBoxRect);
         ScrollPos = GUILayout.BeginScrollView(ScrollPos);
 
@@ -92,6 +99,10 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public void OnDestroy() {
+
+    }
+
+    private void OnTextChanged() {
 
     }
 
@@ -126,7 +137,7 @@ public class ETGModConsole : IETGModMenu {
         }
 
         if (Commands.ContainsKey(parts[0])) {
-            Commands[parts[0]](args);
+            Commands[parts[0]].RunCommand(args);
             LoggedText.Add("Executed command " + parts[0]);
         } else {
             LoggedText.Add("Command " + parts[0] + " not found.");
@@ -207,7 +218,9 @@ public class ETGModConsole : IETGModMenu {
         }
         int id = int.Parse (args [0]);
         LoggedText.Add ("Attempting to spawn item ID " + args[0] + ", class " + PickupObjectDatabase.GetById (id).GetType());
-        ETGMod.Player.GiveItemID (id);
+        int count = int.Parse(args[1]);
+        for(int i = 0; i <count; i++)
+            ETGMod.Player.GiveItemID (id);
     }
 
     void SetShake(string[] args) {
