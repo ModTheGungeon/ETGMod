@@ -40,7 +40,7 @@ public class ConsoleCommand {
             for (int i = 0; i<args.Length; i++) {
 
                 //Out of range, don't bother anymore
-                if (acceptedArguments.Length<i) {
+                if (acceptedArguments.Length<=i) {
                     break;
                 }
 
@@ -71,5 +71,29 @@ public class ConsoleCommand {
         commandReference(args);
     }
 
+    internal bool IsCommandCorrect(string[] splitCommand) {
+
+        if (acceptedArguments==null)
+            return true;
+
+        for(int i = 1; i < splitCommand.Length; i++) {
+
+            if (acceptedArguments.Length<=i-1)
+                return true;
+
+            if (acceptedArguments[i-1]==null)
+                continue;
+
+            bool isContained = false;
+            for(int j = 0; j < acceptedArguments[i-1].Length && !isContained; j++) {
+                if (acceptedArguments[i-1][j]==splitCommand[i])
+                    isContained=true;
+            }
+            if (!isContained)
+                return false;
+        }
+
+        return true;
+    }
 }
 
