@@ -33,9 +33,11 @@ public class ETGModConsole : IETGModMenu {
     private Rect inputBox        = new Rect(16, Screen.height - 32 , Screen.width - 32,                 32 );
     private Rect autoCorrectBox  = new Rect(16, Screen.height - 184, Screen.width - 32,                 120);
 
-    bool closeConsoleOnCommand = false;
-    bool cutInputFocusOnCommand = false;
-    bool stopTimeDuringConsoleOpen = true;
+    private bool closeConsoleOnCommand = false;
+    private bool cutInputFocusOnCommand = false;
+    private bool stopTimeDuringConsoleOpen = true;
+
+    private bool needCorrectInput=false;
 
     string[] displayedCorrectCommands = new string[] { }, displayCorrectArguments=new string[] { };
 
@@ -68,6 +70,16 @@ public class ETGModConsole : IETGModMenu {
     public void OnGUI() {
         //GUI.skin=skin;
 
+        //THIS HAS TO BE CALLED TWICE, once on input, and once the frame after!
+        //For some reason?....
+        if (needCorrectInput) {
+            TextEditor txt = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+
+            if (txt!=null) {
+                txt.MoveTextEnd();
+            }
+            needCorrectInput=false;
+        }
 
         bool ranCommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentCommand.Length > 0;
         if (ranCommand) {
@@ -100,7 +112,15 @@ public class ETGModConsole : IETGModMenu {
                 }
 
                 if (validStrings.Count>0) {
-                    CurrentCommand=validStrings[0];
+                    CurrentCommand=validStrings[0] + " ";
+
+                    //Move selection to end of text
+                    TextEditor txt = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+
+                    if (txt!=null) {
+                        txt.MoveTextEnd();
+                    }
+                    needCorrectInput=true;
                 }
 
                 ranCommand=false;
@@ -140,6 +160,16 @@ public class ETGModConsole : IETGModMenu {
                         for (int i = 0; i<splitCommand.Length; i++) {
                             CurrentCommand+=( i==0 ? ""  : " ") + splitCommand[i];
                         }
+
+                        CurrentCommand+=" ";
+
+                        //Move selection to end of text
+                        TextEditor txt = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+
+                        if (txt!=null) {
+                            txt.MoveTextEnd();
+                        }
+                        needCorrectInput=true;
                     }
                 } catch (System.Exception e) {
                     LoggedText.Add(e.ToString());
@@ -272,7 +302,11 @@ public class ETGModConsole : IETGModMenu {
     /// Runs the currently typed in command.
     /// </summary>
     public static void RunCommand() {
-        RunCommand(CurrentCommand);
+        try {
+            RunCommand(CurrentCommand.TrimEnd(' '));
+        } catch {
+
+        }
         CurrentCommand = string.Empty;
     }
 
