@@ -15,6 +15,8 @@ public class ETGModDebugLogMenu: IETGModMenu {
     private Rect mainBoxRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
     private Rect viewRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
 
+    string debug;
+
     public void Start() {
         Application.logMessageReceived+=Logger;
     }
@@ -24,6 +26,7 @@ public class ETGModDebugLogMenu: IETGModMenu {
     }
 
     public void OnGUI() {
+
         //Set rect
         mainBoxRect=new Rect(16, 16, Screen.width-32, Screen.height-32);
 

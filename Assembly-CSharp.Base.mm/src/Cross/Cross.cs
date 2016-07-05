@@ -59,6 +59,8 @@ public static class Cross {
             }
         }
 
+        ETGModDebugLogMenu.LoggedText.Add("Got type "+type.ToString()+" from name "+name);
+
         return TypeMap[name_] = type;
     }
 

@@ -68,6 +68,7 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public void OnGUI() {
+
         //GUI.skin=skin;
 
         //THIS HAS TO BE CALLED TWICE, once on input, and once the frame after!
@@ -304,8 +305,8 @@ public class ETGModConsole : IETGModMenu {
     public static void RunCommand() {
         try {
             RunCommand(CurrentCommand.TrimEnd(' '));
-        } catch {
-
+        } catch (System.Exception e){
+            LoggedText.Add(e.ToString());
         }
         CurrentCommand = string.Empty;
     }

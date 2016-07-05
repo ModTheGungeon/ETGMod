@@ -29,6 +29,8 @@ public class ETGModGUI : MonoBehaviour {
 
     public static bool UseDamageIndicators = false;
 
+    public static Texture2D BoxTexture;
+
     private static IETGModMenu currentMenuScript {
         get {
             switch (CurrentMenu) {
@@ -60,6 +62,11 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public void Start() {
+
+        BoxTexture=new Texture2D(1,1);
+        BoxTexture.SetPixel(0,0,Color.white);
+        BoxTexture.Apply();
+
         loggerMenu=new ETGModDebugLogMenu();
         loggerMenu.Start();
 
@@ -180,7 +187,8 @@ public class ETGModGUI : MonoBehaviour {
             }
             ETGModConsole.allItems.Add(name, id);
             if (count>=30) {
-                yield return new WaitForEndOfFrame();
+                count=0;
+                yield return null;
             }
         }
 

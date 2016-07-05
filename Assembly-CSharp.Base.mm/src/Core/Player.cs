@@ -12,7 +12,7 @@ public static partial class ETGMod {
     /// ETGMod player configuration.
     /// </summary>
     public static class Player {
-        private readonly static MethodInfo _GiveItem = Cross.XType("GClass200", Platform.Linux).GetMethod("smethod_15");
+        public readonly static MethodInfo _GiveItem = Cross.XType("GClass200", Platform.Linux).GetMethod("smethod_15");
         public static bool GiveItemID(int id) {
             if (!GameManager.GameManager_0.PlayerController_1) {
                 Debug.Log ("Couldn't access static current PlayerController in GameManager");

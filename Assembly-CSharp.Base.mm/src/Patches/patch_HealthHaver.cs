@@ -17,11 +17,6 @@ class patch_HealthHaver : HealthHaver {
             return;
         }
 
-        if (!ETGDamageIndicatorGUI.allHealthHavers.Contains(this)) {
-            ETGDamageIndicatorGUI.allHealthHavers.Add(this);
-            ETGDamageIndicatorGUI.maxHP[this]=maximumHealth;
-        }
-
         float currHP = this.currentHealth;
 
         orig_method_16(float_14, vector2_1, string_6, genum1_0, genum165_0, bool_18, pixelCollider_0, bool_19);
@@ -33,14 +28,17 @@ class patch_HealthHaver : HealthHaver {
         Vector3 centerPos = this.SpeculativeRigidbody_0.Vector2_4;
         centerPos+=this.transform.up;
 
-        if (ETGModGUI.UseDamageIndicators)
+        if (ETGModGUI.UseDamageIndicators) {
             ETGDamageIndicatorGUI.CreateIndicator(centerPos, deltaHP);
+            ETGDamageIndicatorGUI.CreateBar(this);
+        }
+        ETGDamageIndicatorGUI.maxHP[this]=maximumHealth;
         ETGDamageIndicatorGUI.currentHP[this]=currentHealth;
 
+        ETGDamageIndicatorGUI.UpdateHealthBar(this, deltaHP);
+
         if (currentHealth==0) {
-            if (ETGDamageIndicatorGUI.allHealthHavers.Contains(this)) {
-                ETGDamageIndicatorGUI.allHealthHavers.Remove(this);
-            }
+            ETGDamageIndicatorGUI.toRemoveBars.Add(this);
             ETGDamageIndicatorGUI.maxHP.Remove(this);
             ETGDamageIndicatorGUI.currentHP.Remove(this);
         }
