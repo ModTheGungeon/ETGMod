@@ -14,6 +14,7 @@ public static partial class ETGMod {
 
         public static Dictionary<string, ETGModAssetMetadata> Map = new Dictionary<string, ETGModAssetMetadata>();
 
+
         public static Font MainFont;
 
         public static string RemoveExtension(string file) {
@@ -56,6 +57,8 @@ public static partial class ETGMod {
             }
 
             // TODO load and parse data from metadata
+
+            Debug.Log("Metadata:" + metadata);
             
             return null;
         }
@@ -79,7 +82,6 @@ public static partial class ETGMod {
                 materials[i].mainTexture = tex;
             }
         }
-
     }
 
     public static tk2dBaseSprite Handle(this tk2dBaseSprite sprite) {

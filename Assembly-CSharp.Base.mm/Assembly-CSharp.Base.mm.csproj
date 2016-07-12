@@ -67,6 +67,7 @@
     <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
     <Compile Include="src\ETGGUI\Inspector\Components\GenericComponentInspector.cs" />
+    <Compile Include="src\ETGGUI\RandomSelector.cs" />
     <Compile Include="src\ETGModAssetMetadata.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="src\MonoMod\MonoModReplace.cs" />
     <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
     <Compile Include="src\Patches\patch_Dungeon.cs" />
+    <Compile Include="src\Patches\patch_Foyer.cs" />
     <Compile Include="src\Patches\patch_HealthHaver.cs" />
     <Compile Include="src\Patches\patch_tk2dBaseSprite.cs" />
     <Compile Include="src\Patches\patch_GClass235.cs" />

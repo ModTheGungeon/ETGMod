@@ -36,20 +36,26 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
         foreach (DamageIndicator i in toRemove)
             indicators.Remove(i);
 
-        foreach (HealthBar bar in allBars.Values)
-            bar.Update();
+        try {
+            foreach (HealthBar bar in allBars.Values)
+                bar.Update();
 
-        foreach (HealthHaver hh in toRemoveBars) {
-            allBars.Remove(hh);
+            foreach (HealthHaver hh in toRemoveBars) {
+                allBars.Remove(hh);
+            }
+
+            toRemove.Clear();
+            toRemoveBars.Clear();
         }
-
-        toRemove.Clear();
-        toRemoveBars.Clear();
+        catch (System.Exception e) {
+            Debug.Log(e.ToString());
+        }
     }
 
     public void OnGUI() {
         foreach (DamageIndicator i in indicators)
             i.OnGUI();
+
         foreach (HealthBar bar in allBars.Values)
             bar.OnGUI();
     }
@@ -138,6 +144,11 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
 
         public void Update() {
 
+            if (target==null) {
+                toRemoveBars.Add(target);
+                return;
+            }
+
             if (transitionDelay>0)
                 transitionDelay-=Time.deltaTime;
             else if (currentPoint>=currentHP[target]/maxHP[target])
@@ -159,26 +170,31 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
         }
 
         public void OnGUI() {
-            Vector3 wPos = (Vector3)target.SpeculativeRigidbody_0.Vector2_4+( target.transform.up );
-            Vector2 screenPos = Camera.main.WorldToScreenPoint(wPos);
-            screenPos=new Vector2(screenPos.x, Screen.height-screenPos.y);
 
-            int hpMaxBar = (int)Mathf.Max(0, 15-( maxHP[target] ))+100;
+            try {
+                Vector3 wPos = (Vector3)target.SpeculativeRigidbody_0.PixelCollider_0.UnitTopCenter;
+                Vector2 screenPos = Camera.main.WorldToScreenPoint(wPos);
+                screenPos=new Vector2(screenPos.x, Screen.height-screenPos.y);
 
-            outlineRect=new Rect(screenPos.x-( hpMaxBar/2 )-2, screenPos.y-12, hpMaxBar+4, 24);
-            totalBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar, 20);
-            filledBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( currentHP[target]/maxHP[target] ), 20);
-            transitionBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( currentPoint ), 20);
+                int hpMaxBar = (int)Mathf.Max(0, 15-( maxHP[target] ))+100;
 
-            GUI.color=new Color(0, 0, 0, 1);
-            GUI.DrawTexture(outlineRect, ETGModGUI.BoxTexture);
-            GUI.color=new Color(151f/255f, 166f/255f, 170f/255f);
-            GUI.DrawTexture(totalBarRect, ETGModGUI.BoxTexture);
-            GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), currentHP[target]/maxHP[target]);
-            GUI.DrawTexture(filledBarRect, ETGModGUI.BoxTexture);
-            GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), currentPoint)*0.5f;
-            GUI.DrawTexture(transitionBarRect, ETGModGUI.BoxTexture);
-            GUI.color=Color.white;
+                outlineRect=new Rect(screenPos.x-( hpMaxBar/2 )-2, screenPos.y-12, hpMaxBar+4, 24);
+                totalBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar, 20);
+                filledBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( currentHP[target]/maxHP[target] ), 20);
+                transitionBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( currentPoint ), 20);
+
+                GUI.color=new Color(0, 0, 0, 1);
+                GUI.DrawTexture(outlineRect, ETGModGUI.BoxTexture);
+                GUI.color=new Color(151f/255f, 166f/255f, 170f/255f);
+                GUI.DrawTexture(totalBarRect, ETGModGUI.BoxTexture);
+                GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), currentHP[target]/maxHP[target]);
+                GUI.DrawTexture(filledBarRect, ETGModGUI.BoxTexture);
+                GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), currentPoint)*0.5f;
+                GUI.DrawTexture(transitionBarRect, ETGModGUI.BoxTexture);
+                GUI.color=Color.white;
+            } catch {
+
+            }
         }
 
     }

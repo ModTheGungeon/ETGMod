@@ -61,7 +61,7 @@ public class ETGModGUI : MonoBehaviour {
         DontDestroyOnLoad(menuObj);
     }
 
-    public void Start() {
+    public void Awake() {
 
         BoxTexture=new Texture2D(1,1);
         BoxTexture.SetPixel(0,0,Color.white);
@@ -156,6 +156,7 @@ public class ETGModGUI : MonoBehaviour {
         }
 
         currentMenuScript.OnGUI();
+        //RandomSelector.OnGUI();
 
     }
 
