@@ -1,10 +1,6 @@
 ﻿using System;
-using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using Ionic.Zip;
-using Mono.Cecil;
 
 /// <summary>
 /// Cross reflection framework.
@@ -42,10 +38,13 @@ public static class Cross {
 
     public static Dictionary<string, Type> TypeMap = new Dictionary<string, Type>();
 
+    public static Type XType(this string name_) {
+        return name_.XType(CurrentPlatform);
+    }
     public static Type XType(this string name_, Platform from) {
         return name_.XType((int) from, (int) CurrentPlatform);
     }
-
+    
     public static Type XType(this string name_, int from, int to) {
         Type type;
         if (TypeMap.TryGetValue(name_, out type)) {
@@ -59,8 +58,6 @@ public static class Cross {
             }
         }
 
-        ETGModDebugLogMenu.LoggedText.Add("Got type "+type.ToString()+" from name "+name);
-
         return TypeMap[name_] = type;
     }
 
@@ -71,6 +68,14 @@ public static class Cross {
         return ReflectionHelper.InvokeMethod(method, instance, args);
     }
 
+    public static T Find<T>(this CrossSearch<T> search) where T : MemberInfo {
+        return ((CrossSearch) search).Find() as T;
+    }
+    public static object Find(this CrossSearch search) {
+        return Config.Find(search);
+    }
+
+
 }
 
 /// <summary>
@@ -79,6 +84,7 @@ public static class Cross {
 public interface ICrossConfig {
     IEnumerable<Assembly> Assemblies { get; }
     string TypeName(string name, int from, int to);
+    object Find(CrossSearch search);
 }
 
 /// <summary>
