@@ -68,9 +68,9 @@ public class CrossGungeonConfig : ICrossConfig {
         // TODO where do the shifts begin?
         // TODO mac? (give seems to be magically working with following code)
 
-               if (from == Platform.Linux && to == Platform.Windows) {
+               if (from.Has(Platform.Unix)    && to.Has(Platform.Windows)) {
             id += 2;
-        } else if (from == Platform.Windows && to == Platform.Linux) {
+        } else if (from.Has(Platform.Windows) && to.Has(Platform.Unix)) {
             id -= 2;
         }
 

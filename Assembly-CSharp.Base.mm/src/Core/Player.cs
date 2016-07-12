@@ -12,11 +12,9 @@ public static partial class ETGMod {
     /// ETGMod player configuration.
     /// </summary>
     public static class Player {
-        // Linux: GClass200.smethod_15
-        // ret bool, GameObject gameObject_0, PlayerController playerController_0, bool bool_0 = false
         public readonly static MethodInfo _GiveItem = new CrossSearch<MethodInfo>() {
             Name = "smethod_15",
-            In = "GClass200",
+            In = "GClass200", // Linux
             Public = true,
             Static = true,
             Returns = typeof(bool),

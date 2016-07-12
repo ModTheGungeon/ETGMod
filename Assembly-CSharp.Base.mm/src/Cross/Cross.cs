@@ -11,24 +11,27 @@ public static class Cross {
     private readonly static object[] a_object_0 = new object[0];
 
     static Cross() {
-        string os;
         //for mono, get from
         //static extern PlatformID Platform
         PropertyInfo property_platform = typeof(Environment).GetProperty("Platform", BindingFlags.NonPublic | BindingFlags.Static);
+        string platID;
         if (property_platform != null) {
-            os = property_platform.GetValue(null, a_object_0).ToString().ToLower();
+            platID = property_platform.GetValue(null, a_object_0).ToString();
         } else {
             //for .net, use default value
-            os = Environment.OSVersion.Platform.ToString().ToLower();
+            platID = Environment.OSVersion.Platform.ToString();
         }
+        platID = platID.ToLowerInvariant();
 
-        if (os.Contains("win")) {
+        CurrentPlatform = Platform.Unknown;
+        if (platID.Contains("win")) {
             CurrentPlatform = Platform.Windows;
-        } else if (os.Contains("mac") || os.Contains("osx")) {
+        } else if (platID.Contains("mac") || platID.Contains("osx")) {
             CurrentPlatform = Platform.MacOS;
-        } else if (os.Contains("lin") || os.Contains("unix")) {
+        } else if (platID.Contains("lin") || platID.Contains("unix")) {
             CurrentPlatform = Platform.Linux;
         }
+        CurrentPlatform |= (IntPtr.Size == 4 ? Platform.X86 : Platform.X64);
 
     }
 
@@ -39,12 +42,15 @@ public static class Cross {
     public static Dictionary<string, Type> TypeMap = new Dictionary<string, Type>();
 
     public static Type XType(this string name_) {
+        #pragma warning disable 0618
         return name_.XType(CurrentPlatform);
+        #pragma warning restore 0618
     }
+    [Obsolete("Use CrossSearch to directly find members in Config. Use XType() for types.")]
     public static Type XType(this string name_, Platform from) {
         return name_.XType((int) from, (int) CurrentPlatform);
     }
-    
+    [Obsolete("Use CrossSearch to directly find members in Config. Use XType() for types.")]
     public static Type XType(this string name_, int from, int to) {
         Type type;
         if (TypeMap.TryGetValue(name_, out type)) {
@@ -91,8 +97,26 @@ public interface ICrossConfig {
 /// Cross reflection platform enum that can be used as "from" and "to".
 /// </summary>
 public enum Platform : int {
-    Unknown = 0,
-    Windows = 1,
-    MacOS = 2,
-    Linux = 3
+    None = 0,
+
+    // Underlying platform categories
+    OS = 1,
+
+    X86 = 0,
+    X64 = 2,
+
+    NT = 4,
+    Unix = 8,
+
+    // Operating systems (OSes are always "and-equal" to OS)
+    Unknown = OS | 16,
+    Windows = OS | NT | 32,
+    MacOS = OS | Unix | 64,
+    Linux = OS | Unix | 128,
+
+    // AMD64 (64bit) variants (always "and-equal" to X64)
+    Unknown64 = Unknown | X64,
+    Windows64 = Windows | X64,
+    MacOS64 = MacOS | X64,
+    Linux64 = Linux | X64,
 }
