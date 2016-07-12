@@ -16,10 +16,10 @@ public class CrossSearch {
 
     public string Name;
     public string In;
-    public bool Private;
+    public bool Private = false;
     public bool Public = true;
-    public bool Static;
-    public Type Returns;
+    public bool Static = false;
+    public Type Returns = t_void;
     public Type[] Args;
     public CrossSearch[] Context;
 

@@ -17,6 +17,7 @@ public static partial class ETGMod {
         public readonly static MethodInfo _GiveItem = new CrossSearch<MethodInfo>() {
             Name = "smethod_15",
             In = "GClass200",
+            Public = true,
             Static = true,
             Returns = typeof(bool),
             Args = new [] { typeof(GameObject), typeof(PlayerController), typeof(bool) }
