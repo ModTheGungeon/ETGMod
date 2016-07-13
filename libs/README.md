@@ -1,6 +1,6 @@
 The versions here are versions stripped with the FmbLibStripper tool.
 
-# WARNING FROM THE FUTURE: DON'T BE A DUMBASS. DON'T PUSH THE ORIGINAL VERSION OF THE STRIPPED LIBS!
+# DON'T PUSH THE ORIGINAL VERSION OF THE STRIPPED LIBS!
 
 Feel free to replace the .dlls **locally** though.
 
