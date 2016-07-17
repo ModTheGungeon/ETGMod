@@ -36,16 +36,18 @@ public static partial class ETGMod {
         }
         _Started = true;
 
+        UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;
+
         ETGModGUI.Create();
 
         Debug.Log("ETGMod " + BaseVersion);
-
         Assets.Hook();
+        Assembly.GetCallingAssembly().MapAssets();
 
         _ScanBackends();
-
         _LoadMods();
 
+        ETGModGUI.Start();
         CallInEachModule("Start");
     }
     
@@ -202,7 +204,7 @@ public static partial class ETGMod {
                         }
                     }
                 } else {
-                    Assets.Map[Assets.RemoveExtension(entryName)] = new ETGModAssetMetadata(archive, entryName);
+                    Assets.Map[Assets.RemoveExtension(entryName)] = new AssetMetadata(archive, entryName);
                 }
             }
         }
@@ -210,6 +212,8 @@ public static partial class ETGMod {
         if (asm == null) {
             return;
         }
+
+        asm.MapAssets();
 
         Type[] types = asm.GetTypes();
         for (int i = 0; i < types.Length; i++) {
@@ -278,6 +282,7 @@ public static partial class ETGMod {
             }
         }
 
+        asm.MapAssets();
         Assets.Crawl(dir);
 
         Type[] types = asm.GetTypes();

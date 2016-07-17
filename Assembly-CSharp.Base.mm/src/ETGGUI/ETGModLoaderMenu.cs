@@ -18,6 +18,7 @@ public class ETGModLoaderMenu : IETGModMenu {
     }
 
     public void OnGUI() {
+        // GUI.DrawTexture(new Rect(0, 0, ETGModGUI.TestTexture.width, ETGModGUI.TestTexture.height), ETGModGUI.TestTexture);
 
         WindowRect = new Rect(15, 15, Screen.width - 30,Screen.height - 30);
 

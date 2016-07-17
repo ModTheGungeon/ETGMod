@@ -4,7 +4,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class ETGModDebugLogMenu: IETGModMenu {
+public class ETGModDebugLogMenu : IETGModMenu {
 
     /// <summary>
     /// All debug logged text lines. Feel free to add your lines here!
@@ -12,11 +12,10 @@ public class ETGModDebugLogMenu: IETGModMenu {
     public static List<string> LoggedText = new List<string>();
     public static Vector2 ScrollPos;
 
-    private Rect _MainBoxRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
-    private Rect _ViewRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
+    private static Rect _MainBoxRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
+    private static Rect _ViewRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
 
     public void Start() {
-        Application.logMessageReceived+=Logger;
     }
 
     public void Update() {
@@ -57,7 +56,7 @@ public class ETGModDebugLogMenu: IETGModMenu {
         GUILayout.EndArea();
     }
 
-    public void Logger(string text, string stackTrace, LogType type) {
+    public static void Logger(string text, string stackTrace, LogType type) {
         if (text.Contains("\n")) {
             LoggedText.AddRange(text.Split('\n'));
         } else {
