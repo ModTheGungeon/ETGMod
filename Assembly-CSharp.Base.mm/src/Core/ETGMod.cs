@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using Ionic.Zip;
 using Mono.Cecil;
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
@@ -29,6 +30,15 @@ public static partial class ETGMod {
     public static List<ETGModule> GameMods = new List<ETGModule>();
     public static List<ETGBackend> Backends = new List<ETGBackend>();
 
+    [DllImport("mono")]
+    private static extern void mono_debug_init(MonoDebugFormat init);
+
+    [DllImport("mono")]
+    private static extern string[] mono_runtime_get_main_args(); //ret MonoArray*
+
+    [DllImport("mono")]
+    private static extern bool mono_debug_using_mono_debugger(); //ret gboolean
+
     private static bool _Started = false;
     public static void Start() {
         if (_Started) {
@@ -43,6 +53,21 @@ public static partial class ETGMod {
         Debug.Log("ETGMod " + BaseVersion);
         Assets.Hook();
         Assembly.GetCallingAssembly().MapAssets();
+
+        Debug.Log("entering mono_runtime_get_main_args");
+        string[] args = mono_runtime_get_main_args();
+        Debug.Log("passed mono_runtime_get_main_args");
+        for (int i = 0; i < args.Length; i++) {
+            Debug.Log(i + ": " + args[i]);
+        }
+
+        Debug.Log("entering mono_debug_using_mono_debugger");
+        Debug.Log(mono_debug_using_mono_debugger());
+        Debug.Log("passed mono_debug_using_mono_debugger");
+
+        Debug.Log("entering mono_debug_init");
+        //mono_debug_init(MonoDebugFormat.MONO_DEBUG_FORMAT_MONO);
+        Debug.Log("passed mono_debug_init");
 
         _ScanBackends();
         _LoadMods();
@@ -467,4 +492,10 @@ public static partial class ETGMod {
     private readonly static Type[] _EmptyTypeArray = new Type[0];
     private readonly static object[] _EmptyObjectArray = new object[0];
 
+}
+
+public enum MonoDebugFormat {
+    MONO_DEBUG_FORMAT_NONE,
+    MONO_DEBUG_FORMAT_MONO,
+    MONO_DEBUG_FORMAT_DEBUGGER
 }

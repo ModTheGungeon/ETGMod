@@ -5,7 +5,7 @@ using UnityEngineInternal;
 using MonoMod;
 
 namespace UnityEngine {
-    public sealed class patch_Resources {
+    internal sealed class patch_Resources {
 
         [MonoModOriginal] public static extern Object Ooad(string path, System.Type systemTypeInstance);
         [MonoModOriginalName("Ooad")]

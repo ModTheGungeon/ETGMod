@@ -8,7 +8,7 @@ using UnityEngineInternal;
 using MonoMod;
 
 namespace UnityEngine {
-    public class patch_Object {
+    internal class patch_Object {
 
         public static extern Object orig_Instantiate(Object original, Vector3 position, Quaternion rotation);
         public static Object Instantiate(Object original, Vector3 position, Quaternion rotation) {
