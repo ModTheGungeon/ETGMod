@@ -20,33 +20,33 @@ public class ETGModGUI : MonoBehaviour {
 
     public static MenuOpened CurrentMenu;
 
-    public static GameObject menuObj;
-    private readonly static ETGModNullMenu nullMenu = new ETGModNullMenu();
-    private static ETGModLoaderMenu loaderMenu;
-    private static ETGModConsole consoleMenu;
-    private static ETGModDebugLogMenu loggerMenu;
-    private static ETGModInspector inspectorMenu;
+    public static GameObject MenuObject;
+    private readonly static ETGModNullMenu NullMenu = new ETGModNullMenu();
+    private static ETGModLoaderMenu LoaderMenu;
+    private static ETGModConsole ConsoleMenu;
+    private static ETGModDebugLogMenu LoggerMenu;
+    private static ETGModInspector InspectorMenu;
 
-    public static float? timeScale = null;
+    public static float? StoredTimeScale = null;
 
     public static bool UseDamageIndicators = false;
 
     public static Texture2D BoxTexture;
 
-    private static IETGModMenu currentMenuScript {
+    private static IETGModMenu CurrentMenuScript {
         get {
             switch (CurrentMenu) {
                 case MenuOpened.Loader:
-                    return loaderMenu;
+                    return LoaderMenu;
                 case MenuOpened.Console:
-                    return consoleMenu;
+                    return ConsoleMenu;
                 case MenuOpened.Logger:
-                    return loggerMenu;
+                    return LoggerMenu;
                 case MenuOpened.Inspector:
-                    return inspectorMenu;
+                    return InspectorMenu;
 
             }
-            return nullMenu;
+            return NullMenu;
         }
     }
 
@@ -54,32 +54,32 @@ public class ETGModGUI : MonoBehaviour {
     /// Creates a new object with this script on it.
     /// </summary>
     public static void Create() {
-        if (menuObj!=null) {
+        if (MenuObject != null) {
             return;
         }
-        menuObj=new GameObject();
-        menuObj.name="ModLoaderMenu";
-        menuObj.AddComponent<ETGModGUI>();
-        DontDestroyOnLoad(menuObj);
+        MenuObject = new GameObject();
+        MenuObject.name = "ModLoaderMenu";
+        MenuObject.AddComponent<ETGModGUI>();
+        DontDestroyOnLoad(MenuObject);
     }
 
     public void Awake() {
 
-        BoxTexture=new Texture2D(1,1);
+        BoxTexture = new Texture2D(1,1);
         BoxTexture.SetPixel(0,0,Color.white);
         BoxTexture.Apply();
 
-        loggerMenu=new ETGModDebugLogMenu();
-        loggerMenu.Start();
+        LoggerMenu = new ETGModDebugLogMenu();
+        LoggerMenu.Start();
 
-        loaderMenu=new ETGModLoaderMenu();
-        loaderMenu.Start();
+        LoaderMenu = new ETGModLoaderMenu();
+        LoaderMenu.Start();
 
-        consoleMenu=new ETGModConsole();
-        consoleMenu.Start();
+        ConsoleMenu = new ETGModConsole();
+        ConsoleMenu.Start();
 
-        inspectorMenu=new ETGModInspector();
-        inspectorMenu.Start();
+        InspectorMenu = new ETGModInspector();
+        InspectorMenu.Start();
 
         ETGDamageIndicatorGUI.Create();
         StartCoroutine(ListAllItemsAndGuns());
@@ -87,58 +87,58 @@ public class ETGModGUI : MonoBehaviour {
 
     public void Update() {
         if (Input.GetKeyDown(KeyCode.F1)) {
-            if (CurrentMenu==MenuOpened.Loader)
-                CurrentMenu=MenuOpened.None;
+            if (CurrentMenu == MenuOpened.Loader)
+                CurrentMenu = MenuOpened.None;
             else
-                CurrentMenu=MenuOpened.Loader;
+                CurrentMenu = MenuOpened.Loader;
 
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F2)||Input.GetKeyDown(KeyCode.Slash)||Input.GetKeyDown(KeyCode.BackQuote)) {
-            if (CurrentMenu==MenuOpened.Console)
-                CurrentMenu=MenuOpened.None;
+            if (CurrentMenu == MenuOpened.Console)
+                CurrentMenu = MenuOpened.None;
             else
-                CurrentMenu=MenuOpened.Console;
+                CurrentMenu = MenuOpened.Console;
 
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F3)) {
-            if (CurrentMenu==MenuOpened.Logger)
-                CurrentMenu=MenuOpened.None;
+            if (CurrentMenu == MenuOpened.Logger)
+                CurrentMenu = MenuOpened.None;
             else
-                CurrentMenu=MenuOpened.Logger;
+                CurrentMenu = MenuOpened.Logger;
 
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F4)) {
-            if (CurrentMenu==MenuOpened.Inspector)
-                CurrentMenu=MenuOpened.None;
+            if (CurrentMenu == MenuOpened.Inspector)
+                CurrentMenu = MenuOpened.None;
             else
-                CurrentMenu=MenuOpened.Inspector;
+                CurrentMenu = MenuOpened.Inspector;
 
             UpdatePlayerState();
         }
 
 
-        currentMenuScript.Update();
+        CurrentMenuScript.Update();
     }
 
     public static void UpdatePlayerState() {
-        if (GameManager.GameManager_0!=null&&GameManager.GameManager_0.PlayerController_1!=null) {
-            bool set = CurrentMenu==MenuOpened.None;
-            GameManager.GameManager_0.PlayerController_1.enabled=set;
-            Camera.main.GetComponent<CameraController>().enabled=set;
-            if (timeScale.HasValue) {
-                Time.timeScale = (float)timeScale;
-                timeScale = null;
+        if (GameManager.GameManager_0 != null&&GameManager.GameManager_0.PlayerController_1!=null) {
+            bool set = (CurrentMenu == MenuOpened.None);
+            GameManager.GameManager_0.PlayerController_1.enabled = set;
+            Camera.main.GetComponent<CameraController>().enabled = set;
+            if (StoredTimeScale.HasValue) {
+                Time.timeScale = (float)StoredTimeScale;
+                StoredTimeScale = null;
             }
         }
     }
 
-    Font f;
+    // Font f;
 
     public void OnGUI() {
 
@@ -146,8 +146,8 @@ public class ETGModGUI : MonoBehaviour {
 
 
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
-            if (!timeScale.HasValue) {
-                timeScale = Time.timeScale;
+            if (!StoredTimeScale.HasValue) {
+                StoredTimeScale = Time.timeScale;
                 Time.timeScale = 0;
             }
 
@@ -157,7 +157,7 @@ public class ETGModGUI : MonoBehaviour {
             }
         }
 
-        currentMenuScript.OnGUI();
+        CurrentMenuScript.OnGUI();
         //RandomSelector.OnGUI();
 
     }
@@ -212,28 +212,28 @@ public class ETGModGUI : MonoBehaviour {
 
 
 
-            if (ETGModConsole.allItems.ContainsKey(name)) {
+            if (ETGModConsole.AllItems.ContainsKey(name)) {
                 int appendindex = 2;
-                while (ETGModConsole.allItems.ContainsKey (name + "_" + appendindex.ToString())) {
+                while (ETGModConsole.AllItems.ContainsKey (name + "_" + appendindex.ToString())) {
                     appendindex++;
                 }
                 name = name + "_" + appendindex.ToString ();
             }
-            ETGModConsole.allItems.Add(name, id);
-            if (count>=30) {
-                count=0;
+            ETGModConsole.AllItems.Add(name, id);
+            if (count >= 30) {
+                count = 0;
                 yield return null;
             }
         }
 
         //Add command arguments.
         string[][] giveCommands = new string[1][];
-        giveCommands[0]=new string[ETGModConsole.allItems.Keys.Count];
-        ETGModConsole.allItems.Keys.CopyTo(giveCommands[0], 0);
+        giveCommands[0] = new string[ETGModConsole.AllItems.Keys.Count];
+        ETGModConsole.AllItems.Keys.CopyTo(giveCommands[0], 0);
 
-        Debug.Log(giveCommands[0].Length+" give command args");
+        Debug.Log(giveCommands[0].Length + " give command args");
 
-        ETGModConsole.Commands["give"].acceptedArguments=giveCommands;
+        ETGModConsole.Commands["give"].AcceptedArguments = giveCommands;
 
     }
 

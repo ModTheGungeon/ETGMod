@@ -32,15 +32,15 @@ class patch_HealthHaver : HealthHaver {
             ETGDamageIndicatorGUI.CreateIndicator(centerPos, deltaHP);
             ETGDamageIndicatorGUI.CreateBar(this);
         }
-        ETGDamageIndicatorGUI.maxHP[this]=maximumHealth;
-        ETGDamageIndicatorGUI.currentHP[this]=currentHealth;
+        ETGDamageIndicatorGUI.MaxHP[this]=maximumHealth;
+        ETGDamageIndicatorGUI.CurrentHP[this]=currentHealth;
 
         ETGDamageIndicatorGUI.UpdateHealthBar(this, deltaHP);
 
         if (currentHealth==0) {
-            ETGDamageIndicatorGUI.toRemoveBars.Add(this);
-            ETGDamageIndicatorGUI.maxHP.Remove(this);
-            ETGDamageIndicatorGUI.currentHP.Remove(this);
+            ETGDamageIndicatorGUI.ToRemoveBars.Add(this);
+            ETGDamageIndicatorGUI.MaxHP.Remove(this);
+            ETGDamageIndicatorGUI.CurrentHP.Remove(this);
         }
     }
 

@@ -393,7 +393,6 @@ public static partial class ETGMod {
             return val;
         }
 
-        Type[] argsTypes = { typeof(T) };
         object[] args = { val };
 
         Delegate[] ds = md.GetInvocationList();

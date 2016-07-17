@@ -6,15 +6,15 @@ using UnityEngine;
 
 class ETGDamageIndicatorGUI : MonoBehaviour {
 
-    private static List<DamageIndicator> indicators = new List<DamageIndicator>();
-    private static List<DamageIndicator> usedPool = new List<DamageIndicator>();
-    private static List<DamageIndicator> toRemove = new List<DamageIndicator>();
+    private static List<DamageIndicator> Indicators = new List<DamageIndicator>();
+    private static List<DamageIndicator> UsedPool = new List<DamageIndicator>();
+    private static List<DamageIndicator> ToRemove = new List<DamageIndicator>();
 
-    private static Dictionary<HealthHaver, HealthBar> allBars = new Dictionary<HealthHaver, HealthBar>();
-    public static Dictionary<HealthHaver, float> maxHP = new Dictionary<HealthHaver, float>();
-    public static Dictionary<HealthHaver, float> currentHP = new Dictionary<HealthHaver, float>();
+    private static Dictionary<HealthHaver, HealthBar> AllBars = new Dictionary<HealthHaver, HealthBar>();
+    public static Dictionary<HealthHaver, float> MaxHP = new Dictionary<HealthHaver, float>();
+    public static Dictionary<HealthHaver, float> CurrentHP = new Dictionary<HealthHaver, float>();
 
-    public static List<HealthHaver> toRemoveBars = new List<HealthHaver>();
+    public static List<HealthHaver> ToRemoveBars = new List<HealthHaver>();
 
     public static bool RenderHealthBars = true;
 
@@ -22,7 +22,7 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
         GameObject newObject = new GameObject();
         newObject.name="Damage Indicators";
         newObject.AddComponent<ETGDamageIndicatorGUI>();
-        newObject.transform.SetParent(ETGModGUI.menuObj.transform);
+        newObject.transform.SetParent(ETGModGUI.MenuObject.transform);
     }
 
     public void Start() {
@@ -30,22 +30,22 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     public void Update() {
-        foreach (DamageIndicator i in indicators)
+        foreach (DamageIndicator i in Indicators)
             i.Update();
 
-        foreach (DamageIndicator i in toRemove)
-            indicators.Remove(i);
+        foreach (DamageIndicator i in ToRemove)
+            Indicators.Remove(i);
 
         try {
-            foreach (HealthBar bar in allBars.Values)
+            foreach (HealthBar bar in AllBars.Values)
                 bar.Update();
 
-            foreach (HealthHaver hh in toRemoveBars) {
-                allBars.Remove(hh);
+            foreach (HealthHaver hh in ToRemoveBars) {
+                AllBars.Remove(hh);
             }
 
-            toRemove.Clear();
-            toRemoveBars.Clear();
+            ToRemove.Clear();
+            ToRemoveBars.Clear();
         }
         catch (System.Exception e) {
             Debug.Log(e.ToString());
@@ -53,50 +53,50 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     public void OnGUI() {
-        foreach (DamageIndicator i in indicators)
+        foreach (DamageIndicator i in Indicators)
             i.OnGUI();
 
-        foreach (HealthBar bar in allBars.Values)
+        foreach (HealthBar bar in AllBars.Values)
             bar.OnGUI();
     }
 
     public static void CreateIndicator(Vector3 worldPosOrigin, object content) {
 
         //We need to make a new object
-        if (usedPool.Count==0) {
+        if (UsedPool.Count==0) {
             DamageIndicator newIndicator = new DamageIndicator();
 
             newIndicator.wPosOrigin=worldPosOrigin;
             newIndicator.content="<size=35>"+content+"</size>";
 
-            indicators.Add(newIndicator);
+            Indicators.Add(newIndicator);
         } else {
             //We have a pooled object, use this instead
 
-            DamageIndicator pickedIndicator = usedPool[0];
-            usedPool.RemoveAt(0);
+            DamageIndicator pickedIndicator = UsedPool[0];
+            UsedPool.RemoveAt(0);
 
             pickedIndicator.content="<size=35>"+content+"</size>";
             pickedIndicator.wPosOrigin=worldPosOrigin;
 
-            indicators.Add(pickedIndicator);
+            Indicators.Add(pickedIndicator);
         }
     }
 
     public static void CreateBar(HealthHaver targ) {
 
-        if (allBars.ContainsKey(targ))
+        if (AllBars.ContainsKey(targ))
             return;
 
         HealthBar newBar = new HealthBar();
-        newBar.target=targ;
+        newBar.Target=targ;
 
-        allBars.Add(targ, newBar);
+        AllBars.Add(targ, newBar);
     }
 
     public static void UpdateHealthBar(HealthHaver hh, float dmg) {
-        if (allBars.ContainsKey(hh))
-            allBars[hh].UpdateTransitionBar(dmg);
+        if (AllBars.ContainsKey(hh))
+            AllBars[hh].UpdateTransitionBar(dmg);
     }
 
     private class DamageIndicator {
@@ -112,8 +112,8 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
             time+=Time.deltaTime;
 
             if (time>=2) {
-                usedPool.Add(this);
-                toRemove.Add(this);
+                UsedPool.Add(this);
+                ToRemove.Add(this);
                 time=0;
                 offset=Vector2.zero;
             }
@@ -129,68 +129,68 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     private class HealthBar {
-        public HealthHaver target;
+        public HealthHaver Target;
 
-        Rect outlineRect = new Rect();
-        Rect totalBarRect = new Rect();
-        Rect filledBarRect = new Rect();
-        Rect transitionBarRect = new Rect();
+        Rect OutlineRect = new Rect();
+        Rect TotalBarRect = new Rect();
+        Rect FilledBarRect = new Rect();
+        Rect TransitionBarRect = new Rect();
 
         //The point on the HP bar we're transitioning to.
-        float currentPoint = 1f;
+        float CurrentPoint = 1f;
         //The time before transition takes place.
-        float transitionDelay = 0.1f;
-        float transitionSpeed = 0.3f;
+        float TransitionDelay = 0.1f;
+        float TransitionSpeed = 0.3f;
 
         public void Update() {
 
-            if (target==null) {
-                toRemoveBars.Add(target);
+            if (Target==null) {
+                ToRemoveBars.Add(Target);
                 return;
             }
 
-            if (transitionDelay>0)
-                transitionDelay-=Time.deltaTime;
-            else if (currentPoint>=currentHP[target]/maxHP[target])
-                currentPoint-=Time.deltaTime*transitionSpeed;
+            if (TransitionDelay>0)
+                TransitionDelay-=Time.deltaTime;
+            else if (CurrentPoint>=CurrentHP[Target]/MaxHP[Target])
+                CurrentPoint-=Time.deltaTime*TransitionSpeed;
 
         }
 
         public void UpdateTransitionBar(float damageDelta) {
 
             //Local hit point, the place we where at before we took damage
-            float hitPointL = ( currentHP[target]+damageDelta )/maxHP[target];
+            float hitPointL = ( CurrentHP[Target]+damageDelta )/MaxHP[Target];
 
             //If the current hit point is greater than the local one, we'll leave it as-is. Otherwise we're going to set it to the current hit point.
-            if (Mathf.Abs(currentPoint-hitPointL)<0.01f) {
-                currentPoint=hitPointL;
+            if (Mathf.Abs(CurrentPoint-hitPointL)<0.01f) {
+                CurrentPoint=hitPointL;
             }
 
-            transitionDelay=0.1f;
+            TransitionDelay=0.1f;
         }
 
         public void OnGUI() {
 
             try {
-                Vector3 wPos = (Vector3)target.SpeculativeRigidbody_0.PixelCollider_0.UnitTopCenter;
+                Vector3 wPos = (Vector3)Target.SpeculativeRigidbody_0.PixelCollider_0.UnitTopCenter;
                 Vector2 screenPos = Camera.main.WorldToScreenPoint(wPos);
                 screenPos=new Vector2(screenPos.x, Screen.height-screenPos.y);
 
-                int hpMaxBar = (int)Mathf.Max(0, 15-( maxHP[target] ))+100;
+                int hpMaxBar = (int)Mathf.Max(0, 15-( MaxHP[Target] ))+100;
 
-                outlineRect=new Rect(screenPos.x-( hpMaxBar/2 )-2, screenPos.y-12, hpMaxBar+4, 24);
-                totalBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar, 20);
-                filledBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( currentHP[target]/maxHP[target] ), 20);
-                transitionBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( currentPoint ), 20);
+                OutlineRect=new Rect(screenPos.x-( hpMaxBar/2 )-2, screenPos.y-12, hpMaxBar+4, 24);
+                TotalBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar, 20);
+                FilledBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( CurrentHP[Target]/MaxHP[Target] ), 20);
+                TransitionBarRect=new Rect(screenPos.x-( hpMaxBar/2 ), screenPos.y-10, hpMaxBar*( CurrentPoint ), 20);
 
                 GUI.color=new Color(0, 0, 0, 1);
-                GUI.DrawTexture(outlineRect, ETGModGUI.BoxTexture);
+                GUI.DrawTexture(OutlineRect, ETGModGUI.BoxTexture);
                 GUI.color=new Color(151f/255f, 166f/255f, 170f/255f);
-                GUI.DrawTexture(totalBarRect, ETGModGUI.BoxTexture);
-                GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), currentHP[target]/maxHP[target]);
-                GUI.DrawTexture(filledBarRect, ETGModGUI.BoxTexture);
-                GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), currentPoint)*0.5f;
-                GUI.DrawTexture(transitionBarRect, ETGModGUI.BoxTexture);
+                GUI.DrawTexture(TotalBarRect, ETGModGUI.BoxTexture);
+                GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), CurrentHP[Target]/MaxHP[Target]);
+                GUI.DrawTexture(FilledBarRect, ETGModGUI.BoxTexture);
+                GUI.color=Color.Lerp(new Color(229f/255f, 54f/255f, 23f/255f), new Color(77f/255f, 214f/255f, 80f/255f), CurrentPoint)*0.5f;
+                GUI.DrawTexture(TransitionBarRect, ETGModGUI.BoxTexture);
                 GUI.color=Color.white;
             } catch {
 

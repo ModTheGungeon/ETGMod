@@ -23,7 +23,7 @@ public static partial class ETGMod {
         }.Find();
         public static bool GiveItemID(int id) {
             if (!GameManager.GameManager_0.PlayerController_1) {
-                Debug.Log ("Couldn't access static current PlayerController in GameManager");
+                Debug.Log ("Couldn't access PlayerController instance in GameManager");
                 return false;
             }
             PlayerController playercontroller = GameManager.GameManager_0.PlayerController_1;

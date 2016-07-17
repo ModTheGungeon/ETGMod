@@ -7,15 +7,19 @@ public delegate object DynamicMethodDelegate(object target, params object[] args
 /// <summary>
 /// Stolen from http://theinstructionlimit.com/fast-net-reflection and FEZ. Thanks, Renaud!
 /// </summary>
+
+// I will be in the list of contributors! And no one will know that all I did was change
+// field names from camelCase to PascalCase.
+
 public static class ReflectionHelper {
-    private static readonly Type[] emptyTypes = new Type[0];
-    private static readonly Type[] manyObjects = new Type[2] {typeof(object), typeof(object[])};
-    private static readonly object[] noObjects = new object[0];
-    private static readonly Dictionary<MethodInfo, DynamicMethodDelegate> methodCache = new Dictionary<MethodInfo, DynamicMethodDelegate>();
-    private static readonly Dictionary<Type, DynamicMethodDelegate> constructorCache = new Dictionary<Type, DynamicMethodDelegate>();
+    private static readonly Type[] EmptyTypes = new Type[0];
+    private static readonly Type[] ManyObjects = new Type[2] {typeof(object), typeof(object[])};
+    private static readonly object[] NoObjects = new object[0];
+    private static readonly Dictionary<MethodInfo, DynamicMethodDelegate> MethodCache = new Dictionary<MethodInfo, DynamicMethodDelegate>();
+    private static readonly Dictionary<Type, DynamicMethodDelegate> ConstructorCache = new Dictionary<Type, DynamicMethodDelegate>();
 
     public static DynamicMethodDelegate CreateDelegate(this MethodBase method) {
-        var dynam = new DynamicMethod(string.Empty, typeof(object), manyObjects, typeof(ReflectionHelper).Module, true);
+        var dynam = new DynamicMethod(string.Empty, typeof(object), ManyObjects, typeof(ReflectionHelper).Module, true);
         ILGenerator il = dynam.GetILGenerator();
 
         ParameterInfo[] args = method.GetParameters();
@@ -73,12 +77,12 @@ public static class ReflectionHelper {
 
     public static DynamicMethodDelegate GetDelegate(this MethodInfo method) {
         DynamicMethodDelegate dmd;
-        if (methodCache.TryGetValue(method, out dmd)) {
+        if (MethodCache.TryGetValue(method, out dmd)) {
             return dmd;
         }
 
         dmd = CreateDelegate(method);
-        methodCache.Add(method, dmd);
+        MethodCache.Add(method, dmd);
 
         return dmd;
     }
@@ -91,13 +95,13 @@ public static class ReflectionHelper {
             return Array.CreateInstance(type.GetElementType(), 0);
         }
         DynamicMethodDelegate dmd;
-        lock (constructorCache) {
-            if (!constructorCache.TryGetValue(type, out dmd)) {
-                dmd = CreateDelegate(type.GetConstructor(emptyTypes));
-                constructorCache.Add(type, dmd);
+        lock (ConstructorCache) {
+            if (!ConstructorCache.TryGetValue(type, out dmd)) {
+                dmd = CreateDelegate(type.GetConstructor(EmptyTypes));
+                ConstructorCache.Add(type, dmd);
             }
         }
-        return dmd(null, noObjects);
+        return dmd(null, NoObjects);
     }
 
     public static object InvokeMethod(MethodInfo info, object targetInstance, params object[] arguments) {
@@ -105,7 +109,7 @@ public static class ReflectionHelper {
     }
 
     public static object GetValue(PropertyInfo member, object instance) {
-        return InvokeMethod(member.GetGetMethod(true), instance, noObjects);
+        return InvokeMethod(member.GetGetMethod(true), instance, NoObjects);
     }
 
     public static object GetValue(MemberInfo member, object instance) {

@@ -19,7 +19,7 @@ public class ETGModConsole : IETGModMenu {
     /// <summary>
     /// All items in the game, name sorted. Used for the give command.
     /// </summary>
-    public static Dictionary<string, int> allItems = new Dictionary<string, int>();
+    public static Dictionary<string, int> AllItems = new Dictionary<string, int>();
 
     /// <summary>
     /// All console logged text lines. Feel free to add your lines here!
@@ -30,18 +30,19 @@ public class ETGModConsole : IETGModMenu {
     /// </summary>
     public static string CurrentCommand = "";
 
-    public static Vector2 mainScrollPos,correctScrollPos;
+    public static Vector2 MainScrollPos;
+    public static Vector2 CorrectScrollPos;
 
-    private Rect mainBoxRect     = new Rect(16,                 16 , Screen.width - 32, Screen.height - 32 );
-    private Rect inputBox        = new Rect(16, Screen.height - 32 , Screen.width - 32,                 32 );
-    private Rect autoCorrectBox  = new Rect(16, Screen.height - 184, Screen.width - 32,                 120);
+    private Rect MainBoxRect     = new Rect(16,                 16 , Screen.width - 32, Screen.height - 32 );
+    private Rect InputBox        = new Rect(16, Screen.height - 32 , Screen.width - 32,                 32 );
+    private Rect AutoCorrectBox  = new Rect(16, Screen.height - 184, Screen.width - 32,                 120);
 
-    private bool closeConsoleOnCommand = false;
-    private bool cutInputFocusOnCommand = false;
+    private bool CloseConsoleOnCommand = false;
+    private bool CutInputFocusOnCommand = false;
 
-    private bool needCorrectInput=false;
+    private bool NeedCorrectInput=false;
 
-    string[] displayedCorrectCommands = new string[] { }, displayCorrectArguments=new string[] { };
+    string[] DisplayedCorrectCommands = new string[] { }, displayCorrectArguments=new string[] { };
 
     public void Start() {
 
@@ -55,8 +56,8 @@ public class ETGModConsole : IETGModMenu {
         Commands["roll_speed"]                                   = new ConsoleCommand("roll_speed"        , DodgeRollSpeed                                                        );
         Commands["tp"] = Commands["teleport"]                    = new ConsoleCommand("<tp, teleport>"    , Teleport                                                              );
 
-        Commands["close_console_on_command"]   = new ConsoleCommand("close_console_on_command",   delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); });
-        Commands["cut_input_focus_on_command"] = new ConsoleCommand("cut_input_focus_on_command", delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); });
+        Commands["close_console_on_command"]   = new ConsoleCommand("close_console_on_command",   delegate (string[] args) { CloseConsoleOnCommand          = SetBool(args, CloseConsoleOnCommand        ); });
+        Commands["cut_input_focus_on_command"] = new ConsoleCommand("cut_input_focus_on_command", delegate (string[] args) { CutInputFocusOnCommand         = SetBool(args, CutInputFocusOnCommand       ); });
         Commands["enable_damage_indicators"]   = new ConsoleCommand("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); });
 
         Commands["set_shake"] = new ConsoleCommand("set_shake" ,SetShake );
@@ -74,13 +75,13 @@ public class ETGModConsole : IETGModMenu {
 
         //THIS HAS TO BE CALLED TWICE, once on input, and once the frame after!
         //For some reason?....
-        if (needCorrectInput) {
+        if (NeedCorrectInput) {
             TextEditor txt = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 
             if (txt!=null) {
                 txt.MoveTextEnd();
             }
-            needCorrectInput=false;
+            NeedCorrectInput=false;
         }
 
         bool ranCommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentCommand.Length > 0;
@@ -92,7 +93,7 @@ public class ETGModConsole : IETGModMenu {
                 //If there's no matching command for what the user has typed, we'll try to auto-correct it.
                 List<string> validStrings = new List<string>();
 
-                validStrings.AddRange(displayedCorrectCommands);
+                validStrings.AddRange(DisplayedCorrectCommands);
 
                 for (int i = 0; i<CurrentCommand.Length; i++) {
                     List<string> toRemove = new List<string>();
@@ -122,7 +123,7 @@ public class ETGModConsole : IETGModMenu {
                     if (txt!=null) {
                         txt.MoveTextEnd();
                     }
-                    needCorrectInput=true;
+                    NeedCorrectInput=true;
                 }
 
                 ranCommand=false;
@@ -171,7 +172,7 @@ public class ETGModConsole : IETGModMenu {
                         if (txt!=null) {
                             txt.MoveTextEnd();
                         }
-                        needCorrectInput=true;
+                        NeedCorrectInput=true;
                     }
                 } catch (System.Exception e) {
                     LoggedText.Add(e.ToString());
@@ -184,14 +185,14 @@ public class ETGModConsole : IETGModMenu {
             }
         }
 
-        mainBoxRect    = new Rect(16,                      16 , Screen.width - 32, Screen.height - 32 - 29 );
-        inputBox       = new Rect(16, Screen.height - 16 - 24 , Screen.width - 32,                      24 );
-        autoCorrectBox = new Rect(16, Screen.height - 16 - 144, Screen.width - 32,                     120 );
+        MainBoxRect    = new Rect(16,                      16 , Screen.width - 32, Screen.height - 32 - 29 );
+        InputBox       = new Rect(16, Screen.height - 16 - 24 , Screen.width - 32,                      24 );
+        AutoCorrectBox = new Rect(16, Screen.height - 16 - 144, Screen.width - 32,                     120 );
 
-        GUI.Box(mainBoxRect   , "Console");
+        GUI.Box(MainBoxRect   , "Console");
 
         //Input
-        string changedCommand=GUI.TextField(inputBox, CurrentCommand);
+        string changedCommand=GUI.TextField(InputBox, CurrentCommand);
 
         if(changedCommand != CurrentCommand) {
             CurrentCommand=changedCommand;
@@ -199,8 +200,8 @@ public class ETGModConsole : IETGModMenu {
         }
 
         //Logged text
-        GUILayout.BeginArea(mainBoxRect);
-        mainScrollPos = GUILayout.BeginScrollView(mainScrollPos);
+        GUILayout.BeginArea(MainBoxRect);
+        MainScrollPos = GUILayout.BeginScrollView(MainScrollPos);
 
         for (int i = 0; i < LoggedText.Count; i++) {
             GUILayout.Label(LoggedText[i]);
@@ -211,13 +212,13 @@ public class ETGModConsole : IETGModMenu {
 
         //Auto-correct box.
         if(CurrentCommand.Length>0){
-            GUI.Box(autoCorrectBox, "Auto-Correct");
+            GUI.Box(AutoCorrectBox, "Auto-Correct");
 
-            GUILayout.BeginArea(autoCorrectBox);
-            correctScrollPos=GUILayout.BeginScrollView(correctScrollPos);
+            GUILayout.BeginArea(AutoCorrectBox);
+            CorrectScrollPos=GUILayout.BeginScrollView(CorrectScrollPos);
 
-            for(int i = 0; i < displayedCorrectCommands.Length; i++) {
-                GUILayout.Label(displayedCorrectCommands[i]);
+            for(int i = 0; i < DisplayedCorrectCommands.Length; i++) {
+                GUILayout.Label(DisplayedCorrectCommands[i]);
             }
 
             for(int i = 0; i <displayCorrectArguments.Length; i++) {
@@ -234,9 +235,9 @@ public class ETGModConsole : IETGModMenu {
             //If this command is valid
             // No new line when we ran a command.
             CurrentCommand="";
-            if (cutInputFocusOnCommand)
+            if (CutInputFocusOnCommand)
                 GUI.FocusControl("");
-            if (closeConsoleOnCommand) {
+            if (CloseConsoleOnCommand) {
                 ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
                 ETGModGUI.UpdatePlayerState();
             }
@@ -267,28 +268,28 @@ public class ETGModConsole : IETGModMenu {
                         avaliablCommands.Add(s);
                 }
 
-                displayedCorrectCommands=avaliablCommands.ToArray();
+                DisplayedCorrectCommands=avaliablCommands.ToArray();
             } else {
-                displayedCorrectCommands=new string[] { };
+                DisplayedCorrectCommands=new string[] { };
                 GUILayout.Label("Args");
                 //If there's arguments....
                 List<string> avaliablCommands = new List<string>();
 
-                GUILayout.Label(Commands[seperatedCommand[0]].acceptedArguments.ToString());
+                GUILayout.Label(Commands[seperatedCommand[0]].AcceptedArguments.ToString());
 
-                if (Commands[seperatedCommand[0]].acceptedArguments==null)
+                if (Commands[seperatedCommand[0]].AcceptedArguments==null)
                     return;
 
-                GUILayout.Label(Commands[seperatedCommand[0]].acceptedArguments[0].Length.ToString());
+                GUILayout.Label(Commands[seperatedCommand[0]].AcceptedArguments[0].Length.ToString());
 
                 for (int i = 0; i<seperatedCommand.Length-1; i++) {
                     //Index of the argument in the seperated command. i is the index in the arguments array.
                     int realIndex = i+1;
 
-                    if (Commands[seperatedCommand[0]].acceptedArguments.Length<=i)
+                    if (Commands[seperatedCommand[0]].AcceptedArguments.Length<=i)
                         break;
 
-                    foreach (string s in Commands[seperatedCommand[0]].acceptedArguments[i]) {
+                    foreach (string s in Commands[seperatedCommand[0]].AcceptedArguments[i]) {
                         if (s.Contains(seperatedCommand[realIndex]))
                             avaliablCommands.Add(s);
                     }
@@ -423,7 +424,7 @@ public class ETGModConsole : IETGModMenu {
         catch {
             //Arg isn't an id, so it's probably an item name.
             // Are you Brent?
-            id = allItems[args[0]];
+            id = AllItems[args[0]];
         }
 
         if (id==-1) {

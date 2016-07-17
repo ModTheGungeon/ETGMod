@@ -1,4 +1,7 @@
-﻿using System;
+﻿#pragma warning disable 0626
+#pragma warning disable 0649
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

@@ -6,8 +6,8 @@ using System.Collections.Generic;
 
 public class ETGModLoaderMenu : IETGModMenu {
 
-    Rect windowRect = new Rect(15,15,300,Screen.height/2);
-    Vector2 mainScrollView=Vector2.zero;
+    Rect WindowRect = new Rect(15, 15, 300, Screen.height / 2);
+    Vector2 MainScrollView = Vector2.zero;
 
     public void Start() {
 
@@ -19,11 +19,11 @@ public class ETGModLoaderMenu : IETGModMenu {
 
     public void OnGUI() {
 
-        windowRect=new Rect(15,15,Screen.width-30,Screen.height-30);
+        WindowRect = new Rect(15, 15, Screen.width - 30,Screen.height - 30);
 
-        GUI.Box(windowRect,"Mod Loader");
-        GUI.Box(new Rect(30, 30, 300, Screen.height-60), "Mods");
-        GUILayout.BeginArea(windowRect);
+        GUI.Box(WindowRect, "Mod Loader");
+        GUI.Box(new Rect(30, 30, 300, Screen.height - 60), "Mods");
+        GUILayout.BeginArea(WindowRect);
         GUISelector();
         GUILayout.EndArea();
     }
@@ -34,8 +34,8 @@ public class ETGModLoaderMenu : IETGModMenu {
 
     //Mod selector
     public void GUISelector() {
-        GUILayout.BeginArea(new Rect(15,15,windowRect.width-30,windowRect.height-30));
-        mainScrollView=GUILayout.BeginScrollView(mainScrollView);
+        GUILayout.BeginArea(new Rect(15, 15, WindowRect.width - 30, WindowRect.height - 30));
+        MainScrollView=GUILayout.BeginScrollView(MainScrollView);
 
         foreach (ETGModule asset in ETGMod.GameMods) {
 

@@ -7,10 +7,10 @@ using System.Reflection;
 /// </summary>
 public class CrossSearch {
 
-    public readonly static Type t_void = typeof(void);
-    public readonly static Type t_FieldInfo = typeof(FieldInfo);
-    public readonly static Type t_MethodInfo = typeof(MethodInfo);
-    public readonly static Type t_PropertyInfo = typeof(PropertyInfo);
+    public readonly static Type TypeVoid = typeof(void);
+    public readonly static Type TypeFieldInfo = typeof(FieldInfo);
+    public readonly static Type TypeMethodInfo = typeof(MethodInfo);
+    public readonly static Type TypePropertyInfo = typeof(PropertyInfo);
 
     public Type Type;
 
@@ -19,7 +19,7 @@ public class CrossSearch {
     public bool Private = false;
     public bool Public = true;
     public bool Static = false;
-    public Type Returns = t_void;
+    public Type Returns = TypeVoid;
     public Type[] Args;
     public CrossSearch[] Context;
 

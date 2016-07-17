@@ -21,7 +21,7 @@ public class ETGModInspector : IETGModMenu {
     public static GameObject targetObject;
 
     static Rect WindowRect;
-    static Vector2 scrollPos;
+    static Vector2 ScrollPos;
 
     public void Start() {
         //Init the hierarchy.
@@ -42,7 +42,7 @@ public class ETGModInspector : IETGModMenu {
 
     public void WindowFunction(int windowID) {
 
-        scrollPos=GUILayout.BeginScrollView(scrollPos);
+        ScrollPos=GUILayout.BeginScrollView(ScrollPos);
         if (targetObject != null) {
             foreach (Component c in targetObject.GetComponents<Component>()) {
                 if (c == null) {

@@ -7,7 +7,8 @@ using UnityEngine;
 namespace ETGGUI {
     static class FontConverter {
 
-        public static Vector3 offset, size;
+        public static Vector3 Offset = new Vector3 (0, 0, 0);
+        public static Vector3 Size = new Vector3(0, 0, 0);
 
         public static Font GetFontFromdfFont(dfFont font) {
             Font f = new Font();
@@ -32,7 +33,7 @@ namespace ETGGUI {
                 inf.glyphWidth=glyphDefinition.width;
                 inf.glyphHeight=glyphDefinition.height;
 
-                inf.size=(int)size.x;
+                inf.size=(int)Size.x;
 
                 if (inf.glyphHeight>maxHeight)
                     maxHeight=inf.glyphHeight;

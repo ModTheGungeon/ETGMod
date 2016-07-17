@@ -79,18 +79,13 @@ public class CrossGungeonConfig : ICrossConfig {
 
     public object Find(CrossSearch search) {
         string prefix = "UNKNOWN_";
-        if (search.Type == CrossSearch.t_FieldInfo) {
-            CrossSearch<FieldInfo> search_ = (CrossSearch<FieldInfo>) search;
+        if (search.Type == CrossSearch.TypeFieldInfo) {
             prefix = search.Returns.Name + "_";
             prefix = prefix[0].ToString().ToLowerInvariant() + prefix.Substring(1);
 
-        } else if (search.Type == CrossSearch.t_MethodInfo) {
-            CrossSearch<MethodInfo> search_ = (CrossSearch<MethodInfo>) search;
+        } else if (search.Type == CrossSearch.TypeMethodInfo) {
             prefix = search.Static ? "smethod_" : "method_";
-
-
-        } else if (search.Type == CrossSearch.t_PropertyInfo) {
-            CrossSearch<PropertyInfo> search_ = (CrossSearch<PropertyInfo>) search;
+        } else if (search.Type == CrossSearch.TypePropertyInfo) {
             prefix = search.Returns.Name + "_";
 
         }
@@ -108,7 +103,7 @@ public class CrossGungeonConfig : ICrossConfig {
                 if (search.In.Contains("`")) {
                     string[] ids = search.In.Substring(6).Split('`');
                     preTypeID = int.Parse(ids[0]);
-                    typeOr |= int.Parse(ids[1]) << 32;
+                    typeOr |= uint.Parse(ids[1]) << 32;
                 } else {
                     preTypeID = int.Parse(search.In.Substring(6));
                 }
@@ -161,17 +156,17 @@ public class CrossGungeonConfig : ICrossConfig {
             (search.Static ? BindingFlags.Static : BindingFlags.Instance)
             ;
 
-        if (search.Type == CrossSearch.t_FieldInfo) {
+        if (search.Type == CrossSearch.TypeFieldInfo) {
             // We just return the field. There's currently a too high risk of false positives.
             return @in.GetField(search.Name, flags);
 
 
-        } else if (search.Type == CrossSearch.t_PropertyInfo) {
+        } else if (search.Type == CrossSearch.TypePropertyInfo) {
             // We do the same with the properties as with the fields.
             return @in.GetProperty(search.Name, flags);
         }
 
-        if (search.Type != CrossSearch.t_MethodInfo) {
+        if (search.Type != CrossSearch.TypeMethodInfo) {
             return null;
         }
 
@@ -180,7 +175,7 @@ public class CrossGungeonConfig : ICrossConfig {
             for (int mi = Math.Max(0, preID - SearchFocusRadius); mi <= preID + SearchFocusRadius; mi++) {
                 MethodInfo method = @in.GetMethod(prefix + mi, flags, null, search.Args, null);
                 if (method == null ||
-                    method.ReturnType != (search.Returns ?? CrossSearch.t_void)) {
+                    method.ReturnType != (search.Returns ?? CrossSearch.TypeVoid)) {
                     continue;
                 }
                 return method;
@@ -194,7 +189,7 @@ public class CrossGungeonConfig : ICrossConfig {
             ParameterInfo[] argsInfo = method.GetParameters();
             if (!method.Name.StartsWith(prefix) ||
                 argsInfo.Length != search.Args.Length ||
-                method.ReturnType != (search.Returns ?? CrossSearch.t_void)) {
+                method.ReturnType != (search.Returns ?? CrossSearch.TypeVoid)) {
                 continue;
             }
             bool match = true;

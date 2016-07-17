@@ -41,7 +41,6 @@ public static partial class ETGMod {
             // ETGModUnityEngineHooks.UnloadAsset = UnloadAsset;
         }
 
-        private readonly static Type t_Texture = typeof(Texture);
         public static UnityEngine.Object Load(string path, Type type) {
             if (path == "PlayerCoopCultist") {
                 Debug.Log("LOADHOOK Loading resource \"" + path + "\" of (requested) type " + type);

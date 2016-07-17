@@ -10,19 +10,19 @@ public class LimitedStream : MemoryStream {
     public bool LimitStreamShared = false;
     private long pos = 0;
     
-    protected byte[] cachedBuffer;
-    protected long cachedOffset;
-    protected long cachedLength;
-    protected bool cacheBuffer_ = true;
+    protected byte[] CachedBuffer;
+    protected long CachedOffset;
+    protected long CachedLength;
+    protected bool _CacheBuffer = true;
     public bool CacheBuffer {
         get {
-            return cacheBuffer_;
+            return _CacheBuffer;
         }
         set {
             if (!value) {
-                cachedBuffer = null;
+                CachedBuffer = null;
             }
-            cacheBuffer_ = value;
+            _CacheBuffer = value;
         }
     }
     
@@ -134,17 +134,17 @@ public class LimitedStream : MemoryStream {
     }
     
     public override byte[] GetBuffer() {
-        if (cachedBuffer != null && cachedOffset == LimitOffset && cachedLength == LimitLength) {
-            return cachedBuffer;
+        if (CachedBuffer != null && CachedOffset == LimitOffset && CachedLength == LimitLength) {
+            return CachedBuffer;
         }
             
-        if (!cacheBuffer_) {
+        if (!_CacheBuffer) {
             return ToArray();
         }
             
-        cachedOffset = LimitOffset;
-        cachedLength = LimitLength;
-        return cachedBuffer = ToArray();
+        CachedOffset = LimitOffset;
+        CachedLength = LimitLength;
+        return CachedBuffer = ToArray();
     }
     
     private readonly byte[] toArrayReadBuffer = new byte[2048];
