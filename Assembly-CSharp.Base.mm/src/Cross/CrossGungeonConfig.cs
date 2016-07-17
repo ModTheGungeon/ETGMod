@@ -176,13 +176,11 @@ public class CrossGungeonConfig : ICrossConfig {
         }
 
         // With methods, we can actually search.
-        Console.WriteLine("METHOD RADIUS SEARCH?");
         if (preID != -1) {
-            Console.WriteLine("METHOD RADIUS SEARCH.");
             for (int mi = Math.Max(0, preID - SearchFocusRadius); mi <= preID + SearchFocusRadius; mi++) {
-                Console.WriteLine(prefix + mi);
                 MethodInfo method = @in.GetMethod(prefix + mi, flags, null, search.Args, null);
-                if (method == null) {
+                if (method == null ||
+                    method.ReturnType != (search.Returns ?? CrossSearch.t_void)) {
                     continue;
                 }
                 return method;
