@@ -5,6 +5,8 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using ETGGUI;
+using System;
+using Object = UnityEngine.Object;
 
 public class ETGModGUI : MonoBehaviour {
 
@@ -142,9 +144,9 @@ public class ETGModGUI : MonoBehaviour {
 
         //GUI.skin.font=f;
 
-        // sorry for the if block
+
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
-            if (!timeScale.HasValue && (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None)) {
+            if (!timeScale.HasValue) {
                 timeScale = Time.timeScale;
                 Time.timeScale = 0;
             }
@@ -169,6 +171,7 @@ public class ETGModGUI : MonoBehaviour {
         while (PickupObjectDatabase.Instance==null)
             yield return new WaitForEndOfFrame();
 
+        // TODO: bleh, foreach
         foreach(PickupObject obj in PickupObjectDatabase.Instance.Objects) {
 
             if (obj==null) 
@@ -177,14 +180,44 @@ public class ETGModGUI : MonoBehaviour {
                 continue;
             if (obj.EncounterTrackable_0.JournalEntry_0==null)
                 continue;
-
+            
             string name = obj.EncounterTrackable_0.JournalEntry_0.method_2(true).Replace(' ', '_').ToLower();
             int id = PickupObjectDatabase.Instance.Objects.IndexOf(obj);
 
             count++;
 
+            // Handle Master Rounds specially because we actually care about the order
+            if (name == "master_round") {
+                string objectname = obj.gameObject.name;
+                int floornumber = 420;
+                switch (objectname.Substring("MasteryToken_".Length)) {
+                case "Castle": // Keep of the Lead Lord
+                    floornumber = 1;
+                    break;
+                case "Gungeon": // Gungeon Proper
+                    floornumber = 2;
+                    break;
+                case "Mines":
+                    floornumber = 3;
+                    break;
+                case "Catacombs": // Hollow
+                    floornumber = 4;
+                    break;
+                case "Forge":
+                    floornumber = 5;
+                    break;
+                }
+                name = name + "_" + floornumber;
+            }
+
+
+
             if (ETGModConsole.allItems.ContainsKey(name)) {
-                name=obj.gameObject.name.Replace(' ', '_').ToLower();
+                int appendindex = 2;
+                while (ETGModConsole.allItems.ContainsKey (name + "_" + appendindex.ToString())) {
+                    appendindex++;
+                }
+                name = name + "_" + appendindex.ToString ();
             }
             ETGModConsole.allItems.Add(name, id);
             if (count>=30) {

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using System;
+using Object = UnityEngine.Object;
 
 public class ETGModConsole : IETGModMenu {
 
@@ -36,7 +38,6 @@ public class ETGModConsole : IETGModMenu {
 
     private bool closeConsoleOnCommand = false;
     private bool cutInputFocusOnCommand = false;
-    private bool stopTimeDuringConsoleOpen = true;
 
     private bool needCorrectInput=false;
 
@@ -57,7 +58,6 @@ public class ETGModConsole : IETGModMenu {
         Commands["close_console_on_command"]   = new ConsoleCommand("close_console_on_command",   delegate (string[] args) { closeConsoleOnCommand          = SetBool(args, closeConsoleOnCommand        ); });
         Commands["cut_input_focus_on_command"] = new ConsoleCommand("cut_input_focus_on_command", delegate (string[] args) { cutInputFocusOnCommand         = SetBool(args, cutInputFocusOnCommand       ); });
         Commands["enable_damage_indicators"]   = new ConsoleCommand("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); });
-        Commands["console_time_stop"]          = new ConsoleCommand("console_time_stop",          delegate (string[] args) { stopTimeDuringConsoleOpen      = SetBool(args, stopTimeDuringConsoleOpen    ); });
 
         Commands["set_shake"] = new ConsoleCommand("set_shake" ,SetShake );
         Commands["give"]      = new ConsoleCommand("give"      ,GiveItem);
@@ -407,11 +407,11 @@ public class ETGModConsole : IETGModMenu {
 
     void GiveItem(string[] args) {
         if (args.Length < 1 || args.Length > 2) {
-            LoggedText.Add ("Command requires 1-2 arguments (int, int)");
+            LoggedText.Add ("Command requires 1-2 arguments (int|string, int)");
             return;
         }
         if (!GameManager.GameManager_0.PlayerController_1) {
-            LoggedText.Add ("Coudln't access Player Controller");
+            LoggedText.Add ("Couldn't access Player Controller");
             return;
         }
 
@@ -422,6 +422,7 @@ public class ETGModConsole : IETGModMenu {
         }
         catch {
             //Arg isn't an id, so it's probably an item name.
+            // Are you Brent?
             id = allItems[args[0]];
         }
 
@@ -430,7 +431,7 @@ public class ETGModConsole : IETGModMenu {
             return;
         }
 
-        LoggedText.Add ("Attempting to spawn item ID " + args[0] + ", class " + PickupObjectDatabase.GetById (id).GetType());
+        LoggedText.Add ("Attempting to spawn item ID " + args[0] + " (numeric " + id.ToString() + ")" + ", class " + PickupObjectDatabase.GetById (id).GetType());
 
         if (args.Length==2) {
             int count = int.Parse(args[1]);
