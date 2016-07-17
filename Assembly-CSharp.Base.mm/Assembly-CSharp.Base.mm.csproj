@@ -58,11 +58,11 @@
     <Compile Include="src\ETGGUI\ConsoleCommand.cs" />
     <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
     <Compile Include="src\ETGGUI\FontConverter.cs" />
-<!--<<<<<<< HEAD-->
-	<!--Something went wrong while time-traveling... whoops!-->
+    <!--<<<<<<< HEAD-->
+    <!--Something went wrong while time-traveling... whoops!-->
     <!--Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" /-->
-<!--=======-->
-<!-->>>>>>> 056ab26... Added fontconverter to the csproj-->
+    <!--=======-->
+    <!-->>>>>>> 056ab26... Added fontconverter to the csproj-->
     <Compile Include="src\ETGGUI\Inspector\Properties\StringPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
@@ -87,10 +87,14 @@
     <Compile Include="src\MonoMod\MonoModIgnore.cs" />
     <Compile Include="src\MonoMod\MonoModInline.cs" />
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
+    <Compile Include="src\MonoMod\MonoModNoNew.cs" />
+    <Compile Include="src\MonoMod\MonoModOnPlatform.cs" />
     <Compile Include="src\MonoMod\MonoModOriginal.cs" />
     <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
     <Compile Include="src\MonoMod\MonoModRemove.cs" />
     <Compile Include="src\MonoMod\MonoModReplace.cs" />
+    <Compile Include="src\MonoMod\Platform.cs" />
+    <Compile Include="src\MonoMod\PlatformHelper.cs" />
     <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
     <Compile Include="src\Patches\patch_Dungeon.cs" />
     <Compile Include="src\Patches\patch_Foyer.cs" />

@@ -9,45 +9,18 @@ public static class Cross {
 
     private readonly static object[] _EmptyObjectArray = new object[0];
 
-    static Cross() {
-        //for mono, get from
-        //static extern PlatformID Platform
-        PropertyInfo property_platform = typeof(Environment).GetProperty("Platform", BindingFlags.NonPublic | BindingFlags.Static);
-        string platID;
-        if (property_platform != null) {
-            platID = property_platform.GetValue(null, _EmptyObjectArray).ToString();
-        } else {
-            //for .net, use default value
-            platID = Environment.OSVersion.Platform.ToString();
-        }
-        platID = platID.ToLowerInvariant();
-
-        CurrentPlatform = Platform.Unknown;
-        if (platID.Contains("win")) {
-            CurrentPlatform = Platform.Windows;
-        } else if (platID.Contains("mac") || platID.Contains("osx")) {
-            CurrentPlatform = Platform.MacOS;
-        } else if (platID.Contains("lin") || platID.Contains("unix")) {
-            CurrentPlatform = Platform.Linux;
-        }
-        CurrentPlatform |= (IntPtr.Size == 4 ? Platform.X86 : Platform.X64);
-
-    }
-
-    public static Platform CurrentPlatform { get; private set; } 
-
     public static ICrossConfig Config = new CrossGungeonConfig();
 
     public static Dictionary<string, Type> TypeMap = new Dictionary<string, Type>();
 
     public static Type XType(this string name_) {
         #pragma warning disable 0618
-        return name_.XType(CurrentPlatform);
+        return name_.XType(PlatformHelper.Current);
         #pragma warning restore 0618
     }
     [Obsolete("Use CrossSearch to directly find members in Config. Use XType() for types.")]
     public static Type XType(this string name_, Platform from) {
-        return name_.XType((int) from, (int) CurrentPlatform);
+        return name_.XType((int) from, (int) PlatformHelper.Current);
     }
     [Obsolete("Use CrossSearch to directly find members in Config. Use XType() for types.")]
     public static Type XType(this string name_, int from, int to) {
@@ -90,32 +63,4 @@ public interface ICrossConfig {
     IEnumerable<Assembly> Assemblies { get; }
     string TypeName(string name, int from, int to);
     object Find(CrossSearch search);
-}
-
-/// <summary>
-/// Cross reflection platform enum that can be used as "from" and "to".
-/// </summary>
-public enum Platform : int {
-    None = 0,
-
-    // Underlying platform categories
-    OS = 1,
-
-    X86 = 0,
-    X64 = 2,
-
-    NT = 4,
-    Unix = 8,
-
-    // Operating systems (OSes are always "and-equal" to OS)
-    Unknown = OS | 16,
-    Windows = OS | NT | 32,
-    MacOS = OS | Unix | 64,
-    Linux = OS | Unix | 128,
-
-    // AMD64 (64bit) variants (always "and-equal" to X64)
-    Unknown64 = Unknown | X64,
-    Windows64 = Windows | X64,
-    MacOS64 = MacOS | X64,
-    Linux64 = Linux | X64,
 }
