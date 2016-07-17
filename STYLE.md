@@ -1,4 +1,4 @@
-# ETGMod code style guide v1.0
+# ETGMod code style guide v1.1
 
 ### Preamble
 
@@ -19,9 +19,10 @@ Method arguments should use Camel case, e.g. `cachedPath`.
 Namespaces use Pascal case.  
 Properties use Pascal case.
 
-### Properties
+### Private
 
-It's recommended not to create properties that have a similiar name to the underlying field, but if such usage is needed, prefix the field with an underscore (`_`).
+Private fields, methods, classes etc. should have an underscore (`_`) at the beginning of the name.  
+Underlying fields of properties should be private.
 
 ### Operators
 
@@ -51,5 +52,5 @@ Do not implement your own cross platform helpers or hacks.
 
 ---
 
-Note: This document may (and probably will) be changed. Make sure to check every once in a while to see if something's been changed.  
+Note: This document may be changed. Make sure to check every once in a while to see if something's been changed.  
 The version number will be modified if so.

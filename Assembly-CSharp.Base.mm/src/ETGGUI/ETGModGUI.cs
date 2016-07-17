@@ -21,11 +21,11 @@ public class ETGModGUI : MonoBehaviour {
     public static MenuOpened CurrentMenu;
 
     public static GameObject MenuObject;
-    private readonly static ETGModNullMenu NullMenu = new ETGModNullMenu();
-    private static ETGModLoaderMenu LoaderMenu;
-    private static ETGModConsole ConsoleMenu;
-    private static ETGModDebugLogMenu LoggerMenu;
-    private static ETGModInspector InspectorMenu;
+    private readonly static ETGModNullMenu _NullMenu = new ETGModNullMenu();
+    private static ETGModLoaderMenu _LoaderMenu;
+    private static ETGModConsole _ConsoleMenu;
+    private static ETGModDebugLogMenu _LoggerMenu;
+    private static ETGModInspector _InspectorMenu;
 
     public static float? StoredTimeScale = null;
 
@@ -33,20 +33,20 @@ public class ETGModGUI : MonoBehaviour {
 
     public static Texture2D BoxTexture;
 
-    private static IETGModMenu CurrentMenuScript {
+    private static IETGModMenu _CurrentMenuScript {
         get {
             switch (CurrentMenu) {
                 case MenuOpened.Loader:
-                    return LoaderMenu;
+                    return _LoaderMenu;
                 case MenuOpened.Console:
-                    return ConsoleMenu;
+                    return _ConsoleMenu;
                 case MenuOpened.Logger:
-                    return LoggerMenu;
+                    return _LoggerMenu;
                 case MenuOpened.Inspector:
-                    return InspectorMenu;
+                    return _InspectorMenu;
 
             }
-            return NullMenu;
+            return _NullMenu;
         }
     }
 
@@ -69,17 +69,17 @@ public class ETGModGUI : MonoBehaviour {
         BoxTexture.SetPixel(0,0,Color.white);
         BoxTexture.Apply();
 
-        LoggerMenu = new ETGModDebugLogMenu();
-        LoggerMenu.Start();
+        _LoggerMenu = new ETGModDebugLogMenu();
+        _LoggerMenu.Start();
 
-        LoaderMenu = new ETGModLoaderMenu();
-        LoaderMenu.Start();
+        _LoaderMenu = new ETGModLoaderMenu();
+        _LoaderMenu.Start();
 
-        ConsoleMenu = new ETGModConsole();
-        ConsoleMenu.Start();
+        _ConsoleMenu = new ETGModConsole();
+        _ConsoleMenu.Start();
 
-        InspectorMenu = new ETGModInspector();
-        InspectorMenu.Start();
+        _InspectorMenu = new ETGModInspector();
+        _InspectorMenu.Start();
 
         ETGDamageIndicatorGUI.Create();
         StartCoroutine(ListAllItemsAndGuns());
@@ -123,7 +123,7 @@ public class ETGModGUI : MonoBehaviour {
         }
 
 
-        CurrentMenuScript.Update();
+        _CurrentMenuScript.Update();
     }
 
     public static void UpdatePlayerState() {
@@ -157,7 +157,7 @@ public class ETGModGUI : MonoBehaviour {
             }
         }
 
-        CurrentMenuScript.OnGUI();
+        _CurrentMenuScript.OnGUI();
         //RandomSelector.OnGUI();
 
     }

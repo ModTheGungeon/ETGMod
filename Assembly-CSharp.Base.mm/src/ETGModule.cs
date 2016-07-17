@@ -78,7 +78,7 @@ public abstract class ETGBackend : ETGModule {
 
 public class ETGModuleMetadata {
 
-    private string _archive = "";
+    private string _Archive = "";
     /// <summary>
     /// The path to the ZIP of the mod. In case of backends, an empty string.
     /// 
@@ -86,14 +86,14 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual string Archive {
         get {
-            return _archive;
+            return _Archive;
         }
         set {
             throw new InvalidOperationException("The ETGModuleMetadata ZIP path is read-only!");
         }
     }
 
-    private string _directory = "";
+    private string _Directory = "";
     /// <summary>
     /// The path to the directory of the mod. In case of backends, an empty string.
     /// 
@@ -101,14 +101,14 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual string Directory {
         get {
-            return _directory;
+            return _Directory;
         }
         set {
             throw new InvalidOperationException("The ETGModuleMetadata directory path is read-only!");
         }
     }
 
-    private string _name;
+    private string _Name;
     /// <summary>
     /// The name of the mod. In case of backends, the name of the API (f.e. ExampleAPI) without spaces.
     /// 
@@ -116,17 +116,17 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual string Name {
         get {
-            return _name;
+            return _Name;
         }
         set {
-            if (_name != null) {
+            if (_Name != null) {
                 throw new InvalidOperationException("The ETGModuleMetadata name is read-only!");
             }
-            _name = value;
+            _Name = value;
         }
     }
 
-    private Version _version;
+    private Version _Version;
     /// <summary>
     /// The mod / backend version.
     /// 
@@ -146,17 +146,17 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual Version Version {
         get {
-            return _version;
+            return _Version;
         }
         set {
-            if (_version != null) {
+            if (_Version != null) {
                 throw new InvalidOperationException("The ETGModuleMetadata version is read-only!");
             }
-            _version = value;
+            _Version = value;
         }
     }
 
-    private string _dll;
+    private string _DLL;
     /// <summary>
     /// The DLL of the mod in the ZIP or the absolute DLL path with folder mods. In case of backends, an empty string.
     /// 
@@ -164,17 +164,17 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual string DLL {
         get {
-            return _dll;
+            return _DLL;
         }
         set {
-            if (_dll != null) {
+            if (_DLL != null) {
                 throw new InvalidOperationException("The ETGModuleMetadata DLL path is read-only!");
             }
-            _dll = value;
+            _DLL = value;
         }
     }
 
-    private bool _prelinked = true;
+    private bool _Prelinked = true;
     /// <summary>
     /// Whether the mod has been prelinked or not. In case of backends, always true.
     /// 
@@ -182,14 +182,14 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual bool Prelinked {
         get {
-            return _prelinked;
+            return _Prelinked;
         }
         set {
             throw new InvalidOperationException("The ETGModuleMetadata Prelinked flag is read-only!");
         }
     }
 
-    private List<ETGModuleMetadata> _dependencies;
+    private List<ETGModuleMetadata> _Dependencies;
     /// <summary>
     /// The dependencies of the mod. In case of backends, this will return null.
     /// 
@@ -197,10 +197,10 @@ public class ETGModuleMetadata {
     /// </summary>
     public virtual ICollection<ETGModuleMetadata> Dependencies {
         get {
-            if (_dependencies == null) {
+            if (_Dependencies == null) {
                 return null;
             }
-            return _dependencies.AsReadOnly();
+            return _Dependencies.AsReadOnly();
         }
         set {
             throw new InvalidOperationException("The ETGModuleMetadata dependency list is read-only!");
@@ -213,10 +213,10 @@ public class ETGModuleMetadata {
 
     internal static ETGModuleMetadata Parse(string archive, string directory, Stream stream) {
         ETGModuleMetadata metadata = new ETGModuleMetadata();
-        metadata._archive = archive;
-        metadata._directory = directory;
-        metadata._prelinked = false;
-        metadata._dependencies = new List<ETGModuleMetadata>();
+        metadata._Archive = archive;
+        metadata._Directory = directory;
+        metadata._Prelinked = false;
+        metadata._Dependencies = new List<ETGModuleMetadata>();
 
         using (StreamReader reader = new StreamReader(stream)) {
             int lineN = -1;
@@ -253,35 +253,35 @@ public class ETGModuleMetadata {
                 data[1] = data[1].Trim();
 
                 if (prop == "Name") {
-                    metadata._name = data[1];
+                    metadata._Name = data[1];
 
                 } else if (prop == "Version") {
-                    metadata._version = new Version(data[1]);
+                    metadata._Version = new Version(data[1]);
 
                 } else if (prop == "DLL") {
-                    metadata._dll = data[1].Replace("\\", "/");
+                    metadata._DLL = data[1].Replace("\\", "/");
 
                 } else if (prop == "Prelinked") {
-                    metadata._prelinked = data[1].ToLowerInvariant() == "true";
+                    metadata._Prelinked = data[1].ToLowerInvariant() == "true";
 
                 } else if (prop == "Depends" || prop == "Dependency") {
                     ETGModuleMetadata dep = new ETGModuleMetadata();
-                    dep._name = data[1];
-                    dep._version = new Version(0, 0);
+                    dep._Name = data[1];
+                    dep._Version = new Version(0, 0);
                     if (data[1].Contains(" ")) {
                         string[] depData = data[1].Split(' ');
-                        dep._name = depData[0].Trim();
-                        dep._version = new Version(depData[1].Trim());
+                        dep._Name = depData[0].Trim();
+                        dep._Version = new Version(depData[1].Trim());
                     }
-                    metadata._dependencies.Add(dep);
+                    metadata._Dependencies.Add(dep);
 
                 }
             }
         }
 
         // Set the DLL path to be absolute in folder mods if not already absolute
-        if (!string.IsNullOrEmpty(directory) && !File.Exists(metadata._dll)) {
-            metadata._dll = Path.Combine(directory, metadata._dll.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+        if (!string.IsNullOrEmpty(directory) && !File.Exists(metadata._DLL)) {
+            metadata._DLL = Path.Combine(directory, metadata._DLL.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
         }
 
         // Add dependency to Base 1.0 if missing.
@@ -294,9 +294,9 @@ public class ETGModuleMetadata {
         }
         if (!dependsOnBase) {
             Debug.Log("WARNING: No dependency to Base found in " + metadata + "! Adding dependency to Base 1.0...");
-            metadata._dependencies.Insert(0, new ETGModuleMetadata() {
-                _name = "Base",
-                _version = new Version(1, 0)
+            metadata._Dependencies.Insert(0, new ETGModuleMetadata() {
+                _Name = "Base",
+                _Version = new Version(1, 0)
             });
         }
 

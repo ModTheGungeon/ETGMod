@@ -8,12 +8,12 @@ public class LimitedStream : MemoryStream {
     public long LimitLength;
     
     public bool LimitStreamShared = false;
-    private long pos = 0;
+    private long _Position = 0;
     
     protected byte[] CachedBuffer;
     protected long CachedOffset;
     protected long CachedLength;
-    protected bool _CacheBuffer = true;
+    private bool _CacheBuffer = true;
     public bool CacheBuffer {
         get {
             return _CacheBuffer;
@@ -52,11 +52,11 @@ public class LimitedStream : MemoryStream {
 
     public override long Position {
         get {
-            return LimitStreamShared ? pos : LimitStream.Position - LimitOffset;
+            return LimitStreamShared ? _Position : LimitStream.Position - LimitOffset;
         }
         set {
             LimitStream.Position = value + LimitOffset;
-            pos = value;
+            _Position = value;
         }
     }
     
@@ -77,7 +77,7 @@ public class LimitedStream : MemoryStream {
             throw new Exception("out of something");
         }
         int read = LimitStream.Read(buffer, offset, count);
-        pos += read;
+        _Position += read;
         return read;
     }
     
@@ -87,7 +87,7 @@ public class LimitedStream : MemoryStream {
         }
         int b = LimitStream.ReadByte();
         if (b != -1) {
-            pos++;
+            _Position++;
         }
         return b;
     }
@@ -98,19 +98,19 @@ public class LimitedStream : MemoryStream {
                 if (LimitOffset + LimitLength <= offset) {
                     throw new Exception("out of something");
                 }
-                pos = offset;
+                _Position = offset;
                 return LimitStream.Seek(LimitOffset + offset, SeekOrigin.Begin);
             case SeekOrigin.Current:
                 if (LimitOffset + LimitLength <= Position + offset) {
                     throw new Exception("out of something");
                 }
-                pos += offset;
+                _Position += offset;
                 return LimitStream.Seek(offset, SeekOrigin.Current);
             case SeekOrigin.End:
                 if (LimitLength - offset < 0) {
                     throw new Exception("out of something");
                 }
-                pos = LimitLength - offset;
+                _Position = LimitLength - offset;
                 return LimitStream.Seek(LimitOffset + LimitLength - offset, SeekOrigin.Begin);
             default:
                 return 0;
@@ -130,7 +130,7 @@ public class LimitedStream : MemoryStream {
             throw new Exception("out of something");
         }
         LimitStream.Write(buffer, offset, count);
-        pos += count;
+        _Position += count;
     }
     
     public override byte[] GetBuffer() {
@@ -147,7 +147,7 @@ public class LimitedStream : MemoryStream {
         return CachedBuffer = ToArray();
     }
     
-    private readonly byte[] toArrayReadBuffer = new byte[2048];
+    private readonly byte[] _ToArrayReadBuffer = new byte[2048];
     public override byte[] ToArray() {
         byte[] buffer;
         int read;
@@ -163,8 +163,8 @@ public class LimitedStream : MemoryStream {
             MemoryStream ms = new MemoryStream();
                 
             LimitStream.Seek(LimitOffset, SeekOrigin.Begin);
-            while (0 < (read = LimitStream.Read(toArrayReadBuffer, 0, toArrayReadBuffer.Length))) {
-                base.Write(toArrayReadBuffer, 0, read);
+            while (0 < (read = LimitStream.Read(_ToArrayReadBuffer, 0, _ToArrayReadBuffer.Length))) {
+                base.Write(_ToArrayReadBuffer, 0, read);
             }
                 
             LimitStream.Seek(origPosition, SeekOrigin.Begin);

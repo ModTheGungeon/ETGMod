@@ -33,14 +33,14 @@ public class ETGModConsole : IETGModMenu {
     public static Vector2 MainScrollPos;
     public static Vector2 CorrectScrollPos;
 
-    private Rect MainBoxRect     = new Rect(16,                 16 , Screen.width - 32, Screen.height - 32 );
-    private Rect InputBox        = new Rect(16, Screen.height - 32 , Screen.width - 32,                 32 );
-    private Rect AutoCorrectBox  = new Rect(16, Screen.height - 184, Screen.width - 32,                 120);
+    private Rect _MainBoxRect     = new Rect(16,                 16 , Screen.width - 32, Screen.height - 32 );
+    private Rect _InputBox        = new Rect(16, Screen.height - 32 , Screen.width - 32,                 32 );
+    private Rect _AutoCorrectBox  = new Rect(16, Screen.height - 184, Screen.width - 32,                 120);
 
-    private bool CloseConsoleOnCommand = false;
-    private bool CutInputFocusOnCommand = false;
+    private bool _CloseConsoleOnCommand = false;
+    private bool _CutInputFocusOnCommand = false;
 
-    private bool NeedCorrectInput=false;
+    private bool _NeedCorrectInput=false;
 
     string[] DisplayedCorrectCommands = new string[] { }, displayCorrectArguments=new string[] { };
 
@@ -56,8 +56,8 @@ public class ETGModConsole : IETGModMenu {
         Commands["roll_speed"]                                   = new ConsoleCommand("roll_speed"        , DodgeRollSpeed                                                        );
         Commands["tp"] = Commands["teleport"]                    = new ConsoleCommand("<tp, teleport>"    , Teleport                                                              );
 
-        Commands["close_console_on_command"]   = new ConsoleCommand("close_console_on_command",   delegate (string[] args) { CloseConsoleOnCommand          = SetBool(args, CloseConsoleOnCommand        ); });
-        Commands["cut_input_focus_on_command"] = new ConsoleCommand("cut_input_focus_on_command", delegate (string[] args) { CutInputFocusOnCommand         = SetBool(args, CutInputFocusOnCommand       ); });
+        Commands["close_console_on_command"]   = new ConsoleCommand("close_console_on_command",   delegate (string[] args) { _CloseConsoleOnCommand          = SetBool(args, _CloseConsoleOnCommand        ); });
+        Commands["cut_input_focus_on_command"] = new ConsoleCommand("cut_input_focus_on_command", delegate (string[] args) { _CutInputFocusOnCommand         = SetBool(args, _CutInputFocusOnCommand       ); });
         Commands["enable_damage_indicators"]   = new ConsoleCommand("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); });
 
         Commands["set_shake"] = new ConsoleCommand("set_shake" ,SetShake );
@@ -75,13 +75,13 @@ public class ETGModConsole : IETGModMenu {
 
         //THIS HAS TO BE CALLED TWICE, once on input, and once the frame after!
         //For some reason?....
-        if (NeedCorrectInput) {
+        if (_NeedCorrectInput) {
             TextEditor txt = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 
             if (txt!=null) {
                 txt.MoveTextEnd();
             }
-            NeedCorrectInput=false;
+            _NeedCorrectInput=false;
         }
 
         bool ranCommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentCommand.Length > 0;
@@ -123,7 +123,7 @@ public class ETGModConsole : IETGModMenu {
                     if (txt!=null) {
                         txt.MoveTextEnd();
                     }
-                    NeedCorrectInput=true;
+                    _NeedCorrectInput=true;
                 }
 
                 ranCommand=false;
@@ -172,7 +172,7 @@ public class ETGModConsole : IETGModMenu {
                         if (txt!=null) {
                             txt.MoveTextEnd();
                         }
-                        NeedCorrectInput=true;
+                        _NeedCorrectInput=true;
                     }
                 } catch (System.Exception e) {
                     LoggedText.Add(e.ToString());
@@ -185,22 +185,22 @@ public class ETGModConsole : IETGModMenu {
             }
         }
 
-        MainBoxRect    = new Rect(16,                      16 , Screen.width - 32, Screen.height - 32 - 29 );
-        InputBox       = new Rect(16, Screen.height - 16 - 24 , Screen.width - 32,                      24 );
-        AutoCorrectBox = new Rect(16, Screen.height - 16 - 144, Screen.width - 32,                     120 );
+        _MainBoxRect    = new Rect(16,                      16 , Screen.width - 32, Screen.height - 32 - 29 );
+        _InputBox       = new Rect(16, Screen.height - 16 - 24 , Screen.width - 32,                      24 );
+        _AutoCorrectBox = new Rect(16, Screen.height - 16 - 144, Screen.width - 32,                     120 );
 
-        GUI.Box(MainBoxRect   , "Console");
+        GUI.Box(_MainBoxRect   , "Console");
 
         //Input
-        string changedCommand=GUI.TextField(InputBox, CurrentCommand);
+        string changedCommand=GUI.TextField(_InputBox, CurrentCommand);
 
         if(changedCommand != CurrentCommand) {
             CurrentCommand=changedCommand;
-            OnTextChanged();
+            _OnTextChanged();
         }
 
         //Logged text
-        GUILayout.BeginArea(MainBoxRect);
+        GUILayout.BeginArea(_MainBoxRect);
         MainScrollPos = GUILayout.BeginScrollView(MainScrollPos);
 
         for (int i = 0; i < LoggedText.Count; i++) {
@@ -212,9 +212,9 @@ public class ETGModConsole : IETGModMenu {
 
         //Auto-correct box.
         if(CurrentCommand.Length>0){
-            GUI.Box(AutoCorrectBox, "Auto-Correct");
+            GUI.Box(_AutoCorrectBox, "Auto-Correct");
 
-            GUILayout.BeginArea(AutoCorrectBox);
+            GUILayout.BeginArea(_AutoCorrectBox);
             CorrectScrollPos=GUILayout.BeginScrollView(CorrectScrollPos);
 
             for(int i = 0; i < DisplayedCorrectCommands.Length; i++) {
@@ -235,9 +235,9 @@ public class ETGModConsole : IETGModMenu {
             //If this command is valid
             // No new line when we ran a command.
             CurrentCommand="";
-            if (CutInputFocusOnCommand)
+            if (_CutInputFocusOnCommand)
                 GUI.FocusControl("");
-            if (CloseConsoleOnCommand) {
+            if (_CloseConsoleOnCommand) {
                 ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
                 ETGModGUI.UpdatePlayerState();
             }
@@ -250,7 +250,7 @@ public class ETGModConsole : IETGModMenu {
 
     }
 
-    private void OnTextChanged() {
+    private void _OnTextChanged() {
 
         //Set auto-correct data
 
@@ -314,7 +314,7 @@ public class ETGModConsole : IETGModMenu {
     }
 
 
-    private readonly static string[] a_string_0 = new string[0];
+    private readonly static string[] _EmptyStringArray = new string[0];
     /// <summary>
     /// Runs a given command.
     /// </summary>
@@ -332,7 +332,7 @@ public class ETGModConsole : IETGModMenu {
             }
         } else {
             parts = new string[] { command };
-            args = a_string_0;
+            args = _EmptyStringArray;
         }
 
         if (Commands.ContainsKey(parts[0])) {

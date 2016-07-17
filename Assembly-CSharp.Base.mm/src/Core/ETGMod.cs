@@ -23,18 +23,18 @@ public static partial class ETGMod {
     /// Used for CallInEachModule to call a method in each type of mod.
     /// </summary>
     public static List<ETGModule> AllMods = new List<ETGModule>();
-    private static List<Type> ModuleTypes = new List<Type>();
-    private static List<Dictionary<string, MethodInfo>> ModuleMethods = new List<Dictionary<string, MethodInfo>>();
+    private static List<Type> _ModuleTypes = new List<Type>();
+    private static List<Dictionary<string, MethodInfo>> _ModuleMethods = new List<Dictionary<string, MethodInfo>>();
 
     public static List<ETGModule> GameMods = new List<ETGModule>();
     public static List<ETGBackend> Backends = new List<ETGBackend>();
 
-    private static bool _started = false;
+    private static bool _Started = false;
     public static void Start() {
-        if (_started) {
+        if (_Started) {
             return;
         }
-        _started = true;
+        _Started = true;
 
         ETGModGUI.Create();
 
@@ -42,14 +42,14 @@ public static partial class ETGMod {
 
         Assets.Hook();
 
-        ScanBackends();
+        _ScanBackends();
 
-        LoadMods();
+        _LoadMods();
 
         CallInEachModule("Start");
     }
     
-    private static void ScanBackends() {
+    private static void _ScanBackends() {
         Debug.Log("Scanning Assembly-CSharp.dll for backends...");
         Assembly asm = Assembly.GetAssembly(typeof(ETGMod));
         Type[] types = asm.GetTypes();
@@ -61,19 +61,19 @@ public static partial class ETGMod {
         }
     }
     public static void InitBackend(Type type) {
-        ETGBackend module = (ETGBackend) type.GetConstructor(a_Type_0).Invoke(a_object_0);
+        ETGBackend module = (ETGBackend) type.GetConstructor(_EmptyTypeArray).Invoke(_EmptyObjectArray);
         Debug.Log("Initializing backend " + type.FullName);
 
         // Metadata is pre-set in backends
 
         Backends.Add(module);
         AllMods.Add(module);
-        ModuleTypes.Add(type);
-        ModuleMethods.Add(new Dictionary<string, MethodInfo>());
+        _ModuleTypes.Add(type);
+        _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
         Debug.Log("Backend " + module.Metadata.Name + " initialized.");
     }
 
-    private static void LoadMods() {
+    private static void _LoadMods() {
         Debug.Log("Loading game mods...");
 
         if (!Directory.Exists(ModsDirectory)) {
@@ -186,7 +186,7 @@ public static partial class ETGMod {
             }
 
             // ... then add an AssemblyResolve handler for all the .zip-ped libraries
-            AppDomain.CurrentDomain.AssemblyResolve += metadata.GenerateModAssemblyResolver();
+            AppDomain.CurrentDomain.AssemblyResolve += metadata._GenerateModAssemblyResolver();
 
             // ... then everything else
             foreach (ZipEntry entry in zip.Entries) {
@@ -218,14 +218,14 @@ public static partial class ETGMod {
                 continue;
             }
 
-            ETGModule module = (ETGModule) type.GetConstructor(a_Type_0).Invoke(a_object_0);
+            ETGModule module = (ETGModule) type.GetConstructor(_EmptyTypeArray).Invoke(_EmptyObjectArray);
 
             module.Metadata = metadata;
 
             GameMods.Add(module);
             AllMods.Add(module);
-            ModuleTypes.Add(type);
-            ModuleMethods.Add(new Dictionary<string, MethodInfo>());
+            _ModuleTypes.Add(type);
+            _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
         }
 
         Debug.Log("Mod " + metadata.Name + " initialized.");
@@ -264,7 +264,7 @@ public static partial class ETGMod {
         }
 
         // ... then add an AssemblyResolve handler for all the .zip-ped libraries
-        AppDomain.CurrentDomain.AssemblyResolve += metadata.GenerateModAssemblyResolver();
+        AppDomain.CurrentDomain.AssemblyResolve += metadata._GenerateModAssemblyResolver();
 
         // ... then everything else
         if (!File.Exists(metadata.DLL)) {
@@ -287,20 +287,20 @@ public static partial class ETGMod {
                 continue;
             }
 
-            ETGModule module = (ETGModule) type.GetConstructor(a_Type_0).Invoke(a_object_0);
+            ETGModule module = (ETGModule) type.GetConstructor(_EmptyTypeArray).Invoke(_EmptyObjectArray);
 
             module.Metadata = metadata;
 
             GameMods.Add(module);
             AllMods.Add(module);
-            ModuleTypes.Add(type);
-            ModuleMethods.Add(new Dictionary<string, MethodInfo>());
+            _ModuleTypes.Add(type);
+            _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
         }
 
         Debug.Log("Mod " + metadata.Name + " initialized.");
     }
 
-    private static ResolveEventHandler GenerateModAssemblyResolver(this ETGModuleMetadata metadata) {
+    private static ResolveEventHandler _GenerateModAssemblyResolver(this ETGModuleMetadata metadata) {
         if (!string.IsNullOrEmpty(metadata.Archive)) {
             return delegate (object sender, ResolveEventArgs args) {
                 string asmName = new AssemblyName(args.Name).Name + ".dll";
@@ -402,10 +402,7 @@ public static partial class ETGMod {
 
         return (T) args[0];
     }
-
-    // A shared object a day keeps the GC away!
-    private static object[] _object_0 = new object[0];
-    private static Type[] _type_0 = new Type[0];
+        
     /// <summary>
     /// Calls a method in every module.
     /// </summary>
@@ -414,11 +411,11 @@ public static partial class ETGMod {
     public static void CallInEachModule(string methodName, object[] args = null) {
         Type[] argsTypes = null;
         if (args == null) {
-            args = _object_0;
-            args = _type_0;
+            args = _EmptyObjectArray;
+            args = _EmptyTypeArray;
         }
-        for (int i = 0; i < ModuleTypes.Count; i++) {
-            Dictionary<string, MethodInfo> moduleMethods = ModuleMethods[i];
+        for (int i = 0; i < _ModuleTypes.Count; i++) {
+            Dictionary<string, MethodInfo> moduleMethods = _ModuleMethods[i];
             MethodInfo method;
             if (moduleMethods.TryGetValue(methodName, out method)) {
                 if (method == null) {
@@ -431,7 +428,7 @@ public static partial class ETGMod {
             if (argsTypes == null) {
                 argsTypes = Type.GetTypeArray(args);
             }
-            method = ModuleTypes[i].GetMethod(methodName, argsTypes);
+            method = _ModuleTypes[i].GetMethod(methodName, argsTypes);
             moduleMethods[methodName] = method;
             if (method == null) {
                 continue;
@@ -461,7 +458,8 @@ public static partial class ETGMod {
         return args[0];
     }
 
-    private readonly static Type[] a_Type_0 = new Type[0];
-    private readonly static object[] a_object_0 = new object[0];
+    // A shared object a day keeps the GC away!
+    private readonly static Type[] _EmptyTypeArray = new Type[0];
+    private readonly static object[] _EmptyObjectArray = new object[0];
 
 }

@@ -6,11 +6,11 @@ using UnityEngine;
 
 class ETGDamageIndicatorGUI : MonoBehaviour {
 
-    private static List<DamageIndicator> Indicators = new List<DamageIndicator>();
-    private static List<DamageIndicator> UsedPool = new List<DamageIndicator>();
-    private static List<DamageIndicator> ToRemove = new List<DamageIndicator>();
+    private static List<DamageIndicator> _Indicators = new List<DamageIndicator>();
+    private static List<DamageIndicator> _UsedPool = new List<DamageIndicator>();
+    private static List<DamageIndicator> _ToRemove = new List<DamageIndicator>();
 
-    private static Dictionary<HealthHaver, HealthBar> AllBars = new Dictionary<HealthHaver, HealthBar>();
+    private static Dictionary<HealthHaver, HealthBar> _AllBars = new Dictionary<HealthHaver, HealthBar>();
     public static Dictionary<HealthHaver, float> MaxHP = new Dictionary<HealthHaver, float>();
     public static Dictionary<HealthHaver, float> CurrentHP = new Dictionary<HealthHaver, float>();
 
@@ -30,21 +30,21 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     public void Update() {
-        foreach (DamageIndicator i in Indicators)
+        foreach (DamageIndicator i in _Indicators)
             i.Update();
 
-        foreach (DamageIndicator i in ToRemove)
-            Indicators.Remove(i);
+        foreach (DamageIndicator i in _ToRemove)
+            _Indicators.Remove(i);
 
         try {
-            foreach (HealthBar bar in AllBars.Values)
+            foreach (HealthBar bar in _AllBars.Values)
                 bar.Update();
 
             foreach (HealthHaver hh in ToRemoveBars) {
-                AllBars.Remove(hh);
+                _AllBars.Remove(hh);
             }
 
-            ToRemove.Clear();
+            _ToRemove.Clear();
             ToRemoveBars.Clear();
         }
         catch (System.Exception e) {
@@ -53,77 +53,77 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     public void OnGUI() {
-        foreach (DamageIndicator i in Indicators)
+        foreach (DamageIndicator i in _Indicators)
             i.OnGUI();
 
-        foreach (HealthBar bar in AllBars.Values)
+        foreach (HealthBar bar in _AllBars.Values)
             bar.OnGUI();
     }
 
     public static void CreateIndicator(Vector3 worldPosOrigin, object content) {
 
         //We need to make a new object
-        if (UsedPool.Count==0) {
+        if (_UsedPool.Count==0) {
             DamageIndicator newIndicator = new DamageIndicator();
 
-            newIndicator.wPosOrigin=worldPosOrigin;
-            newIndicator.content="<size=35>"+content+"</size>";
+            newIndicator.WPosOrigin=worldPosOrigin;
+            newIndicator.Content="<size=35>"+content+"</size>";
 
-            Indicators.Add(newIndicator);
+            _Indicators.Add(newIndicator);
         } else {
             //We have a pooled object, use this instead
 
-            DamageIndicator pickedIndicator = UsedPool[0];
-            UsedPool.RemoveAt(0);
+            DamageIndicator pickedIndicator = _UsedPool[0];
+            _UsedPool.RemoveAt(0);
 
-            pickedIndicator.content="<size=35>"+content+"</size>";
-            pickedIndicator.wPosOrigin=worldPosOrigin;
+            pickedIndicator.Content="<size=35>"+content+"</size>";
+            pickedIndicator.WPosOrigin=worldPosOrigin;
 
-            Indicators.Add(pickedIndicator);
+            _Indicators.Add(pickedIndicator);
         }
     }
 
     public static void CreateBar(HealthHaver targ) {
 
-        if (AllBars.ContainsKey(targ))
+        if (_AllBars.ContainsKey(targ))
             return;
 
         HealthBar newBar = new HealthBar();
         newBar.Target=targ;
 
-        AllBars.Add(targ, newBar);
+        _AllBars.Add(targ, newBar);
     }
 
     public static void UpdateHealthBar(HealthHaver hh, float dmg) {
-        if (AllBars.ContainsKey(hh))
-            AllBars[hh].UpdateTransitionBar(dmg);
+        if (_AllBars.ContainsKey(hh))
+            _AllBars[hh].UpdateTransitionBar(dmg);
     }
 
     private class DamageIndicator {
-        public Vector2 offset;
-        public Vector3 wPosOrigin;
-        public object content;
+        public Vector2 Offset;
+        public Vector3 WPosOrigin;
+        public object Content;
 
-        private float time;
+        private float _Time;
 
         public void Update() {
-            offset-=Vector2.up*Time.deltaTime*5;
-            offset=new Vector2(Mathf.Sin(time*15)-0.5f, offset.y);
-            time+=Time.deltaTime;
+            Offset-=Vector2.up*Time.deltaTime*5;
+            Offset=new Vector2(Mathf.Sin(_Time*15)-0.5f, Offset.y);
+            _Time+=Time.deltaTime;
 
-            if (time>=2) {
-                UsedPool.Add(this);
-                ToRemove.Add(this);
-                time=0;
-                offset=Vector2.zero;
+            if (_Time>=2) {
+                _UsedPool.Add(this);
+                _ToRemove.Add(this);
+                _Time=0;
+                Offset=Vector2.zero;
             }
         }
 
         public void OnGUI() {
-            Vector2 worldToScreenPoint = Camera.main.WorldToScreenPoint(wPosOrigin);
+            Vector2 worldToScreenPoint = Camera.main.WorldToScreenPoint(WPosOrigin);
             worldToScreenPoint=new Vector2(worldToScreenPoint.x, Screen.height-worldToScreenPoint.y);
             GUI.color=Color.red;
-            GUI.Label(new Rect(worldToScreenPoint+( offset*15 )+( new Vector2(25, 25) ), new Vector2(50, 50)), content.ToStringIfNoString());
+            GUI.Label(new Rect(worldToScreenPoint+( Offset*15 )+( new Vector2(25, 25) ), new Vector2(50, 50)), Content.ToStringIfNoString());
             GUI.color=Color.white;
         }
     }

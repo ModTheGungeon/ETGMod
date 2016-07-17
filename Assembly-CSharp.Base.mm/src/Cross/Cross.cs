@@ -7,7 +7,7 @@ using System.Reflection;
 /// </summary>
 public static class Cross {
 
-    private readonly static object[] EmptyObjectArray = new object[0];
+    private readonly static object[] _EmptyObjectArray = new object[0];
 
     static Cross() {
         //for mono, get from
@@ -15,7 +15,7 @@ public static class Cross {
         PropertyInfo property_platform = typeof(Environment).GetProperty("Platform", BindingFlags.NonPublic | BindingFlags.Static);
         string platID;
         if (property_platform != null) {
-            platID = property_platform.GetValue(null, EmptyObjectArray).ToString();
+            platID = property_platform.GetValue(null, _EmptyObjectArray).ToString();
         } else {
             //for .net, use default value
             platID = Environment.OSVersion.Platform.ToString();
