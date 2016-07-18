@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-public class patch_CharacterSelectController : CharacterSelectController {
+internal class patch_CharacterSelectController : CharacterSelectController {
 
     /// <summary>
     /// Stringify the character so it can be used "elsewhere".

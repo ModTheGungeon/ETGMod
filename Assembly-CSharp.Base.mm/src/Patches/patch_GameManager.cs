@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-public class patch_GameManager : GameManager {
+internal class patch_GameManager : GameManager {
 
     public static extern GameObject orig_get_GameObject_1();
     public static GameObject get_GameObject_1() {

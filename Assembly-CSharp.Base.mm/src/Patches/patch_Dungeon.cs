@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Dungeonator {
-    public class patch_Dungeon : Dungeon {
+    internal class patch_Dungeon : Dungeon {
 
         private extern IEnumerator orig_Start();
         private IEnumerator Start() {

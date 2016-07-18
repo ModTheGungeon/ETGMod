@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-public abstract class patch_tk2dBaseSprite : tk2dBaseSprite {
+internal abstract class patch_tk2dBaseSprite : tk2dBaseSprite {
 
     public extern void orig_Awake();
     public new void Awake() {

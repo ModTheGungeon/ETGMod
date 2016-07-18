@@ -8,7 +8,7 @@ using MonoMod;
 /// <summary>
 /// Character / enemy cache?
 /// </summary>
-public static class patch_GClass235 {
+internal static class patch_GClass235 {
     public static extern Object orig_smethod_0(string name);
     public static Object smethod_0(string name) {
         if (ETGMod.Player.CoopReplacement != null && name == "PlayerCoopCultist") {

@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-public class patch_MainMenuFoyerController : MainMenuFoyerController {
+internal class patch_MainMenuFoyerController : MainMenuFoyerController {
 
     public extern void orig_method_0();
     public new void method_0() {
