@@ -36,7 +36,7 @@ public class AssetMetadata {
                 string file = File.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
                 using (ZipFile zip = ZipFile.Read(Zip)) {
                     foreach (ZipEntry entry in zip.Entries) {
-                        if (entry.FileName.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) == File) {
+                        if (entry.FileName.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) == file) {
                             MemoryStream ms = new MemoryStream();
                             entry.Extract(ms);
                             ms.Seek(0, SeekOrigin.Begin);
