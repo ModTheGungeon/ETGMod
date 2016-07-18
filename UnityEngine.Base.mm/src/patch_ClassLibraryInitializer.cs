@@ -13,9 +13,8 @@ namespace UnityEngine {
         private static extern void orig_Init();
         // Seemingly first piece of managed code running in Unity
         private static void Init() {
-            MonoDebug.Force();
-
             orig_Init();
+            MonoDebug.Force();
         }
     }
 }

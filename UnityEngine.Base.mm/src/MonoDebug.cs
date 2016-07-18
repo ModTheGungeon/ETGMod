@@ -60,22 +60,16 @@ public static class MonoDebug {
             return false;
         }
 
-        Action<object> l = Debug.Log;
-        if (Environment.OSVersion.Platform == PlatformID.Unix) {
-            l = Console.WriteLine;
-        }
-
         IntPtr NULL = IntPtr.Zero;
 
         // At this point only mscorlib and UnityEngine are loaded... if called in ClassLibraryInitializer.
         // TODO: mono_debug_open_image_from_memory all non-mscorlib assemblies? Does Mono even survive that?!
 
-        l("MonoDebug!");
-        l("Forcing Mono into debug mode: " + format);
+        Debug.Log("Forcing Mono into debug mode: " + format);
 
         // Prepare the functions.
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
-            l("On Windows, mono_debug_domain_create is not public. Creating delegate from pointer.");
+            Debug.Log("On Windows, mono_debug_domain_create is not public. Creating delegate from pointer.");
             // The function is not in the export table on Windows... although it should
             // See https://github.com/Unity-Technologies/mono/blob/unity-staging/msvc/mono.def
             // Compare with https://github.com/mono/mono/blob/master/msvc/mono.def, where mono_debug_domain_create is exported
@@ -85,7 +79,7 @@ public static class MonoDebug {
             mono_debug_domain_create = (d_mono_debug_domain_create) Marshal.GetDelegateForFunctionPointer(p_mono_debug_domain_create, typeof(d_mono_debug_domain_create));
 
         } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
-            l("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
+            Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
             // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
             IntPtr e = IntPtr.Zero;
             IntPtr libmonoso = IntPtr.Zero;
@@ -95,36 +89,36 @@ public static class MonoDebug {
                 dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
             }
             if ((e = dlerror()) != IntPtr.Zero) {
-                l("MonoDebug can't access libmono.so!");
-                l("dlerror: " + Marshal.PtrToStringAnsi(e));
+                Debug.Log("MonoDebug can't access libmono.so!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
             mono_debug_init = (d_mono_debug_init)
                 Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_debug_init"), typeof(d_mono_debug_init));
             if ((e = dlerror()) != IntPtr.Zero) {
-                l("MonoDebug can't access mono_debug_init!");
-                l("dlerror: " + Marshal.PtrToStringAnsi(e));
+                Debug.Log("MonoDebug can't access mono_debug_init!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
             mono_assembly_get_image = (d_mono_assembly_get_image)
                 Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_assembly_get_image"), typeof(d_mono_assembly_get_image));
             if ((e = dlerror()) != IntPtr.Zero) {
-                l("MonoDebug can't access mono_assembly_get_image!");
-                l("dlerror: " + Marshal.PtrToStringAnsi(e));
+                Debug.Log("MonoDebug can't access mono_assembly_get_image!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
             mono_debug_open_image_from_memory = (d_mono_debug_open_image_from_memory)
                 Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_debug_open_image_from_memory"), typeof(d_mono_debug_open_image_from_memory));
             if ((e = dlerror()) != IntPtr.Zero) {
-                l("MonoDebug can't access mono_debug_open_image_from_memory!");
-                l("dlerror: " + Marshal.PtrToStringAnsi(e));
+                Debug.Log("MonoDebug can't access mono_debug_open_image_from_memory!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
             mono_debug_domain_create = (d_mono_debug_domain_create)
                 Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_debug_domain_create"), typeof(d_mono_debug_domain_create));
             if ((e = dlerror()) != IntPtr.Zero) {
-                l("MonoDebug can't access mono_debug_domain_create!");
-                l("dlerror: " + Marshal.PtrToStringAnsi(e));
+                Debug.Log("MonoDebug can't access mono_debug_domain_create!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
         }
@@ -137,23 +131,23 @@ public static class MonoDebug {
         AppDomain domainManaged = AppDomain.CurrentDomain; // Unity Child Domain; Any other app domains?
         IntPtr domain = (IntPtr) f_mono_app_domain.GetValue(domainManaged);
 
-        l("Generating dynamic assembly to prevent mono_debug_open_image_from_memory invocation.");
+        Debug.Log("Generating dynamic assembly to prevent mono_debug_open_image_from_memory invocation.");
         AssemblyBuilder asmNULLBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("NULL"), AssemblyBuilderAccess.Run);
         IntPtr asmNULL = (IntPtr) f_mono_assembly.GetValue(asmNULLBuilder);
         IntPtr imgNULL = mono_assembly_get_image(asmNULL);
 
         // Precompile some method calls used after mono_debug_init to prevent Mono from crashing while compiling.
-        l("Precompiling mono_debug_open_image_from_memory.");
+        Debug.Log("Precompiling mono_debug_open_image_from_memory.");
         mono_debug_open_image_from_memory(imgNULL, NULL, 0);
-        l("Precompiling mono_debug_domain_create.");
+        Debug.Log("Precompiling mono_debug_domain_create.");
         mono_debug_domain_create(NULL);
 
-        l("Invoking mono_debug_init.");
+        Debug.Log("Invoking mono_debug_init.");
         mono_debug_init(format);
-        l("Filling debug data as soon as possible.");
+        Debug.Log("Filling debug data as soon as possible.");
         mono_debug_domain_create(domain);
         mono_debug_open_image_from_memory(img, NULL, 0);
-        l("Done!");
+        Debug.Log("Done!");
         return true;
     }
 
