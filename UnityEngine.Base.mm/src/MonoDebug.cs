@@ -93,34 +93,43 @@ public static class MonoDebug {
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
-            mono_debug_init = (d_mono_debug_init)
-                Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_debug_init"), typeof(d_mono_debug_init));
+            IntPtr s;
+
+            s = dlsym(libmonoso, "mono_debug_init");
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access mono_debug_init!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
-            mono_assembly_get_image = (d_mono_assembly_get_image)
-                Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_assembly_get_image"), typeof(d_mono_assembly_get_image));
+            mono_debug_init = (d_mono_debug_init)
+                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_init));
+
+            s = dlsym(libmonoso, "mono_assembly_get_image");
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access mono_assembly_get_image!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
-            mono_debug_open_image_from_memory = (d_mono_debug_open_image_from_memory)
-                Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_debug_open_image_from_memory"), typeof(d_mono_debug_open_image_from_memory));
+            mono_assembly_get_image = (d_mono_assembly_get_image)
+                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_assembly_get_image));
+
+            s = dlsym(libmonoso, "mono_debug_open_image_from_memory");
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access mono_debug_open_image_from_memory!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
-            mono_debug_domain_create = (d_mono_debug_domain_create)
-                Marshal.GetDelegateForFunctionPointer(dlsym(libmonoso, "mono_debug_domain_create"), typeof(d_mono_debug_domain_create));
+            mono_debug_open_image_from_memory = (d_mono_debug_open_image_from_memory)
+                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_open_image_from_memory));
+
+            s = dlsym(libmonoso, "mono_debug_domain_create");
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access mono_debug_domain_create!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return false;
             }
+            mono_debug_domain_create = (d_mono_debug_domain_create)
+                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_domain_create));
         }
 
         // Prepare everything else required: Assembly / image, domain and NULL assembly pointers.
