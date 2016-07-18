@@ -1,12 +1,6 @@
 ﻿#pragma warning disable 0626
 #pragma warning disable 0649
 
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.CompilerServices;
-using UnityEngineInternal;
-using MonoMod;
-
 namespace UnityEngine {
     internal class patch_Object {
 

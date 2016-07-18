@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Runtime.CompilerServices;
-using UnityEngineInternal;
+﻿#pragma warning disable 0626
+#pragma warning disable 0649
 using MonoMod;
 
 namespace UnityEngine {
