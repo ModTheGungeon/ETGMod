@@ -9,12 +9,20 @@ public static class MonoDebug {
     // THIS IS AN UGLY HACK. IT'S VERY UGLY.
 
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
-    private static long WINDOWS_mono_debug_init = 0x0000000180074cd4;
-    private static long WINDOWS_mono_debug_domain_create = 0x0000000180074ac0;
-	private static long WINDOWS_mono_debugger_agent_init = 0x00000001800d4ef4;
-	// REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
-	private static long LINUX_64_mono_debug_init = 0x0000000000000000;
+    private static long WINDOWS_mono_debug_init =           0x0000000180074cd4;
+    private static long WINDOWS_mono_debug_domain_create =  0x0000000180074ac0;
+	private static long WINDOWS_mono_debugger_agent_init =  0x00000001800d4ef4;
+    private static long WINDOWS_runtime_initialized =       0x0000000000000000;
+    private static long WINDOWS_appdomain_load =            0x0000000000000000;
+    private static long WINDOWS_thread_startup =            0x0000000000000000;
+    private static long WINDOWS_assembly_load =             0x0000000000000000;
+    // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
+    private static long LINUX_64_mono_debug_init =          0x0000000000000000;
 	private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
+    private static long LINUX_64_runtime_initialized =      0x0000000000000000;
+    private static long LINUX_64_appdomain_load =           0x0000000000000000;
+    private static long LINUX_64_thread_startup =           0x0000000000000000;
+    private static long LINUX_64_assembly_load =            0x0000000000000000;
 
     private static FieldInfo f_mono_assembly = typeof(Assembly).GetField("_mono_assembly", BindingFlags.NonPublic | BindingFlags.Instance);
     private static FieldInfo f_mono_app_domain = typeof(AppDomain).GetField("_mono_app_domain", BindingFlags.NonPublic | BindingFlags.Instance);
