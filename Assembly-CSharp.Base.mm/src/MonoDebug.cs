@@ -194,7 +194,7 @@ public static class MonoDebug {
         if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
             return false;
         }
-        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555,server=y";
+        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555,defer=y";
         Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
 
         // Prepare the functions.
@@ -242,7 +242,7 @@ public static class MonoDebug {
 			return false;
 		}
         if (IntPtr.Size == 4) {
-            Debug.Log("32 bit not supported!");
+            Debug.Log("x86 not supported!");
             return false;
         }
         if (Environment.OSVersion.Platform == PlatformID.MacOSX) {
@@ -264,11 +264,10 @@ public static class MonoDebug {
             mono_debugger_agent_init = (d_mono_debugger_agent_init) Marshal.GetDelegateForFunctionPointer(p_mono_debugger_agent_init, typeof(d_mono_debugger_agent_init));
         }
 
-        mono_debugger_agent_init(); // UNCOMMENT IF YOU WANT HANG
+        mono_debugger_agent_init();
 
         // Manually call:
 
-        // debugger_profiler?
         // runtime_initialized
         // appdomain_load
         // thread_startup
