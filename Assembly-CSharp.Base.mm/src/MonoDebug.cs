@@ -13,8 +13,6 @@ public static class MonoDebug {
     private static long WINDOWS_mono_debug_domain_create = 0x0000000180074ac0;
 	private static long WINDOWS_mono_debugger_agent_init = 0x00000001800d4ef4;
 	// REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
-	private static long LINUX_32_mono_debug_init = 0x0000000000000000;
-	private static long LINUX_32_mono_debugger_agent_init = 0x0000000000000000;
 	private static long LINUX_64_mono_debug_init = 0x0000000000000000;
 	private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
 
@@ -243,14 +241,18 @@ public static class MonoDebug {
 		if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
 			return false;
 		}
-		if (Environment.OSVersion.Platform == PlatformID.Unix && LINUX_64_mono_debugger_agent_init == 0L) {
+        if (IntPtr.Size == 4) {
+            Debug.Log("32 bit not supported!");
+            return false;
+        }
+        if (Environment.OSVersion.Platform == PlatformID.MacOSX) {
+            Debug.Log("Mac OS X not supported!");
+            return false;
+        }
+        if (Environment.OSVersion.Platform == PlatformID.Unix && LINUX_64_mono_debugger_agent_init == 0L) {
             Debug.Log("Linux / Unix currently not supported!");
 			return false;
 		}
-        if (Environment.OSVersion.Platform == PlatformID.MacOSX) {
-            Debug.Log("Mac OS X currently not supported!");
-            return false;
-        }
         Debug.Log("Kick-starting Mono's debugger agent.");
 
         // Prepare the functions.
@@ -262,7 +264,7 @@ public static class MonoDebug {
             mono_debugger_agent_init = (d_mono_debugger_agent_init) Marshal.GetDelegateForFunctionPointer(p_mono_debugger_agent_init, typeof(d_mono_debugger_agent_init));
         }
 
-        //mono_debugger_agent_init(); // UNCOMMENT IF YOU WANT HANG
+        mono_debugger_agent_init(); // UNCOMMENT IF YOU WANT HANG
 
         // Manually call:
 
