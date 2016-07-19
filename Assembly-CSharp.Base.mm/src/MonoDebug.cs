@@ -9,8 +9,14 @@ public static class MonoDebug {
     // THIS IS AN UGLY HACK. IT'S VERY UGLY.
 
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
-    private static long WINDOWS_f_mono_debug_init = 0x0000000180074cd4;
-    private static long WINDOWS_f_mono_debug_domain_create = 0x0000000180074ac0;
+    private static long WINDOWS_mono_debug_init = 0x0000000180074cd4;
+    private static long WINDOWS_mono_debug_domain_create = 0x0000000180074ac0;
+	private static long WINDOWS_mono_debugger_agent_init = 0x00000001800d4ef4;
+	// REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
+	private static long LINUX_32_mono_debug_init = 0x0000000000000000;
+	private static long LINUX_32_mono_debugger_agent_init = 0x0000000000000000;
+	private static long LINUX_64_mono_debug_init = 0x0000000000000000;
+	private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
 
     private static FieldInfo f_mono_assembly = typeof(Assembly).GetField("_mono_assembly", BindingFlags.NonPublic | BindingFlags.Instance);
     private static FieldInfo f_mono_app_domain = typeof(AppDomain).GetField("_mono_app_domain", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -31,54 +37,6 @@ public static class MonoDebug {
     private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPTStr)] string symbol);
     [DllImport("dl")]
     private static extern IntPtr dlerror();
-
-    // Unity ships with its own implementation where only --debugger-agent= gets parsed. --soft-breakpoints cannot be set.
-    private delegate void d_mono_jit_parse_options(int argc, string[] argv);
-    [DllImport("mono", EntryPoint = "mono_jit_parse_options")]
-    private static extern void pi_mono_jit_parse_options(int argc, string[] argv); // int argc, char* argv[]
-    private static d_mono_jit_parse_options mono_jit_parse_options = pi_mono_jit_parse_options;
-
-    public static bool SetupDebuggerAgent(string agent = null) {
-        Debug.Log("MonoDebug.SetupDebuggerAgent!");
-        if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
-            return false;
-        }
-        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555";
-        Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
-
-        if (Environment.OSVersion.Platform == PlatformID.Unix) {
-            Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
-            // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
-            IntPtr e = IntPtr.Zero;
-            IntPtr libmonoso = IntPtr.Zero;
-            if (IntPtr.Size == 8) {
-                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
-            } else {
-                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
-            }
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access libmono.so!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            IntPtr s;
-
-            s = dlsym(libmonoso, "mono_jit_parse_options");
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access mono_jit_parse_options!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            mono_jit_parse_options = (d_mono_jit_parse_options)
-                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_jit_parse_options));
-        }
-        // TODO Mac OS X?
-
-        mono_jit_parse_options(1, new string[] { "--debugger-agent=" + agent });
-
-        Debug.Log("Done!");
-        return true;
-    }
 
     private delegate void d_mono_debug_init(MonoDebugFormat init);
     [DllImport("mono", EntryPoint = "mono_debug_init")]
@@ -119,7 +77,7 @@ public static class MonoDebug {
             // Compare with https://github.com/mono/mono/blob/master/msvc/mono.def, where mono_debug_domain_create is exported
             IntPtr m_mono = GetModuleHandle("mono.dll");
             IntPtr p_mono_debug_init = GetProcAddress(m_mono, "mono_debug_init");
-            IntPtr p_mono_debug_domain_create = new IntPtr(WINDOWS_f_mono_debug_domain_create - WINDOWS_f_mono_debug_init + (p_mono_debug_init.ToInt64()));
+            IntPtr p_mono_debug_domain_create = new IntPtr(WINDOWS_mono_debug_domain_create - WINDOWS_mono_debug_init + (p_mono_debug_init.ToInt64()));
             mono_debug_domain_create = (d_mono_debug_domain_create) Marshal.GetDelegateForFunctionPointer(p_mono_debug_domain_create, typeof(d_mono_debug_domain_create));
 
         } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
@@ -226,6 +184,97 @@ public static class MonoDebug {
         Debug.Log("Done!");
         return true;
     }
+
+    // Unity ships with its own implementation where only --debugger-agent= gets parsed. --soft-breakpoints cannot be set.
+    private delegate void d_mono_jit_parse_options(int argc, string[] argv);
+    [DllImport("mono", EntryPoint = "mono_jit_parse_options")]
+    private static extern void pi_mono_jit_parse_options(int argc, string[] argv); // int argc, char* argv[]
+    private static d_mono_jit_parse_options mono_jit_parse_options = pi_mono_jit_parse_options;
+
+    public static bool SetupDebuggerAgent(string agent = null) {
+        Debug.Log("MonoDebug.SetupDebuggerAgent!");
+        if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
+            return false;
+        }
+        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555,server=y";
+        Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
+
+        // Prepare the functions.
+        if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
+            // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
+            IntPtr e = IntPtr.Zero;
+            IntPtr libmonoso = IntPtr.Zero;
+            if (IntPtr.Size == 8) {
+                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
+            } else {
+                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
+            }
+            if ((e = dlerror()) != IntPtr.Zero) {
+                Debug.Log("MonoDebug can't access libmono.so!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+                return false;
+            }
+            IntPtr s;
+
+            s = dlsym(libmonoso, "mono_jit_parse_options");
+            if ((e = dlerror()) != IntPtr.Zero) {
+                Debug.Log("MonoDebug can't access mono_jit_parse_options!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+                return false;
+            }
+            mono_jit_parse_options = (d_mono_jit_parse_options)
+                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_jit_parse_options));
+        }
+        // TODO Mac OS X?
+
+        mono_jit_parse_options(1, new string[] { "--debugger-agent=" + agent });
+
+        Debug.Log("Done!");
+        return true;
+    }
+
+    // It's hidden everywhere... no need to even have a P/Invoke fallback here.
+    private delegate void d_mono_debugger_agent_init();
+	private static d_mono_debugger_agent_init mono_debugger_agent_init;
+
+	public static bool InitDebuggerAgent() {
+		Debug.Log("MonoDebug.InitDebuggerAgent!");
+		if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
+			return false;
+		}
+		if (Environment.OSVersion.Platform == PlatformID.Unix && LINUX_64_mono_debugger_agent_init == 0L) {
+            Debug.Log("Linux / Unix currently not supported!");
+			return false;
+		}
+        if (Environment.OSVersion.Platform == PlatformID.MacOSX) {
+            Debug.Log("Mac OS X currently not supported!");
+            return false;
+        }
+        Debug.Log("Kick-starting Mono's debugger agent.");
+
+        // Prepare the functions.
+        Debug.Log("mono_debugger_agent_init is not public. Creating delegate from pointer.");
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+            IntPtr m_mono = GetModuleHandle("mono.dll");
+            IntPtr p_mono_debug_init = GetProcAddress(m_mono, "mono_debug_init");
+            IntPtr p_mono_debugger_agent_init = new IntPtr(WINDOWS_mono_debugger_agent_init - WINDOWS_mono_debug_init + (p_mono_debug_init.ToInt64()));
+            mono_debugger_agent_init = (d_mono_debugger_agent_init) Marshal.GetDelegateForFunctionPointer(p_mono_debugger_agent_init, typeof(d_mono_debugger_agent_init));
+        }
+
+        //mono_debugger_agent_init(); // UNCOMMENT IF YOU WANT HANG
+
+        // Manually call:
+
+        // debugger_profiler?
+        // runtime_initialized
+        // appdomain_load
+        // thread_startup
+        // assembly_load
+
+        Debug.Log("Done!");
+		return true;
+	}
 
 }
 

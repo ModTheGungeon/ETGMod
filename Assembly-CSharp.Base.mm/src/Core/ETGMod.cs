@@ -43,8 +43,9 @@ public static partial class ETGMod {
         try {
             MonoDebug.SetupDebuggerAgent();
             MonoDebug.Init();
+			MonoDebug.InitDebuggerAgent();
         } catch (Exception e) {
-            Debug.Log("ClassLibraryInitializer called MonoDebug.Force and it sudoku'd.");
+            Debug.Log("ETGMod called MonoDebug and it sudoku'd.");
             Debug.Log(e);
         }
 
@@ -56,12 +57,12 @@ public static partial class ETGMod {
         Assets.Hook();
         Assembly.GetCallingAssembly().MapAssets();
 
-        Debug.Log("entering mono_runtime_get_main_args");
+        /*Debug.Log("entering mono_runtime_get_main_args");
         string[] args = mono_runtime_get_main_args();
         Debug.Log("passed mono_runtime_get_main_args");
         for (int i = 0; i < args.Length; i++) {
             Debug.Log(i + ": " + args[i]);
-        }
+        }*/
 
         _ScanBackends();
         _LoadMods();
