@@ -79,13 +79,13 @@ public class CrossGungeonConfig : ICrossConfig {
 
     public object Find(CrossSearch search) {
         string prefix = "UNKNOWN_";
-        if (search.Type == CrossSearch.TypeFieldInfo) {
+        if (search.MemberType == CrossSearch.TypeFieldInfo) {
             prefix = search.Returns.Name + "_";
             prefix = prefix[0].ToString().ToLowerInvariant() + prefix.Substring(1);
 
-        } else if (search.Type == CrossSearch.TypeMethodInfo) {
+        } else if (search.MemberType == CrossSearch.TypeMethodInfo) {
             prefix = search.Static ? "smethod_" : "method_";
-        } else if (search.Type == CrossSearch.TypePropertyInfo) {
+        } else if (search.MemberType == CrossSearch.TypePropertyInfo) {
             prefix = search.Returns.Name + "_";
 
         }
@@ -93,6 +93,13 @@ public class CrossGungeonConfig : ICrossConfig {
         int preID = -1;
         if (!string.IsNullOrEmpty(search.Name)) {
             preID = int.Parse(search.Name.Substring(search.Name.IndexOf('_') + 1));
+        }
+
+        if (search.InType != null) {
+            object obj = FindInType(search, search.InType, prefix, preID);
+            if (obj != null) {
+                return obj;
+            }
         }
 
         int preTypeID = -1;
@@ -148,25 +155,29 @@ public class CrossGungeonConfig : ICrossConfig {
     public object FindInType(CrossSearch search, Type @in, string prefix, int preID) {
         // Check the context here; return null prematurely if context doesn't match.
         if (search.Context != null && search.Context.Length != 0) {
-            // TODO check context!
+            for (int i = 0; i < search.Context.Length; i++) {
+                CrossSearch context = search.Context[i];
+                context.InType = @in;
+                if (context.Find() == null) {
+                    return null;
+                }
+            }
+            
         }
 
-        BindingFlags flags =
-            (search.Private ? BindingFlags.NonPublic : search.Public ? BindingFlags.Public : BindingFlags.Default) |
-            (search.Static ? BindingFlags.Static : BindingFlags.Instance)
-            ;
+        BindingFlags flags = search.Flags;
 
-        if (search.Type == CrossSearch.TypeFieldInfo) {
+        if (search.MemberType == CrossSearch.TypeFieldInfo) {
             // We just return the field. There's currently a too high risk of false positives.
             return @in.GetField(search.Name, flags);
 
 
-        } else if (search.Type == CrossSearch.TypePropertyInfo) {
+        } else if (search.MemberType == CrossSearch.TypePropertyInfo) {
             // We do the same with the properties as with the fields.
             return @in.GetProperty(search.Name, flags);
         }
 
-        if (search.Type != CrossSearch.TypeMethodInfo) {
+        if (search.MemberType != CrossSearch.TypeMethodInfo) {
             return null;
         }
 

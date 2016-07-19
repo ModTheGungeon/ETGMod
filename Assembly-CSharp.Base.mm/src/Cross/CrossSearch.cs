@@ -12,10 +12,11 @@ public class CrossSearch {
     public readonly static Type TypeMethodInfo = typeof(MethodInfo);
     public readonly static Type TypePropertyInfo = typeof(PropertyInfo);
 
-    public Type Type;
+    public Type MemberType;
 
     public string Name;
     public string In;
+    public Type InType;
     public bool Private = false;
     public bool Public = true;
     public bool Static = false;
@@ -23,11 +24,19 @@ public class CrossSearch {
     public Type[] Args;
     public CrossSearch[] Context;
 
+    public BindingFlags Flags {
+        get {
+            return
+                (Private ? BindingFlags.NonPublic : Public ? BindingFlags.Public : BindingFlags.Default) |
+                (Static ? BindingFlags.Static : BindingFlags.Instance);
+        }
+    }
+
     public CrossSearch() {
     }
     public CrossSearch(Type type)
         : this() {
-        Type = type;
+        MemberType = type;
     }
 
 }
