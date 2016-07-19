@@ -19,7 +19,7 @@ namespace Dungeonator {
 
             // TODO do magic here
 
-            return (IEnumerator) list;
+            return list.GetEnumerator();
         }
 
     }

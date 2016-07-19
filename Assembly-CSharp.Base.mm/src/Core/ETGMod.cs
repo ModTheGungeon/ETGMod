@@ -41,8 +41,9 @@ public static partial class ETGMod {
         _Started = true;
 
         try {
-            MonoDebug.Force();
-        } catch (System.Exception e) {
+            MonoDebug.SetupDebuggerAgent();
+            MonoDebug.Init();
+        } catch (Exception e) {
             Debug.Log("ClassLibraryInitializer called MonoDebug.Force and it sudoku'd.");
             Debug.Log(e);
         }

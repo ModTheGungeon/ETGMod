@@ -15,6 +15,8 @@ public static class MonoDebug {
     private static FieldInfo f_mono_assembly = typeof(Assembly).GetField("_mono_assembly", BindingFlags.NonPublic | BindingFlags.Instance);
     private static FieldInfo f_mono_app_domain = typeof(AppDomain).GetField("_mono_app_domain", BindingFlags.NonPublic | BindingFlags.Instance);
 
+    private static IntPtr NULL = IntPtr.Zero;
+
     // Windows
     [DllImport("kernel32")]
     private static extern IntPtr GetModuleHandle(string lpModuleName);
@@ -29,6 +31,54 @@ public static class MonoDebug {
     private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPTStr)] string symbol);
     [DllImport("dl")]
     private static extern IntPtr dlerror();
+
+    // Unity ships with its own implementation where only --debugger-agent= gets parsed. --soft-breakpoints cannot be set.
+    private delegate void d_mono_jit_parse_options(int argc, string[] argv);
+    [DllImport("mono", EntryPoint = "mono_jit_parse_options")]
+    private static extern void pi_mono_jit_parse_options(int argc, string[] argv); // int argc, char* argv[]
+    private static d_mono_jit_parse_options mono_jit_parse_options = pi_mono_jit_parse_options;
+
+    public static bool SetupDebuggerAgent(string agent = null) {
+        Debug.Log("MonoDebug.SetupDebuggerAgent!");
+        if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
+            return false;
+        }
+        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555";
+        Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
+
+        if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
+            // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
+            IntPtr e = IntPtr.Zero;
+            IntPtr libmonoso = IntPtr.Zero;
+            if (IntPtr.Size == 8) {
+                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
+            } else {
+                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
+            }
+            if ((e = dlerror()) != IntPtr.Zero) {
+                Debug.Log("MonoDebug can't access libmono.so!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+                return false;
+            }
+            IntPtr s;
+
+            s = dlsym(libmonoso, "mono_jit_parse_options");
+            if ((e = dlerror()) != IntPtr.Zero) {
+                Debug.Log("MonoDebug can't access mono_jit_parse_options!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+                return false;
+            }
+            mono_jit_parse_options = (d_mono_jit_parse_options)
+                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_jit_parse_options));
+        }
+        // TODO Mac OS X?
+
+        mono_jit_parse_options(1, new string[] { "--debugger-agent=" + agent });
+
+        Debug.Log("Done!");
+        return true;
+    }
 
     private delegate void d_mono_debug_init(MonoDebugFormat init);
     [DllImport("mono", EntryPoint = "mono_debug_init")]
@@ -53,15 +103,12 @@ public static class MonoDebug {
     private static extern void pi_mono_debug_domain_create(IntPtr domain); // MonoDomain* domain
     private static d_mono_debug_domain_create mono_debug_domain_create = pi_mono_debug_domain_create;
 
-
-    public static bool/*-if-it-returns-at-all*/ Force(MonoDebugFormat format = MonoDebugFormat.MONO_DEBUG_FORMAT_MONO) {
+    public static bool/*-if-it-returns-at-all*/ Init(MonoDebugFormat format = MonoDebugFormat.MONO_DEBUG_FORMAT_MONO) {
+        Debug.Log("MonoDebug.Init!");
         if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
             return false;
         }
-        IntPtr NULL = IntPtr.Zero;
-
         // At this point only mscorlib and UnityEngine are loaded... if called in ClassLibraryInitializer.
-
         Debug.Log("Forcing Mono into debug mode: " + format);
 
         // Prepare the functions.
