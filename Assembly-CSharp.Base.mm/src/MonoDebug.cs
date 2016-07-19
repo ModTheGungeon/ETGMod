@@ -41,13 +41,13 @@ public static class MonoDebug {
     private static extern IntPtr pi_mono_assembly_get_image(IntPtr assembly); // ret MonoImage*; MonoAssembly* assembly
     private static d_mono_assembly_get_image mono_assembly_get_image = pi_mono_assembly_get_image;
 
-    // same as mono_debug_open_image, without returning the MonoDebugHandle*
+    // Same as mono_debug_open_image, without returning the MonoDebugHandle*
     private delegate IntPtr d_mono_debug_open_image_from_memory(IntPtr image, IntPtr raw_contents, int size);
     [DllImport("mono", EntryPoint = "mono_debug_open_image_from_memory")]
     private static extern IntPtr pi_mono_debug_open_image_from_memory(IntPtr image, IntPtr raw_contents, int size); // MonoImage* image, const guint8* raw_contents, int size
     private static d_mono_debug_open_image_from_memory mono_debug_open_image_from_memory = pi_mono_debug_open_image_from_memory;
 
-    // seemingly more official wrapper around create_data_table
+    // Seemingly more official wrapper around create_data_table
     private delegate void d_mono_debug_domain_create(IntPtr domain);
     [DllImport("mono", EntryPoint = "mono_debug_domain_create")]
     private static extern void pi_mono_debug_domain_create(IntPtr domain); // MonoDomain* domain
@@ -55,15 +55,12 @@ public static class MonoDebug {
 
 
     public static bool/*-if-it-returns-at-all*/ Force(MonoDebugFormat format = MonoDebugFormat.MONO_DEBUG_FORMAT_MONO) {
-        if (Environment.OSVersion.Platform == PlatformID.MacOSX) {
-            // Give up. TODO Does Mac OSX actually complain?
+        if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
             return false;
         }
-
         IntPtr NULL = IntPtr.Zero;
 
         // At this point only mscorlib and UnityEngine are loaded... if called in ClassLibraryInitializer.
-        // TODO: mono_debug_open_image_from_memory all non-mscorlib assemblies? Does Mono even survive that?!
 
         Debug.Log("Forcing Mono into debug mode: " + format);
 
@@ -84,9 +81,9 @@ public static class MonoDebug {
             IntPtr e = IntPtr.Zero;
             IntPtr libmonoso = IntPtr.Zero;
             if (IntPtr.Size == 8) {
-                dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
+                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
             } else {
-                dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
+                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
             }
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access libmono.so!");
@@ -131,11 +128,12 @@ public static class MonoDebug {
             mono_debug_domain_create = (d_mono_debug_domain_create)
                 Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_domain_create));
         }
+        // TODO Mac OS X?
 
         // Prepare everything else required: Assembly / image, domain and NULL assembly pointers.
-        Assembly asmManaged = Assembly.GetCallingAssembly();
-        IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
-        IntPtr img = mono_assembly_get_image(asm);
+        Assembly asmThisManaged = Assembly.GetCallingAssembly();
+        IntPtr asmThis = (IntPtr) f_mono_assembly.GetValue(asmThisManaged);
+        IntPtr imgThis = mono_assembly_get_image(asmThis);
 
         AppDomain domainManaged = AppDomain.CurrentDomain; // Unity Child Domain; Any other app domains?
         IntPtr domain = (IntPtr) f_mono_app_domain.GetValue(domainManaged);
@@ -151,11 +149,33 @@ public static class MonoDebug {
         Debug.Log("Precompiling mono_debug_domain_create.");
         mono_debug_domain_create(NULL);
 
+        // Entering highly critical part
         Debug.Log("Invoking mono_debug_init.");
         mono_debug_init(format);
-        Debug.Log("Filling debug data as soon as possible.");
+        Debug.Log("Filling debug data for main domain and main assembly.");
         mono_debug_domain_create(domain);
-        mono_debug_open_image_from_memory(img, NULL, 0);
+        mono_debug_open_image_from_memory(imgThis, NULL, 0);
+        // Leaving highly critical part
+
+        Debug.Log("Filling debug data for other assemblies.");
+        Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < asmsManaged.Length; i++) {
+            Assembly asmManaged = asmsManaged[i];
+            IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
+            IntPtr img = mono_assembly_get_image(asm);
+            Debug.Log(i + ": " + asmManaged.FullName + "; ASM: 0x" + asm.ToString("X8") + "; IMG: " + img.ToString("X8"));
+            if (asmManaged == asmThisManaged) {
+                Debug.Log("Skipping because already filled.");
+            }
+            if (asmManaged is AssemblyBuilder) {
+                Debug.Log("Skipping because dynamic.");
+            }
+            if (asmManaged.GetName().Name == "mscorlib") {
+                Debug.Log("Skipping because mscorlib.");
+            }
+            mono_debug_open_image_from_memory(imgThis, NULL, 0);
+        }
+
         Debug.Log("Done!");
         return true;
     }

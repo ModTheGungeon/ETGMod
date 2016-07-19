@@ -8,12 +8,6 @@ namespace UnityEngine {
         // Seemingly first piece of managed code running in Unity
         private static void Init() {
             orig_Init();
-            try {
-                MonoDebug.Force();
-            } catch (System.Exception e) {
-                Debug.Log("ClassLibraryInitializer called MonoDebug.Force and it sudoku'd.");
-                Debug.Log(e);
-            }
         }
     }
 }

@@ -40,6 +40,13 @@ public static partial class ETGMod {
         }
         _Started = true;
 
+        try {
+            MonoDebug.Force();
+        } catch (System.Exception e) {
+            Debug.Log("ClassLibraryInitializer called MonoDebug.Force and it sudoku'd.");
+            Debug.Log(e);
+        }
+
         UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();

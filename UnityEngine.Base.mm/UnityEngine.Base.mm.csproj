@@ -44,7 +44,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\ETGModUnityEngineHooks.cs" />
-    <Compile Include="src\MonoDebug.cs" />
     <Compile Include="src\MonoMod\MonoModIgnore.cs" />
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
     <Compile Include="src\MonoMod\MonoModOriginal.cs" />
