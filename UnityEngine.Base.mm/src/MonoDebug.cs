@@ -367,9 +367,6 @@ public static class MonoDebug {
 			if (asmManaged is AssemblyBuilder) {
 				continue;
 			}
-			if (asmManaged.GetName().Name == "mscorlib") {
-				continue;
-			}
 			assembly_load(NULL, asm, 0);
 		}
 
