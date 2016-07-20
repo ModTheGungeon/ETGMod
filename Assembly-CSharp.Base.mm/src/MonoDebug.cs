@@ -253,7 +253,7 @@ public static class MonoDebug {
             return false;
         }
         // Possible: none, server=y, defer=y
-        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555";
+        agent = agent ?? "transport=dt_socket,address=127.0.0.1:10000";
         Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
 
         // Prepare the functions.
@@ -426,60 +426,32 @@ public static class MonoDebug {
         }
         */
 
-        bool runtimeInit = false;
-        bool runtimeInited = false;
-        Thread threadSlave = new Thread(delegate () {
-            Debug.Log("Entering \"MonoDebug runtime_initialized thread\" thread.");
-            while (!runtimeInit) {
-            }
-            Debug.Log("Continuing in \"MonoDebug runtime_initialized thread\" thread: " + Thread.CurrentThread.ManagedThreadId);
-            runtime_initialized(NULL);
-            thread_startup(NULL, CurrentThreadId);
+		appdomain_load(NULL, domain, 0);
+		assembly_load(NULL, asmThis, 0);
 
-            appdomain_load(NULL, domain, 0);
-            assembly_load(NULL, asmThis, 0);
+		Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
+		for (int i = 0; i < asmsManaged.Length; i++)
+		{
+			Assembly asmManaged = asmsManaged[i];
+			IntPtr asm = (IntPtr)f_mono_assembly.GetValue(asmManaged);
+			if (asmManaged == asmThisManaged)
+			{
+				continue;
+			}
+			if (asmManaged is AssemblyBuilder)
+			{
+				continue;
+			}
+			if (asmManaged.GetName().Name == "mscorlib")
+			{
+				continue;
+			}
+			assembly_load(NULL, asm, 0);
+		}
 
-            Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
-            for (int i = 0; i < asmsManaged.Length; i++) {
-                Assembly asmManaged = asmsManaged[i];
-                IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
-                if (asmManaged == asmThisManaged) {
-                    continue;
-                }
-                if (asmManaged is AssemblyBuilder) {
-                    continue;
-                }
-                if (asmManaged.GetName().Name == "mscorlib") {
-                    continue;
-                }
-                assembly_load(NULL, asm, 0);
-            }
-
-            Debug.Log("Returning from \"MonoDebug runtime_initialized thread\" thread to main thread.");
-            runtimeInited = true;
-        }) {
-            Name = "MonoDebug runtime_initialized thread",
-            IsBackground = true
-        };
-        threadSlave.Start();
-
-        Debug.Log("Telling \"MonoDebug runtime_initialized thread\" thread to continue. Current thread: " + Thread.CurrentThread.ManagedThreadId);
-        runtimeInit = true;
-        while (!runtimeInited) {
-        }
-        Debug.Log("Aaaand... we're back!");
-
-        /*
-        Debug.Log("C " + threads);
-        for (int i = 1; i <= threads; i++) {
-            Debug.Log("C " + i + " / " + threads);
-            if (i == threadIDCurrent) {
-                continue;
-            }
-            // TODO hijack thread, make it run thread_startup(GARBAGE, current managed thread id);
-        }
-        */
         thread_startup(NULL, CurrentThreadId);
+
+		runtime_initialized(NULL);
 
         Debug.Log("Done!");
 		return true;
