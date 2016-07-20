@@ -30,6 +30,8 @@ public static partial class ETGMod {
     public static List<ETGModule> GameMods = new List<ETGModule>();
     public static List<ETGBackend> Backends = new List<ETGBackend>();
 
+    public static string[] LaunchArguments;
+
     [DllImport("mono")]
     private static extern string[] mono_runtime_get_main_args(); //ret MonoArray*
 
@@ -40,12 +42,27 @@ public static partial class ETGMod {
         }
         _Started = true;
 
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+            LaunchArguments = mono_runtime_get_main_args();
+        } else {
+            LaunchArguments = MonoDebug.GetDelegate<Func<string[]>>("mono_runtime_get_main_args")();
+        }
+
+        bool debuggerClient = false;
+        // 0 is the binary path
+        for (int i = 1; i < LaunchArguments.Length; i++) {
+            string arg = LaunchArguments[i];
+            if (arg == "--debugger-client") {
+                debuggerClient = true;
+            }
+        }
+
         try {
-            MonoDebug.SetupDebuggerAgent();
+            if (debuggerClient) MonoDebug.SetupDebuggerAgent();
             MonoDebug.Init();
-			MonoDebug.InitDebuggerAgent();
+            if (debuggerClient) MonoDebug.InitDebuggerAgent();
         } catch (Exception e) {
-            Debug.Log("ETGMod called MonoDebug and it sudoku'd.");
+            Debug.Log("Called MonoDebug and it sudoku'd.");
             Debug.Log(e);
         }
 
@@ -56,13 +73,6 @@ public static partial class ETGMod {
         Debug.Log("ETGMod " + BaseVersion);
         Assets.Hook();
         Assembly.GetCallingAssembly().MapAssets();
-
-        /*Debug.Log("entering mono_runtime_get_main_args");
-        string[] args = mono_runtime_get_main_args();
-        Debug.Log("passed mono_runtime_get_main_args");
-        for (int i = 0; i < args.Length; i++) {
-            Debug.Log(i + ": " + args[i]);
-        }*/
 
         _ScanBackends();
         _LoadMods();

@@ -12,14 +12,14 @@ public static class MonoDebug {
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
     private static long WINDOWS_mono_debug_init =           0x0000000180074cd4;
     private static long WINDOWS_mono_debug_domain_create =  0x0000000180074ac0;
-	private static long WINDOWS_mono_debugger_agent_init =  0x00000001800d4ef4;
+    private static long WINDOWS_mono_debugger_agent_init =  0x00000001800d4ef4;
     private static long WINDOWS_runtime_initialized =       0x00000001800d3324;
     private static long WINDOWS_appdomain_load =            0x00000001800d3704;
     private static long WINDOWS_thread_startup =            0x00000001800d336c;
     private static long WINDOWS_assembly_load =             0x00000001800d3778;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
     private static long LINUX_64_mono_debug_init =          0x0000000000000000;
-	private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
+    private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
     private static long LINUX_64_runtime_initialized =      0x0000000000000000;
     private static long LINUX_64_appdomain_load =           0x0000000000000000;
     private static long LINUX_64_thread_startup =           0x0000000000000000;
@@ -175,9 +175,13 @@ public static class MonoDebug {
         } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
             Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
             // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
+            if (mono_debug_init == pi_mono_debug_init) mono_debug_init = null;
             if ((mono_debug_init = mono_debug_init ?? GetDelegate<d_mono_debug_init>()) == null) return false;
+            if (mono_assembly_get_image == pi_mono_assembly_get_image) mono_assembly_get_image = null;
             if ((mono_assembly_get_image = mono_assembly_get_image ?? GetDelegate<d_mono_assembly_get_image>()) == null) return false;
+            if (mono_debug_open_image_from_memory == pi_mono_debug_open_image_from_memory) mono_debug_open_image_from_memory = null;
             if ((mono_debug_open_image_from_memory = mono_debug_open_image_from_memory ?? GetDelegate<d_mono_debug_open_image_from_memory>()) == null) return false;
+            if (mono_debug_domain_create == pi_mono_debug_domain_create) mono_debug_domain_create = null;
             if ((mono_debug_domain_create = mono_debug_domain_create ?? GetDelegate<d_mono_debug_domain_create>()) == null) return false;
         }
         // TODO Mac OS X?
@@ -243,7 +247,8 @@ public static class MonoDebug {
         if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
             return false;
         }
-        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555,defer=y";
+        // Possible: none, server=y, defer=y
+        agent = agent ?? "transport=dt_socket,address=127.0.0.1:55555";
         Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
 
         // Prepare the functions.
@@ -262,7 +267,7 @@ public static class MonoDebug {
 
     // Those are hidden everywhere... no need to even have a P/Invoke fallbacks here.
     private delegate void d_mono_debugger_agent_init();
-	private static d_mono_debugger_agent_init mono_debugger_agent_init;
+    private static d_mono_debugger_agent_init mono_debugger_agent_init;
     private delegate void d_runtime_initialized(IntPtr prof); // MonoProfiler* prof
     private static d_runtime_initialized runtime_initialized;
     private delegate void d_appdomain_load(IntPtr prof, IntPtr domain, int result); // MonoProfiler* prof, MonoDomain* domain, int result
@@ -313,7 +318,6 @@ public static class MonoDebug {
             if ((appdomain_load = appdomain_load ?? GetDelegateHacky<d_appdomain_load>(LINUX_64_appdomain_load)) == null) return false;
             if ((thread_startup = thread_startup ?? GetDelegateHacky<d_thread_startup>(LINUX_64_thread_startup)) == null) return false;
             if ((assembly_load = assembly_load ?? GetDelegateHacky<d_assembly_load>(LINUX_64_assembly_load)) == null) return false;
-
         }
 
         Debug.Log("Hoping that Mono won't kill itself...");
@@ -323,6 +327,10 @@ public static class MonoDebug {
         runtime_initialized(NULL);
         appdomain_load(NULL, domain, 0);
         assembly_load(NULL, asmThis, 0);
+
+        // ManagedThreadId is correct, but skip the current thread! The debugger agent checks for it.
+        ulong threadSkip = (ulong) Thread.CurrentThread.ManagedThreadId;
+        // thread_startup(NULL, (ulong) Thread.CurrentThread.ManagedThreadId);
 
         // thread_startup cannot be called as access to all threads via official APIs is impossible (unimplemented!).
         // TODO: Find a workaround for this.
@@ -343,6 +351,7 @@ public static class MonoDebug {
             }
             assembly_load(NULL, asm, 0);
         }
+
 
         Debug.Log("Done!");
 		return true;
