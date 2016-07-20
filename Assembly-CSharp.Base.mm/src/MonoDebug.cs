@@ -224,12 +224,15 @@ public static class MonoDebug {
             Debug.Log(i + ": " + asmManaged.FullName + "; ASM: 0x" + asm.ToString("X8") + "; IMG: " + img.ToString("X8"));
             if (asmManaged == asmThisManaged) {
                 Debug.Log("Skipping because already filled.");
+                continue;
             }
             if (asmManaged is AssemblyBuilder) {
                 Debug.Log("Skipping because dynamic.");
+                continue;
             }
             if (asmManaged.GetName().Name == "mscorlib") {
                 Debug.Log("Skipping because mscorlib.");
+                continue;
             }
             mono_debug_open_image_from_memory(imgThis, NULL, 0);
         }
@@ -279,8 +282,61 @@ public static class MonoDebug {
     private delegate void d_assembly_load(IntPtr prof, IntPtr assembly, int result); //MonoProfiler* prof, MonoAssembly* assembly, int result
     private static d_assembly_load assembly_load;
 
+    // Windows
+    [DllImport("kernel32")]
+    private static extern uint GetCurrentThreadId();
+    // turns out this code is useless...
+    /*
+    [Flags]
+    private enum SnapshotFlags : uint {
+        HeapList = 0x00000001,
+        Process = 0x00000002,
+        Thread = 0x00000004,
+        Module = 0x00000008,
+        Module32 = 0x00000010,
+        Inherit = 0x80000000,
+        All = 0x0000001F,
+        NoHeaps = 0x40000000
+    }
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct THREADENTRY32 {
+        public uint dwSize;
+        public uint cntUsage;
+        public uint th32ThreadID;
+        public uint th32OwnerProcessID;
+        public uint tpBasePri;
+        public uint tpDeltaPri;
+        public uint dwFlags;
+    }
+    [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern IntPtr CreateToolhelp32Snapshot([In] uint dwFlags, [In] uint th32ProcessID);
+    [DllImport("kernel32")]
+    private static extern bool Thread32First(IntPtr hSnapshot, ref THREADENTRY32 lpte);
+    [DllImport("kernel32")]
+    private static extern bool Thread32Next(IntPtr hSnapshot, out THREADENTRY32 lpte);
+    [DllImport("kernel32", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CloseHandle([In] IntPtr hObject);
+    */
+
     // Linux
+    [DllImport("pthread")]
+    private static extern ulong pthread_self();
     // TODO probably @zatherz
+
+    public static ulong CurrentThreadId {
+        get {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+                return GetCurrentThreadId();
+
+            } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+                return pthread_self();
+
+            }
+
+            return 0;
+        }
+    }
 
     public static bool InitDebuggerAgent() {
 		Debug.Log("MonoDebug.InitDebuggerAgent!");
@@ -308,6 +364,8 @@ public static class MonoDebug {
         AppDomain domainManaged = AppDomain.CurrentDomain; // Unity Child Domain; Any other app domains?
         IntPtr domain = (IntPtr) f_mono_app_domain.GetValue(domainManaged);
 
+        int pid = Process.GetCurrentProcess().Id;
+
         // Prepare the functions.
         Debug.Log("mono_debugger_agent_init and the other functions are not public. Creating delegates from pointer.");
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
@@ -325,43 +383,103 @@ public static class MonoDebug {
             if ((assembly_load = assembly_load ?? GetDelegateHacky<d_assembly_load>(LINUX_64_assembly_load)) == null) return false;
         }
 
-        Debug.Log("Hoping that Mono won't kill itself...");
-
+        Debug.Log("Running mono_debugger_agent_init and hoping that Mono won't die...");
         mono_debugger_agent_init();
 
-        runtime_initialized(NULL);
+        // Precompile some method calls used after runtime_initialized to prevent Mono from crashing while compiling.
+        Debug.Log("Precompiling appdomain_load.");
         appdomain_load(NULL, domain, 0);
+        Debug.Log("Precompiling assembly_load.");
         assembly_load(NULL, asmThis, 0);
 
-        // ManagedThreadId is correct, but skip the current thread! The debugger agent checks for it.
-        int threadCurrent = Thread.CurrentThread.ManagedThreadId;
-        object[] args_GetProcessData = new object[] { /*int pid*/ Process.GetCurrentProcess().Id, /*int data_type*/ 0, /*out int error*/ null};
-        int threads = (int) m_GetProcessData.Invoke(null, args_GetProcessData);
-        int processDataError = (int) args_GetProcessData[2];
-        for (int i = 1; i < threadCurrent; i++) {
-            if (i == threadCurrent) {
+        /*
+        long threads = 0L;
+
+        if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            // Unity's mono reads /proc for Linux
+            // int pid, int data_type, out int error
+            object[] args_GetProcessData = new object[] { Process.GetCurrentProcess().Id, 0, null };
+            threads = (long) m_GetProcessData.Invoke(null, args_GetProcessData);
+            int processDataError = (int) args_GetProcessData[2];
+            Debug.Log("GetProcessData error: " + processDataError);
+
+        } else if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+            // Unity's mono does nothing for Windows
+            IntPtr threadSnap = NULL;
+            THREADENTRY32 threadEntry = new THREADENTRY32();
+            threadSnap = CreateToolhelp32Snapshot((uint) (SnapshotFlags.NoHeaps | SnapshotFlags.Thread), 0);
+            if (threadSnap == NULL) {
+                goto SKIPWINTHREADMILL;
+            }
+            threadEntry.dwSize = (uint) Marshal.SizeOf(typeof(THREADENTRY32));
+            if (!Thread32First(threadSnap, ref threadEntry)) {
+                CloseHandle(threadSnap);
+                goto SKIPWINTHREADMILL;
+            }
+            do {
+                if (threadEntry.th32OwnerProcessID == pid) {
+                    threads++;
+                }
+            } while (Thread32Next(threadSnap, out threadEntry));
+            CloseHandle(threadSnap);
+            SKIPWINTHREADMILL:;
+        }
+        */
+
+        bool runtimeInit = false;
+        bool runtimeInited = false;
+        Thread threadSlave = new Thread(delegate () {
+            Debug.Log("Entering \"MonoDebug runtime_initialized thread\" thread.");
+            while (!runtimeInit) {
+            }
+            Debug.Log("Continuing in \"MonoDebug runtime_initialized thread\" thread: " + Thread.CurrentThread.ManagedThreadId);
+            runtime_initialized(NULL);
+            thread_startup(NULL, CurrentThreadId);
+
+            appdomain_load(NULL, domain, 0);
+            assembly_load(NULL, asmThis, 0);
+
+            Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
+            for (int i = 0; i < asmsManaged.Length; i++) {
+                Assembly asmManaged = asmsManaged[i];
+                IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
+                if (asmManaged == asmThisManaged) {
+                    continue;
+                }
+                if (asmManaged is AssemblyBuilder) {
+                    continue;
+                }
+                if (asmManaged.GetName().Name == "mscorlib") {
+                    continue;
+                }
+                assembly_load(NULL, asm, 0);
+            }
+
+            Debug.Log("Returning from \"MonoDebug runtime_initialized thread\" thread to main thread.");
+            runtimeInited = true;
+        }) {
+            Name = "MonoDebug runtime_initialized thread",
+            IsBackground = true
+        };
+        threadSlave.Start();
+
+        Debug.Log("Telling \"MonoDebug runtime_initialized thread\" thread to continue. Current thread: " + Thread.CurrentThread.ManagedThreadId);
+        runtimeInit = true;
+        while (!runtimeInited) {
+        }
+        Debug.Log("Aaaand... we're back!");
+
+        /*
+        Debug.Log("C " + threads);
+        for (int i = 1; i <= threads; i++) {
+            Debug.Log("C " + i + " / " + threads);
+            if (i == threadIDCurrent) {
                 continue;
             }
-            // Let's just hope the id is valid...
-            thread_startup(NULL, (ulong) i);
+            // TODO hijack thread, make it run thread_startup(GARBAGE, current managed thread id);
         }
-
-        Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
-        for (int i = 0; i < asmsManaged.Length; i++) {
-            Assembly asmManaged = asmsManaged[i];
-            IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
-            Debug.Log(i + ": " + asmManaged.FullName + "; ASM: 0x" + asm.ToString("X8"));
-            if (asmManaged == asmThisManaged) {
-                Debug.Log("Skipping because already filled.");
-            }
-            if (asmManaged is AssemblyBuilder) {
-                Debug.Log("Skipping because dynamic.");
-            }
-            if (asmManaged.GetName().Name == "mscorlib") {
-                Debug.Log("Skipping because mscorlib.");
-            }
-            assembly_load(NULL, asm, 0);
-        }
+        */
+        thread_startup(NULL, CurrentThreadId);
 
         Debug.Log("Done!");
 		return true;
