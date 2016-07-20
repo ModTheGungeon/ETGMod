@@ -430,20 +430,16 @@ public static class MonoDebug {
 		assembly_load(NULL, asmThis, 0);
 
 		Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
-		for (int i = 0; i < asmsManaged.Length; i++)
-		{
+		for (int i = 0; i < asmsManaged.Length; i++) {
 			Assembly asmManaged = asmsManaged[i];
 			IntPtr asm = (IntPtr)f_mono_assembly.GetValue(asmManaged);
-			if (asmManaged == asmThisManaged)
-			{
+			if (asmManaged == asmThisManaged) {
 				continue;
 			}
-			if (asmManaged is AssemblyBuilder)
-			{
+			if (asmManaged is AssemblyBuilder) {
 				continue;
 			}
-			if (asmManaged.GetName().Name == "mscorlib")
-			{
+			if (asmManaged.GetName().Name == "mscorlib") {
 				continue;
 			}
 			assembly_load(NULL, asm, 0);

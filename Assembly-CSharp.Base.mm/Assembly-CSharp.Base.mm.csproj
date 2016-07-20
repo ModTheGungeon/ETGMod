@@ -54,7 +54,6 @@
     <Compile Include="src\Core\Extensions.cs" />
     <Compile Include="src\Core\Assets.cs" />
     <Compile Include="src\Core\Player.cs" />
-    <Compile Include="src\Core\ETGMod.cs" />
     <Compile Include="src\Cross\CrossSearch.cs" />
     <Compile Include="src\Cross\CrossGungeonConfig.cs" />
     <Compile Include="src\Cross\Cross.cs" />
@@ -83,7 +82,6 @@
     <Compile Include="src\ETGGUI\ETGModGUI.cs" />
     <Compile Include="src\ETGModMainBehaviour.cs" />
     <Compile Include="src\LimitedStream.cs" />
-    <Compile Include="src\MonoDebug.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />
     <Compile Include="src\MonoMod\MonoModEnumReplace.cs" />
@@ -108,6 +106,7 @@
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
     <Compile Include="src\Patches\patch_PlayerConsumables.cs" />
+    <Compile Include="src\ETGMod.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

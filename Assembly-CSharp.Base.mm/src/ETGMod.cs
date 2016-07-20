@@ -48,24 +48,6 @@ public static partial class ETGMod {
             LaunchArguments = MonoDebug.GetDelegate<Func<string[]>>("mono_runtime_get_main_args")();
         }
 
-        bool debuggerClient = false;
-        // 0 is the binary path
-        for (int i = 1; i < LaunchArguments.Length; i++) {
-            string arg = LaunchArguments[i];
-            if (arg == "--debugger-client") {
-                debuggerClient = true;
-            }
-        }
-
-        try {
-            if (debuggerClient) MonoDebug.SetupDebuggerAgent();
-            MonoDebug.Init();
-            if (debuggerClient) MonoDebug.InitDebuggerAgent();
-        } catch (Exception e) {
-            Debug.Log("Called MonoDebug and it sudoku'd.");
-            Debug.Log(e);
-        }
-
         UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();
