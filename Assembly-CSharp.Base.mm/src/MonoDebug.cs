@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using System.Reflection.Emit;
 using System.Threading;
+using Process = System.Diagnostics.Process;
 
 public static class MonoDebug {
     
@@ -27,6 +28,7 @@ public static class MonoDebug {
 
     private static FieldInfo f_mono_assembly = typeof(Assembly).GetField("_mono_assembly", BindingFlags.NonPublic | BindingFlags.Instance);
     private static FieldInfo f_mono_app_domain = typeof(AppDomain).GetField("_mono_app_domain", BindingFlags.NonPublic | BindingFlags.Instance);
+    private static MethodInfo m_GetProcessData = typeof(Process).GetMethod("GetProcessData", BindingFlags.NonPublic | BindingFlags.Static);
 
     private static IntPtr NULL = IntPtr.Zero;
 
@@ -277,6 +279,9 @@ public static class MonoDebug {
     private delegate void d_assembly_load(IntPtr prof, IntPtr assembly, int result); //MonoProfiler* prof, MonoAssembly* assembly, int result
     private static d_assembly_load assembly_load;
 
+    // Linux
+    // TODO probably @zatherz
+
     public static bool InitDebuggerAgent() {
 		Debug.Log("MonoDebug.InitDebuggerAgent!");
 		if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
@@ -329,11 +334,17 @@ public static class MonoDebug {
         assembly_load(NULL, asmThis, 0);
 
         // ManagedThreadId is correct, but skip the current thread! The debugger agent checks for it.
-        ulong threadSkip = (ulong) Thread.CurrentThread.ManagedThreadId;
-        // thread_startup(NULL, (ulong) Thread.CurrentThread.ManagedThreadId);
-
-        // thread_startup cannot be called as access to all threads via official APIs is impossible (unimplemented!).
-        // TODO: Find a workaround for this.
+        int threadCurrent = Thread.CurrentThread.ManagedThreadId;
+        object[] args_GetProcessData = new object[] { /*int pid*/ Process.GetCurrentProcess().Id, /*int data_type*/ 0, /*out int error*/ null};
+        int threads = (int) m_GetProcessData.Invoke(null, args_GetProcessData);
+        int processDataError = (int) args_GetProcessData[2];
+        for (int i = 1; i < threadCurrent; i++) {
+            if (i == threadCurrent) {
+                continue;
+            }
+            // Let's just hope the id is valid...
+            thread_startup(NULL, (ulong) i);
+        }
 
         Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
         for (int i = 0; i < asmsManaged.Length; i++) {
@@ -351,7 +362,6 @@ public static class MonoDebug {
             }
             assembly_load(NULL, asm, 0);
         }
-
 
         Debug.Log("Done!");
 		return true;
