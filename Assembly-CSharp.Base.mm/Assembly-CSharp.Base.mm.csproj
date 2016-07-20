@@ -106,7 +106,7 @@
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
     <Compile Include="src\Patches\patch_PlayerConsumables.cs" />
-    <Compile Include="src\ETGMod.cs" />
+    <Compile Include="src\Core\ETGMod.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
