@@ -286,39 +286,6 @@ public static class MonoDebug {
     [DllImport("kernel32")]
     private static extern uint GetCurrentThreadId();
     // turns out this code is useless...
-    /*
-    [Flags]
-    private enum SnapshotFlags : uint {
-        HeapList = 0x00000001,
-        Process = 0x00000002,
-        Thread = 0x00000004,
-        Module = 0x00000008,
-        Module32 = 0x00000010,
-        Inherit = 0x80000000,
-        All = 0x0000001F,
-        NoHeaps = 0x40000000
-    }
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    private struct THREADENTRY32 {
-        public uint dwSize;
-        public uint cntUsage;
-        public uint th32ThreadID;
-        public uint th32OwnerProcessID;
-        public uint tpBasePri;
-        public uint tpDeltaPri;
-        public uint dwFlags;
-    }
-    [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Auto)]
-    private static extern IntPtr CreateToolhelp32Snapshot([In] uint dwFlags, [In] uint th32ProcessID);
-    [DllImport("kernel32")]
-    private static extern bool Thread32First(IntPtr hSnapshot, ref THREADENTRY32 lpte);
-    [DllImport("kernel32")]
-    private static extern bool Thread32Next(IntPtr hSnapshot, out THREADENTRY32 lpte);
-    [DllImport("kernel32", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CloseHandle([In] IntPtr hObject);
-    */
-
     // Linux
     [DllImport("pthread")]
     private static extern ulong pthread_self();
@@ -343,6 +310,7 @@ public static class MonoDebug {
 		if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
 			return false;
 		}
+
         if (IntPtr.Size == 4) {
             Debug.Log("x86 not supported!");
             return false;
@@ -386,53 +354,13 @@ public static class MonoDebug {
         Debug.Log("Running mono_debugger_agent_init and hoping that Mono won't die...");
         mono_debugger_agent_init();
 
-        // Precompile some method calls used after runtime_initialized to prevent Mono from crashing while compiling.
-        Debug.Log("Precompiling appdomain_load.");
-        appdomain_load(NULL, domain, 0);
-        Debug.Log("Precompiling assembly_load.");
-        assembly_load(NULL, asmThis, 0);
-
-        /*
-        long threads = 0L;
-
-        if (Environment.OSVersion.Platform == PlatformID.Unix) {
-            // Unity's mono reads /proc for Linux
-            // int pid, int data_type, out int error
-            object[] args_GetProcessData = new object[] { Process.GetCurrentProcess().Id, 0, null };
-            threads = (long) m_GetProcessData.Invoke(null, args_GetProcessData);
-            int processDataError = (int) args_GetProcessData[2];
-            Debug.Log("GetProcessData error: " + processDataError);
-
-        } else if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
-            // Unity's mono does nothing for Windows
-            IntPtr threadSnap = NULL;
-            THREADENTRY32 threadEntry = new THREADENTRY32();
-            threadSnap = CreateToolhelp32Snapshot((uint) (SnapshotFlags.NoHeaps | SnapshotFlags.Thread), 0);
-            if (threadSnap == NULL) {
-                goto SKIPWINTHREADMILL;
-            }
-            threadEntry.dwSize = (uint) Marshal.SizeOf(typeof(THREADENTRY32));
-            if (!Thread32First(threadSnap, ref threadEntry)) {
-                CloseHandle(threadSnap);
-                goto SKIPWINTHREADMILL;
-            }
-            do {
-                if (threadEntry.th32OwnerProcessID == pid) {
-                    threads++;
-                }
-            } while (Thread32Next(threadSnap, out threadEntry));
-            CloseHandle(threadSnap);
-            SKIPWINTHREADMILL:;
-        }
-        */
-
 		appdomain_load(NULL, domain, 0);
 		assembly_load(NULL, asmThis, 0);
 
 		Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
 		for (int i = 0; i < asmsManaged.Length; i++) {
 			Assembly asmManaged = asmsManaged[i];
-			IntPtr asm = (IntPtr)f_mono_assembly.GetValue(asmManaged);
+			IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
 			if (asmManaged == asmThisManaged) {
 				continue;
 			}
