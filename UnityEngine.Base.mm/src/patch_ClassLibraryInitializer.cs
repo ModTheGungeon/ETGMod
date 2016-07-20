@@ -14,7 +14,7 @@ namespace UnityEngine {
         // Seemingly first piece of managed code running in Unity
         private static void Init() {
             orig_Init();
-
+            
 			string[] args;
 			if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
 				args = mono_runtime_get_main_args();
