@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System;
 using UnityEngine;
 using System.Reflection.Emit;
+using System.Threading;
 
 public static class MonoDebug {
     
@@ -12,10 +13,10 @@ public static class MonoDebug {
     private static long WINDOWS_mono_debug_init =           0x0000000180074cd4;
     private static long WINDOWS_mono_debug_domain_create =  0x0000000180074ac0;
 	private static long WINDOWS_mono_debugger_agent_init =  0x00000001800d4ef4;
-    private static long WINDOWS_runtime_initialized =       0x0000000000000000;
-    private static long WINDOWS_appdomain_load =            0x0000000000000000;
-    private static long WINDOWS_thread_startup =            0x0000000000000000;
-    private static long WINDOWS_assembly_load =             0x0000000000000000;
+    private static long WINDOWS_runtime_initialized =       0x00000001800d3324;
+    private static long WINDOWS_appdomain_load =            0x00000001800d3704;
+    private static long WINDOWS_thread_startup =            0x00000001800d336c;
+    private static long WINDOWS_assembly_load =             0x00000001800d3778;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
     private static long LINUX_64_mono_debug_init =          0x0000000000000000;
 	private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
@@ -67,6 +68,93 @@ public static class MonoDebug {
     private static extern void pi_mono_debug_domain_create(IntPtr domain); // MonoDomain* domain
     private static d_mono_debug_domain_create mono_debug_domain_create = pi_mono_debug_domain_create;
 
+    private static IntPtr _Mono = NULL;
+    public static IntPtr GetMono() {
+        if (_Mono != NULL) {
+            return _Mono;
+        }
+
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+            return GetModuleHandle("mono.dll");
+
+        } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            IntPtr e = IntPtr.Zero;
+            IntPtr libmonoso = IntPtr.Zero;
+            if (IntPtr.Size == 8) {
+                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
+            } else {
+                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
+            }
+            if ((e = dlerror()) != IntPtr.Zero) {
+                Debug.Log("MonoDebug can't access libmono.so!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+                return NULL;
+            }
+        }
+
+        return NULL;
+    }
+
+    public static IntPtr GetFunction(string name) {
+        return GetFunction(GetMono(), name);
+    }
+    public static IntPtr GetFunction(IntPtr lib, string name) {
+        if (lib == NULL) {
+            return NULL;
+        }
+
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+            return GetProcAddress(lib, name);
+
+        } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            IntPtr s, e;
+
+            s = dlsym(lib, "mono_debug_init");
+            if ((e = dlerror()) != IntPtr.Zero) {
+                Debug.Log("MonoDebug can't access " + name + "!");
+                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+                return NULL;
+            }
+            return s;
+        }
+
+        return NULL;
+    }
+
+    public static T GetDelegate<T>() where T : class {
+        return GetDelegate<T>(typeof(T).Name.Substring(2));
+    }
+    public static T GetDelegate<T>(string name) where T : class {
+        return GetDelegate<T>(GetMono(), name);
+    }
+    public static T GetDelegate<T>(IntPtr lib, string name) where T : class {
+        if (lib == NULL) {
+            return null;
+        }
+
+        IntPtr s = GetFunction(lib, name);
+        if (s == NULL) {
+            return null;
+        }
+
+        return GetDelegate<T>(s);
+    }
+    public static T GetDelegateHacky<T>(long s) where T : class {
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+            s = s - WINDOWS_mono_debug_init + (GetFunction("mono_debug_init").ToInt64());
+
+        } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            if (IntPtr.Size == 8) {
+                s = s - LINUX_64_mono_debug_init + (GetFunction("mono_debug_init").ToInt64());
+            }
+
+        }
+        return GetDelegate<T>(new IntPtr(s));
+    }
+    public static T GetDelegate<T>(IntPtr s) where T : class {
+        return Marshal.GetDelegateForFunctionPointer(s, typeof(T)) as T;
+    }
+
     public static bool/*-if-it-returns-at-all*/ Init(MonoDebugFormat format = MonoDebugFormat.MONO_DEBUG_FORMAT_MONO) {
         Debug.Log("MonoDebug.Init!");
         if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
@@ -81,67 +169,20 @@ public static class MonoDebug {
             // The function is not in the export table on Windows... although it should
             // See https://github.com/Unity-Technologies/mono/blob/unity-staging/msvc/mono.def
             // Compare with https://github.com/mono/mono/blob/master/msvc/mono.def, where mono_debug_domain_create is exported
-            IntPtr m_mono = GetModuleHandle("mono.dll");
-            IntPtr p_mono_debug_init = GetProcAddress(m_mono, "mono_debug_init");
-            IntPtr p_mono_debug_domain_create = new IntPtr(WINDOWS_mono_debug_domain_create - WINDOWS_mono_debug_init + (p_mono_debug_init.ToInt64()));
-            mono_debug_domain_create = (d_mono_debug_domain_create) Marshal.GetDelegateForFunctionPointer(p_mono_debug_domain_create, typeof(d_mono_debug_domain_create));
+            if (mono_debug_domain_create == pi_mono_debug_domain_create) mono_debug_domain_create = null;
+            if ((mono_debug_domain_create = mono_debug_domain_create ?? GetDelegateHacky<d_mono_debug_domain_create>(WINDOWS_mono_debug_domain_create)) == null) return false;
 
         } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
             Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
             // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
-            IntPtr e = IntPtr.Zero;
-            IntPtr libmonoso = IntPtr.Zero;
-            if (IntPtr.Size == 8) {
-                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
-            } else {
-                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
-            }
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access libmono.so!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            IntPtr s;
-
-            s = dlsym(libmonoso, "mono_debug_init");
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access mono_debug_init!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            mono_debug_init = (d_mono_debug_init)
-                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_init));
-
-            s = dlsym(libmonoso, "mono_assembly_get_image");
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access mono_assembly_get_image!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            mono_assembly_get_image = (d_mono_assembly_get_image)
-                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_assembly_get_image));
-
-            s = dlsym(libmonoso, "mono_debug_open_image_from_memory");
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access mono_debug_open_image_from_memory!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            mono_debug_open_image_from_memory = (d_mono_debug_open_image_from_memory)
-                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_open_image_from_memory));
-
-            s = dlsym(libmonoso, "mono_debug_domain_create");
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access mono_debug_domain_create!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            mono_debug_domain_create = (d_mono_debug_domain_create)
-                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_debug_domain_create));
+            if ((mono_debug_init = mono_debug_init ?? GetDelegate<d_mono_debug_init>()) == null) return false;
+            if ((mono_assembly_get_image = mono_assembly_get_image ?? GetDelegate<d_mono_assembly_get_image>()) == null) return false;
+            if ((mono_debug_open_image_from_memory = mono_debug_open_image_from_memory ?? GetDelegate<d_mono_debug_open_image_from_memory>()) == null) return false;
+            if ((mono_debug_domain_create = mono_debug_domain_create ?? GetDelegate<d_mono_debug_domain_create>()) == null) return false;
         }
         // TODO Mac OS X?
 
-        // Prepare everything else required: Assembly / image, domain and NULL assembly pointers.
+        // Prepare everything else required: Assembly / image, domain, ...
         Assembly asmThisManaged = Assembly.GetCallingAssembly();
         IntPtr asmThis = (IntPtr) f_mono_assembly.GetValue(asmThisManaged);
         IntPtr imgThis = mono_assembly_get_image(asmThis);
@@ -209,28 +250,7 @@ public static class MonoDebug {
         if (Environment.OSVersion.Platform == PlatformID.Unix) {
             Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
             // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
-            IntPtr e = IntPtr.Zero;
-            IntPtr libmonoso = IntPtr.Zero;
-            if (IntPtr.Size == 8) {
-                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
-            } else {
-                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
-            }
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access libmono.so!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            IntPtr s;
-
-            s = dlsym(libmonoso, "mono_jit_parse_options");
-            if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access mono_jit_parse_options!");
-                Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
-                return false;
-            }
-            mono_jit_parse_options = (d_mono_jit_parse_options)
-                Marshal.GetDelegateForFunctionPointer(s, typeof(d_mono_jit_parse_options));
+            if ((mono_jit_parse_options = mono_jit_parse_options ?? GetDelegate<d_mono_jit_parse_options>()) == null) return false;
         }
         // TODO Mac OS X?
 
@@ -240,11 +260,19 @@ public static class MonoDebug {
         return true;
     }
 
-    // It's hidden everywhere... no need to even have a P/Invoke fallback here.
+    // Those are hidden everywhere... no need to even have a P/Invoke fallbacks here.
     private delegate void d_mono_debugger_agent_init();
 	private static d_mono_debugger_agent_init mono_debugger_agent_init;
+    private delegate void d_runtime_initialized(IntPtr prof); // MonoProfiler* prof
+    private static d_runtime_initialized runtime_initialized;
+    private delegate void d_appdomain_load(IntPtr prof, IntPtr domain, int result); // MonoProfiler* prof, MonoDomain* domain, int result
+    private static d_appdomain_load appdomain_load;
+    private delegate void d_thread_startup(IntPtr prof, ulong tid); // MonoProfiler* prof, gsize tid
+    private static d_thread_startup thread_startup;
+    private delegate void d_assembly_load(IntPtr prof, IntPtr assembly, int result); //MonoProfiler* prof, MonoAssembly* assembly, int result
+    private static d_assembly_load assembly_load;
 
-	public static bool InitDebuggerAgent() {
+    public static bool InitDebuggerAgent() {
 		Debug.Log("MonoDebug.InitDebuggerAgent!");
 		if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
 			return false;
@@ -263,23 +291,58 @@ public static class MonoDebug {
 		}
         Debug.Log("Kick-starting Mono's debugger agent.");
 
+        // Prepare everything else required: Assembly, domain, ...
+        Assembly asmThisManaged = Assembly.GetCallingAssembly();
+        IntPtr asmThis = (IntPtr) f_mono_assembly.GetValue(asmThisManaged);
+
+        AppDomain domainManaged = AppDomain.CurrentDomain; // Unity Child Domain; Any other app domains?
+        IntPtr domain = (IntPtr) f_mono_app_domain.GetValue(domainManaged);
+
         // Prepare the functions.
-        Debug.Log("mono_debugger_agent_init is not public. Creating delegate from pointer.");
+        Debug.Log("mono_debugger_agent_init and the other functions are not public. Creating delegates from pointer.");
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
-            IntPtr m_mono = GetModuleHandle("mono.dll");
-            IntPtr p_mono_debug_init = GetProcAddress(m_mono, "mono_debug_init");
-            IntPtr p_mono_debugger_agent_init = new IntPtr(WINDOWS_mono_debugger_agent_init - WINDOWS_mono_debug_init + (p_mono_debug_init.ToInt64()));
-            mono_debugger_agent_init = (d_mono_debugger_agent_init) Marshal.GetDelegateForFunctionPointer(p_mono_debugger_agent_init, typeof(d_mono_debugger_agent_init));
+            if ((mono_debugger_agent_init = mono_debugger_agent_init ?? GetDelegateHacky<d_mono_debugger_agent_init>(WINDOWS_mono_debugger_agent_init)) == null) return false;
+            if ((runtime_initialized = runtime_initialized ?? GetDelegateHacky<d_runtime_initialized>(WINDOWS_runtime_initialized)) == null) return false;
+            if ((appdomain_load = appdomain_load ?? GetDelegateHacky<d_appdomain_load>(WINDOWS_appdomain_load)) == null) return false;
+            if ((thread_startup = thread_startup ?? GetDelegateHacky<d_thread_startup>(WINDOWS_thread_startup)) == null) return false;
+            if ((assembly_load = assembly_load ?? GetDelegateHacky<d_assembly_load>(WINDOWS_assembly_load)) == null) return false;
+
+        } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            if ((mono_debugger_agent_init = mono_debugger_agent_init ?? GetDelegateHacky<d_mono_debugger_agent_init>(LINUX_64_mono_debugger_agent_init)) == null) return false;
+            if ((runtime_initialized = runtime_initialized ?? GetDelegateHacky<d_runtime_initialized>(LINUX_64_runtime_initialized)) == null) return false;
+            if ((appdomain_load = appdomain_load ?? GetDelegateHacky<d_appdomain_load>(LINUX_64_appdomain_load)) == null) return false;
+            if ((thread_startup = thread_startup ?? GetDelegateHacky<d_thread_startup>(LINUX_64_thread_startup)) == null) return false;
+            if ((assembly_load = assembly_load ?? GetDelegateHacky<d_assembly_load>(LINUX_64_assembly_load)) == null) return false;
+
         }
+
+        Debug.Log("Hoping that Mono won't kill itself...");
 
         mono_debugger_agent_init();
 
-        // Manually call:
+        runtime_initialized(NULL);
+        appdomain_load(NULL, domain, 0);
+        assembly_load(NULL, asmThis, 0);
 
-        // runtime_initialized
-        // appdomain_load
-        // thread_startup
-        // assembly_load
+        // thread_startup cannot be called as access to all threads via official APIs is impossible (unimplemented!).
+        // TODO: Find a workaround for this.
+
+        Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < asmsManaged.Length; i++) {
+            Assembly asmManaged = asmsManaged[i];
+            IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
+            Debug.Log(i + ": " + asmManaged.FullName + "; ASM: 0x" + asm.ToString("X8"));
+            if (asmManaged == asmThisManaged) {
+                Debug.Log("Skipping because already filled.");
+            }
+            if (asmManaged is AssemblyBuilder) {
+                Debug.Log("Skipping because dynamic.");
+            }
+            if (asmManaged.GetName().Name == "mscorlib") {
+                Debug.Log("Skipping because mscorlib.");
+            }
+            assembly_load(NULL, asm, 0);
+        }
 
         Debug.Log("Done!");
 		return true;
