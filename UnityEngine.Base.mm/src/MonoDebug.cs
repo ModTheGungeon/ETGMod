@@ -11,13 +11,13 @@ public static class MonoDebug {
     // THIS IS AN UGLY HACK. IT'S VERY UGLY.
 
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
-    private static long WINDOWS_mono_debug_init =           0x0000000180074cd4;
-    private static long WINDOWS_mono_debug_domain_create =  0x0000000180074ac0;
-    private static long WINDOWS_mono_debugger_agent_init =  0x0000000180085e50;
-    private static long WINDOWS_runtime_initialized =       0x00000001800d4280;
-    private static long WINDOWS_appdomain_load =            0x00000001800d4660;
-    private static long WINDOWS_thread_startup =            0x00000001800d5510;
-    private static long WINDOWS_assembly_load =             0x00000001800d46d4;
+    private static long WINDOWS_mono_debug_init =           0x0000000000074d1c;
+    private static long WINDOWS_mono_debug_domain_create =  0x0000000000074b08;
+    private static long WINDOWS_mono_debugger_agent_init =  0x0000000000085e50;
+    private static long WINDOWS_runtime_initialized =       0x00000000000d4280;
+    private static long WINDOWS_appdomain_load =            0x00000000000d4660;
+    private static long WINDOWS_thread_startup =            0x00000000000d5510;
+    private static long WINDOWS_assembly_load =             0x00000000000d46d4;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
     private static long LINUX_64_mono_debug_init =          0x000000000012eddc;
     private static long LINUX_64_mono_debugger_agent_init = 0x00000000000aee17;
@@ -221,7 +221,7 @@ public static class MonoDebug {
             Assembly asmManaged = asmsManaged[i];
             IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
             IntPtr img = mono_assembly_get_image(asm);
-            Debug.Log(i + ": " + asmManaged.FullName + "; ASM: 0x" + asm.ToString("X8") + "; IMG: " + img.ToString("X8"));
+            Debug.Log(i + ": " + asmManaged.FullName + "; ASM: 0x" + asm.ToString("X8") + "; IMG: 0x" + img.ToString("X8"));
             if (asmManaged == asmThisManaged) {
                 Debug.Log("Skipping because already filled.");
                 continue;
