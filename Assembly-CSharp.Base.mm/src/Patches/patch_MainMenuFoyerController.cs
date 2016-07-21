@@ -5,11 +5,11 @@ using UnityEngine;
 
 internal class patch_MainMenuFoyerController : MainMenuFoyerController {
 
-    public extern void orig_method_0();
-    public new void method_0() {
-        orig_method_0();
+    protected extern void orig_Awake();
+    protected void Awake() {
+        orig_Awake();
 
-        dfLabel_0.Text += " | Mod the Gungeon " + ETGMod.BaseVersion;
+        VersionLabel.Text += " | Mod the Gungeon " + ETGMod.BaseVersion;
 
     }
 
