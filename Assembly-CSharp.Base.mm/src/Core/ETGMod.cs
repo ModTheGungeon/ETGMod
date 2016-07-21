@@ -32,6 +32,7 @@ public static partial class ETGMod {
 
     public static string[] LaunchArguments;
 
+    private delegate string[] d_mono_runtime_get_main_args();
     [DllImport("mono")]
     private static extern string[] mono_runtime_get_main_args(); //ret MonoArray*
 
@@ -45,7 +46,7 @@ public static partial class ETGMod {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
             LaunchArguments = mono_runtime_get_main_args();
         } else {
-            LaunchArguments = MonoDebug.GetDelegate<Func<string[]>>("mono_runtime_get_main_args")();
+            LaunchArguments = MonoDebug.GetDelegate<d_mono_runtime_get_main_args>("mono_runtime_get_main_args")();
         }
 
         UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;

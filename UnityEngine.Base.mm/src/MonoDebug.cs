@@ -16,7 +16,7 @@ public static class MonoDebug {
     private static long WINDOWS_mono_debugger_agent_init =  0x00000000000D5E50;
     private static long WINDOWS_runtime_initialized =       0x00000000000D4280;
     private static long WINDOWS_appdomain_load =            0x00000000000D4660;
-    private static long WINDOWS_thread_startup =            0x00000000000D5510;
+    private static long WINDOWS_thread_startup =            0x00000000000D4510;
     private static long WINDOWS_assembly_load =             0x00000000000D46D4;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
     private static long LINUX_64_mono_debug_init =          0x000000000012eddc;
@@ -353,16 +353,17 @@ public static class MonoDebug {
 		appdomain_load(NULL, domain, 0);
 		assembly_load(NULL, asmThis, 0);
 
-		Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
-		for (int i = 0; i < asmsManaged.Length; i++) {
-			Assembly asmManaged = asmsManaged[i];
-			IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
-			if (asmManaged == asmThisManaged) {
-				continue;
-			}
-			assembly_load(NULL, asm, 0);
-		}
+        Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < asmsManaged.Length; i++) {
+            Assembly asmManaged = asmsManaged[i];
+            IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
+            if (asmManaged == asmThisManaged) {
+                continue;
+            }
+            assembly_load(NULL, asm, 0);
+        }
 
+        Debug.Log("thread_startup " + CurrentThreadId);
         thread_startup(NULL, CurrentThreadId);
 
 		runtime_initialized(NULL);
