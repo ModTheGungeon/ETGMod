@@ -306,10 +306,10 @@ public static class MonoDebug {
     }
 
     public static bool InitDebuggerAgent() {
-		Debug.Log("MonoDebug.InitDebuggerAgent!");
-		if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
-			return false;
-		}
+        Debug.Log("MonoDebug.InitDebuggerAgent!");
+        if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
+            return false;
+        }
 
         if (IntPtr.Size == 4) {
             Debug.Log("x86 not supported!");
@@ -350,8 +350,8 @@ public static class MonoDebug {
         Debug.Log("Running mono_debugger_agent_init and hoping that Mono won't die...");
         mono_debugger_agent_init();
 
-		appdomain_load(NULL, domain, 0);
-		assembly_load(NULL, asmThis, 0);
+        appdomain_load(NULL, domain, 0);
+        assembly_load(NULL, asmThis, 0);
 
         Assembly[] asmsManaged = AppDomain.CurrentDomain.GetAssemblies();
         for (int i = 0; i < asmsManaged.Length; i++) {
@@ -366,11 +366,11 @@ public static class MonoDebug {
         Debug.Log("thread_startup " + CurrentThreadId);
         thread_startup(NULL, CurrentThreadId);
 
-		runtime_initialized(NULL);
+        runtime_initialized(NULL);
 
         Debug.Log("Done!");
-		return true;
-	}
+        return true;
+    }
 
 }
 
