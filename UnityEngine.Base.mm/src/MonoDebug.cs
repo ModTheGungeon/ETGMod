@@ -13,18 +13,18 @@ public static class MonoDebug {
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
     private static long WINDOWS_mono_debug_init =           0x0000000180074cd4;
     private static long WINDOWS_mono_debug_domain_create =  0x0000000180074ac0;
-    private static long WINDOWS_mono_debugger_agent_init =  0x00000001800d4ef4;
-    private static long WINDOWS_runtime_initialized =       0x00000001800d3324;
-    private static long WINDOWS_appdomain_load =            0x00000001800d3704;
-    private static long WINDOWS_thread_startup =            0x00000001800d336c;
-    private static long WINDOWS_assembly_load =             0x00000001800d3778;
+    private static long WINDOWS_mono_debugger_agent_init =  0x0000000180085e50;
+    private static long WINDOWS_runtime_initialized =       0x00000001800d4280;
+    private static long WINDOWS_appdomain_load =            0x00000001800d4660;
+    private static long WINDOWS_thread_startup =            0x00000001800d5510;
+    private static long WINDOWS_assembly_load =             0x00000001800d46d4;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
-    private static long LINUX_64_mono_debug_init =          0x0000000000000000;
-    private static long LINUX_64_mono_debugger_agent_init = 0x0000000000000000;
-    private static long LINUX_64_runtime_initialized =      0x0000000000000000;
-    private static long LINUX_64_appdomain_load =           0x0000000000000000;
-    private static long LINUX_64_thread_startup =           0x0000000000000000;
-    private static long LINUX_64_assembly_load =            0x0000000000000000;
+    private static long LINUX_64_mono_debug_init =          0x000000000012eddc;
+    private static long LINUX_64_mono_debugger_agent_init = 0x00000000000aee17;
+    private static long LINUX_64_runtime_initialized =      0x000000000002ac00;
+    private static long LINUX_64_appdomain_load =           0x000000000002bf50;
+    private static long LINUX_64_thread_startup =           0x000000000002a8e0;
+    private static long LINUX_64_assembly_load =            0x000000000002a130;
 
     private static FieldInfo f_mono_assembly = typeof(Assembly).GetField("_mono_assembly", BindingFlags.NonPublic | BindingFlags.Instance);
     private static FieldInfo f_mono_app_domain = typeof(AppDomain).GetField("_mono_app_domain", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -319,10 +319,6 @@ public static class MonoDebug {
             Debug.Log("Mac OS X not supported!");
             return false;
         }
-        if (Environment.OSVersion.Platform == PlatformID.Unix && LINUX_64_mono_debugger_agent_init == 0L) {
-            Debug.Log("Linux / Unix currently not supported!");
-			return false;
-		}
         Debug.Log("Kick-starting Mono's debugger agent.");
 
         // Prepare everything else required: Assembly, domain, ...
