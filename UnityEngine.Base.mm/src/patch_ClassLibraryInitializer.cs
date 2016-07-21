@@ -20,7 +20,7 @@ namespace UnityEngine {
 			if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
 				args = mono_runtime_get_main_args();
 			} else {
-				args = MonoDebug.GetDelegate<d_mono_runtime_get_main_args>("mono_runtime_get_main_args")();
+				args = MonoDebug.GetDelegate<d_mono_runtime_get_main_args>()();
 			}
 			bool debuggerClient = false;
 			// 0 is the binary path
