@@ -16,7 +16,7 @@ public static class MonoDebug {
     private static long WINDOWS_mono_debugger_agent_init =  0x00000000000D5E50;
     private static long WINDOWS_runtime_initialized =       0x00000000000D4280;
     private static long WINDOWS_appdomain_load =            0x00000000000D4660;
-    private static long WINDOWS_thread_startup =            0x00000000000D4510;
+    private static long WINDOWS_thread_startup =            0x00000000000D42C8;
     private static long WINDOWS_assembly_load =             0x00000000000D46D4;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
     private static long LINUX_64_mono_debug_init =          0x000000000012eddc;
@@ -347,24 +347,6 @@ public static class MonoDebug {
             if ((assembly_load = assembly_load ?? GetDelegateHacky<d_assembly_load>(LINUX_64_assembly_load)) == null) return false;
         }
 
-        Debug.Log("Setting up slave thread.");
-        bool slaveRun = false;
-        bool slavePass = false;
-        Thread slave = new Thread(delegate () {
-            Debug.Log("Slave alive.");
-            while (!slaveRun) { }
-            Debug.Log("Slave running.");
-            Debug.Log("thread_startup " + CurrentThreadId);
-            thread_startup(NULL, CurrentThreadId);
-            Debug.Log("aaand...");
-            runtime_initialized(NULL);
-            Debug.Log("Slave quitting.");
-            slavePass = true;
-        }) {
-            Name = "MonoDebug.InitDebuggerAgent slave thread",
-            IsBackground = true
-        };
-        slave.Start();
 
         Debug.Log("Running mono_debugger_agent_init and hoping that Mono won't die...");
         mono_debugger_agent_init();
@@ -385,12 +367,9 @@ public static class MonoDebug {
         }
 
         Debug.Log("thread_startup " + CurrentThreadId);
-        thread_startup(NULL, 1331414134);
-
-        Debug.Log("Switching to slave thread.");
-        slaveRun = true;
-        while (!slavePass) { }
-        Debug.Log("Slave passed.");
+        thread_startup(NULL, CurrentThreadId);
+        Debug.Log("aaand...");
+        runtime_initialized(NULL);
 
         Debug.Log("Done!");
         return true;
