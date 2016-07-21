@@ -363,9 +363,9 @@ public static class MonoDebug {
             assembly_load(NULL, asm, 0);
         }
 
-        Debug.Log("thread_startup " + CurrentThreadId);
         thread_startup(NULL, CurrentThreadId);
 
+        Debug.Log("runtime_initialized");
         runtime_initialized(NULL);
 
         Debug.Log("Done!");
