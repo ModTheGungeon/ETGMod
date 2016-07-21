@@ -81,17 +81,17 @@ public static class MonoDebug {
 
         } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
             IntPtr e = IntPtr.Zero;
-            IntPtr libmonoso = IntPtr.Zero;
             if (IntPtr.Size == 8) {
-                libmonoso = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
+                _Mono = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
             } else {
-                libmonoso = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
+                _Mono = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
             }
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access libmono.so!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return NULL;
             }
+            return _Mono;
         }
 
         return NULL;
