@@ -11,8 +11,8 @@ public static class MonoDebug {
     // THIS IS AN UGLY HACK. IT'S VERY UGLY.
 
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
-    private static long WINDOWS_mono_debug_init =           0x0000000000074d1c;
-    private static long WINDOWS_mono_debug_domain_create =  0x0000000000074b08;
+    private static long WINDOWS_mono_debug_init =           0x0000000000074D1C;
+    private static long WINDOWS_mono_debug_domain_create =  0x0000000000074B08;
     private static long WINDOWS_mono_debugger_agent_init =  0x0000000000085e50;
     private static long WINDOWS_runtime_initialized =       0x00000000000d4280;
     private static long WINDOWS_appdomain_load =            0x00000000000d4660;
@@ -111,7 +111,7 @@ public static class MonoDebug {
         } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
             IntPtr s, e;
 
-            s = dlsym(lib, "mono_debug_init");
+            s = dlsym(lib, name);
             if ((e = dlerror()) != IntPtr.Zero) {
                 Debug.Log("MonoDebug can't access " + name + "!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
