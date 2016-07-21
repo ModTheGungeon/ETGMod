@@ -13,11 +13,11 @@ public static class MonoDebug {
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE mono.dll SHIPPING WITH YOUR GAME!
     private static long WINDOWS_mono_debug_init =           0x0000000000074D1C;
     private static long WINDOWS_mono_debug_domain_create =  0x0000000000074B08;
-    private static long WINDOWS_mono_debugger_agent_init =  0x0000000000085e50;
-    private static long WINDOWS_runtime_initialized =       0x00000000000d4280;
-    private static long WINDOWS_appdomain_load =            0x00000000000d4660;
-    private static long WINDOWS_thread_startup =            0x00000000000d5510;
-    private static long WINDOWS_assembly_load =             0x00000000000d46d4;
+    private static long WINDOWS_mono_debugger_agent_init =  0x00000000000D5E50;
+    private static long WINDOWS_runtime_initialized =       0x00000000000D4280;
+    private static long WINDOWS_appdomain_load =            0x00000000000D4660;
+    private static long WINDOWS_thread_startup =            0x00000000000D5510;
+    private static long WINDOWS_assembly_load =             0x00000000000D46D4;
     // REPLACE THOSE ADDRESSES WITH THOSE IN THE libmono.so SHIPPING WITH YOUR GAME!
     private static long LINUX_64_mono_debug_init =          0x000000000012eddc;
     private static long LINUX_64_mono_debugger_agent_init = 0x00000000000aee17;

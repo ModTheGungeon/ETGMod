@@ -34,6 +34,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Assembly-CSharp.Base.mm\Assembly-CSharp.Base.mm.csproj">
+      <Project>{363A46E8-D9DD-4F31-9307-73B664E71D45}</Project>
+      <Name>Assembly-CSharp.Base.mm</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
