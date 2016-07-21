@@ -347,6 +347,25 @@ public static class MonoDebug {
             if ((assembly_load = assembly_load ?? GetDelegateHacky<d_assembly_load>(LINUX_64_assembly_load)) == null) return false;
         }
 
+        Debug.Log("Setting up slave thread.");
+        bool slaveRun = false;
+        bool slavePass = false;
+        Thread slave = new Thread(delegate () {
+            Debug.Log("Slave alive.");
+            while (!slaveRun) { }
+            Debug.Log("Slave running.");
+            Debug.Log("thread_startup " + CurrentThreadId);
+            thread_startup(NULL, CurrentThreadId);
+            Debug.Log("aaand...");
+            runtime_initialized(NULL);
+            Debug.Log("Slave quitting.");
+            slavePass = true;
+        }) {
+            Name = "MonoDebug.InitDebuggerAgent slave thread",
+            IsBackground = true
+        };
+        slave.Start();
+
         Debug.Log("Running mono_debugger_agent_init and hoping that Mono won't die...");
         mono_debugger_agent_init();
 
@@ -357,16 +376,21 @@ public static class MonoDebug {
         for (int i = 0; i < asmsManaged.Length; i++) {
             Assembly asmManaged = asmsManaged[i];
             IntPtr asm = (IntPtr) f_mono_assembly.GetValue(asmManaged);
-            if (asmManaged == asmThisManaged) {
+            if (asmManaged == asmThisManaged ||
+                asmManaged is AssemblyBuilder ||
+                asmManaged.GetName().Name == "mscorlib") {
                 continue;
             }
             assembly_load(NULL, asm, 0);
         }
 
-        thread_startup(NULL, CurrentThreadId);
+        Debug.Log("thread_startup " + CurrentThreadId);
+        thread_startup(NULL, 1331414134);
 
-        Debug.Log("runtime_initialized");
-        runtime_initialized(NULL);
+        Debug.Log("Switching to slave thread.");
+        slaveRun = true;
+        while (!slavePass) { }
+        Debug.Log("Slave passed.");
 
         Debug.Log("Done!");
         return true;
