@@ -172,7 +172,7 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
         public void OnGUI() {
 
             try {
-                Vector3 wPos = (Vector3)Target.SpeculativeRigidbody_0.PixelCollider_0.UnitTopCenter;
+                Vector3 wPos = (Vector3)Target.specRigidbody.PrimaryPixelCollider.UnitTopCenter;
                 Vector2 screenPos = Camera.main.WorldToScreenPoint(wPos);
                 screenPos=new Vector2(screenPos.x, Screen.height-screenPos.y);
 

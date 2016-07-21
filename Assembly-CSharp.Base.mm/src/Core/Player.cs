@@ -22,11 +22,11 @@ public static partial class ETGMod {
             // No context required.
         }.Find();
         public static bool GiveItemID(int id) {
-            if (!GameManager.GameManager_0.PlayerController_1) {
+            if (!GameManager.Instance.PrimaryPlayer) {
                 Debug.Log ("Couldn't access PlayerController instance in GameManager");
                 return false;
             }
-            PlayerController playercontroller = GameManager.GameManager_0.PlayerController_1;
+            PlayerController playercontroller = GameManager.Instance.PrimaryPlayer;
             GameObject pickupobject = PickupObjectDatabase.GetById (id).gameObject;
             _GiveItem.Xs(pickupobject, playercontroller, false);
             return true;
