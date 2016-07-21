@@ -364,9 +364,6 @@ public static class MonoDebug {
 			if (asmManaged == asmThisManaged) {
 				continue;
 			}
-			if (asmManaged is AssemblyBuilder) {
-				continue;
-			}
 			assembly_load(NULL, asm, 0);
 		}
 
