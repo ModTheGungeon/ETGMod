@@ -45,7 +45,7 @@ public static partial class ETGMod {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
             LaunchArguments = mono_runtime_get_main_args();
         } else {
-            LaunchArguments = MonoDebug.GetDelegate<Func<string[]>>("mono_runtime_get_main_args")();
+            LaunchArguments = MonoDebug.GetDelegate<Func<string[]>>("mono_runtime_get_main_arg")();
         }
 
         UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;
