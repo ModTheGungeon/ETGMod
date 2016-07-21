@@ -101,7 +101,6 @@
     <Compile Include="src\Patches\patch_Foyer.cs" />
     <Compile Include="src\Patches\patch_HealthHaver.cs" />
     <Compile Include="src\Patches\patch_tk2dBaseSprite.cs" />
-    <Compile Include="src\Patches\patch_GClass235.cs" />
     <Compile Include="src\Patches\patch_GameManager.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
