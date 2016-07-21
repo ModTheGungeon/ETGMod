@@ -115,7 +115,7 @@ public static partial class ETGMod {
         }
 
         public static void HandleSprite(tk2dBaseSprite sprite) {
-            Material[] materials = sprite.Collection.material_1;
+            Material[] materials = sprite.Collection.materials;
             for (int i = 0; i < materials.Length; i++) {
                 Texture2D texOrig = materials[i].mainTexture as Texture2D;
                 Texture2D tex = new Texture2D(texOrig.width, texOrig.height, texOrig.format, 1 < texOrig.mipmapCount, texOrig.filterMode != FilterMode.Point);
