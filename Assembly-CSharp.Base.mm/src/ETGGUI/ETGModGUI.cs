@@ -86,6 +86,8 @@ public class ETGModGUI : MonoBehaviour {
         _LoaderMenu.Start();
         _ConsoleMenu.Start();
         _InspectorMenu.Start();
+
+        tk2dButton x = new tk2dButton ();
     }
 
     public void Update() {
