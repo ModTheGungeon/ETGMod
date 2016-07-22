@@ -364,8 +364,8 @@ public class ETGModConsole : IETGModMenu {
         }
         Debug.Log(args[0]);
 
-        if (GameManager.GameManager_0 != null && GameManager.GameManager_0.PlayerController_1 != null) {
-            GameManager.GameManager_0.PlayerController_1.dodgeRollStats_0.distance = float.Parse(args[0]);
+        if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
+            GameManager.Instance.PrimaryPlayer.rollStats.distance = float.Parse(args[0]);
         }
     }
 
@@ -375,8 +375,8 @@ public class ETGModConsole : IETGModMenu {
         }
         Debug.Log(args[0]);
 
-        if (GameManager.GameManager_0 != null && GameManager.GameManager_0.PlayerController_1 != null) {
-            GameManager.GameManager_0.PlayerController_1.dodgeRollStats_0.time = float.Parse(args[0]);
+        if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
+            GameManager.Instance.PrimaryPlayer.rollStats.time = float.Parse(args[0]);
         }
     }
 
@@ -385,8 +385,8 @@ public class ETGModConsole : IETGModMenu {
             return;
         }
 
-        if (GameManager.GameManager_0 != null && GameManager.GameManager_0.PlayerController_1 != null) {
-            GameManager.GameManager_0.PlayerController_1.transform.position = new Vector3(
+        if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
+            GameManager.Instance.PrimaryPlayer.transform.position = new Vector3(
                 float.Parse(args[0]),
                 float.Parse(args[1]),
                 float.Parse(args[2])
@@ -411,7 +411,7 @@ public class ETGModConsole : IETGModMenu {
             LoggedText.Add ("Command requires 1-2 arguments (int|string, int)");
             return;
         }
-        if (!GameManager.GameManager_0.PlayerController_1) {
+        if (!GameManager.Instance.PrimaryPlayer) {
             LoggedText.Add ("Couldn't access Player Controller");
             return;
         }

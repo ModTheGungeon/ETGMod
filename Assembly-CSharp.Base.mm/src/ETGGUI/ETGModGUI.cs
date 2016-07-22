@@ -87,7 +87,6 @@ public class ETGModGUI : MonoBehaviour {
         _ConsoleMenu.Start();
         _InspectorMenu.Start();
 
-        tk2dButton x = new tk2dButton ();
     }
 
     public void Update() {
@@ -132,9 +131,9 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public static void UpdatePlayerState() {
-        if (GameManager.GameManager_0 != null&&GameManager.GameManager_0.PlayerController_1!=null) {
+        if (GameManager.Instance != null&&GameManager.Instance.PrimaryPlayer!=null) {
             bool set = (CurrentMenu == MenuOpened.None);
-            GameManager.GameManager_0.PlayerController_1.enabled = set;
+            GameManager.Instance.PrimaryPlayer.enabled = set;
             Camera.main.GetComponent<CameraController>().enabled = set;
             if (StoredTimeScale.HasValue) {
                 Time.timeScale = (float)StoredTimeScale;
@@ -181,12 +180,12 @@ public class ETGModGUI : MonoBehaviour {
 
             if (obj==null) 
                 continue;
-            if (obj.EncounterTrackable_0==null)
+            if (obj.encounterTrackable==null)
                 continue;
-            if (obj.EncounterTrackable_0.JournalEntry_0==null)
+            if (obj.encounterTrackable.journalData==null)
                 continue;
             
-            string name = obj.EncounterTrackable_0.JournalEntry_0.method_2(true).Replace(' ', '_').ToLower();
+            string name = obj.encounterTrackable.journalData.GetPrimaryDisplayName(true).Replace(' ', '_').ToLower();
             int id = PickupObjectDatabase.Instance.Objects.IndexOf(obj);
 
             count++;
