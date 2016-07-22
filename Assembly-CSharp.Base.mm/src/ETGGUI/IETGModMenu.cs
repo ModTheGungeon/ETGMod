@@ -11,6 +11,8 @@ public interface IETGModMenu {
     void Update();
     void OnGUI();
     void OnDestroy();
+    void OnOpen();
+    void OnClose();
 
 }
 
@@ -19,4 +21,6 @@ public class ETGModNullMenu : IETGModMenu {
     public void Update() { }
     public void OnGUI() { }
     public void OnDestroy() { }
+    public void OnOpen() { }
+    public void OnClose() { }
 }

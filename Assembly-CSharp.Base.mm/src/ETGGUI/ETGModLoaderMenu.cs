@@ -29,9 +29,11 @@ public class ETGModLoaderMenu : IETGModMenu {
         GUILayout.EndArea();
     }
 
-    public void OnDestroy() {
+    public void OnOpen() { }
 
-    }
+    public void OnClose() { }
+
+    public void OnDestroy() { }
 
     //Mod selector
     public void GUISelector() {

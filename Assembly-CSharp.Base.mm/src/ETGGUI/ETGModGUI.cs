@@ -86,43 +86,58 @@ public class ETGModGUI : MonoBehaviour {
         _LoaderMenu.Start();
         _ConsoleMenu.Start();
         _InspectorMenu.Start();
-
     }
 
     public void Update() {
         if (Input.GetKeyDown(KeyCode.F1)) {
-            if (CurrentMenu == MenuOpened.Loader)
+            if (CurrentMenu == MenuOpened.Loader) {
                 CurrentMenu = MenuOpened.None;
-            else
+                _CurrentMenuScript.OnClose ();
+            } else {
                 CurrentMenu = MenuOpened.Loader;
+                _CurrentMenuScript.OnOpen ();
+            }
 
+            UpdateTimeScale ();
             UpdatePlayerState();
         }
 
-        if (Input.GetKeyDown(KeyCode.F2)||Input.GetKeyDown(KeyCode.Slash)||Input.GetKeyDown(KeyCode.BackQuote)) {
-            if (CurrentMenu == MenuOpened.Console)
+        if (Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.Slash) || Input.GetKeyDown(KeyCode.BackQuote)) {
+            if (CurrentMenu == MenuOpened.Console) {
                 CurrentMenu = MenuOpened.None;
-            else
+                _CurrentMenuScript.OnClose ();
+            } else {
                 CurrentMenu = MenuOpened.Console;
+                _CurrentMenuScript.OnOpen ();
+            }
 
+            UpdateTimeScale ();
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F3)) {
-            if (CurrentMenu == MenuOpened.Logger)
+            if (CurrentMenu == MenuOpened.Logger) {
                 CurrentMenu = MenuOpened.None;
-            else
+                _CurrentMenuScript.OnClose ();
+            } else {
                 CurrentMenu = MenuOpened.Logger;
+                _CurrentMenuScript.OnOpen ();
+            }
 
+            UpdateTimeScale ();
             UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F4)) {
-            if (CurrentMenu == MenuOpened.Inspector)
+            if (CurrentMenu == MenuOpened.Inspector) {
                 CurrentMenu = MenuOpened.None;
-            else
+                _CurrentMenuScript.OnClose ();
+            } else {
                 CurrentMenu = MenuOpened.Inspector;
+                _CurrentMenuScript.OnOpen ();
+            }
 
+            UpdateTimeScale ();
             UpdatePlayerState();
         }
 
@@ -130,15 +145,18 @@ public class ETGModGUI : MonoBehaviour {
         _CurrentMenuScript.Update();
     }
 
+    public static void UpdateTimeScale() {
+        if (StoredTimeScale.HasValue) {
+            Time.timeScale = (float)StoredTimeScale;
+            StoredTimeScale = null;
+        }
+    }
+
     public static void UpdatePlayerState() {
         if (GameManager.Instance != null&&GameManager.Instance.PrimaryPlayer!=null) {
             bool set = (CurrentMenu == MenuOpened.None);
             GameManager.Instance.PrimaryPlayer.enabled = set;
             Camera.main.GetComponent<CameraController>().enabled = set;
-            if (StoredTimeScale.HasValue) {
-                Time.timeScale = (float)StoredTimeScale;
-                StoredTimeScale = null;
-            }
         }
     }
 
@@ -156,8 +174,10 @@ public class ETGModGUI : MonoBehaviour {
             }
 
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) {
+                _CurrentMenuScript.OnClose ();
                 ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
-                ETGModGUI.UpdatePlayerState();
+                ETGModGUI.UpdateTimeScale ();
+                ETGModGUI.UpdatePlayerState ();
             }
         }
 
@@ -176,7 +196,8 @@ public class ETGModGUI : MonoBehaviour {
             yield return new WaitForEndOfFrame();
 
         // TODO: bleh, foreach
-        foreach(PickupObject obj in PickupObjectDatabase.Instance.Objects) {
+        for (int i = 0; i < PickupObjectDatabase.Instance.Objects.Count; i++) {
+            PickupObject obj = PickupObjectDatabase.Instance.Objects [i];
 
             if (obj==null) 
                 continue;
@@ -231,13 +252,7 @@ public class ETGModGUI : MonoBehaviour {
         }
 
         //Add command arguments.
-        string[][] giveCommands = new string[1][];
-        giveCommands[0] = new string[ETGModConsole.AllItems.Keys.Count];
-        ETGModConsole.AllItems.Keys.CopyTo(giveCommands[0], 0);
-
-        Debug.Log(giveCommands[0].Length + " give command args");
-
-        ETGModConsole.Commands["give"].AcceptedArguments = giveCommands;
+        Debug.Log(ETGModConsole.AllItems.Values.Count + " give command args");
 
     }
 

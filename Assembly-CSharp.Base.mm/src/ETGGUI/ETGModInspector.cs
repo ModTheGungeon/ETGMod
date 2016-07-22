@@ -61,9 +61,11 @@ public class ETGModInspector : IETGModMenu {
         GUI.DragWindow();
     }
 
-    public void OnDestroy() {
+    public void OnOpen() { }
 
-    }
+    public void OnClose() { }
+
+    public void OnDestroy() { }
 
     public static object DrawProperty(PropertyInfo inf, object input) {
         if (input == null) {

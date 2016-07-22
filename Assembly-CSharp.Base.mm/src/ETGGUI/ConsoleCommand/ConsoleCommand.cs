@@ -8,13 +8,7 @@ using UnityEngine;
 /// <summary>
 /// ETG Mod console command class
 /// </summary>
-public class ConsoleCommand {
-
-
-    /// <summary>
-    /// The command's name in the console, what you use to call it.
-    /// </summary>
-    public string CommandName;
+public class ConsoleCommand : ConsoleCommandUnit {
 
     /// <summary>
     /// The function run when
@@ -27,12 +21,18 @@ public class ConsoleCommand {
     /// </summary>
     public string[][] AcceptedArguments;
 
-    public ConsoleCommand(string cmdName, System.Action<string[]> cmdRef, params string[][] acceptedArgs) {
-        CommandName = cmdName;
-        CommandReference = cmdRef;
-        if (acceptedArgs != null) {
-            AcceptedArguments = acceptedArgs;
-        }
+    private string[] _EmptyStringArray = new string[] {};
+
+    public ConsoleCommand(System.Action<string[]> cmdref, AutocompletionSettings autocompletion) {
+        CommandReference = cmdref;
+        Autocompletion = autocompletion;
+    }
+
+    public ConsoleCommand(System.Action<string[]> cmdref) {
+        CommandReference = cmdref;
+        Autocompletion = new AutocompletionSettings (delegate (string input) {
+            return _EmptyStringArray;
+        });
     }
 
     public void RunCommand(string[] args) {
@@ -62,7 +62,7 @@ public class ConsoleCommand {
                 if (foundMatch) {
                     continue;
                 } else {
-                    Debug.Log("Unnaceptable argument " +'"'+args[i]+'"' +" in command " + CommandName);
+                    Debug.Log("Unnaceptable argument " +'"'+args[i]+'"' +" in command " + Name);
                     return;
                 }
             }

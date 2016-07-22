@@ -34,9 +34,11 @@ public class ETGModDebugLogMenu : IETGModMenu {
         _DrawLoggedText();
     }
 
-    public void OnDestroy() {
+    public void OnOpen() { }
 
-    }
+    public void OnClose() { }
+
+    public void OnDestroy() { }
 
     private void _DrawMainBox() {
         GUI.Box(_MainBoxRect, string.Empty);

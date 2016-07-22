@@ -22,5 +22,4 @@ internal class patch_GameManager : GameManager {
             ETGModMainBehaviour.Instance = new GameObject("ETGMod Manager").AddComponent<ETGModMainBehaviour>();
         }
     }
-
 }
