@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Reflection.Emit;
 using System.Threading;
 using Process = System.Diagnostics.Process;
+using Debugger = System.Diagnostics.Debugger;
 
 public static class MonoDebug {
     
@@ -260,6 +261,7 @@ public static class MonoDebug {
         if (Environment.OSVersion.Platform == PlatformID.Unix) {
             Debug.Log("On Linux, Unity hates any access to libmono.so. Creating delegates from pointers.");
             // Unity doesn't want anyone to open libmono.so as it can't open it... but even checks the correct path!
+            mono_jit_parse_options = null;
             if ((mono_jit_parse_options = mono_jit_parse_options ?? GetDelegate<d_mono_jit_parse_options>()) == null) return false;
         }
         // TODO Mac OS X?
@@ -373,6 +375,19 @@ public static class MonoDebug {
 
         Debug.Log("Done!");
         return true;
+    }
+
+    public static int Breaks { get; private set; }
+    public static void Break() {
+        if (!Debugger.IsAttached) {
+            return;
+        }
+        Breaks++;
+
+        bool hold = true;
+        while (hold);
+
+        Breaks--;
     }
 
 }
