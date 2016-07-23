@@ -98,6 +98,26 @@ public static class MonoDebug {
         return NULL;
     }
 
+    private static IntPtr _PThread = NULL;
+    public static IntPtr GetPThread() {
+        if (_PThread != NULL) {
+            return _PThread;
+        }
+
+        if (Environment.OSVersion.Platform != PlatformID.Unix) {
+            return NULL;
+        }
+
+        IntPtr e = IntPtr.Zero;
+        _PThread = dlopen("pthread", RTLD_NOW);
+        if ((e = dlerror()) != IntPtr.Zero) {
+            Debug.Log("MonoDebug can't access libpthread.so!");
+            Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
+            return NULL;
+        }
+        return _PThread;
+    }
+
     public static IntPtr GetFunction(string name) {
         return GetFunction(GetMono(), name);
     }
@@ -126,6 +146,9 @@ public static class MonoDebug {
 
     public static T GetDelegate<T>() where T : class {
         return GetDelegate<T>(typeof(T).Name.Substring(2));
+    }
+    public static T GetDelegateIn<T>(IntPtr lib) where T : class {
+        return GetDelegate<T>(lib, typeof(T).Name.Substring(2));
     }
     public static T GetDelegate<T>(string name) where T : class {
         return GetDelegate<T>(GetMono(), name);
@@ -287,11 +310,9 @@ public static class MonoDebug {
     // Windows
     [DllImport("kernel32")]
     private static extern uint GetCurrentThreadId();
-    // turns out this code is useless...
     // Linux
-    [DllImport("pthread")]
-    private static extern ulong pthread_self();
-    // TODO probably @zatherz
+    private delegate ulong d_pthread_self();
+    private static d_pthread_self pthread_self;
 
     public static ulong CurrentThreadId {
         get {
@@ -299,6 +320,7 @@ public static class MonoDebug {
                 return GetCurrentThreadId();
 
             } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+                if ((pthread_self = pthread_self ?? GetDelegateIn<d_pthread_self>(GetPThread())) == null) return 0;
                 return pthread_self();
 
             }
