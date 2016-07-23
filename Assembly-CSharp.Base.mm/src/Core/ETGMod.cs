@@ -12,7 +12,9 @@ using System.Runtime.InteropServices;
 /// </summary>
 public static partial class ETGMod {
 
-    public readonly static Version BaseVersion = new Version(1, 0);
+    public readonly static Version BaseVersion = new Version(0, 1, 0);
+    // The following line will be replaced by Travis.
+    public readonly static int BaseTravisBuild = 0;
     /// <summary>
     /// Base version profile, used separately from BaseVersion.
     /// A higher profile ID means higher instability ("developerness").
@@ -26,6 +28,23 @@ public static partial class ETGMod {
         new Profile(0, ""); // no tag
         #endif
 
+    public static string BaseUIVersion {
+        get {
+            string v = BaseVersion.ToString(3);
+
+            if (BaseTravisBuild != 0) {
+                v += "-";
+                v += BaseTravisBuild;
+            }
+
+            if (!string.IsNullOrEmpty(BaseProfile.Name)) {
+                v += "-";
+                v += BaseProfile.Name;
+            }
+
+            return v;
+        }
+    }
     public readonly static string GameFolder = ".";
     public readonly static string ModsDirectory = Path.Combine(GameFolder, "Mods");
     public readonly static string ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
@@ -201,6 +220,12 @@ public static partial class ETGMod {
                     }
                     break;
                 }
+            }
+
+            // ... then check if the mod runs on this profile ...
+            if (!metadata.Profile.RunsOn(BaseProfile)) {
+                Debug.LogWarning("http://www.windoof.org/sites/default/files/unsupported.gif");
+                return;
             }
 
             // ... then check if the dependencies are loaded ...
@@ -498,6 +523,13 @@ public static partial class ETGMod {
         public Profile(int id, string name) {
             Id = id;
             Name = name;
+        }
+
+        public bool RunsOn(Profile p) {
+            return Id <= p.Id;
+        }
+        public bool Runs() {
+            return RunsOn(BaseProfile);
         }
 
         public override bool Equals(object obj) {

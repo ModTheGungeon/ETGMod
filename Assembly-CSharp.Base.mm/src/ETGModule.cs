@@ -189,6 +189,24 @@ public class ETGModuleMetadata {
         }
     }
 
+    private ETGMod.Profile _Profile;
+    /// <summary>
+    /// The base profile used to compile this mod.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual ETGMod.Profile Profile {
+        get {
+            return _Profile;
+        }
+        set {
+            if (_Profile != null) {
+                throw new InvalidOperationException("The ETGModuleMetadata profile is read-only!");
+            }
+            _Profile = value;
+        }
+    }
+
     private List<ETGModuleMetadata> _Dependencies;
     /// <summary>
     /// The dependencies of the mod. In case of backends, this will return null.
@@ -216,6 +234,7 @@ public class ETGModuleMetadata {
         metadata._Archive = archive;
         metadata._Directory = directory;
         metadata._Prelinked = false;
+        metadata._Profile = ETGMod.BaseProfile; // Works as if it were set to Release
         metadata._Dependencies = new List<ETGModuleMetadata>();
 
         using (StreamReader reader = new StreamReader(stream)) {
@@ -263,6 +282,19 @@ public class ETGModuleMetadata {
 
                 } else if (prop == "Prelinked") {
                     metadata._Prelinked = data[1].ToLowerInvariant() == "true";
+
+                } else if (prop == "Profile") {
+                    int pid;
+                    string pname = "";
+                    if (!int.TryParse(data[1], out pid)) {
+                        pname = data[1].ToLowerInvariant();
+                        if (pname != ETGMod.BaseProfile.Name) {
+                            pid = int.MaxValue;
+                        } else {
+                            pid = ETGMod.BaseProfile.Id;
+                        }
+                    }
+                    metadata._Profile = new ETGMod.Profile(pid, pname);
 
                 } else if (prop == "Depends" || prop == "Dependency") {
                     ETGModuleMetadata dep = new ETGModuleMetadata();

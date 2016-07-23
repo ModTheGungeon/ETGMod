@@ -9,7 +9,12 @@ internal class patch_MainMenuFoyerController : MainMenuFoyerController {
     protected void Awake() {
         orig_Awake();
 
-        VersionLabel.Text += " | Mod the Gungeon " + ETGMod.BaseVersion;
+        VersionLabel.Position = new Vector3(
+            VersionLabel.Position.x,
+            VersionLabel.Position.y + VersionLabel.Height * 2f,
+            VersionLabel.Position.z
+        );
+        VersionLabel.Text = "Enter the Gungeon" + VersionLabel.Text + "\nMod the Gungeon " + ETGMod.BaseUIVersion;
 
     }
 
