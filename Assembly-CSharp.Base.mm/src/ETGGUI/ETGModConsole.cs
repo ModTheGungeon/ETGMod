@@ -104,6 +104,24 @@ public class ETGModConsole : IETGModMenu {
 
     public void OnGUI() {
 
+        TextEditor te = GetTextEditor();
+        bool rancommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentTextFieldText.Length > 0;
+        if (rancommand) {
+            string[] input = SplitArgs(te.text.Trim());
+            int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
+
+            List<String> path = new List<String>();
+            for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
+                if (!String.IsNullOrEmpty(input[i])) path.Add(input[i]);
+            }
+
+            List<String> args = new List<String>();
+            for (int i = commandindex; i < input.Length; i++) {
+                if (!String.IsNullOrEmpty(input[i])) args.Add(input[i]);
+            }
+            RunCommand(path.ToArray(), args.ToArray());
+        }
+
         //GUI.skin=skin;
 
         //THIS HAS TO BE CALLED TWICE, once on input, and once the frame after!
@@ -128,25 +146,6 @@ public class ETGModConsole : IETGModMenu {
         if (_FocusOnInputBox) {
             GUI.FocusControl ("CommandBox");
             _FocusOnInputBox = false;
-        }
-
-        TextEditor te = GetTextEditor ();
-
-        bool rancommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentTextFieldText.Length > 0;
-        if (rancommand) {
-            string[] input = SplitArgs(te.text.Trim());
-            int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
-
-            List<String> path = new List<String>();
-            for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
-                if (!String.IsNullOrEmpty(input[i])) path.Add (input [i]);
-            }
-           
-            List<String> args = new List<String>();
-            for (int i = commandindex; i < input.Length; i++) {
-                if (!String.IsNullOrEmpty(input[i])) args.Add (input [i]);
-            }
-            RunCommand (path.ToArray(), args.ToArray());
         }
 
         _MainBoxRect       = new Rect(16,                      16 , Screen.width - 32, Screen.height - 32 - 29 );
