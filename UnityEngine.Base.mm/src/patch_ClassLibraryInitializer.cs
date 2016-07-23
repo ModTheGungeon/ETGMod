@@ -39,6 +39,8 @@ namespace UnityEngine {
                 Debug.Log("Called MonoDebug and it sudoku'd.");
                 Debug.Log(e);
             }
+
+            MonoDebug.Break();
         }
     }
 }

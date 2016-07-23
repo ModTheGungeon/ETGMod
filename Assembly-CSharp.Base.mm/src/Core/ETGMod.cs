@@ -12,8 +12,19 @@ using System.Runtime.InteropServices;
 /// </summary>
 public static partial class ETGMod {
 
-    public readonly static string BaseVersionString = "1.0"; // Used by the installer
     public readonly static Version BaseVersion = new Version(1, 0);
+    /// <summary>
+    /// Base version profile, used separately from BaseVersion.
+    /// A higher profile ID means higher instability ("developerness").
+    /// </summary>
+    public readonly static Profile BaseProfile =
+        #if TRAVIS
+        new Profile(2, "travis");
+        #elif DEBUG
+        new Profile(1, "debug");
+        #else
+        new Profile(0, ""); // no tag
+        #endif
 
     public readonly static string GameFolder = ".";
     public readonly static string ModsDirectory = Path.Combine(GameFolder, "Mods");
@@ -479,5 +490,63 @@ public static partial class ETGMod {
     // A shared object a day keeps the GC away!
     private readonly static Type[] _EmptyTypeArray = new Type[0];
     private readonly static object[] _EmptyObjectArray = new object[0];
+
+    public class Profile {
+        public readonly int Id;
+        public readonly string Name;
+
+        public Profile(int id, string name) {
+            Id = id;
+            Name = name;
+        }
+
+        public override bool Equals(object obj) {
+            Profile p = obj as Profile;
+            if (p == null) {
+                return false;
+            }
+            return p.Id == Id;
+        }
+
+        public override int GetHashCode() {
+            return Id;
+        }
+
+        public static bool operator <(Profile a, Profile b) {
+            if ((a == null) || (b == null)) {
+                return false;
+            }
+            return a.Id < b.Id;
+        }
+        public static bool operator >(Profile a, Profile b) {
+            if ((a == null) || (b == null)) {
+                return false;
+            }
+            return a.Id > b.Id;
+        }
+
+        public static bool operator <=(Profile a, Profile b) {
+            if ((a == null) || (b == null)) {
+                return false;
+            }
+            return a.Id <= b.Id;
+        }
+        public static bool operator >=(Profile a, Profile b) {
+            if ((a == null) || (b == null)) {
+                return false;
+            }
+            return a.Id >= b.Id;
+        }
+
+        public static bool operator ==(Profile a, Profile b) {
+            if ((a == null) || (b == null)) {
+                return false;
+            }
+            return a.Id == b.Id;
+        }
+        public static bool operator !=(Profile a, Profile b) {
+            return !(a == b);
+        }
+    }
 
 }
