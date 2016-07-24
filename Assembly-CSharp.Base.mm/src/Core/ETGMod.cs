@@ -82,6 +82,7 @@ public static partial class ETGMod {
         UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();
+        MultiplayerManager.Create();
 
         Debug.Log("ETGMod " + BaseVersion);
         Assets.Hook();

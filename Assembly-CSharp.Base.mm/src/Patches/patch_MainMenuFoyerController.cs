@@ -7,9 +7,12 @@ internal class patch_MainMenuFoyerController : MainMenuFoyerController {
 
     public bool isMatched;
 
+    public static MainMenuFoyerController instance;
+
     protected extern void orig_Awake();
     protected void Awake() {
         orig_Awake();
+        instance=this;
 
         VersionLabel.Position = new Vector3(
             VersionLabel.Position.x,

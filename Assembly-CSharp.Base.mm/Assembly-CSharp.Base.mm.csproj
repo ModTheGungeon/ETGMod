@@ -32,6 +32,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\libs\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -97,6 +100,7 @@
     <Compile Include="src\MonoMod\MonoModReplace.cs" />
     <Compile Include="src\MonoMod\Platform.cs" />
     <Compile Include="src\MonoMod\PlatformHelper.cs" />
+    <Compile Include="src\Multiplayer\MultiplayerManager.cs" />
     <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
     <Compile Include="src\Patches\patch_Dungeon.cs" />
     <Compile Include="src\Patches\patch_Foyer.cs" />
@@ -130,7 +134,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="src\Multiplayer\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
