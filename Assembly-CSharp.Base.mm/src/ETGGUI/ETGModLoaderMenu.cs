@@ -47,6 +47,7 @@ public class ETGModLoaderMenu : IETGModMenu {
         }
 
         GUILayout.EndScrollView();
+        GUILayout.EndArea();
     }
 
 }

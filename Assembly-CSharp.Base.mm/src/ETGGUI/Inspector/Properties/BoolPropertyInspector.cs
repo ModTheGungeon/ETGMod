@@ -7,7 +7,7 @@ using System.Reflection;
 
 class BoolPropertyInspector : IBasePropertyInspector {
     public object OnGUI(PropertyInfo info, object input) {
-        throw new NotImplementedException();
+        return input;
     }
 }
 

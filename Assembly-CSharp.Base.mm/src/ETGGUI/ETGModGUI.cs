@@ -162,7 +162,6 @@ public class ETGModGUI : MonoBehaviour {
 
         //GUI.skin.font=f;
 
-
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
             if (!StoredTimeScale.HasValue) {
                 StoredTimeScale = Time.timeScale;
