@@ -46,17 +46,11 @@
     <PostBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
       ..\..\..\..\ETGMod.Installer\bin\Release\ETGMod.Installer.exe --postcompile ..\..\..\Assembly-CSharp.Base.mm\bin\Debug\
     </PostBuildEvent>
-    <PostBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
-      mono ../../../../ETGMod.Installer/bin/Release/ETGMod.Installer.exe --postcompile ../../../Assembly-CSharp.Base.mm/bin/Debug/
-    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <PostBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
       ..\..\..\..\ETGMod.Installer\bin\Release\ETGMod.Installer.exe --postcompile ..\..\..\Assembly-CSharp.Base.mm\bin\Release\
-    </PostBuildEvent>
-    <PostBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
-      mono ../../../../ETGMod.Installer/bin/Release/ETGMod.Installer.exe --postcompile ../../../Assembly-CSharp.Base.mm/bin/Release/
     </PostBuildEvent>
   </PropertyGroup>
 </Project>

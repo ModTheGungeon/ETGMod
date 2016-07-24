@@ -109,7 +109,7 @@ public static class MonoDebug {
         }
 
         IntPtr e = IntPtr.Zero;
-        _PThread = dlopen("pthread", RTLD_NOW);
+        _PThread = dlopen("libpthread.so.0", RTLD_NOW);
         if ((e = dlerror()) != IntPtr.Zero) {
             Debug.Log("MonoDebug can't access libpthread.so!");
             Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
