@@ -16,12 +16,14 @@ namespace ETGGUI.Inspector {
 
         private static PropertyInfo p_Object_name = typeof(UnityEngine.Object).GetProperty("name");
         private static PropertyInfo p_Transform_tag = typeof(Transform).GetProperty("tag");
+        private static PropertyInfo p_Transform_position = typeof(Transform).GetProperty("position");
 
         private List<string> crawled = new List<string>();
         public void OnGUI(object instance) {
             crawled.Clear();
             crawled.Add("name");
             crawled.Add("tag");
+            crawled.Add("position");
             PropertyInfo[] allProperties = instance.GetType().GetProperties(
                 BindingFlags.Public |
                 BindingFlags.Instance |
@@ -31,15 +33,14 @@ namespace ETGGUI.Inspector {
             if (instance is Transform) {
                 object getProperty = ((Transform) instance).name;
                 object setProperty = ETGModInspector.DrawProperty(p_Object_name, getProperty);
-                if (getProperty != setProperty) {
+                if (getProperty != setProperty) 
                     ((Transform) instance).name = (string) setProperty;
-                }
+                
 
                 getProperty = ((Transform) instance).tag;
                 setProperty = ETGModInspector.DrawProperty(p_Transform_tag, getProperty);
-                if (getProperty != setProperty) {
+                if (getProperty != setProperty) 
                     ((Transform) instance).tag = (string) setProperty;
-                }
             }
 
             GUILayout.Label("");

@@ -33,8 +33,6 @@ public class ETGModGUI : MonoBehaviour {
 
     public static Texture2D BoxTexture;
 
-    public static Texture2D TestTexture;
-
     private static IETGModMenu _CurrentMenuScript {
         get {
             switch (CurrentMenu) {
@@ -80,8 +78,6 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public static void Start() {
-        TestTexture = Resources.Load<Texture2D>("Test/Texture");
-
         _LoggerMenu.Start();
         _LoaderMenu.Start();
         _ConsoleMenu.Start();

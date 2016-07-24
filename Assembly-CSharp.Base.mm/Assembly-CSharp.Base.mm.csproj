@@ -63,10 +63,13 @@
     <!--Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" /-->
     <!--=======-->
     <!-->>>>>>> 056ab26... Added fontconverter to the csproj-->
+    <Compile Include="src\ETGGUI\Inspector\Properties\BoolPropertyInspector.cs" />
+    <Compile Include="src\ETGGUI\Inspector\Properties\FloatPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\StringPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
     <Compile Include="src\ETGGUI\Inspector\Components\GenericComponentInspector.cs" />
+    <Compile Include="src\ETGGUI\Inspector\Properties\VectorPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\RandomSelector.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
@@ -127,6 +130,6 @@
   </Target>
   -->
   <ItemGroup>
-    <Folder Include="src\ETGGUI\ConsoleCommand\" />
+    <Folder Include="src\Multiplayer\" />
   </ItemGroup>
 </Project>

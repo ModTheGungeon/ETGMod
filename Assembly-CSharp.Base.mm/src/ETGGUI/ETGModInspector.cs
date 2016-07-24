@@ -14,7 +14,24 @@ public class ETGModInspector : IETGModMenu {
     };
 
     public static Dictionary<Type, IBasePropertyInspector> PropertyInspectorRegistry = new Dictionary<Type, IBasePropertyInspector>() {
-        { typeof(string), new StringPropertyInspector() }
+        {
+            typeof(string), new StringPropertyInspector()
+        },
+        {
+            typeof(Vector2), new VectorPropertyInspector()
+        },
+        {
+            typeof(Vector3), new VectorPropertyInspector()
+        },
+        {
+            typeof(Vector4), new VectorPropertyInspector()
+        },
+        {
+            typeof(float), new FloatPropertyInspector()
+        },
+        {
+            typeof(bool), new BoolPropertyInspector()
+        }
     };
 
     public static GenericComponentInspector baseInspector;
