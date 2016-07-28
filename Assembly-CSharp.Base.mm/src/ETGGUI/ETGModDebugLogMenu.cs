@@ -53,22 +53,27 @@ public class ETGModDebugLogMenu : IETGModMenu {
         ScrollPos=GUILayout.BeginScrollView(ScrollPos);
 
         for (int i = 0; i<LoggedText.Count; i++) {
-            if (LoggedText[i]=="\n") {
+            try {
+                if (LoggedText[i]=="\n") {
+                    GUILayout.Label(LoggedText[i]);
+                    continue;
+                }
+                GUILayout.BeginHorizontal();
+                isTraceShown[i]=GUILayout.Toggle(isTraceShown[i], "", GUILayout.Width(15), GUILayout.Height(15));
                 GUILayout.Label(LoggedText[i]);
-                continue;
-            }
-            GUILayout.BeginHorizontal();
-            isTraceShown[i]=GUILayout.Toggle(isTraceShown[i],"",GUILayout.Width(15), GUILayout.Height(15));
-            GUILayout.Label(LoggedText[i]);
-            GUILayout.EndHorizontal();
+                GUILayout.EndHorizontal();
 
-            if (isTraceShown[i]) {
-                GUILayout.Label("<color=green>" + stackTraces[i] + "</color>");
+                if (isTraceShown[i]) {
+                    GUILayout.Label("<color=green>"+stackTraces[i]+"</color>");
+                }
+            } catch {
+                continue;
             }
         }
 
         GUILayout.EndScrollView();
         GUILayout.EndArea();
+
     }
 
     public static void Logger(string text, string stackTrace, LogType type) {
@@ -90,6 +95,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
                 isTraceShown.Add(false);
             }
         }
+
         ScrollPos=new Vector2(ScrollPos.x, _ViewRect.height);
     }
 

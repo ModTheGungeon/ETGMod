@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp.Base.mm", "Assembly-CSharp.Base.mm\Assembly-CSharp.Base.mm.csproj", "{363A46E8-D9DD-4F31-9307-73B664E71D45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityEngine.Base.mm", "UnityEngine.Base.mm\UnityEngine.Base.mm.csproj", "{3C105AF3-D405-4536-B45E-C764D6ED84C7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DUMMY", "DUMMY\DUMMY.csproj", "{044B4891-AF22-43DC-A800-21E81AEA753F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,28 +66,6 @@ Global
 		{3C105AF3-D405-4536-B45E-C764D6ED84C7}.pcl_Release|Any CPU.Build.0 = Release|Any CPU
 		{3C105AF3-D405-4536-B45E-C764D6ED84C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C105AF3-D405-4536-B45E-C764D6ED84C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_2_0_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_2_0_Release|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_3_5_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_3_5_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_3_5_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_3_5_Release|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_0_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_0_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_0_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_0_Release|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_5_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_5_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_5_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.net_4_5_Release|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.pcl_Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.pcl_Debug|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.pcl_Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.pcl_Release|Any CPU.Build.0 = Debug|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{044B4891-AF22-43DC-A800-21E81AEA753F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

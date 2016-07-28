@@ -71,23 +71,25 @@ public class ETGModConsole : IETGModMenu {
                     return ret.ToArray();
                 }))
                 .AddUnit ("screenshake", SetShake)
-                .AddUnit ("echo", Echo)
-                .AddUnit("tp", Teleport);
+                .AddUnit ("echo",        Echo    )
+                .AddUnit ("tp",          Teleport);
 
         // ROLL NAMESPACE
         Commands.AddUnit ("roll", new ConsoleCommandGroup());
 
         Commands.GetGroup ("roll")
-                .AddUnit ("distance", DodgeRollDistance)
-                .AddUnit ("speed", DodgeRollSpeed);
+                .AddUnit  ("distance", DodgeRollDistance)
+                .AddUnit  ("speed",    DodgeRollSpeed   );
 
         // CONF NAMESPACE
         Commands.AddUnit ("conf", new ConsoleCommandGroup());
 
         Commands.GetGroup("conf")
-                .AddUnit("close_console_on_command", delegate (string[] args) { _CloseConsoleOnCommand          = SetBool(args, _CloseConsoleOnCommand        );})
-                .AddUnit("cut_input_focus_on_command", delegate (string[] args) { _CutInputFocusOnCommand         = SetBool(args, _CutInputFocusOnCommand       ); })
-                .AddUnit("enable_damage_indicators", delegate (string[] args) { ETGModGUI.UseDamageIndicators  = SetBool(args, ETGModGUI.UseDamageIndicators); });
+                .AddUnit("close_console_on_command",   delegate (string[] args) { _CloseConsoleOnCommand          = SetBool(args, _CloseConsoleOnCommand        );})
+                .AddUnit("cut_input_focus_on_command", delegate (string[] args) { _CutInputFocusOnCommand         = SetBool(args, _CutInputFocusOnCommand       );})
+                .AddUnit("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators   = SetBool(args, ETGModGUI.UseDamageIndicators );});
+
+        Commands.AddUnit("set_player_vunerable", delegate(string[] args) { GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable=SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable); });
     }
 
     public void Update() {

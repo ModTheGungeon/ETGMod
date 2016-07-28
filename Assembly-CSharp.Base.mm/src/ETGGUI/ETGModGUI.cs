@@ -159,7 +159,6 @@ public class ETGModGUI : MonoBehaviour {
     // Font f;
 
     public void OnGUI() {
-
         //GUI.skin.font=f;
 
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {

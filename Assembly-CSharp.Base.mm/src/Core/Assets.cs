@@ -39,6 +39,7 @@ public static partial class ETGMod {
             string[] resourceNames = asm.GetManifestResourceNames();
             for (int i = 0; i < resourceNames.Length; i++) {
                 string name = resourceNames[i];
+                Debug.Log(name);
                 int indexOfContent = name.IndexOf("Content");
                 if (indexOfContent < 0) {
                     continue;
