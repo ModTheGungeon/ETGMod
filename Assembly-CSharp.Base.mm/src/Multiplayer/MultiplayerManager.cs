@@ -106,13 +106,6 @@ class MultiplayerManager : MonoBehaviour {
 
     public void OnGUI() {
 
-        foreach (float f in NetworkInput.directions)
-            GUILayout.Label(f.ToString());
-
-        GUILayout.Label("Sent bytes:" + NetworkInput.displayBytesSent);
-        GUILayout.Label("Recieved bytes:"+NetworkInput.displayBytesRecieved);
-        GUILayout.Label("Global packet ID:"+PacketHelper.GlobalPacketID.ToString());
-
         if (isOnMainMenu&&state==MultiplayerMenuState.Closed) {
 
             if (GUI.Button(new Rect(Screen.width-210, Screen.height-110, 200, 100), "Multiplayer"))
