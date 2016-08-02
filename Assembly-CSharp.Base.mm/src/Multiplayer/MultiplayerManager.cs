@@ -81,17 +81,17 @@ class MultiplayerManager : MonoBehaviour {
     }
 
     public static void OpenGUI() {
-        patch_MainMenuFoyerController.instance.NewGameButton.IsInteractive=false;
-        patch_MainMenuFoyerController.instance.QuitGameButton.IsInteractive=false;
-        patch_MainMenuFoyerController.instance.ControlsButton.IsInteractive=false;
+        patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive=false;
+        patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive=false;
+        patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive=false;
     }
 
     public void CloseGUI() {
         if (state==MultiplayerMenuState.SelectingMode) {
             state=MultiplayerMenuState.Closed;
-            patch_MainMenuFoyerController.instance.NewGameButton.IsInteractive=true;
-            patch_MainMenuFoyerController.instance.QuitGameButton.IsInteractive=true;
-            patch_MainMenuFoyerController.instance.ControlsButton.IsInteractive=true;
+            patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive=true;
+            patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive=true;
+            patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive=true;
         } else if (state!=MultiplayerMenuState.Closed) {
             state=MultiplayerMenuState.SelectingMode;
             SteamHelper.LeaveLobby();
@@ -198,9 +198,9 @@ class MultiplayerManager : MonoBehaviour {
 
             if(GUILayout.Button("Start game")) {
                 state=MultiplayerMenuState.Closed;
-                patch_MainMenuFoyerController.instance.NewGameButton.IsInteractive=true;
-                patch_MainMenuFoyerController.instance.QuitGameButton.IsInteractive=true;
-                patch_MainMenuFoyerController.instance.ControlsButton.IsInteractive=true;
+                patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive=true;
+                patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive=true;
+                patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive=true;
             }
 
             GUILayout.EndArea();

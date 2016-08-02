@@ -5,21 +5,16 @@ using UnityEngine;
 
 internal class patch_MainMenuFoyerController : MainMenuFoyerController {
 
-    public bool isMatched;
+    public static MainMenuFoyerController Instance;
 
-    public static MainMenuFoyerController instance;
+    private bool isMatched;
 
     protected extern void orig_Awake();
     protected void Awake() {
         orig_Awake();
-        instance=this;
+        Instance = this;
 
-        VersionLabel.Position=new Vector3(
-            VersionLabel.Position.x,
-            VersionLabel.Position.y+VersionLabel.Height*2f,
-            VersionLabel.Position.z
-        );
-        VersionLabel.Text="Enter the Gungeon"+VersionLabel.Text+"\nMod the Gungeon "+ETGMod.BaseUIVersion;
+        VersionLabel.Text = VersionLabel.Text + " | " + ETGMod.BaseUIVersion;
     }
 
     Texture2D tex;
