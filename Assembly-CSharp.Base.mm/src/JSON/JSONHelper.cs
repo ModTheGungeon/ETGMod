@@ -160,8 +160,8 @@ public static class JSONHelper {
 
     public static void WriteStartMetadata(this JsonHelperWriter json) {
         json.WriteStartObject();
-        json.WritePropertyName(METAPROP);
-        json.WriteValue(METAVAL);
+        json.WritePropertyName(META_PROP);
+        json.WriteValue(META_VAL);
     }
     public static void WriteEndMetadata(this JsonHelperWriter json) {
         json.WriteEndObject();

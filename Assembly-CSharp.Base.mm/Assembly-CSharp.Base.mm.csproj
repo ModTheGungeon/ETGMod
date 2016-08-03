@@ -133,7 +133,6 @@
     <Compile Include="src\JSON\Config\JSONDictionaryEntryConfig.cs" />
     <Compile Include="src\JSON\JsonHelperWriter.cs" />
     <Compile Include="src\JSON\Config\JSONGameObjectConfig.cs" />
-    <Compile Include="src\JSON\Config\JSONComponentConfig.cs" />
     <Compile Include="src\JSON\Config\JSONTransformConfig.cs" />
   </ItemGroup>
   <ItemGroup>

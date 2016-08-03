@@ -18,7 +18,18 @@ public class JSONGameObjectConfig : JSONConfig<GameObject> {
         json.WriteProperty("layer", go.layer);
         json.WriteProperty("activeSelf", go.activeSelf);
 
-        json.WriteProperty("components", go.GetComponents<Component>());
+        json.WritePropertyName("components");
+        json.WriteStartArray();
+        Component[] components = go.GetComponents<Component>();
+        for (int i = 0; i < components.Length; i++) {
+            Component component = components[i];
+            json.WriteStartObject();
+            json.WriteProperty("type", component.GetType());
+            json.WritePropertyName("value");
+            json.Write(component);
+            json.WriteEndObject();
+        }
+        json.WriteEndArray();
 
         json.WritePropertyName("children");
         json.WriteStartArray();
