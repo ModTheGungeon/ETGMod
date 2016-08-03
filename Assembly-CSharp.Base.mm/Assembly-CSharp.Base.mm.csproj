@@ -126,6 +126,12 @@
     <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommandUnit.cs" />
     <Compile Include="src\ETGGUI\AutocompletionSettings.cs" />
     <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommandGroup.cs" />
+    <Compile Include="src\JSON\JSONHelper.cs" />
+    <Compile Include="src\JSON\JSONConfig.cs" />
+    <Compile Include="src\JSON\JSONConfigMap.cs" />
+    <Compile Include="src\JSON\Config\JSONTextureConfig.cs" />
+    <Compile Include="src\JSON\Config\JSONDictionaryEntryConfig.cs" />
+    <Compile Include="src\JSON\JsonHelperWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -147,5 +153,7 @@
   -->
   <ItemGroup>
     <Folder Include="Content\etgmod\gui\" />
+    <Folder Include="src\JSON\" />
+    <Folder Include="src\JSON\Config\" />
   </ItemGroup>
 </Project>
