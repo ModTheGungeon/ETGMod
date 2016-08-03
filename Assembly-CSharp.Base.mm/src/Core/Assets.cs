@@ -102,7 +102,6 @@ public static partial class ETGMod {
                 return Resources.Load(Player.CoopReplacement ?? (path + ETGModUnityEngineHooks.SkipSuffix), type) as GameObject;
             }
 
-
             string dumpdir = Path.Combine(Application.streamingAssetsPath, "DUMP");
             string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
             Directory.GetParent(dumppath).Create();
@@ -123,10 +122,10 @@ public static partial class ETGMod {
                 string json = System.Text.Encoding.UTF8.GetString(metadata.Data);
                 if (isPatch) {
                     UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
-                    JsonUtility.FromJsonOverwrite(json, obj);
+                    // obj.ReadPatchJSON(json);
                     return obj;
                 }
-                return JsonUtility.FromJson(json, type) as UnityEngine.Object;
+                // return JSONHelper.Read<UnityEngine.Object>(json);
             }
 
             // TODO load and parse data from metadata

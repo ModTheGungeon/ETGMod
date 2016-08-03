@@ -31,49 +31,32 @@ public class JSONConfig {
         return true;
     }
 
-    public virtual JToken Serialize(object obj, MemberInfo info, bool isPrivate) {
-        if (!CanSerialize(obj, info, isPrivate)) {
-            return null;
-        }
-
-        return JToken.FromObject(ReflectionHelper.GetValue(info, obj));
-    }
-
-    public virtual void Serialize(object obj, MemberInfo info, JsonHelperWriter json, bool isPrivate) {
+    public virtual void Serialize(JsonHelperWriter json, object obj, MemberInfo info, bool isPrivate) {
         if (!CanSerialize(obj, info, isPrivate)) {
             return;
         }
 
         json.WritePropertyName(info.Name);
-        ReflectionHelper.GetValue(info, obj).WriteJSON(json);
+        json.Write(ReflectionHelper.GetValue(info, obj));
     }
 
     public virtual object Deserialize(JToken token, MemberInfo info, bool isPrivate) {
         return null; // TODO
     }
 
-    public virtual JToken Serialize(object obj) {
-        Type type = obj.GetType();
-        JObject json = new JObject();
-
-        json.AddAll(this, obj, type.GetProperties(BindingFlags.Public    | BindingFlags.Instance));
-        json.AddAll(this, obj, type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance), true);
-
-        json.AddAll(this, obj, type.GetFields(BindingFlags.Public    | BindingFlags.Instance));
-        json.AddAll(this, obj, type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance), true);
-
-        return json;
-    }
-
-    public virtual void Serialize(object obj, JsonHelperWriter json) {
+    public virtual void Serialize(JsonHelperWriter json, object obj) {
         Type type = obj.GetType();
         json.WriteStartObject();
 
-        json.AddAll(this, obj, type.GetProperties(BindingFlags.Public    | BindingFlags.Instance));
-        json.AddAll(this, obj, type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance), true);
+        if (obj is UnityEngine.Object) {
+            json.WriteProperty("name", ((UnityEngine.Object) obj).name);
+        }
 
-        json.AddAll(this, obj, type.GetFields(BindingFlags.Public    | BindingFlags.Instance));
-        json.AddAll(this, obj, type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance), true);
+        json.WriteAll(this, obj, type.GetProperties(BindingFlags.Public    | BindingFlags.Instance));
+        json.WriteAll(this, obj, type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance), true);
+
+        json.WriteAll(this, obj, type.GetFields(BindingFlags.Public    | BindingFlags.Instance));
+        json.WriteAll(this, obj, type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance), true);
 
         json.WriteEndObject();
     }
@@ -83,17 +66,5 @@ public class JSONConfig {
 public class JSONConfig<T> : JSONConfig {
 
     protected Type t = typeof(T);
-
-    public JToken SerializeAs(T obj, MemberInfo info, bool isPrivate) {
-        return Serialize(obj, info, isPrivate);
-    }
-
-    public T DeserializeAs(JToken token, MemberInfo info, bool isPrivate) {
-        return (T) Deserialize(token, info, isPrivate);
-    }
-
-    public JToken SerializeAs(T obj) {
-        return Serialize(obj);
-    }
 
 }

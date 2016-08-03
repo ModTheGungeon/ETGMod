@@ -5,14 +5,17 @@ using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections;
 
-public class JSONTextureBaseConfig<T> : JSONConfig<T> {
+public class JSONComponentConfig : JSONConfig<Component> {
 
     public override void Serialize(JsonHelperWriter json, object obj) {
+        Component component = (Component) obj;
         json.WriteStartObject();
 
-        json.WriteProperty("name", ((Texture) obj).name);
-        json.WriteProperty("type", typeof(T).Name);
+        json.WriteProperty("type", component.GetType());
+        json.WritePropertyName("value");
+        base.Serialize(json, obj);
 
         json.WriteEndObject();
     }
