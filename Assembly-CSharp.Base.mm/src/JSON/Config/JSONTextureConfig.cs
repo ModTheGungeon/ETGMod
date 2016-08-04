@@ -10,6 +10,7 @@ public class JSONTextureBaseConfig<T> : JSONConfig<T> {
 
     public override void Serialize(JsonHelperWriter json, object obj) {
         json.WriteStartObject();
+        WriteMetaHeader(json, obj);
 
         json.WriteProperty("name", ((Texture) obj).name);
         json.WriteProperty("type", typeof(T).Name);

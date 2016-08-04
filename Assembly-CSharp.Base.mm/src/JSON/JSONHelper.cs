@@ -9,14 +9,46 @@ using System.Collections;
 
 public static class JSONHelper {
 
-    public const int NOREF = -1;
+    public static class META {
 
-    public const string META_PROP = ".";
-    public const int META_VAL = 1337;
-    public const string META_REFID = "r#";
-    public const string META_REFTYPE = "r=";
-    public const int META_REFTYPE_SAMEREF = 0;
-    public const int META_REFTYPE_EQUAL = 1;
+        /// <summary>
+        /// The metadata object marker. Use it inside metadata objects to specify which type of metadata it is.
+        /// </summary>
+        public const string MARKER = ".";
+        /// <summary>
+        /// The property "marker". Use it in normal objects as property name and the metadata object as value.
+        /// </summary>
+        public const string PROP = ":";
+        /// <summary>
+        /// The ValueType / struct "marker". Use it as value to PROP in value types.
+        /// </summary>
+        public const string VALUETYPE = "~";
+
+        public const string REF                 = "ref";
+        public const int REF_NONE               = -1;
+        public const string REF_ID              = "#";
+        public const string REF_TYPE            = "=";
+        public const int REF_TYPE_SAMEREF       = 0;
+        public const int REF_TYPE_EQUAL         = 1;
+
+        public const string OBJTYPE         = "objtype";
+        public const string TYPE            = "type";
+        public const string TYPE_FULLNAME   = "name";
+        public const string TYPE_SPLIT      = "split";
+        public const string TYPE_GENPARAMS  = "params";
+
+        public const string EXTERNAL                = "external";
+        public const string EXTERNAL_PATH           = "path";
+        public const string EXTERNAL_IN             = "in";
+        public const string EXTERNAL_IN_RESOURCES   = "Resources.Load";
+        public const string EXTERNAL_IN_RELATIVE    = "relative";
+        public const string EXTERNAL_IN_SHARED      = "shared";
+
+        public const string ARRAYAT         = "at";
+        public const string ARRAYAT_INDEX   = "index";
+        public const string ARRAYAT_VALUE   = "value";
+
+    }
 
     private static Assembly _Asm = Assembly.GetCallingAssembly();
     private static Type[] _Types = _Asm.GetExportedTypes();
@@ -24,6 +56,11 @@ public static class JSONHelper {
     private static object[] a_object_0 = new object[0];
 
     public static Dictionary<Type, JSONConfig> Configs = new Dictionary<Type, JSONConfig>();
+    public static JSONConfig ConfigValueType = new JSONValueTypeConfig();
+
+    public static string DumpDir;
+    private static Dictionary<UnityEngine.Object, string> _DumpObjPathMap = new Dictionary<UnityEngine.Object, string>();
+    private static Dictionary<string, int> _DumpNameIdMap = new Dictionary<string, int>();
 
     static JSONHelper() {
         List<Type> _Types_Assignable = new List<Type>(_Types.Length);
@@ -43,8 +80,11 @@ public static class JSONHelper {
     public static JSONConfig GetJSONConfig(this Type type_) {
         Type type = type_;
         JSONConfig config;
-        if (Configs.TryGetValue(type, out config)) {
+        if (Configs.TryGetValue(type_, out config)) {
             return config;
+        }
+        if (type.IsValueType) {
+            return Configs[type_] = new JSONValueTypeConfig().Fill(type_);
         }
 
         while (type != null) {
@@ -56,14 +96,23 @@ public static class JSONHelper {
                         continue;
                     }
                     if (type == bi.GetGenericArguments()[0]) {
-                        return Configs[type_] = (JSONConfig) t.GetConstructor(Type.EmptyTypes).Invoke(a_object_0);
+                        return Configs[type_] = ((JSONConfig) t.GetConstructor(Type.EmptyTypes).Invoke(a_object_0)).Fill(type_);
                     }
                 }
             }
             type = type.BaseType;
         }
 
-        return Configs[type_] = new JSONConfig();
+        return Configs[type_] = new JSONConfig().Fill(type_);
+    }
+
+    public static JsonHelperWriter WriteJSON(string path) {
+        File.Delete(path);
+        Stream stream = File.OpenWrite(path);
+        StreamWriter text = new StreamWriter(stream);
+        JsonHelperWriter json = new JsonHelperWriter(text);
+        json.Formatting = Formatting.Indented;
+        return json;
     }
 
     public static void WriteJSON(this object obj, string path) {
@@ -82,17 +131,7 @@ public static class JSONHelper {
             return;
         }
 
-        if (obj is Type) {
-            // Json.NET claims to support Type, yet fails on MonoType : RuntimeType : Type..?!
-            JToken.FromObject(((Type) obj).FullName).WriteJSON(path);
-            return;
-        }
-
-        File.Delete(path);
-        using (Stream stream = File.OpenWrite(path))
-        using (StreamWriter text = new StreamWriter(stream))
-        using (JsonHelperWriter json = new JsonHelperWriter(text)) {
-            json.Formatting = Formatting.Indented;
+        using (JsonHelperWriter json = WriteJSON(path)) {
             json.Write(obj);
         }
     }
@@ -114,24 +153,13 @@ public static class JSONHelper {
         }
 
         if (obj is Type) {
-            // Json.NET claims to support Type, yet fails on MonoType : RuntimeType : Type..?!
-            json.WriteValue(((Type) obj).FullName);
+            json.WriteMetaType((Type) obj);
             return;
         }
 
-        int id = json.GetReferenceID(obj);
-        if (id != NOREF) {
-            json.WriteStartMetadata();
-
-            json.WritePropertyName(META_REFID);
-            json.WriteValue(id);
-            json.WritePropertyName(META_REFTYPE);
-            json.WriteValue(json.GetReferenceType(id, obj));
-
-            json.WriteEndMetadata();
+        if (json.TryWriteMetaReference(obj, true)) {
             return;
         }
-        json.RegisterReference(obj);
 
         JSONConfig config = type.GetJSONConfig();
         if (config.GetType() == t_JSONConfig) {
@@ -155,16 +183,123 @@ public static class JSONHelper {
             }
         }
 
+        UnityEngine.Object so = (UnityEngine.Object) (
+                       ((object) (obj as GameObject)) ??
+                       ((object) (obj as ScriptableObject)) ?? 
+                       ((object) (obj as Component))
+        );
+        string name = so?.name;
+        if (json.RootWritten && (json.DumpDir != null || DumpDir != null) && !string.IsNullOrEmpty(name) && !(obj is Transform)) {
+            if (DumpDir == null) {
+                Directory.CreateDirectory(json.DumpDir);
+                string dumppath = Path.Combine(json.DumpDir, name + ".json");
+                if (!File.Exists(dumppath)) {
+                    using (JsonHelperWriter jsonSub = WriteJSON(dumppath)) {
+                        jsonSub.DumpDir = Path.Combine(json.DumpDir, name);
+                        jsonSub.Write(obj);
+                    }
+                }
+                json.WriteMetaAssetReference(name, META.EXTERNAL_IN_RELATIVE);
+
+            } else {
+                string path;
+                if (_DumpObjPathMap.TryGetValue(so, out path)) {
+                    json.WriteMetaAssetReference(path, META.EXTERNAL_IN_SHARED);
+                    return;
+                }
+                path = type.Name + "s/" + name;
+
+                int id;
+                if (!_DumpNameIdMap.TryGetValue(path, out id)) {
+                    id = -1;
+                }
+                _DumpNameIdMap[name] = ++id;
+
+                if (id != 0) {
+                    path += "." + id;
+                }
+                _DumpObjPathMap[so] = path;
+
+                string dumppath = Path.Combine(DumpDir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
+                Directory.GetParent(dumppath).Create();
+                if (!File.Exists(dumppath)) {
+                    using (JsonHelperWriter jsonSub = WriteJSON(dumppath)) {
+                        jsonSub.Write(obj);
+                    }
+                }
+                json.WriteMetaAssetReference(path, META.EXTERNAL_IN_SHARED);
+            }
+            return;
+        }
+
+        json.RootWritten = true;
         config.Serialize(json, obj);
     }
 
-    public static void WriteStartMetadata(this JsonHelperWriter json) {
+    public static void WriteStartMetadata(this JsonHelperWriter json, string metatype) {
         json.WriteStartObject();
-        json.WritePropertyName(META_PROP);
-        json.WriteValue(META_VAL);
+        json.WriteProperty(META.MARKER, metatype);
     }
     public static void WriteEndMetadata(this JsonHelperWriter json) {
         json.WriteEndObject();
+    }
+
+    public static bool TryWriteMetaReference(this JsonHelperWriter json, object obj, bool register = false) {
+        int id = json.GetReferenceID(obj);
+
+        if (id != META.REF_NONE) {
+            json.WriteStartMetadata(META.REF);
+
+            json.WritePropertyName(META.REF_ID);
+            json.WriteValue(id);
+            json.WritePropertyName(META.REF_TYPE);
+            json.WriteValue(json.GetReferenceType(id, obj));
+
+            json.WriteEndMetadata();
+            return true;
+        }
+
+        if (register) {
+            json.RegisterReference(obj);
+        }
+        return false;
+    }
+
+    public static void WriteMetaObjectType(this JsonHelperWriter json, object obj) {
+        json.WriteMetaType_(obj.GetType(), META.OBJTYPE);
+    }
+    public static void WriteMetaType(this JsonHelperWriter json, Type type) {
+        json.WriteMetaType_(type, META.TYPE);
+    }
+    private static void WriteMetaType_(this JsonHelperWriter json, Type type, string metatype) {
+        json.WriteStartMetadata(metatype);
+
+        json.WriteProperty(META.TYPE_FULLNAME, type.FullName);
+        string ns = type.Namespace;
+        if (ns != null) {
+            json.WritePropertyName(META.TYPE_SPLIT);
+            json.WriteStartArray();
+            json.Write(ns);
+            json.Write(type.Name);
+            json.WriteEndArray();
+        }
+        Type[] genparams = type.GetGenericArguments();
+        if (genparams.Length != 0) {
+            json.WriteProperty(META.TYPE_GENPARAMS, genparams);
+        }
+
+        json.WriteEndMetadata();
+    }
+
+    public static void WriteMetaAssetReference(this JsonHelperWriter json, string path, string @in = META.EXTERNAL_IN_RESOURCES) {
+        json.WriteStartMetadata(META.EXTERNAL);
+
+        json.WriteProperty(META.EXTERNAL_PATH, path);
+        if (@in != META.EXTERNAL_IN_RESOURCES) {
+            json.WriteProperty(META.EXTERNAL_IN, @in);
+        }
+
+        json.WriteEndMetadata();
     }
 
     public static void WriteProperty(this JsonHelperWriter json, string name, object obj) {
@@ -172,13 +307,13 @@ public static class JSONHelper {
         json.Write(obj);
     }
 
-    public static void Write(this JsonHelperWriter json, JSONConfig config, object obj, MemberInfo info, bool isPrivate = false) {
-        config.Serialize(json, obj, info, isPrivate);
+    public static void Write(this JsonHelperWriter json, JSONConfig config, object obj, MemberInfo info) {
+        config.Serialize(json, obj, info);
     }
 
-    public static void WriteAll(this JsonHelperWriter json, JSONConfig config, object obj, MemberInfo[] infos, bool isPrivate = false) {
+    public static void WriteAll(this JsonHelperWriter json, JSONConfig config, object obj, MemberInfo[] infos) {
         for (int i = 0; i < infos.Length; i++) {
-            json.Write(config, obj, infos[i], isPrivate);
+            config.Serialize(json, obj, infos[i]);
         }
     }
 

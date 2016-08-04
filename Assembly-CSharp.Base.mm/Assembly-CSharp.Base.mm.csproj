@@ -134,6 +134,7 @@
     <Compile Include="src\JSON\JsonHelperWriter.cs" />
     <Compile Include="src\JSON\Config\JSONGameObjectConfig.cs" />
     <Compile Include="src\JSON\Config\JSONTransformConfig.cs" />
+    <Compile Include="src\JSON\Config\JSONValueTypeConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

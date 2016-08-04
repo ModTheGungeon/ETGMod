@@ -12,6 +12,7 @@ public class JSONTransformConfig : JSONConfig<Transform> {
     public override void Serialize(JsonHelperWriter json, object obj) {
         Transform t = (Transform) obj;
         json.WriteStartObject();
+        WriteMetaHeader(json, obj);
 
         // TODO all the (2) various types of Transforms
         json.WriteProperty("position", t.position);

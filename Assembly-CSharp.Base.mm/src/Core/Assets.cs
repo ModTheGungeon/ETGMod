@@ -96,19 +96,25 @@ public static partial class ETGMod {
         }
 
         public static UnityEngine.Object Load(string path, Type type) {
-            if (path == "PlayerCoopCultist") {
+            if (path == "PlayerCoopCultist" && Player.CoopReplacement != null) {
                 Debug.Log("LOADHOOK Loading resource \"" + path + "\" of (requested) type " + type);
 
-                return Resources.Load(Player.CoopReplacement ?? (path + ETGModUnityEngineHooks.SkipSuffix), type) as GameObject;
+                return Resources.Load(Player.CoopReplacement, type) as GameObject;
             }
 
-            string dumpdir = Path.Combine(Application.streamingAssetsPath, "DUMP");
+            string dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMP");
+            JSONHelper.DumpDir = Path.Combine(dumpdir, "SHARED");
             string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
             Directory.GetParent(dumppath).Create();
             if (!File.Exists(dumppath)) {
-                Debug.Log("JSON FOR " + type + " " + path);
-                Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix).WriteJSON(dumppath);
+                UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
+                if (obj != null) {
+                    using (JsonHelperWriter json = JSONHelper.WriteJSON(dumppath)) {
+                        json.Write(obj);
+                    }
+                }
             }
+            JSONHelper.DumpDir = null;
 
             AssetMetadata metadata;
             bool isJson = false;

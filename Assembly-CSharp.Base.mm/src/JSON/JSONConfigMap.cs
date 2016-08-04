@@ -19,14 +19,14 @@ public abstract class JSONConfigMap<T> : JSONConfig<T> {
     }
 
     private Dictionary<MemberInfo, bool> map;
-    public override bool CanSerialize(object obj, MemberInfo info, bool isPrivate) {
+    public override bool CanSerialize(MemberInfo info, bool isPrivate) {
         if (map == null) {
             map = Map;
         }
 
         bool serialize;
         if ((!map.TryGetValue(info, out serialize) && Default) || serialize) {
-            return base.CanSerialize(obj, info, isPrivate);
+            return base.CanSerialize(info, isPrivate);
         }
         return false;
     }

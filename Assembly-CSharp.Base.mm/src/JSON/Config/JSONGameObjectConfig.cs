@@ -12,33 +12,25 @@ public class JSONGameObjectConfig : JSONConfig<GameObject> {
     public override void Serialize(JsonHelperWriter json, object obj) {
         GameObject go = (GameObject) obj;
         json.WriteStartObject();
+        WriteMetaHeader(json, obj);
 
         json.WriteProperty("name", go.name);
         json.WriteProperty("tag", go.tag);
         json.WriteProperty("layer", go.layer);
         json.WriteProperty("activeSelf", go.activeSelf);
 
-        json.WritePropertyName("components");
-        json.WriteStartArray();
-        Component[] components = go.GetComponents<Component>();
-        for (int i = 0; i < components.Length; i++) {
-            Component component = components[i];
-            json.WriteStartObject();
-            json.WriteProperty("type", component.GetType());
-            json.WritePropertyName("value");
-            json.Write(component);
-            json.WriteEndObject();
-        }
-        json.WriteEndArray();
+        json.WriteProperty("components", go.GetComponents<Component>());
 
-        json.WritePropertyName("children");
-        json.WriteStartArray();
         Transform transform = go.transform;
         int children = transform.childCount;
-        for (int i = 0; i < children; i++) {
-            json.Write(transform.GetChild(i).gameObject);
+        if (children != 0) {
+            json.WritePropertyName("children");
+            json.WriteStartArray();
+            for (int i = 0; i < children; i++) {
+                json.Write(transform.GetChild(i).gameObject);
+            }
+            json.WriteEndArray();
         }
-        json.WriteEndArray();
 
         json.WriteEndObject();
     }
