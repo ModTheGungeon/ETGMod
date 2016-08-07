@@ -19,4 +19,14 @@ public static partial class ETGMod {
         return default(T);
     }
 
+    public static int IndexOfInvariant(this string s, string a) {
+        return s.IndexOf(a, StringComparison.InvariantCulture);
+    }
+    public static bool StartsWithInvariant(this string s, string a) {
+        return s.StartsWith(a, StringComparison.InvariantCulture);
+    }
+    public static bool EndsWithInvariant(this string s, string a) {
+        return s.EndsWith(a, StringComparison.InvariantCulture);
+    }
+
 }

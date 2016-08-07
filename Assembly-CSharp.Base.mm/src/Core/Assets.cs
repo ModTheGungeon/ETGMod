@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Ionic.Zip;
+using Newtonsoft.Json;
 
 public static partial class ETGMod {
 
@@ -17,6 +17,13 @@ public static partial class ETGMod {
         private readonly static Type t_Texture2D = typeof(Texture2D);
 
         public static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
+
+        public static bool TryGetMapped(string path, out AssetMetadata metadata) {
+                 if (Map.TryGetValue(path                   , out metadata)) { }
+            else if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { }
+            else { return false; }
+            return true;
+        }
 
         public static string RemoveExtension(string file) {
             return file.Substring(0, file.LastIndexOf('.'));
@@ -40,7 +47,7 @@ public static partial class ETGMod {
             for (int i = 0; i < resourceNames.Length; i++) {
                 string name = resourceNames[i];
                 Debug.Log(name);
-                int indexOfContent = name.IndexOf("Content");
+                int indexOfContent = name.IndexOfInvariant("Content");
                 if (indexOfContent < 0) {
                     continue;
                 }
@@ -48,11 +55,11 @@ public static partial class ETGMod {
 
                 Type type = t_Object;
 
-                if (name.EndsWith(".fmb") ||
-                    name.EndsWith(".bin")) {
+                if (name.EndsWithInvariant(".fmb") ||
+                    name.EndsWithInvariant(".bin")) {
                     name = name.Substring(0, name.Length - 4);
 
-                } else if (name.EndsWith(".png")) {
+                } else if (name.EndsWithInvariant(".png")) {
                     type = t_Texture2D;
                     name = name.Substring(0, name.Length - 4);
 
@@ -89,16 +96,43 @@ public static partial class ETGMod {
         }
 
         public static UnityEngine.Object Load(string path, Type type) {
-            if (path == "PlayerCoopCultist") {
+            if (path == "PlayerCoopCultist" && Player.CoopReplacement != null) {
                 Debug.Log("LOADHOOK Loading resource \"" + path + "\" of (requested) type " + type);
 
-                return Resources.Load(Player.CoopReplacement ?? (path + ETGModUnityEngineHooks.SkipSuffix), type) as GameObject;
+                return Resources.Load(Player.CoopReplacement, type) as GameObject;
             }
 
+            string dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMP");
+            JSONHelper.DumpDir = Path.Combine(dumpdir, "SHARED");
+            string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
+            Directory.GetParent(dumppath).Create();
+            if (!File.Exists(dumppath)) {
+                UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
+                if (obj != null) {
+                    using (JsonHelperWriter json = JSONHelper.WriteJSON(dumppath)) {
+                        json.Write(obj);
+                    }
+                }
+            }
+            JSONHelper.DumpDir = null;
+
             AssetMetadata metadata;
-                 if (Map.TryGetValue(path,                    out metadata)) { }
-            else if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { }
+            bool isJson = false;
+            bool isPatch = false;
+                 if (TryGetMapped(path, out metadata)) { }
+            else if (TryGetMapped(path + ".json", out metadata)) { isJson = true; }
+            else if (TryGetMapped(path + ".patch.json", out metadata)) { isPatch = true; isJson = true; }
             else { return null; }
+
+            if (isJson) {
+                string json = System.Text.Encoding.UTF8.GetString(metadata.Data);
+                if (isPatch) {
+                    UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
+                    // obj.ReadPatchJSON(json);
+                    return obj;
+                }
+                // return JSONHelper.Read<UnityEngine.Object>(json);
+            }
 
             // TODO load and parse data from metadata
             if (t_Texture.IsAssignableFrom(type) ||
