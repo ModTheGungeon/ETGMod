@@ -33,6 +33,8 @@ public class ETGModGUI : MonoBehaviour {
 
     public static Texture2D BoxTexture;
 
+    public static GUISkin guiSkin;
+
     private static IETGModMenu _CurrentMenuScript {
         get {
             switch (CurrentMenu) {
@@ -82,6 +84,16 @@ public class ETGModGUI : MonoBehaviour {
         _LoaderMenu.Start();
         _ConsoleMenu.Start();
         _InspectorMenu.Start();
+
+        guiSkin = Resources.Load<GUISkin>("Gungeon Font");
+
+        guiSkin.font.RequestCharactersInTexture("abcdefghijklmnopqrstuvwxyz",12);
+
+        foreach (CharacterInfo inf in guiSkin.font.characterInfo)
+            Debug.Log(inf.uv);
+
+        Debug.Log("Font is " + guiSkin.font);
+        Debug.Log("Font name: " + guiSkin.font.name);
     }
 
     public void Update() {
@@ -159,7 +171,8 @@ public class ETGModGUI : MonoBehaviour {
     // Font f;
 
     public void OnGUI() {
-        //GUI.skin.font=f;
+
+        GUI.DrawTexture(new Rect(0,0,500,500), GUI.skin.font.material.mainTexture);
 
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
             if (!StoredTimeScale.HasValue) {

@@ -25,12 +25,10 @@ class NetworkInput {
         foreach (byte b in totalArray)
             displayBytesSent+=b;
 
-        PacketHelper.SendPacketToPlayer(Steamworks.SteamUser.GetSteamID(),"NetInput",totalArray);
+        PacketHelper.SendPacketToPlayersInGame("NetInput",totalArray);
     }
 
     public static void RecieveUpdatePacket(byte[] data) {
-
-        Debug.Log("Player input packet gotten");
 
         directions[0]=BitConverter.ToSingle(data, 0);
         directions[1]=BitConverter.ToSingle(data, 4);
