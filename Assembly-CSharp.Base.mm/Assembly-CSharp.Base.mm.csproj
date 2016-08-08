@@ -103,22 +103,21 @@
     <Compile Include="src\MonoMod\MonoModReplace.cs" />
     <Compile Include="src\MonoMod\Platform.cs" />
     <Compile Include="src\MonoMod\PlatformHelper.cs" />
-    <Compile Include="src\Multiplayer\MultiplayerActions.cs" />
     <Compile Include="src\Multiplayer\MultiplayerManager.cs" />
     <Compile Include="src\Multiplayer\NetworkInput.cs" />
     <Compile Include="src\Multiplayer\PacketHelper.cs" />
+    <Compile Include="src\Multiplayer\CustomRPC.cs" />
+    <Compile Include="src\Multiplayer\RPCSerializer.cs" />
     <Compile Include="src\Multiplayer\SteamHelper.cs" />
-    <Compile Include="src\Patches\patch_BraveInput.cs" />
     <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
     <Compile Include="src\Patches\patch_Dungeon.cs" />
     <Compile Include="src\Patches\patch_Foyer.cs" />
+    <Compile Include="src\Patches\patch_FoyerCharacterSelectFlag.cs" />
     <Compile Include="src\Patches\patch_HealthHaver.cs" />
-    <Compile Include="src\Patches\patch_InputDevice.cs" />
     <Compile Include="src\Patches\patch_PlayerController.cs" />
     <Compile Include="src\Patches\patch_tk2dBaseSprite.cs" />
     <Compile Include="src\Patches\patch_GameManager.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
-    <Compile Include="src\Patches\patch_TwoAxisInputControl.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
     <Compile Include="src\Patches\patch_PlayerConsumables.cs" />
     <Compile Include="src\Core\ETGMod.cs" />
@@ -156,7 +155,5 @@
   -->
   <ItemGroup>
     <Folder Include="Content\etgmod\gui\" />
-    <Folder Include="src\JSON\" />
-    <Folder Include="src\JSON\Config\" />
   </ItemGroup>
 </Project>

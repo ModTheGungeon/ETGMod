@@ -106,7 +106,7 @@ public static partial class ETGMod {
             JSONHelper.DumpDir = Path.Combine(dumpdir, "SHARED");
             string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
             Directory.GetParent(dumppath).Create();
-            if (!File.Exists(dumppath)) {
+            if (!File.Exists(dumppath) && false) {
                 UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
                 if (obj != null) {
                     using (JsonHelperWriter json = JSONHelper.WriteJSON(dumppath)) {

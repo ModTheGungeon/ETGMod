@@ -5,39 +5,101 @@ using System.Text;
 using Steamworks;
 using InControl;
 using UnityEngine;
+using ETGMultiplayer;
 
 class NetworkInput {
 
     public static float[] directions = new float[4];
 
-    public static string displayBytesSent,displayBytesRecieved;
+    public static Position SyncPos;
+
+    public static string displayBytesSent, displayBytesRecieved;
 
     public static void SendUpdatePacket(BraveInput toSend) {
+        if (!SteamManager.Initialized)
+            return;
 
-        byte[] totalArray = new byte[sizeof(float)*4];
+        if (!GameManager.Instance.PrimaryPlayer)
+            return;
 
-        BitConverter.GetBytes(toSend.ActiveActions.Up.Value)   .CopyTo(totalArray, 0);
-        BitConverter.GetBytes(toSend.ActiveActions.Right.Value).CopyTo(totalArray, 4);
-        BitConverter.GetBytes(toSend.ActiveActions.Down.Value) .CopyTo(totalArray, 8);
-        BitConverter.GetBytes(toSend.ActiveActions.Left.Value) .CopyTo(totalArray, 12);
+        displayBytesSent="";
+        displayBytesSent+=toSend.ActiveActions.Right.Value+"\n";
+        displayBytesSent+=toSend.ActiveActions.Left.Value+"\n";
+        displayBytesSent+=toSend.ActiveActions.Up.Value+"\n";
+        displayBytesSent+=toSend.ActiveActions.Down.Value+"\n";
 
-        displayBytesSent = "";
-        foreach (byte b in totalArray)
-            displayBytesSent+=b;
-
-        PacketHelper.SendPacketToPlayersInGame("NetInput",totalArray);
+        PacketHelper.SendRPCToPlayersInGame("NetInput", new Vector4(toSend.ActiveActions.Right.Value, toSend.ActiveActions.Left.Value, toSend.ActiveActions.Up.Value, toSend.ActiveActions.Down.Value), GameManager.Instance.PrimaryPlayer.specRigidbody.Position.PixelPosition.X, GameManager.Instance.PrimaryPlayer.specRigidbody.Position.PixelPosition.Y );
     }
 
-    public static void RecieveUpdatePacket(byte[] data) {
-
-        directions[0]=BitConverter.ToSingle(data, 0);
-        directions[1]=BitConverter.ToSingle(data, 4);
-        directions[2]=BitConverter.ToSingle(data, 8);
-        directions[3]=BitConverter.ToSingle(data, 12);
+    [CustomRPC("NetInput")]
+    public static void RecieveUpdatePacket(Vector4 dir, int x, int y) {
 
         displayBytesRecieved="";
-        foreach (byte b in data)
-            displayBytesRecieved+=b;
+
+        for (int i = 0; i<4; i++) {
+            directions[i]=dir[i];
+
+            displayBytesRecieved+=dir[i]+"\n";
+        }
+
+        displayBytesRecieved+=x+"\n";
+        displayBytesRecieved+=y+"\n";
+
+        if (GameManager.Instance.SecondaryPlayer) {
+            GameManager.Instance.SecondaryPlayer.specRigidbody.Position = new Position(x,y);
+            displayBytesRecieved+=GameManager.Instance.SecondaryPlayer.specRigidbody.Position.X+"\n";
+            displayBytesRecieved+=GameManager.Instance.SecondaryPlayer.specRigidbody.Position.Y+"\n";
+        }
+    }
+
+    [CustomRPC("SelectPlayer")]
+    public static void NetSelectPlayer(string prefabName) {
+        patch_Foyer.IsNetSelect=true;
+        ETGMod.Player.CoopReplacement=prefabName;
+        PlayerController newPlayer = GeneratePlayer(GetCoopSelectFlag());
+
+        GameManager.Instance.CurrentGameType=GameManager.GameType.COOP_2_PLAYER;
+        if (GameManager.Instance.PrimaryPlayer) {
+            GameManager.Instance.PrimaryPlayer.ReinitializeMovementRestrictors();
+        }
+
+        GameUIRoot.Instance.ConvertCoreUIToCoopMode();
+        PhysicsEngine.Instance.RegisterOverlappingGhostCollisionExceptions(newPlayer.specRigidbody, 2147483647);
+        GameManager.Instance.MainCameraController.ClearPlayerCache();
+        Foyer.Instance.ProcessPlayerEnteredFoyer(newPlayer);
+
+        BraveInput.ReassignAllControllers(InputDevice.Null);
+        if (Foyer.Instance.OnCoopModeChanged!=null) {
+            Foyer.Instance.OnCoopModeChanged();
+        }
+    }
+
+    public static FoyerCharacterSelectFlag GetCoopSelectFlag() {
+        foreach (FoyerCharacterSelectFlag f in GameObject.FindObjectsOfType<FoyerCharacterSelectFlag>())
+            if (f.IsCoopCharacter)
+                return f;
+        return GameObject.FindObjectsOfType<FoyerCharacterSelectFlag>().Last();
+    }
+
+    private static PlayerController GeneratePlayer(FoyerCharacterSelectFlag Owner) {
+        if (GameManager.Instance.SecondaryPlayer!=null) {
+            return GameManager.Instance.SecondaryPlayer;
+        }
+        GameManager.Instance.ClearSecondaryPlayer();
+        GameManager.LastUsedCoopPlayerPrefab=(GameObject)Resources.Load("PlayerCoopCultist");
+        PlayerController playerController = null;
+        if (playerController==null) {
+            GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(GameManager.LastUsedCoopPlayerPrefab, new Vector3(25,25), Quaternion.identity);
+            gameObject.SetActive(true);
+            playerController=gameObject.GetComponent<PlayerController>();
+        }
+        FoyerCharacterSelectFlag component = Owner.GetComponent<FoyerCharacterSelectFlag>();
+        if (component&&component.IsAlternateCostume) {
+            playerController.SwapToAlternateCostume();
+        }
+        GameManager.Instance.SecondaryPlayer=playerController;
+        playerController.PlayerIDX=1;
+        return playerController;
     }
 
 }

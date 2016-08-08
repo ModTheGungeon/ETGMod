@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Steamworks;
 using UnityEngine;
+using ETGMultiplayer;
 
 class SteamHelper {
 
@@ -69,6 +70,7 @@ class SteamHelper {
         isInLobby=false;
         PacketHelper.GlobalPacketID=0;
         MultiplayerManager.allText.Clear();
+        MultiplayerManager.isPlayingMultiplayer=false;
     }
 
     public static void CreateLobby(bool isPublic) {
@@ -104,12 +106,14 @@ class SteamHelper {
         Debug.Log("Joined lobby");
         isInLobby=true;
         CurrentLobby=new CSteamID(param.m_ulSteamIDLobby);
+        MultiplayerManager.isPlayingMultiplayer=true;
     }
 
     static void P2PConnectionReqest(P2PSessionRequest_t param) {
         Debug.Log(param.m_steamIDRemote + " is requesting a P2P connection, let's accept");
         SteamNetworking.AcceptP2PSessionWithUser(param.m_steamIDRemote);
-        PacketHelper.SendPacketToPlayersInGame("ChatMessage",Encoding.ASCII.GetBytes("Player joined game"),true);
+        PacketHelper.SendRPCToPlayersInGame("ChatMessage","Player joined game",true);
+        MultiplayerManager.isPlayingMultiplayer=true;
     }
 
 }

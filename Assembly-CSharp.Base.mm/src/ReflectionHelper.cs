@@ -135,4 +135,10 @@ public static class ReflectionHelper {
         }
     }
 
+    public static Action<byte[]> CreateRPCDelegate(this MethodInfo info, object instance = null) {
+        return delegate (byte[] b) {
+            info.Invoke(instance, new object[] { b });
+        };
+    }
+
 }
