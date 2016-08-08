@@ -102,19 +102,34 @@ public static partial class ETGMod {
                 return Resources.Load(Player.CoopReplacement, type) as GameObject;
             }
 
+            /*
             string dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMP");
-            JSONHelper.DumpDir = Path.Combine(dumpdir, "SHARED");
+            // JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
             string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
-            Directory.GetParent(dumppath).Create();
             if (!File.Exists(dumppath)) {
                 UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
                 if (obj != null) {
-                    using (JsonHelperWriter json = JSONHelper.WriteJSON(dumppath)) {
-                        json.Write(obj);
-                    }
+                    Directory.GetParent(dumppath).Create();
+                    Console.WriteLine("JSON WRITING " + path);
+                    obj.WriteJSON(dumppath);
+                    Console.WriteLine("JSON READING " + path);
+                    object testobj = JSONHelper.ReadJSON(dumppath);
+                    JSONHelper.LOG = false;
+
+                    dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMPA");
+                    // JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
+                    dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
+                    Directory.GetParent(dumppath).Create();
+                    Console.WriteLine("JSON REWRITING " + path);
+                    testobj.WriteJSON(dumppath);
+                    Console.WriteLine("JSON REREADING " + path);
+                    testobj = JSONHelper.ReadJSON(dumppath);
+                    JSONHelper.LOG = false;
+                    Console.WriteLine("JSON DONE " + path);
                 }
             }
-            JSONHelper.DumpDir = null;
+            JSONHelper.SharedDir = null;
+            */
 
             AssetMetadata metadata;
             bool isJson = false;

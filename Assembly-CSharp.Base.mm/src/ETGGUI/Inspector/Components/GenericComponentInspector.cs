@@ -16,6 +16,7 @@ namespace ETGGUI.Inspector {
 
         private static PropertyInfo p_Object_name = typeof(UnityEngine.Object).GetProperty("name");
         private static PropertyInfo p_Transform_tag = typeof(Transform).GetProperty("tag");
+        private static PropertyInfo p_GameObject_activeSelf = typeof(GameObject).GetProperty("activeSelf");
         private static PropertyInfo p_Transform_position = typeof(Transform).GetProperty("position");
 
         private List<string> crawled = new List<string>();
@@ -35,7 +36,11 @@ namespace ETGGUI.Inspector {
                 object setProperty = ETGModInspector.DrawProperty(p_Object_name, getProperty);
                 if (getProperty != setProperty) 
                     ((Transform) instance).name = (string) setProperty;
-                
+
+                getProperty = ((Transform) instance).gameObject.activeSelf;
+                setProperty = ETGModInspector.DrawProperty(p_GameObject_activeSelf, getProperty);
+                if (getProperty != setProperty)
+                    ((Transform) instance).gameObject.SetActive((bool) setProperty);
 
                 getProperty = ((Transform) instance).tag;
                 setProperty = ETGModInspector.DrawProperty(p_Transform_tag, getProperty);

@@ -126,15 +126,28 @@
     <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommandUnit.cs" />
     <Compile Include="src\ETGGUI\AutocompletionSettings.cs" />
     <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommandGroup.cs" />
-    <Compile Include="src\JSON\JSONHelper.cs" />
-    <Compile Include="src\JSON\JSONConfig.cs" />
-    <Compile Include="src\JSON\JSONConfigMap.cs" />
-    <Compile Include="src\JSON\Config\JSONTextureConfig.cs" />
-    <Compile Include="src\JSON\Config\JSONDictionaryEntryConfig.cs" />
+    <Compile Include="src\JSON\JSONHelper.Common.cs" />
+    <Compile Include="src\JSON\JSONRule.cs" />
+    <Compile Include="src\JSON\JSONMappedRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONTextureRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONDictionaryEntryRule.cs" />
     <Compile Include="src\JSON\JsonHelperWriter.cs" />
-    <Compile Include="src\JSON\Config\JSONGameObjectConfig.cs" />
-    <Compile Include="src\JSON\Config\JSONTransformConfig.cs" />
-    <Compile Include="src\JSON\Config\JSONValueTypeConfig.cs" />
+    <Compile Include="src\JSON\Rules\JSONGameObjectRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONTransformRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONValueTypeRule.cs" />
+    <Compile Include="src\JSON\JsonHelperReader.cs" />
+    <Compile Include="src\JSON\JSONHelper.META.cs" />
+    <Compile Include="src\JSON\JSONHelper.Write.cs" />
+    <Compile Include="src\JSON\JSONHelper.Read.cs" />
+    <Compile Include="src\JSON\Rules\JSONTextAssetRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONVectorQuaternionRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONMaterialRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONBagelColliderRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONAttachPointDataRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONOverridableBoolRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONScriptableObjectRule.cs" />
+    <Compile Include="src\JSON\Rules\JSONComponentRule.cs" />
+    <Compile Include="src\PInvokeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -157,6 +170,6 @@
   <ItemGroup>
     <Folder Include="Content\etgmod\gui\" />
     <Folder Include="src\JSON\" />
-    <Folder Include="src\JSON\Config\" />
+    <Folder Include="src\JSON\Rules\" />
   </ItemGroup>
 </Project>

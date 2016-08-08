@@ -1,5 +1,5 @@
 ﻿using System;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -66,6 +66,8 @@ public static partial class ETGMod {
     [DllImport("mono")]
     private static extern string[] mono_runtime_get_main_args(); //ret MonoArray*
 
+    private delegate UnityEngine.Object[] d_LoadAll_Internal(string path, Type type);
+
     private static bool _Started = false;
     public static void Start() {
         if (_Started) {
@@ -76,11 +78,10 @@ public static partial class ETGMod {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
             LaunchArguments = mono_runtime_get_main_args();
         } else {
-            // TODO Linux fix without MonoDebug
-            // LaunchArguments = MonoDebug.GetDelegate<d_mono_runtime_get_main_args>()();
+            LaunchArguments = PInvokeHelper.Mono.GetDelegate<d_mono_runtime_get_main_args>()();
         }
 
-        UnityEngine.Application.logMessageReceived += ETGModDebugLogMenu.Logger;
+        Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();
         MultiplayerManager.Create();

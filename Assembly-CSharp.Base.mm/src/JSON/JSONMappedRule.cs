@@ -6,7 +6,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public abstract class JSONConfigMap<T> : JSONConfig<T> {
+public abstract class JSONMappedRule<T> : JSONRule<T> {
 
     public abstract Dictionary<MemberInfo, bool> Map {
         get;

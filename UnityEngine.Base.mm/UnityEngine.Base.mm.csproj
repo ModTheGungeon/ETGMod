@@ -51,6 +51,8 @@
     <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
     <Compile Include="src\patch_Object.cs" />
     <Compile Include="src\patch_Resources.cs" />
+    <Compile Include="src\patch_TextAsset.cs" />
+    <Compile Include="src\ETGModInstallerRenames.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

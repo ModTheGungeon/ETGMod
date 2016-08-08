@@ -1,5 +1,6 @@
 ﻿#pragma warning disable 0626
 #pragma warning disable 0649
+using System.Diagnostics;
 using MonoMod;
 
 namespace UnityEngine {
