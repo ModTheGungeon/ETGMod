@@ -6,6 +6,7 @@ using System.Text;
 using InControl;
 using UnityEngine;
 using Steamworks;
+using ETGMultiplayer;
 
 class MultiplayerManager : MonoBehaviour {
 
@@ -49,10 +50,12 @@ class MultiplayerManager : MonoBehaviour {
         PacketHelper.Init();
         StartCoroutine(UpdatePlayerNames());
         StartCoroutine(SendNetworkInput());
-        StartCoroutine(SendNetworkInput());
     }
 
     public void Update() {
+
+        if (!SteamManager.Initialized)
+            return;
 
         if (Input.GetKeyDown(KeyCode.Escape)) {
             CloseGUI();
@@ -73,10 +76,11 @@ class MultiplayerManager : MonoBehaviour {
 
     public IEnumerator SendNetworkInput() {
         yield return new WaitForSeconds(10);
+        NetworkInput.SyncPos=new Position(528,326);
         while (true) {
                 if(BraveInput.PrimaryPlayerInstance && BraveInput.PrimaryPlayerInstance.ActiveActions!=null)
                     NetworkInput.SendUpdatePacket(BraveInput.PrimaryPlayerInstance);
-            yield return new WaitForSecondsRealtime(0.125f);
+            yield return new WaitForSecondsRealtime(0.025f);
         }
     }
 
@@ -105,6 +109,11 @@ class MultiplayerManager : MonoBehaviour {
     string input = "";
 
     public void OnGUI() {
+
+        if (!SteamManager.Initialized)
+            return;
+
+        GUILayout.Label(NetworkInput.displayBytesRecieved + "\n" + NetworkInput.displayBytesSent);
 
         if (isOnMainMenu&&state==MultiplayerMenuState.Closed) {
 
@@ -171,7 +180,7 @@ class MultiplayerManager : MonoBehaviour {
 
             if (enteredText) {
                 string msg = "<"+Steamworks.SteamFriends.GetPersonaName()+">:"+input;
-                PacketHelper.SendPacketToPlayersInGame("ChatMessage", Encoding.ASCII.GetBytes(msg), true);
+                PacketHelper.SendRPCToPlayersInGame("ChatMessage", true, msg);
                 allText.Add(msg);
                 input="";
             }

@@ -172,8 +172,6 @@ public class ETGModGUI : MonoBehaviour {
 
     public void OnGUI() {
 
-        GUI.DrawTexture(new Rect(0,0,500,500), GUI.skin.font.material.mainTexture);
-
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
             if (!StoredTimeScale.HasValue) {
                 StoredTimeScale = Time.timeScale;
