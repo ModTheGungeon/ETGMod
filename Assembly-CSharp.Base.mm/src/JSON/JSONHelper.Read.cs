@@ -16,18 +16,33 @@ public static partial class JSONHelper {
         false;
 #endif
 
-    public static JsonHelperReader OpenReadJSON(string path) {
-        Stream stream = File.OpenRead(path);
+    public static JsonHelperReader OpenReadJSON(Stream stream) {
         StreamReader text = new StreamReader(stream);
         JsonHelperReader json = new JsonHelperReader(text);
+        return json;
+    }
+    public static JsonHelperReader OpenReadJSON(string path) {
+        JsonHelperReader json = OpenReadJSON(File.OpenRead(path));
         json.RelativeDir = path.Substring(0, path.Length - 5);
         return json;
     }
 
+    public static object ReadJSON(Stream stream) {
+        using (JsonHelperReader json = OpenReadJSON(stream)) {
+            json.Read(); // Go to Start
+            return json.ReadObject();
+        }
+    }
     public static object ReadJSON(string path) {
         using (JsonHelperReader json = OpenReadJSON(path)) {
             json.Read(); // Go to Start
             return json.ReadObject();
+        }
+    }
+    public static T ReadJSON<T>(Stream stream) {
+        using (JsonHelperReader json = OpenReadJSON(stream)) {
+            json.Read(); // Go to Start
+            return json.ReadObject<T>();
         }
     }
     public static T ReadJSON<T>(string path) {

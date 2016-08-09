@@ -144,6 +144,7 @@
     <Compile Include="src\JSON\Rules\JSONScriptableObjectRule.cs" />
     <Compile Include="src\JSON\Rules\JSONComponentRule.cs" />
     <Compile Include="src\PInvokeHelper.cs" />
+    <Compile Include="src\Core\Databases.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

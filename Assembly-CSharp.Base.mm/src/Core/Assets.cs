@@ -140,13 +140,14 @@ public static partial class ETGMod {
             else { return null; }
 
             if (isJson) {
-                string json = System.Text.Encoding.UTF8.GetString(metadata.Data);
                 if (isPatch) {
                     UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
-                    // obj.ReadPatchJSON(json);
-                    return obj;
+                    using (JsonHelperReader json = JSONHelper.OpenReadJSON(metadata.Stream)) {
+                        json.Read(); // Go to start;
+                        return (UnityEngine.Object) json.FillObject(obj);
+                    }
                 }
-                // return JSONHelper.Read<UnityEngine.Object>(json);
+                return (UnityEngine.Object) JSONHelper.ReadJSON(metadata.Stream);
             }
 
             // TODO load and parse data from metadata
