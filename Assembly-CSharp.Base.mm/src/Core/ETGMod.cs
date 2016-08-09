@@ -93,6 +93,9 @@ public static partial class ETGMod {
         _ScanBackends();
         _LoadMods();
 
+        /*Gun test = Databases.Items.NewGunPrototype("TEST", GunClass.SHITTY);
+        Databases.Items.Add(test);*/
+
         ETGModGUI.Start();
         CallInEachModule("Start");
     }

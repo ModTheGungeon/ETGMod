@@ -153,8 +153,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Content\test\texture.png" />
-    <EmbeddedResource Include="Content\etgmod\logo.png" />
+    <EmbeddedResource Include="Content\test\texture.png">
+      <LogicalName>Content/test/texture.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\etgmod\logo.png">
+      <LogicalName>Content/etgmod/logo.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\PlayerCoopCultist\PlayerSprite.0.png">
+      <LogicalName>Content/sprites/PlayerCoopCultist/PlayerSprite.0.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -168,5 +175,6 @@
     <Folder Include="Content\etgmod\gui\" />
     <Folder Include="src\JSON\" />
     <Folder Include="src\JSON\Rules\" />
+    <Folder Include="Content\sprites\" />
   </ItemGroup>
 </Project>

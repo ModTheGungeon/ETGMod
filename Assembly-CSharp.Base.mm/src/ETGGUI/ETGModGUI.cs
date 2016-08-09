@@ -31,6 +31,7 @@ public class ETGModGUI : MonoBehaviour {
 
     public static bool UseDamageIndicators = false;
 
+    public static Texture2D TestTexture;
     public static Texture2D BoxTexture;
 
     public static GUISkin guiSkin;
@@ -84,6 +85,8 @@ public class ETGModGUI : MonoBehaviour {
         _LoaderMenu.Start();
         _ConsoleMenu.Start();
         _InspectorMenu.Start();
+
+        TestTexture = Resources.Load<Texture2D>("test/texture");
 
         guiSkin = Resources.Load<GUISkin>("Gungeon Font");
 

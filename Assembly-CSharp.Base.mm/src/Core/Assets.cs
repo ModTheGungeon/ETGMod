@@ -55,20 +55,11 @@ public static partial class ETGMod {
 
                 Type type = t_Object;
 
-                if (name.EndsWithInvariant(".fmb") ||
-                    name.EndsWithInvariant(".bin")) {
-                    name = name.Substring(0, name.Length - 4);
-
-                } else if (name.EndsWithInvariant(".png")) {
+                if (name.EndsWithInvariant(".png")) {
                     type = t_Texture2D;
                     name = name.Substring(0, name.Length - 4);
 
-                } else {
-                    name = name.Substring(0, name.LastIndexOf('.'));
                 }
-
-                // Folders are dots... for some reason.
-                name = name.Replace('\\', '/').Replace('.', '/');
 
                 // Good news: Embedded resources get their spaces replaced with underscores and folders are marked with dots.
                 // As we don't know what was there and what not, add all combos!
@@ -83,6 +74,7 @@ public static partial class ETGMod {
                         rebuiltname += ci % (si + 1) == 0 ? "_" : " ";
                         rebuiltname += split[si];
                     }
+                    Console.WriteLine("REBUILT: " + rebuiltname);
                     Map[rebuiltname] = metadata;
                 }
             }
@@ -150,7 +142,6 @@ public static partial class ETGMod {
                 return (UnityEngine.Object) JSONHelper.ReadJSON(metadata.Stream);
             }
 
-            // TODO load and parse data from metadata
             if (t_Texture.IsAssignableFrom(type) ||
                 type == t_Texture2D ||
                 (type == t_Object && metadata.AssetType == t_Texture2D)) {
@@ -160,12 +151,17 @@ public static partial class ETGMod {
                 return tex;
             }
 
-            Debug.Log("Metadata:" + metadata);
-            
             return null;
         }
 
-        public static void HandleSprite(tk2dBaseSprite sprite) {
+        public static void MakeSpriteRW(tk2dBaseSprite sprite) {
+            Material[] materials = sprite.Collection.materials;
+            for (int i = 0; i < materials.Length; i++) {
+                materials[i].mainTexture = (materials[i].mainTexture as Texture2D)?.GetRW();
+            }
+        }
+
+        public static void MakeSpriteDebug(tk2dBaseSprite sprite) {
             Material[] materials = sprite.Collection.materials;
             for (int i = 0; i < materials.Length; i++) {
                 Texture2D texOrig = materials[i].mainTexture as Texture2D;
@@ -175,20 +171,64 @@ public static partial class ETGMod {
                 for (int y = 0; y < tex.height; y++) {
                     for (int x = 0; x < tex.width; x++) {
                         int p = x + y * tex.width;
-                        data[p] = new Color(x / (float) tex.width, y / (float) tex.height, 1f, 1f);
+                        // data[p] = new Color(x / (float) tex.width, y / (float) tex.height, 1f, 1f);
+                        data[p] = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1f);
                     }
                 }
 
                 tex.SetPixels(data);
-                tex.Apply(true, false);
+                tex.Apply(true, true);
                 materials[i].mainTexture = tex;
             }
         }
+
+        public static tk2dBaseSprite Handle(tk2dBaseSprite sprite) {
+            string assetPrefix = "sprites/" + sprite.transform.GetPath().Replace("(Clone)", "") + ".";
+
+            if (sprite.Collection == null) {
+                return sprite;
+            }
+            if (sprite.Collection.materials == null) {
+                return sprite;
+            }
+            Material[] materials = sprite.Collection.materials;
+            for (int i = 0; i < materials.Length; i++) {
+                string assetPath = assetPrefix + i;
+                AssetMetadata metadata;
+                if (TryGetMapped(assetPath, out metadata)) {
+                    materials[i].mainTexture = Resources.Load<Texture2D>(assetPath);
+                } else {
+                    materials[i].mainTexture = ETGModGUI.TestTexture ?? materials[i].mainTexture;
+                }
+            }
+
+            return sprite;
+        }
+
+        public static Transform[] Handle(Transform[] ts) {
+            for (int i = 0; i < ts.Length; i++) {
+                Handle(ts[i]);
+            }
+            return ts;
+        }
+        public static void Handle(Transform t) {
+            GameObject go = t.gameObject;
+
+            tk2dBaseSprite sprite = go.GetComponent<tk2dBaseSprite>();
+            if (sprite != null) {
+                sprite.Handle();
+            }
+
+            int childCount = t.childCount;
+            for (int i = 0; i < childCount; i++) {
+                Handle(t.GetChild(i));
+            }
+        }
+
     }
 
     public static tk2dBaseSprite Handle(this tk2dBaseSprite sprite) {
-        Assets.HandleSprite(sprite);
-        return sprite;
+        return Assets.Handle(sprite);
     }
 
     public static void MapAssets(this Assembly asm) {

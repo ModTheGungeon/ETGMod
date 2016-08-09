@@ -17,7 +17,7 @@ namespace Dungeonator {
                 list.Add(start.Current);
             }
 
-            // TODO do magic here
+            ETGMod.Assets.Handle(FindObjectsOfType<Transform>());
 
             return list.GetEnumerator();
         }

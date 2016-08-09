@@ -84,6 +84,7 @@ public static partial class ETGMod {
         RenderTexture.active = copyRT;
 
         Texture2D copy = new Texture2D(texture.width, texture.width, format != null ? format.Value : texture.format, 1 < texture.mipmapCount);
+        copy.name = texture.name;
         copy.ReadPixels(new Rect(0, 0, copyRT.width, copyRT.height), 0, 0);
         copy.Apply(true, false);
 
