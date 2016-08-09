@@ -45,10 +45,11 @@ public static partial class ETGMod {
             return v;
         }
     }
-    public readonly static string GameFolder = ".";
-    public readonly static string ModsDirectory = Path.Combine(GameFolder, "Mods");
-    public readonly static string ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
-    public readonly static string RelinkCacheDirectory = Path.Combine(ModsDirectory, "RelinkCache");
+    public static string GameFolder;
+    public static string ModsDirectory;
+    public static string ModsListFile;
+    public static string RelinkCacheDirectory;
+    public static string ResourcesDirectory;
 
     /// <summary>
     /// Used for CallInEachModule to call a method in each type of mod.
@@ -80,6 +81,12 @@ public static partial class ETGMod {
         } else {
             LaunchArguments = PInvokeHelper.Mono.GetDelegate<d_mono_runtime_get_main_args>()();
         }
+
+        GameFolder = Directory.GetParent(LaunchArguments[0]).FullName;
+        ModsDirectory = Path.Combine(GameFolder, "Mods");
+        ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
+        RelinkCacheDirectory = Path.Combine(ModsDirectory, "RelinkCache");
+        ResourcesDirectory = Path.Combine(GameFolder, "Resources");
 
         Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
