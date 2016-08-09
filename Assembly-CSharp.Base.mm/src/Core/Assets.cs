@@ -17,9 +17,14 @@ public static partial class ETGMod {
         private readonly static Type t_Texture2D = typeof(Texture2D);
 
         public static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
+        public static Dictionary<string, Texture2D> TextureMap = new Dictionary<string, Texture2D>();
 
         public static bool TryGetMapped(string path, out AssetMetadata metadata) {
-            string diskPath = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+            string diskPathRaw = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+            string diskPath = diskPathRaw;
+            if (!File.Exists(diskPath)) {
+                diskPath = diskPathRaw + ".png";
+            }
             if (File.Exists(diskPath)) {
                 metadata = Map[path] = new AssetMetadata(diskPath);
                 return true;
@@ -29,6 +34,11 @@ public static partial class ETGMod {
             if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { return true; }
 
             return false;
+        }
+        public static AssetMetadata GetMapped(string path) {
+            AssetMetadata metadata;
+            TryGetMapped(path, out metadata);
+            return metadata;
         }
 
         public static string RemoveExtension(string file) {
@@ -177,29 +187,28 @@ public static partial class ETGMod {
         }
 
         public static tk2dBaseSprite Handle(tk2dBaseSprite sprite) {
-            string assetPrefix = "sprites/" + sprite.transform.GetPath().Replace("(Clone)", "") + ".";
+            string path = "sprites/" + sprite.Collection.transform.GetPath();
 
-            if (sprite.Collection == null) {
-                return sprite;
+            string diskPath = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
+            if (!File.Exists(diskPath)) {
+                Console.WriteLine("DUMPING A SPRITE TO " + diskPath);
+                Directory.GetParent(diskPath).Create();
+                File.WriteAllBytes(diskPath, ((Texture2D) sprite.Collection.materials[0].mainTexture).GetRW().EncodeToPNG());
             }
-            if (sprite.Collection.materials == null) {
-                return sprite;
+
+            Texture2D replacement;
+            if (!TextureMap.TryGetValue(path, out replacement)) {
+                AssetMetadata metadata;
+                if (!TryGetMapped(path, out metadata)) {
+                    return sprite;
+                }
+                replacement = Resources.Load<Texture2D>(path);
+                TextureMap[path] = replacement;
             }
+
             Material[] materials = sprite.Collection.materials;
             for (int i = 0; i < materials.Length; i++) {
-                string assetPath = assetPrefix + i;
-
-                /*string diskPath = Path.Combine(ResourcesDirectory, assetPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
-                if (!File.Exists(diskPath)) {
-                    Console.WriteLine("DUMPING A SPRITE TO " + diskPath);
-                    Directory.GetParent(diskPath).Create();
-                    File.WriteAllBytes(diskPath, ((Texture2D) materials[i].mainTexture).GetRW().EncodeToPNG());
-                }*/
-
-                AssetMetadata metadata;
-                if (TryGetMapped(assetPath, out metadata)) {
-                    materials[i].mainTexture = Resources.Load<Texture2D>(assetPath);
-                }
+                materials[i].mainTexture = replacement;
             }
 
             return sprite;
