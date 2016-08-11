@@ -32,6 +32,7 @@ class MultiplayerManager : MonoBehaviour {
     public static List<string> allText = new List<string>();
 
     public static void Create() {
+        return;
         GameObject newObject = new GameObject();
         newObject.AddComponent<MultiplayerManager>();
         newObject.name="MultiplayerManager";

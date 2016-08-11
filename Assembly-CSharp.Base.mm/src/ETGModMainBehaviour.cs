@@ -13,6 +13,7 @@ public class ETGModMainBehaviour : MonoBehaviour {
 
     public void Awake() {
         DontDestroyOnLoad(gameObject);
+        ETGMod.StartCoroutine = StartCoroutine; // Set this here so ETGMod can access it statically.
         ETGMod.Init();
     }
 

@@ -159,8 +159,32 @@
     <EmbeddedResource Include="Content\etgmod\logo.png">
       <LogicalName>Content/etgmod/logo.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\PlayerCoopCultist\PlayerSprite.0.png">
-      <LogicalName>Content/sprites/PlayerCoopCultist/PlayerSprite.0.png</LogicalName>
+    <EmbeddedResource Include="Content\sprites\CoopCultist.png">
+      <LogicalName>Content/sprites/CoopCultist.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_006.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_006.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_007.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_007.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_008.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_008.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_009.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_009.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_010.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_010.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_011.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_011.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_012.png">
+      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_012.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\sprites\Foyer_Collection\top_floor_001.png">
+      <LogicalName>Content/sprites/Foyer_Collection/top_floor_001.png</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -6,6 +6,7 @@ using System.Reflection;
 using Ionic.Zip;
 using Mono.Cecil;
 using System.Runtime.InteropServices;
+using System.Collections;
 
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
@@ -67,7 +68,7 @@ public static partial class ETGMod {
     [DllImport("mono")]
     private static extern string[] mono_runtime_get_main_args(); //ret MonoArray*
 
-    private delegate UnityEngine.Object[] d_LoadAll_Internal(string path, Type type);
+    public static Func<IEnumerator, Coroutine> StartCoroutine;
 
     private static bool _Init = false;
     public static void Init() {

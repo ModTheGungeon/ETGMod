@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
+using System.Collections;
 
 public static partial class ETGMod {
 
@@ -21,14 +22,14 @@ public static partial class ETGMod {
         public readonly static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
         public readonly static Dictionary<string, Texture2D> TextureMap = new Dictionary<string, Texture2D>();
 
+        public static bool DumpSprites = false;
+        public static int FramesToHandleAllSpritesIn = 10;
         private readonly static Vector2[] _DefaultUVs = {
             new Vector2(0f, 0f),
             new Vector2(1f, 0f),
             new Vector2(0f, 1f),
             new Vector2(1f, 1f)
         };
-
-        public static bool DumpSprites = false;
 
         public static bool TryGetMapped(string path, out AssetMetadata metadata) {
             string diskPathRaw = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
@@ -88,22 +89,9 @@ public static partial class ETGMod {
 
                 }
 
-                // Good news: Embedded resources get their spaces replaced with underscores and folders are marked with dots.
-                // As we don't know what was there and what not, add all combos!
-                AssetMetadata metadata = new AssetMetadata(asm, resourceNames[i]) {
+                Map[name] = new AssetMetadata(asm, resourceNames[i]) {
                     AssetType = type
                 };
-                string[] split = name.Split('_');
-                int combos = (int) Math.Pow(2, split.Length - 1);
-                for (int ci = 0; ci < combos; ci++) {
-                    string rebuiltname = split[0];
-                    for (int si = 1; si < split.Length; si++) {
-                        rebuiltname += ci % (si + 1) == 0 ? "_" : " ";
-                        rebuiltname += split[si];
-                    }
-                    Console.WriteLine("REBUILT: " + rebuiltname);
-                    Map[rebuiltname] = metadata;
-                }
             }
         }
 
@@ -188,23 +176,16 @@ public static partial class ETGMod {
 
             UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
             if (orig is GameObject) {
-                Handle(((GameObject) orig).transform);
+                HandleGameObject((GameObject) orig);
             }
             return orig;
         }
 
-        public static void MakeSpriteRW(tk2dBaseSprite sprite) {
-            Material[] materials = sprite.Collection.materials;
-            for (int i = 0; i < materials.Length; i++) {
-                materials[i].mainTexture = (materials[i].mainTexture as Texture2D)?.GetRW();
-            }
-        }
-
-        public static tk2dBaseSprite Handle(tk2dBaseSprite sprite) {
+        public static void HandleSprite(tk2dBaseSprite sprite) {
             string diskPath;
             tk2dSpriteCollectionData sprites = sprite.Collection;
             if (TextureMap.ContainsValue((Texture2D) sprites.materials[0].mainTexture)) {
-                return sprite;
+                return;
             }
             // _Replaced.Add(sprites);
 
@@ -219,7 +200,7 @@ public static partial class ETGMod {
                 for (int i = 0; i < sprites.materials.Length; i++) {
                     sprites.materials[i].mainTexture = replacement;
                 }
-                return sprite;
+                return;
             }
 
             Texture2D texRWOrig = null;
@@ -263,7 +244,7 @@ public static partial class ETGMod {
                             }
                         }
                         if (shit) {
-                            return sprite;
+                            return;
                         }
 
                         diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
@@ -364,31 +345,30 @@ public static partial class ETGMod {
                     frame.materialInst.mainTexture = replacement;
                 }
             }
-
-            return sprite;
         }
 
-        public static Transform[] Handle(Transform[] ts) {
-            for (int i = 0; i < ts.Length; i++) {
-                Handle(ts[i]);
-            }
-            return ts;
-        }
-        public static void Handle(Transform t) {
-            GameObject go = t.gameObject;
-
+        public static void HandleGameObject(GameObject go) {
             go.GetComponent<tk2dBaseSprite>()?.Handle();
+        }
 
-            int childCount = t.childCount;
-            for (int i = 0; i < childCount; i++) {
-                Handle(t.GetChild(i));
+        public static void HandleAll() {
+            StartCoroutine(HandleAllSprites());
+        }
+        private static IEnumerator HandleAllSprites() {
+            tk2dBaseSprite[] sprites = UnityEngine.Object.FindObjectsOfType<tk2dBaseSprite>();
+            int handleUntilYield = sprites.Length / FramesToHandleAllSpritesIn;
+            int handleUntilYieldM1 = handleUntilYield - 1;
+            for (int i = 0; i < sprites.Length; i++) {
+                sprites[i].Handle();
+                if (i % handleUntilYield == handleUntilYieldM1) yield return null;
             }
+            yield return null;
         }
 
     }
 
-    public static tk2dBaseSprite Handle(this tk2dBaseSprite sprite) {
-        return Assets.Handle(sprite);
+    public static void Handle(this tk2dBaseSprite sprite) {
+        Assets.HandleSprite(sprite);
     }
 
     public static void MapAssets(this Assembly asm) {
