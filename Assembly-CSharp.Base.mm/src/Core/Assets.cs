@@ -206,7 +206,7 @@ public static partial class ETGMod {
             string path = "sprites/" + sprites.spriteCollectionName;
             string diskPath;
 
-            Console.WriteLine("COLLECTION " + sprites.spriteCollectionName);
+            // Console.WriteLine("COLLECTION " + sprites.spriteCollectionName);
 
             Texture2D replacement;
             AssetMetadata metadata;
@@ -313,27 +313,28 @@ public static partial class ETGMod {
                     double fxY = frame.uvs[1].y - frame.uvs[0].y;
                     double fyY = frame.uvs[2].y - frame.uvs[0].y;
 
+                    double wO = texOrig.width  * (frame.uvs[3].x - frame.uvs[0].x);
+                    double hO = texOrig.height * (frame.uvs[3].y - frame.uvs[0].y);
+
                     double e = 0.001D;
-                    double fxX01 = fxX < e ? 0D : 1D;
-                    double fyX01 = fyX < e ? 0D : 1D;
-                    double fxY01 = fxY < e ? 0D : 1D;
-                    double fyY01 = fyY < e ? 0D : 1D;
+                    double fxX0w = fxX < e ? 0D : wO;
+                    double fyX0w = fyX < e ? 0D : wO;
+                    double fxY0h = fxY < e ? 0D : hO;
+                    double fyY0h = fyY < e ? 0D : hO;
 
                     for (int y = 0; y < h; y++) {
-                        float fy = y / (float) h;
+                        double fy = y / (double) h;
                         for (int x = 0; x < w; x++) {
-                            float fx = x / (float) w;
+                            double fx = x / (double) w;
 
-                            double fxUV01 = fx * fxX01 + fy * fyX01;
-                            double fyUV01 = fx * fxY01 + fy * fyY01;
+                            double fxUV0w = fx * fxX0w + fy * fyX0w;
+                            double fyUV0h = fx * fxY0h + fy * fyY0h;
 
-                            double wO = frame.uvs[3].x - frame.uvs[0].x;
-                            double hO = frame.uvs[3].y - frame.uvs[0].y;
                             double p =
-                                ((frame.uvs[0].y + fyUV01 * hO) * texOrig.height) * texOrig.width +
-                                ((frame.uvs[0].x + fxUV01 * wO) * texOrig.width);
+                                Math.Round(frame.uvs[0].y * texOrig.height + fyUV0h) * texOrig.width +
+                                Math.Round(frame.uvs[0].x * texOrig.width + fxUV0w);
 
-                            texRegion.SetPixel(x, y, texRWData[(int) Math.Round(p)]);
+                            texRegion.SetPixel(x, y, texRWData[(int) p]);
 
                         }
                     }
