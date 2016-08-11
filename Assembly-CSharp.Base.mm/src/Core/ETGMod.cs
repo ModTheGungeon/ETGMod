@@ -69,12 +69,12 @@ public static partial class ETGMod {
 
     private delegate UnityEngine.Object[] d_LoadAll_Internal(string path, Type type);
 
-    private static bool _Started = false;
-    public static void Start() {
-        if (_Started) {
+    private static bool _Init = false;
+    public static void Init() {
+        if (_Init) {
             return;
         }
-        _Started = true;
+        _Init = true;
 
         if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
             LaunchArguments = mono_runtime_get_main_args();
@@ -104,6 +104,10 @@ public static partial class ETGMod {
         Databases.Items.Add(test);*/
 
         ETGModGUI.Start();
+        CallInEachModule("Init");
+    }
+
+    public static void Start() {
         CallInEachModule("Start");
     }
     

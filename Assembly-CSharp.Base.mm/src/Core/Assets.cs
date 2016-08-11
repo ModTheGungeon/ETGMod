@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable RECS0018
+
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
@@ -172,6 +174,8 @@ public static partial class ETGMod {
                 return tex;
             }
 
+            // TODO use tk2dSpriteCollectionData.CreateFromTexture
+
             UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
             if (orig is GameObject) {
                 Handle(((GameObject) orig).transform);
@@ -186,29 +190,161 @@ public static partial class ETGMod {
             }
         }
 
+        private static List<tk2dSpriteCollectionData> _Replaced = new List<tk2dSpriteCollectionData>();
+        private static Material _DumpMaterial;
         public static tk2dBaseSprite Handle(tk2dBaseSprite sprite) {
-            string path = "sprites/" + sprite.Collection.transform.GetPath();
-
-            string diskPath = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
-            if (!File.Exists(diskPath)) {
-                Console.WriteLine("DUMPING A SPRITE TO " + diskPath);
-                Directory.GetParent(diskPath).Create();
-                File.WriteAllBytes(diskPath, ((Texture2D) sprite.Collection.materials[0].mainTexture).GetRW().EncodeToPNG());
+            tk2dSpriteCollectionData sprites = sprite.Collection;
+            if (_Replaced.Contains(sprites)) {
+                return sprite;
             }
+            // _Replaced.Add(sprites);
+
+            if (_DumpMaterial == null) {
+                _DumpMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
+            }
+
+            string path = "sprites/" + sprites.spriteCollectionName;
+            string diskPath;
+
+            Console.WriteLine("COLLECTION " + sprites.spriteCollectionName);
 
             Texture2D replacement;
-            if (!TextureMap.TryGetValue(path, out replacement)) {
-                AssetMetadata metadata;
-                if (!TryGetMapped(path, out metadata)) {
-                    return sprite;
-                }
-                replacement = Resources.Load<Texture2D>(path);
-                TextureMap[path] = replacement;
+            AssetMetadata metadata;
+                 if (TextureMap.TryGetValue(path, out replacement)) { }
+            else if (TryGetMapped          (path, out metadata))    { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
+            if (replacement != null) {
+                Console.WriteLine("Texture atlases as replacements currently not supported!");
+                return sprite;
             }
 
-            Material[] materials = sprite.Collection.materials;
-            for (int i = 0; i < materials.Length; i++) {
-                materials[i].mainTexture = replacement;
+            Texture2D texRWOrig = null;
+            Texture2D texRW = null;
+            Color[] texRWData = null;
+            for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
+                tk2dSpriteDefinition frame = sprites.spriteDefinitions[i];
+                if (!frame.Valid) {
+                    continue;
+                }
+                string pathFull = path + "/" + frame.name;
+                // Console.WriteLine("Frame " + i + ": " + frame.name);
+
+                /*
+                for (int ii = 0; ii < frame.uvs.Length; ii++) {
+                    Console.WriteLine("UV " + ii + ": " + frame.uvs[ii].x + ", " + frame.uvs[ii].y);
+                }
+
+                /**/
+                /*
+                Console.WriteLine("P0 " + frame.position0.x + ", " + frame.position0.y);
+                Console.WriteLine("P1 " + frame.position1.x + ", " + frame.position1.y);
+                Console.WriteLine("P2 " + frame.position2.x + ", " + frame.position2.y);
+                Console.WriteLine("P3 " + frame.position3.x + ", " + frame.position3.y);
+                /**/
+
+                Texture2D texOrig = (Texture2D) frame.material.mainTexture;
+                if (texRWOrig != texOrig) {
+                    texRWOrig = texOrig;
+                    texRW = texOrig.GetRW();
+                    texRWData = texRW.GetPixels();
+
+                    Color[] fuck = texRWData;
+                    Color hard = new Color(0f, 0f, 0f, 0f);
+                    bool shit = true;
+                    for (int me = 0; me < fuck.Length; me += 8) {
+                        if (fuck[me] != hard) {
+                            shit = false;
+                            break;
+                        }
+                    }
+                    if (shit) {
+                        return sprite;
+                    }
+
+                    diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
+                    if (!File.Exists(diskPath)) {
+                        Directory.GetParent(diskPath).Create();
+                        File.WriteAllBytes(diskPath, texRW.EncodeToPNG());
+                    }
+                }
+
+                Texture2D texRegion;
+
+                double x1UV = 1D;
+                double y1UV = 1D;
+                double x2UV = 0D;
+                double y2UV = 0D;
+                for (int ii = 0; ii < frame.uvs.Length; ii++) {
+                    if (frame.uvs[ii].x < x1UV) x1UV = frame.uvs[ii].x;
+                    if (frame.uvs[ii].y < y1UV) y1UV = frame.uvs[ii].y;
+                    if (x2UV < frame.uvs[ii].x) x2UV = frame.uvs[ii].x;
+                    if (y2UV < frame.uvs[ii].y) y2UV = frame.uvs[ii].y;
+                }
+
+                int x1 = (int) Math.Floor(x1UV * texOrig.width);
+                int y1 = (int) Math.Floor(y1UV * texOrig.height);
+                int x2 = (int) Math.Ceiling(x2UV * texOrig.width);
+                int y2 = (int) Math.Ceiling(y2UV * texOrig.height);
+                int w = x2 - x1;
+                int h = y2 - y1;
+
+                if (
+                    frame.uvs[0].x == x1UV && frame.uvs[0].y == y1UV &&
+                    frame.uvs[1].x == x2UV && frame.uvs[1].y == y1UV &&
+                    frame.uvs[2].x == x1UV && frame.uvs[2].y == y2UV &&
+                    frame.uvs[3].x == x2UV && frame.uvs[3].y == y2UV
+                ) {
+                    // original
+                    texRegion = new Texture2D(w, h);
+                    texRegion.SetPixels(texRW.GetPixels(x1, y1, w, h));
+                } else {
+                    // flipped
+                    if (frame.uvs[0].x == frame.uvs[1].x) {
+                        int t = h;
+                        h = w;
+                        w = t;
+                    }
+                    texRegion = new Texture2D(w, h);
+
+                    // Flipping using GPU / GL / Quads / UV doesn't work (returns blank texture for some reason).
+                    // RIP performance.
+
+                    double fxX = frame.uvs[1].x - frame.uvs[0].x;
+                    double fyX = frame.uvs[2].x - frame.uvs[0].x;
+                    double fxY = frame.uvs[1].y - frame.uvs[0].y;
+                    double fyY = frame.uvs[2].y - frame.uvs[0].y;
+
+                    double e = 0.001D;
+                    double fxX01 = fxX < e ? 0D : 1D;
+                    double fyX01 = fyX < e ? 0D : 1D;
+                    double fxY01 = fxY < e ? 0D : 1D;
+                    double fyY01 = fyY < e ? 0D : 1D;
+
+                    for (int y = 0; y < h; y++) {
+                        float fy = y / (float) h;
+                        for (int x = 0; x < w; x++) {
+                            float fx = x / (float) w;
+
+                            double fxUV01 = fx * fxX01 + fy * fyX01;
+                            double fyUV01 = fx * fxY01 + fy * fyY01;
+
+                            double wO = frame.uvs[3].x - frame.uvs[0].x;
+                            double hO = frame.uvs[3].y - frame.uvs[0].y;
+                            double p =
+                                ((frame.uvs[0].y + fyUV01 * hO) * texOrig.height) * texOrig.width +
+                                ((frame.uvs[0].x + fxUV01 * wO) * texOrig.width);
+
+                            texRegion.SetPixel(x, y, texRWData[(int) Math.Round(p)]);
+
+                        }
+                    }
+
+                }
+
+                diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + pathFull).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
+                if (!File.Exists(diskPath)) {
+                    Directory.GetParent(diskPath).Create();
+                    File.WriteAllBytes(diskPath, texRegion.EncodeToPNG());
+                }
             }
 
             return sprite;

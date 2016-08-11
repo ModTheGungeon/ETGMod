@@ -13,6 +13,7 @@ public class ETGModMainBehaviour : MonoBehaviour {
 
     public void Awake() {
         DontDestroyOnLoad(gameObject);
+        ETGMod.Init();
     }
 
     public void Start() {
