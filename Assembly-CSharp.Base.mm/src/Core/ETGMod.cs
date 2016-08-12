@@ -13,7 +13,7 @@ using System.Collections;
 /// </summary>
 public static partial class ETGMod {
 
-    public readonly static Version BaseVersion = new Version(0, 1, 0);
+    public readonly static Version BaseVersion = new Version(0, 2, 0);
     // The following line will be replaced by Travis.
     public readonly static int BaseTravisBuild = 0;
     /// <summary>
@@ -71,6 +71,11 @@ public static partial class ETGMod {
     public static Func<IEnumerator, Coroutine> StartCoroutine;
 
     private static bool _Init = false;
+    public static bool Initialized {
+        get {
+            return _Init;
+        }
+    }
     public static void Init() {
         if (_Init) {
             return;
@@ -101,10 +106,13 @@ public static partial class ETGMod {
         _ScanBackends();
         _LoadMods();
 
+        Assets.Crawl(ResourcesDirectory);
+
         /*Gun test = Databases.Items.NewGunPrototype("TEST", GunClass.SHITTY);
         Databases.Items.Add(test);*/
 
         ETGModGUI.Start();
+        Assets.HandleAll();
         CallInEachModule("Init");
     }
 
@@ -271,7 +279,7 @@ public static partial class ETGMod {
                         }
                     }
                 } else {
-                    Assets.Map[Assets.RemoveExtension(entryName)] = new AssetMetadata(archive, entryName);
+                    Assets.AddMapping(entryName, new AssetMetadata(archive, entryName));
                 }
             }
         }

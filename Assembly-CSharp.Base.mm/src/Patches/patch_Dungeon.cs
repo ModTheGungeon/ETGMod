@@ -17,9 +17,9 @@ namespace Dungeonator {
                 list.Add(start.Current);
             }
 
-            // Set ETGMod.StartCoroutine to be sure it's not null.
-            ETGMod.StartCoroutine = StartCoroutine;
-            ETGMod.Assets.HandleAll();
+            if (ETGMod.Initialized) {
+                ETGMod.Assets.HandleAll();
+            }
 
             return list.GetEnumerator();
         }

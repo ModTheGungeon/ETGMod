@@ -11,7 +11,7 @@ using System.Reflection;
 public class AssetMetadata {
 
     public EType Type;
-    public System.Type AssetType = typeof(Object);
+    public System.Type AssetType = null;
 
     public string File;
 
