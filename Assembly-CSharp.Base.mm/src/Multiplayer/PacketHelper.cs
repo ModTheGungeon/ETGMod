@@ -20,6 +20,8 @@ namespace ETGMultiplayer {
 
         public static void SendPacketToPlayersInGame(string RPCName, byte[] data, bool isTCP = false) {
 
+            return;
+
             if (!SteamManager.Initialized)
                 return;
 
@@ -50,6 +52,8 @@ namespace ETGMultiplayer {
 
         public static void SendPacketToPlayer(CSteamID player, string RPCName, byte[] data, bool isTCP = false) {
 
+            return;
+
             if (!SteamManager.Initialized)
                 return;
 
@@ -77,10 +81,12 @@ namespace ETGMultiplayer {
         }
 
         public static void SendRPCToPlayersInGame(string rpcName, bool isTCP = false, params object[] args) {
+            return;
             SendPacketToPlayersInGame(rpcName,RPCSerializer.GetCompleteSerializedData(args),isTCP);
         }
 
         public static void SendRPCToPlayersInGame(string rpcName, params object[] args) {
+            return;
             SendPacketToPlayersInGame(rpcName, RPCSerializer.GetCompleteSerializedData(args));
         }
 
@@ -91,6 +97,7 @@ namespace ETGMultiplayer {
         /// <param name="rpcName"></param>
         /// <param name="args"></param>
         public static void SendRPCToSelf(string rpcName, params object[] args) {
+            return;
             SendPacketToPlayer(SteamUser.GetSteamID(),rpcName, RPCSerializer.GetCompleteSerializedData(args));
         }
 
