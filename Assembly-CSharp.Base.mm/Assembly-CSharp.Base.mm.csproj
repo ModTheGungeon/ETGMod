@@ -146,6 +146,7 @@
     <Compile Include="src\PInvokeHelper.cs" />
     <Compile Include="src\Core\Databases.cs" />
     <Compile Include="src\Core\Assets.Dump.cs" />
+    <Compile Include="src\Core\Assets.Data.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -201,5 +202,6 @@
     <Folder Include="src\JSON\" />
     <Folder Include="src\JSON\Rules\" />
     <Folder Include="Content\sprites\" />
+    <Folder Include="src\New Folder\" />
   </ItemGroup>
 </Project>

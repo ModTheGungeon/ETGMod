@@ -14,9 +14,12 @@ public static partial class ETGMod {
     /// </summary>
     public static partial class Assets {
 
-        private readonly static Type t_Object = typeof(UnityEngine.Object);
-        private readonly static Type t_Texture = typeof(Texture);
-        private readonly static Type t_Texture2D = typeof(Texture2D);
+        public readonly static Type t_Object = typeof(UnityEngine.Object);
+        public readonly static Type t_AssetDirectory = typeof(AssetDirectory);
+        public readonly static Type t_Texture = typeof(Texture);
+        public readonly static Type t_Texture2D = typeof(Texture2D);
+        public readonly static Type t_tk2dSpriteCollectionData = typeof(tk2dSpriteCollectionData);
+        public readonly static Type t_tk2dSpriteDefinition = typeof(tk2dSpriteDefinition);
 
         private readonly static FieldInfo f_tk2dSpriteCollectionData_spriteNameLookupDict =
             typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -33,17 +36,19 @@ public static partial class ETGMod {
         public static bool DumpResources = false;
 
         public static bool DumpSprites = false;
-        public static int FramesToHandleAllSpritesIn = 10;
+        public static bool DumpSpritesMetadata = false;
+        public static int FramesToHandleAllSpritesIn = 14;
         private readonly static Vector2[] _DefaultUVs = {
             new Vector2(0f, 0f),
             new Vector2(1f, 0f),
             new Vector2(0f, 1f),
             new Vector2(1f, 1f)
         };
+        public static Shader DefaultSpriteShader;
 
-        public static bool TryGetMapped(string path, out AssetMetadata metadata) {
-            if (Map.TryGetValue(path, out metadata)) { return true; }
-            if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { return true; }
+        public static bool TryGetMapped(string path, out AssetMetadata metadata, bool dir = false) {
+            if (Map.TryGetValue(path, out metadata)) { return dir || metadata.AssetType != t_AssetDirectory; }
+            if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { return dir || metadata.AssetType != t_AssetDirectory; }
 
             // ETGMod now crawls through ResourcesDirectory.
             // TryGetMapped is not used everywhere and manual crawling every time is too expensive.
@@ -99,7 +104,11 @@ public static partial class ETGMod {
             }
             files = Directory.GetDirectories(dir);
             for (int i = 0; i < files.Length; i++) {
-                Crawl(files[i], root);
+                string file = files[i];
+                AddMapping(file.Substring(root.Length + 1), new AssetMetadata(file) {
+                    AssetType = t_AssetDirectory
+                });
+                Crawl(file, root);
             }
         }
 
@@ -127,6 +136,8 @@ public static partial class ETGMod {
             // ETGModUnityEngineHooks.LoadAsync = LoadAsync;
             // ETGModUnityEngineHooks.LoadAll = LoadAll;
             // ETGModUnityEngineHooks.UnloadAsset = UnloadAsset;
+
+            DefaultSpriteShader = Shader.Find("tk2d/BlendVertexColor");
         }
 
         public static UnityEngine.Object Load(string path, Type type) {
@@ -143,12 +154,12 @@ public static partial class ETGMod {
             AssetMetadata metadata;
             bool isJson = false;
             bool isPatch = false;
-                 if (TryGetMapped(path, out metadata)) { }
+                 if (TryGetMapped(path, out metadata, true)) { }
             else if (TryGetMapped(path + ".json", out metadata)) { isJson = true; }
             else if (TryGetMapped(path + ".patch.json", out metadata)) { isPatch = true; isJson = true; }
-            else { return null; }
 
-            if (isJson) {
+            if (metadata != null && isJson) {
+                Console.WriteLine(path + " is a jayson!");
                 if (isPatch) {
                     UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
                     using (JsonHelperReader json = JSONHelper.OpenReadJSON(metadata.Stream)) {
@@ -159,26 +170,64 @@ public static partial class ETGMod {
                 return (UnityEngine.Object) JSONHelper.ReadJSON(metadata.Stream);
             }
 
-            if (t_Texture.IsAssignableFrom(type) ||
+            if (metadata != null && t_tk2dSpriteCollectionData == type) {
+                AssetMetadata json = GetMapped(path + ".json");
+                if (metadata.AssetType == t_Texture2D && json != null) {
+                    // Atlas
+                    string[] names;
+                    Rect[] regions;
+                    Vector2[] anchors;
+                    AssetSpriteData.ToTK2D(JSONHelper.ReadJSON<List<AssetSpriteData>>(json.Stream), out names, out regions, out anchors);
+                    return tk2dSpriteCollectionData.CreateFromTexture(
+                        Resources.Load<Texture2D>(path), tk2dSpriteCollectionSize.Default(), names, regions, anchors
+                    );
+                }
+
+                if (metadata.AssetType == t_AssetDirectory) {
+                    // Separate textures
+                    // TODO create collection from "children" assets
+                    tk2dSpriteCollectionData data = new tk2dSpriteCollectionData();
+                    tk2dSpriteCollectionSize size = tk2dSpriteCollectionSize.Default();
+
+                    data.Transient = true;
+                    data.version = 3;
+                    data.invOrthoSize = 1f / size.OrthoSize;
+                    data.halfTargetHeight = size.TargetHeight * 0.5f;
+                    data.premultipliedAlpha = false;
+                    data.material = new Material(DefaultSpriteShader);
+                    data.materials = new Material[] { data.material };
+                    data.buildKey = UnityEngine.Random.Range(0, int.MaxValue);
+
+                    data.Handle(true);
+
+                    data.textures = new Texture2D[data.spriteDefinitions.Length];
+                    for (int i = 0; i < data.spriteDefinitions.Length; i++) {
+                        data.textures[i] = data.spriteDefinitions[i].materialInst.mainTexture;
+                    }
+
+                    return data;
+                }
+            }
+
+            if (metadata != null && (
+                t_Texture.IsAssignableFrom(type) ||
                 type == t_Texture2D ||
-                (type == t_Object && metadata.AssetType == t_Texture2D)) {
+                (type == t_Object && metadata.AssetType == t_Texture2D))) {
                 Texture2D tex = new Texture2D(2, 2);
                 tex.name = path;
                 tex.LoadImage(metadata.Data);
                 tex.filterMode = FilterMode.Point;
                 return tex;
             }
-
-            // TODO use tk2dSpriteCollectionData.CreateFromTexture
-
-            UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
+            
+            UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix, type);
             if (orig is GameObject) {
                 HandleGameObject((GameObject) orig);
             }
             return orig;
         }
 
-        public static void HandleSprite(tk2dSpriteCollectionData sprites) {
+        public static void HandleSprites(tk2dSpriteCollectionData sprites, bool replace = false) {
             if (TextureMap.ContainsValue((Texture2D) sprites.materials[0].mainTexture)) {
                 return;
             }
@@ -197,6 +246,9 @@ public static partial class ETGMod {
 
             if (DumpSprites) {
                 Dump.DumpSpriteCollection(sprites);
+            }
+            if (DumpSpritesMetadata) {
+                Dump.DumpSpriteCollectionMetadata(sprites);
             }
 
             // Old method: Crawl through sprites in collection, replace.
@@ -228,49 +280,63 @@ public static partial class ETGMod {
             // New method: Crawl through asset list, replace or add.
             // +: Adding.
             // +: Faster.
-            // -: No Resources support.
-            bool refresh = false;
+            // -: No dynamic Resources support.
+            List<tk2dSpriteDefinition> list = null;
             foreach (KeyValuePair<string, AssetMetadata> mapping in Map) {
                 string assetPath = mapping.Key;
                 if (assetPath.Length <= path.Length + 1) {
                     continue;
                 }
-                if (!assetPath.ToLowerInvariant().StartsWithInvariant(path.ToLowerInvariant()) || mapping.Value.AssetType != t_Texture2D) {
+                if (!assetPath.StartsWithInvariant(path) || mapping.Value.AssetType != t_Texture2D) {
                     continue;
                 }
 
-                TextureMap[assetPath] = replacement = Resources.Load<Texture2D>(assetPath);
+                if (!TextureMap.TryGetValue(assetPath, out replacement))
+                    replacement = TextureMap[assetPath] = Resources.Load<Texture2D>(assetPath);
                 if (replacement == null) {
                     continue;
                 }
 
                 string name = assetPath.Substring(path.Length + 1);
-                tk2dSpriteDefinition frame = null;
-                for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
-                    tk2dSpriteDefinition frame_ = sprites.spriteDefinitions[i];
-                    if (frame_.Valid && frame_.name.ToLowerInvariant() == name.ToLowerInvariant()) {
-                        frame = frame_;
-                        name = frame.name;
-                        break;
-                    }
-                }
+                tk2dSpriteDefinition frame = sprites.GetSpriteDefinition(name);
 
                 if (frame != null) {
                     // Replace old sprite.
                     frame.ReplaceTexture(replacement);
 
                 } else {
-                    refresh = true;
                     // Add new sprite.
-                    // FIXME TODO!
+                    replace = true;
+                    if (list == null) {
+                        list = new List<tk2dSpriteDefinition>(sprites.spriteDefinitions.Length);
+                        list.AddRange(sprites.spriteDefinitions);
+                    }
                     frame = new tk2dSpriteDefinition();
                     frame.name = name;
                     frame.material = sprites.materials[0];
                     frame.ReplaceTexture(replacement);
+
+                    frame.normals = new Vector3[0];
+                    frame.tangents = new Vector4[0];
+                    frame.indices = new int[] { 0, 3, 1, 2, 3, 0 };
+
+                    // FIXME BLACK MAGIC.
+                    /*
+                    frame.position0 = new Vector3(a3.x + a.x, a3.y + a.y, 0f);
+                    frame.position1 = new Vector3(vector5.x + a.x, a3.y + a.y, 0f);
+                    frame.position2 = new Vector3(a3.x + a.x, vector5.y + a.y, 0f);
+                    frame.position3 = new Vector3(vector5.x + a.x, vector5.y + a.y, 0f);
+                    frame.boundsDataCenter = (a4 + b) / 2f;
+                    frame.boundsDataExtents = a4 - b;
+                    frame.untrimmedBoundsDataCenter = (a4 + b) / 2f;
+                    frame.untrimmedBoundsDataExtents = a4 - b;
+                    */
+
+                    list.Add(frame);
                 }
             }
-
-            if (refresh) {
+            if (replace) {
+                sprites.spriteDefinitions = list.ToArray();
                 ReflectionHelper.SetValue(f_tk2dSpriteCollectionData_spriteNameLookupDict, sprites, null);
             }
         }
@@ -304,11 +370,11 @@ public static partial class ETGMod {
     }
 
     public static void Handle(this tk2dBaseSprite sprite) {
-        Assets.HandleSprite(sprite.Collection);
+        Assets.HandleSprites(sprite.Collection);
     }
 
-    public static void Handle(this tk2dSpriteCollectionData sprites) {
-        Assets.HandleSprite(sprites);
+    public static void Handle(this tk2dSpriteCollectionData sprites, bool replace = false) {
+        Assets.HandleSprites(sprites, replace);
     }
 
     public static void MapAssets(this Assembly asm) {

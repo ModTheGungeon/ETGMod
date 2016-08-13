@@ -63,18 +63,30 @@ public sealed class ItemDB {
         GameObject go = NewPrototype(name);
 
         PickupObject item = go.AddComponent<PickupObject>();
+        SetupItem(item, name);
+
         return item;
     }
 
     public Gun NewGunPrototype(string gunName, GunClass gunClass) {
-        GameObject go = new GameObject(gunName);
-        go.SetActive(false);
+        GameObject go = NewPrototype(gunName);
 
         Gun gun = go.AddComponent<Gun>();
         gun.gunName = gunName;
         gun.gunClass = gunClass;
+        SetupItem(gun, gunName);
 
         return gun;
+    }
+
+    public void SetupItem(PickupObject item, string name) {
+        string nameKey = "#ITEM_" + name.ToUpperInvariant();
+        item.encounterTrackable = new EncounterTrackable();
+        item.encounterTrackable.journalData = new JournalEntry();
+        item.encounterTrackable.journalData.PrimaryDisplayName = nameKey;
+        StringTableManager.StringCollection nameValue = new StringTableManager.SimpleStringCollection();
+        nameValue.AddString(name, 0f);
+        StringTableManager.ItemTable.Add(nameKey, nameValue);
     }
 
 }

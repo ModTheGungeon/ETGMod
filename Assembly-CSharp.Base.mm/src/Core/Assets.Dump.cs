@@ -175,6 +175,28 @@ public static partial class ETGMod {
                 }
             }
 
+            public static void DumpSpriteCollectionMetadata(tk2dSpriteCollectionData sprites) {
+                string path = "sprites/" + sprites.spriteCollectionName;
+                string diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".json");
+                if (!File.Exists(diskPath)) {
+                    Directory.GetParent(diskPath).Create();
+                    JSONHelper.WriteJSON(AssetSpriteData.FromTK2D(sprites), diskPath);
+                }
+                for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
+                    tk2dSpriteDefinition frame = sprites.spriteDefinitions[i];
+                    Texture2D texOrig = (Texture2D) frame.material.mainTexture;
+                    if (!frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D) frame.materialInst.mainTexture))) {
+                        continue;
+                    }
+                    string pathFull = path + "/" + frame.name;
+                    diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + pathFull).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".json");
+                    if (!File.Exists(diskPath)) {
+                        Directory.GetParent(diskPath).Create();
+                        JSONHelper.WriteJSON(AssetSpriteData.FromTK2D(sprites, frame, true), diskPath);
+                    }
+                }
+            }
+
         }
     }
 }

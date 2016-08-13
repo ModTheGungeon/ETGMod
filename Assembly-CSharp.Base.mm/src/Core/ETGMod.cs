@@ -108,12 +108,14 @@ public static partial class ETGMod {
 
         Assets.Crawl(ResourcesDirectory);
 
-        /*Gun test = Databases.Items.NewGunPrototype("TEST", GunClass.SHITTY);
-        Databases.Items.Add(test);*/
+        // Gun test = Databases.Items.NewGunPrototype("BKey-47", GunClass.SHITTY);
+        // Databases.Items.Add(test);
 
         ETGModGUI.Start();
         Assets.HandleAll();
         CallInEachModule("Init");
+        // Needs to happen late as mods can add their own guns.
+        StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
     }
 
     public static void Start() {
@@ -279,7 +281,9 @@ public static partial class ETGMod {
                         }
                     }
                 } else {
-                    Assets.AddMapping(entryName, new AssetMetadata(archive, entryName));
+                    Assets.AddMapping(entryName, new AssetMetadata(archive, entryName) {
+                        AssetType = entry.IsDirectory ? Assets.t_AssetDirectory : null
+                    });
                 }
             }
         }

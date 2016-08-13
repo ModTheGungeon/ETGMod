@@ -77,7 +77,6 @@ public class ETGModGUI : MonoBehaviour {
         _InspectorMenu = new ETGModInspector();
 
         ETGDamageIndicatorGUI.Create();
-        StartCoroutine(ListAllItemsAndGuns());
     }
 
     public static void Start() {
@@ -194,7 +193,7 @@ public class ETGModGUI : MonoBehaviour {
 
     }
 
-    IEnumerator ListAllItemsAndGuns() {
+    internal static IEnumerator ListAllItemsAndGuns() {
 
         yield return new WaitForSeconds(1);
 
