@@ -5,7 +5,7 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
     private Dictionary<string, ConsoleCommand> _Commands = new Dictionary<string, ConsoleCommand>();
     private Dictionary<string, ConsoleCommandGroup> _Groups = new Dictionary<string, ConsoleCommandGroup>();
 
-    public ConsoleCommandGroup () {
+    public ConsoleCommandGroup (System.Action<string[]> cmdref) {
         Autocompletion = new AutocompletionSettings (delegate(string input) {
             string[] list = GetAllUnitNames();
             List<String> ret = new List<String>();
@@ -17,7 +17,12 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
             }
             return ret.ToArray();
         });
+        CommandReference = cmdref;
     }
+
+    public ConsoleCommandGroup () : this(delegate (string[] args) {
+        ETGModConsole.LoggedText.Add("Command group does not have an assigned action");
+    }) {}
 
     public ConsoleCommandGroup AddUnit(string name, ConsoleCommand command) {
         command.Name = name;
@@ -45,17 +50,28 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
         return this;
     }
 
-    public ConsoleCommandUnit GetUnit(string[] unit) {
+    public ConsoleCommandGroup AddGroup(string name) {
+      AddUnit(name, new ConsoleCommandGroup());
+      return this;
+    }
+
+    public UnitSearchResult SearchUnit(string[] path) {
         ConsoleCommandGroup currentgroup = this;
-        if (unit.Length == 0) return currentgroup;
-        for (int i = 0; i < unit.Length; i++) {
-            if (currentgroup.GetGroup(unit[i]) != null) {
-                currentgroup = _Groups [unit [i]];
-            } else if (currentgroup.GetCommand (unit [i]) != null) {
-                return currentgroup.GetCommand (unit [i]);
+        UnitSearchResult result = new UnitSearchResult();
+        for (int i = 0; i < path.Length; i++) {
+            ConsoleCommandGroup group = currentgroup.GetGroup(path[i]);
+            ConsoleCommand command = currentgroup.GetCommand(path[i]);
+            if (group != null) {
+                currentgroup = group;
+                result.index++;
+            } else if (command != null) {
+                result.index++;
+                result.unit = command;
+                return result;
             }
         }
-        return currentgroup;
+        result.unit = currentgroup;
+        return result;
     }
 
     public List<List<String>> ConstructPaths() {
@@ -94,15 +110,12 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
         return ret.ToArray();
     }
 
-    public ConsoleCommandGroup GetGroup(params string[] unit) {
-        ConsoleCommandGroup currentgroup = this;
-        if (unit.Length == 0) return currentgroup;
-        for (int i = 0; i < unit.Length; i++) {
-            if (currentgroup.GetGroup(unit[i]) != null) {
-                currentgroup = _Groups [unit [i]];
-            }
-        }
-        return currentgroup;
+    public ConsoleCommandUnit GetUnit(string[] unit) {
+      return SearchUnit(unit).unit;
+    }
+
+    public ConsoleCommandGroup GetGroup(string[] unit) {
+        return SearchUnit(unit).unit as ConsoleCommandGroup;
     }
 
     public ConsoleCommandGroup GetGroup(string unit) {
@@ -110,38 +123,26 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
         return _Groups [unit];
     }
 
-    public ConsoleCommand GetCommand(params string[] unit) {
-        ConsoleCommandGroup currentgroup = this;
-        if (unit.Length == 0) return null;
-        for (int i = 0; i < unit.Length; i++) {
-            if (currentgroup.GetGroup(unit[i]) != null) {
-                currentgroup = _Groups [unit [i]];
-            } else if (currentgroup.GetCommand (unit [i]) != null) {
-                return currentgroup.GetCommand (unit [i]);
-            }
-        }
-        return null;
+    public ConsoleCommand GetCommand(string[] unit) {
+        return SearchUnit(unit).unit as ConsoleCommand;
     }
 
     public ConsoleCommand GetCommand(string name) {
-        if (_Commands.ContainsKey(name)) {
-            return _Commands [name];
-        } else {
-            return null;
-        }
+        if (!_Commands.ContainsKey(name)) return null;
+        return _Commands[name];
     }
 
     public int GetFirstNonUnitIndexInPath(string[] path) {
-        ConsoleCommandGroup currentgroup = this;
-        int storedindex = 0;
-        for (int i = 0; i < path.Length; i++) {
-            if (currentgroup.GetGroup(path[i]) != null) {
-                currentgroup = _Groups [path [i]];
-                storedindex++;
-            } else if (currentgroup.GetCommand (path [i]) != null) {
-                return i + 1;
-            }
+        return SearchUnit(path).index + 1;
+    }
+
+    public class UnitSearchResult {
+        public int index = -1;
+        public ConsoleCommandUnit unit;
+        public UnitSearchResult(int index, ConsoleCommandUnit unit) {
+          this.index = index;
+          this.unit = unit;
         }
-        return storedindex;
+        public UnitSearchResult() {}
     }
 }

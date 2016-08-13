@@ -17,6 +17,7 @@ public static partial class ETGMod {
                 Debug.Log ("Couldn't access PlayerController instance in GameManager");
                 return false;
             }
+
             LootEngine.TryGivePrefabToPlayer(PickupObjectDatabase.GetById(id).gameObject, GameManager.Instance.PrimaryPlayer, false);
             return true;
         }

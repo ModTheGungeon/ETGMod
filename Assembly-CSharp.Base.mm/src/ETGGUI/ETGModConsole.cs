@@ -15,7 +15,9 @@ public class ETGModConsole : IETGModMenu {
     /// <summary>
     /// All commands supported by the ETGModConsole. Add your own commands here!
     /// </summary>
-    public static ConsoleCommandGroup Commands = new ConsoleCommandGroup();
+    public static ConsoleCommandGroup Commands = new ConsoleCommandGroup(delegate (string[] args) {
+      LoggedText.Add("Command/group " + args[0] + " doesn't exist");
+    });
 
     /// <summary>
     /// All items in the game, name sorted. Used for the give command.
@@ -72,24 +74,36 @@ public class ETGModConsole : IETGModMenu {
                 }))
                 .AddUnit ("screenshake", SetShake)
                 .AddUnit ("echo",        Echo    )
-                .AddUnit ("tp",          Teleport);
+                .AddUnit ("tp",          Teleport)
+                .AddUnit ("godmode", delegate(string[] args) {
+                    GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
+                });
 
         // ROLL NAMESPACE
-        Commands.AddUnit ("roll", new ConsoleCommandGroup());
+        Commands.AddGroup ("roll");
 
         Commands.GetGroup ("roll")
                 .AddUnit  ("distance", DodgeRollDistance)
                 .AddUnit  ("speed",    DodgeRollSpeed   );
 
+        // TEST NAMESPACE
+        Commands.AddUnit  ("test", new ConsoleCommandGroup());
+
+        Commands.GetGroup ("test")
+                .AddUnit  ("spawn", SpawnGUID)
+                .AddGroup ("resources");
+
+        //// TEST.RESOURCES NAMESPACE
+        Commands.GetGroup ("test").GetGroup ("resources")
+                                  .AddUnit  ("load", ResourcesLoad);
+
         // CONF NAMESPACE
-        Commands.AddUnit ("conf", new ConsoleCommandGroup());
+        Commands.AddGroup ("conf");
 
         Commands.GetGroup("conf")
                 .AddUnit("close_console_on_command",   delegate (string[] args) { _CloseConsoleOnCommand          = SetBool(args, _CloseConsoleOnCommand        );})
                 .AddUnit("cut_input_focus_on_command", delegate (string[] args) { _CutInputFocusOnCommand         = SetBool(args, _CutInputFocusOnCommand       );})
                 .AddUnit("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators   = SetBool(args, ETGModGUI.UseDamageIndicators );});
-
-        Commands.AddUnit("set_player_vunerable", delegate(string[] args) { GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable=SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable); });
     }
 
     public void Update() {
@@ -283,12 +297,10 @@ public class ETGModConsole : IETGModMenu {
     /// Runs the provided command with the provided args.
     /// </summary>
     public static void RunCommand(string[] unit, string[] args) {
-        ConsoleCommand command = Commands.GetCommand (unit);
+        ConsoleCommandUnit command = Commands.GetUnit (unit);
         if (command == null) {
             if (Commands.GetGroup (unit) == null) {
                 LoggedText.Add ("Command doesn't exist");
-            } else {
-                LoggedText.Add ("Attempted to execute a command group");
             }
         } else {
             try {
@@ -349,9 +361,9 @@ public class ETGModConsole : IETGModMenu {
         if (args.Length!=1)
             return fallbackValue;
 
-        if (args[0].ToLower()=="true") 
+        if (args[0].ToLower()=="true")
             return true;
-        else if (args[0].ToLower()=="false") 
+        else if (args[0].ToLower()=="false")
             return false;
         else
             return fallbackValue;
@@ -399,5 +411,50 @@ public class ETGModConsole : IETGModMenu {
         ScreenShakeSettings.GLOBAL_SHAKE_MULTIPLIER = float.Parse (args [0]);
     }
 
+    void SpawnGUID(string[] args) {
+		if (!ArgCount (args, 1, 1)) return;
+		AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid (args[0]);
+        if (enemyPrefab == null) {
+          LoggedText.Add("GUID " + args[0] + " doesn't exist");
+          return;
+        }
+        LoggedText.Add ("Spawning GUID " + args[0]);
+        IntVector2? targetCenter = new IntVector2? (GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2 (VectorConversions.Floor));
+        Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {
+            for (int j = 0; j < enemyPrefab.Clearance.x; j++) {
+                for (int k = 0; k < enemyPrefab.Clearance.y; k++) {
+                    if (GameManager.Instance.Dungeon.data.isTopWall (c.x + j, c.y + k)) {
+                        return false;
+                    }
+                    if (targetCenter.HasValue) {
+                        if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) < 4) {
+                            return false;
+                        }
+                        if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) > 20) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+        IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell (new IntVector2? (enemyPrefab.Clearance), new Dungeonator.CellTypes? (enemyPrefab.PathableTiles), false, cellValidator);
+        if (randomAvailableCell.HasValue) {
+            AIActor aIActor = AIActor.Spawn (enemyPrefab, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
+            aIActor.HandleReinforcementFallIntoRoom (0);
+        }
+	}
+
+
+    void ResourcesLoad(string[] args) {
+      if (!ArgCount (args, 1)) return;
+      string resourcepath = String.Join(" ", args);
+      object resource = Resources.Load(resourcepath);
+      if (resource == null) {
+        LoggedText.Add("Couldn't load resource " + resourcepath);
+        return;
+     }
+      LoggedText.Add("Loaded (and threw away) " + resourcepath);
+    }
 }
 
