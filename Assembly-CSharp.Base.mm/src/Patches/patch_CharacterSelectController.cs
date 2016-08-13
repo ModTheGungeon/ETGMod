@@ -9,6 +9,9 @@ internal class patch_CharacterSelectController : CharacterSelectController {
         if (character == PlayableCharacters.Pilot) {
             return "PlayerRogue";
         }
+        if (character == PlayableCharacters.Soldier) {
+            return "PlayerMarine";
+        }
         return "Player" + character;
     }
 
@@ -19,9 +22,6 @@ internal class patch_CharacterSelectController : CharacterSelectController {
         }
 
         if (GameManager.Options.PreferredQuickstartCharacter == GameOptions.QuickstartCharacter.LAST_USED) {
-            if (GameManager.Options.LastPlayedCharacter == PlayableCharacters.Pilot) {
-                return "PlayerRogue";
-            }
             return GetCharacterPathFromIdentity(GameManager.Options.LastPlayedCharacter);
         }
 

@@ -141,4 +141,11 @@ public static partial class ETGMod {
         return path.CombineReversed("/");
     }
 
+    public static GameObject AddChild(this GameObject go, string name, params Type[] components) {
+        GameObject child = new GameObject(name, components);
+        child.transform.SetParent(go.transform);
+        child.transform.SetAsLastSibling();
+        return child;
+    }
+
 }

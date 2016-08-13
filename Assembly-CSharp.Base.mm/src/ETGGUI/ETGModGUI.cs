@@ -204,7 +204,7 @@ public class ETGModGUI : MonoBehaviour {
 
         // TODO: bleh, foreach
         for (int i = 0; i < PickupObjectDatabase.Instance.Objects.Count; i++) {
-            PickupObject obj = PickupObjectDatabase.Instance.Objects [i];
+            PickupObject obj = PickupObjectDatabase.Instance.Objects[i];
 
             if (obj==null) 
                 continue;
@@ -212,9 +212,8 @@ public class ETGModGUI : MonoBehaviour {
                 continue;
             if (obj.encounterTrackable.journalData==null)
                 continue;
-            
+
             string name = obj.encounterTrackable.journalData.GetPrimaryDisplayName(true).Replace(' ', '_').ToLower();
-            int id = PickupObjectDatabase.Instance.Objects.IndexOf(obj);
 
             count++;
 
@@ -251,7 +250,7 @@ public class ETGModGUI : MonoBehaviour {
                 }
                 name = name + "_" + appendindex.ToString ();
             }
-            ETGModConsole.AllItems.Add(name, id);
+            ETGModConsole.AllItems.Add(name, i);
             if (count >= 30) {
                 count = 0;
                 yield return null;

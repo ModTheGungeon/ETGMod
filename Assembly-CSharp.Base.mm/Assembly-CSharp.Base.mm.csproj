@@ -161,9 +161,6 @@
     <EmbeddedResource Include="Content\etgmod\logo.png">
       <LogicalName>Content/etgmod/logo.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\CoopCultist.png">
-      <LogicalName>Content/sprites/CoopCultist.png</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_006.png">
       <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_006.png</LogicalName>
     </EmbeddedResource>

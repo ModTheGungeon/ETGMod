@@ -38,51 +38,46 @@ public sealed class ItemDB {
         }
     }
 
+    public int Count {
+        get {
+            return PickupObjectDatabase.Instance.Objects.Count;
+        }
+    }
+
     public int Add(PickupObject value) {
         int id = PickupObjectDatabase.Instance.Objects.Count;
         if (value != null) {
             value.PickupObjectId = id;
-            value.gameObject.SetActive(true);
         }
         PickupObjectDatabase.Instance.Objects.Add(value);
         return id;
     }
 
-    public GameObject NewPrototype(string name = "") {
-        GameObject go = new GameObject(name);
-        go.SetActive(false);
+    private Gun _GunGivenPrototype;
+    public Gun NewGun(string gunName) {
+        if (_GunGivenPrototype == null) {
+            _GunGivenPrototype = (Gun) PickupObjectDatabase.GetByName("Pea_Shooter");
+        }
 
-        tk2dSprite sprite = go.AddComponent<tk2dSprite>();
-
-        tk2dSpriteAnimator spriteAnim = go.AddComponent<tk2dSpriteAnimator>();
-
-        return go;
+        return NewGun(gunName, _GunGivenPrototype);
     }
-
-    public PickupObject NewItemPrototype(string name) {
-        GameObject go = NewPrototype(name);
-
-        PickupObject item = go.AddComponent<PickupObject>();
-        SetupItem(item, name);
-
-        return item;
+    public Gun NewGun(string gunName, string baseGun) {
+        return NewGun(gunName, (Gun) PickupObjectDatabase.GetByName(baseGun));
     }
+    public Gun NewGun(string gunName, Gun baseGun) {
+        GameObject go = UnityEngine.Object.Instantiate(baseGun.gameObject);
+        go.name = gunName.Replace(" ", "_");
 
-    public Gun NewGunPrototype(string gunName, GunClass gunClass) {
-        GameObject go = NewPrototype(gunName);
-
-        Gun gun = go.AddComponent<Gun>();
-        gun.gunName = gunName;
-        gun.gunClass = gunClass;
+        Gun gun = go.GetComponent<Gun>();
         SetupItem(gun, gunName);
+        gun.gunName = gunName;
+        gun.gunSwitchGroup = go.name;
 
         return gun;
     }
 
     public void SetupItem(PickupObject item, string name) {
-        string nameKey = "#ITEM_" + name.ToUpperInvariant();
-        item.encounterTrackable = new EncounterTrackable();
-        item.encounterTrackable.journalData = new JournalEntry();
+        string nameKey = "#" + item.name.ToUpperInvariant();
         item.encounterTrackable.journalData.PrimaryDisplayName = nameKey;
         StringTableManager.StringCollection nameValue = new StringTableManager.SimpleStringCollection();
         nameValue.AddString(name, 0f);

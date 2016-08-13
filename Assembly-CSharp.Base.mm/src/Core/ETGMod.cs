@@ -108,11 +108,10 @@ public static partial class ETGMod {
 
         Assets.Crawl(ResourcesDirectory);
 
-        // Gun test = Databases.Items.NewGunPrototype("BKey-47", GunClass.SHITTY);
-        // Databases.Items.Add(test);
+        Gun testGun = Databases.Items.NewGun("BKey-47");
+        int testGunId = Databases.Items.Add(testGun);
 
         ETGModGUI.Start();
-        Assets.HandleAll();
         CallInEachModule("Init");
         // Needs to happen late as mods can add their own guns.
         StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
