@@ -29,6 +29,7 @@ public class AssetMetadata {
     /// </summary>
     public Stream Stream {
         get {
+            if (!HasData) return null;
             Stream stream = null;
             if (Type == EType.File) {
                 stream = IOFile.OpenRead(File);
@@ -56,10 +57,11 @@ public class AssetMetadata {
     }
 
     /// <summary>
-    /// Returns the file's contents.
+    /// Returns the files contents.
     /// </summary>
     public byte[] Data {
         get {
+            if (!HasData) return null;
             using (Stream stream = Stream) {
                 if (stream is LimitedStream) {
                     return ((LimitedStream) stream).GetBuffer();
@@ -74,6 +76,12 @@ public class AssetMetadata {
                     return ms.ToArray();
                 }
             }
+        }
+    }
+
+    public bool HasData {
+        get {
+            return AssetType != ETGMod.Assets.t_AssetDirectory;
         }
     }
 

@@ -86,7 +86,7 @@ public sealed class ItemDB {
         item.encounterTrackable.journalData.PrimaryDisplayName = nameKey;
         StringTableManager.StringCollection nameValue = new StringTableManager.SimpleStringCollection();
         nameValue.AddString(name, 0f);
-        StringTableManager.ItemTable.Add(nameKey, nameValue);
+        StringTableManager.ItemTable[nameKey] = nameValue;
     }
 
 }

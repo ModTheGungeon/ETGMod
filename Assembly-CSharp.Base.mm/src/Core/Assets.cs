@@ -46,9 +46,9 @@ public static partial class ETGMod {
         };
         public static Shader DefaultSpriteShader;
 
-        public static bool TryGetMapped(string path, out AssetMetadata metadata, bool dir = false) {
-            if (Map.TryGetValue(path, out metadata)) { return dir || metadata.AssetType != t_AssetDirectory; }
-            if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { return dir || metadata.AssetType != t_AssetDirectory; }
+        public static bool TryGetMapped(string path, out AssetMetadata metadata, bool dataless = false) {
+            if (Map.TryGetValue(path, out metadata)) { return dataless || metadata.HasData; }
+            if (Map.TryGetValue(path.ToLowerInvariant(), out metadata)) { return dataless || metadata.HasData; }
 
             // ETGMod now crawls through ResourcesDirectory.
             // TryGetMapped is not used everywhere and manual crawling every time is too expensive.
@@ -130,6 +130,11 @@ public static partial class ETGMod {
             if (!Directory.Exists(ResourcesDirectory)) {
                 Debug.Log("Resources directory not existing, creating...");
                 Directory.CreateDirectory(ResourcesDirectory);
+            }
+            string spritesDir = Path.Combine(ResourcesDirectory, "sprites");
+            if (!Directory.Exists(spritesDir)) {
+                Debug.Log("Sprites directory not existing, creating...");
+                Directory.CreateDirectory(spritesDir);
             }
 
             ETGModUnityEngineHooks.Load = Load;
@@ -237,6 +242,18 @@ public static partial class ETGMod {
             AssetMetadata metadata;
                  if (TextureMap.TryGetValue(path, out replacement)) { }
             else if (TryGetMapped          (path, out metadata))    { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
+
+            foreach (KeyValuePair<string, AssetMetadata> mapping in Map) {
+                if (!mapping.Value.HasData) continue;
+                string resourcePath = mapping.Key;
+                if (!resourcePath.StartsWithInvariant("sprites/@")) continue;
+                string spriteName = resourcePath.Substring(9);
+                if (sprites.spriteCollectionName.Contains(spriteName)) {
+                    TextureMap[path] = replacement = Resources.Load<Texture2D>(resourcePath);
+                    break;
+                }
+            }
+
             if (replacement != null) {
                 // Full atlas texture replacement.
                 for (int i = 0; i < sprites.materials.Length; i++) {
@@ -299,6 +316,21 @@ public static partial class ETGMod {
 
                 string name = assetPath.Substring(path.Length + 1);
                 tk2dSpriteDefinition frame = sprites.GetSpriteDefinition(name);
+
+                if (frame == null && name[0] == '@') {
+                    name = name.Substring(1);
+                    for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
+                        tk2dSpriteDefinition frame_ = sprites.spriteDefinitions[i];
+                        if (frame_.Valid && frame_.name.Contains(name)) {
+                            frame = frame_;
+                            name = frame_.name;
+                            break;
+                        }
+                    }
+                    if (frame == null) {
+                        continue;
+                    }
+                }
 
                 if (frame != null) {
                     // Replace old sprite.
