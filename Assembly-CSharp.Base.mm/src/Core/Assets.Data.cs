@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
 using System.Collections;
+using AttachPoint = tk2dSpriteDefinition.AttachPoint;
 
 public class AssetDirectory { private AssetDirectory() { } }
 
@@ -22,19 +23,20 @@ public struct AssetSpriteData {
     // Custom extensions for tk2d compatibility
     public int flip;
 
-    public int anchorX;
-    public int anchorY;
+    public AttachPoint[] attachPoints;
 
-    public static void ToTK2D(List<AssetSpriteData> list, out string[] names, out Rect[] regions, out Vector2[] anchors) {
+    public static void ToTK2D(List<AssetSpriteData> list, out string[] names, out Rect[] regions, out Vector2[] anchors, out AttachPoint[][] attachPoints) {
         names = new string[list.Count];
         regions = new Rect[list.Count];
         anchors = new Vector2[list.Count];
+        attachPoints = new AttachPoint[list.Count][];
         for (int i = 0; i < list.Count; i++) {
             // TODO
             AssetSpriteData item = list[i];
             names[i] = item.name;
             regions[i] = new Rect(item.x, item.y, item.width, item.height);
-            anchors[i] = new Vector2(item.anchorX, item.anchorY);
+            anchors[i] = new Vector2(item.width / 2f, item.height / 2f);
+            attachPoints[i] = item.attachPoints;
         }
     }
 
@@ -48,8 +50,14 @@ public struct AssetSpriteData {
     }
 
     public static AssetSpriteData FromTK2D(tk2dSpriteCollectionData sprites, tk2dSpriteDefinition frame, bool separate = false) {
+        if (sprites.materials[0]?.mainTexture == null) {
+            return new AssetSpriteData {
+                name = separate ? "INCOMPLETE" : (frame.name + "_INCOMPLETE")
+            };
+        }
         int texWidth = sprites.materials[0].mainTexture.width;
         int texHeight = sprites.materials[0].mainTexture.height;
+        AttachPoint[] attachPoints = sprites.GetAttachPoints(sprites.spriteDefinitions.IndexOf(frame));
         return new AssetSpriteData {
             name = separate ? null : frame.name,
 
@@ -60,9 +68,10 @@ public struct AssetSpriteData {
 
             flip = frame.uvs[0].x == frame.uvs[1].x ? 1 : 0,
 
-            anchorX = (int) Math.Round(frame.boundsDataCenter.x * texWidth * (frame.uvs[3].x - frame.uvs[0].x)),
-            anchorY = (int) Math.Round(frame.boundsDataCenter.y * texHeight * (frame.uvs[3].y - frame.uvs[0].y))
+            attachPoints = sprites.GetAttachPoints(sprites.spriteDefinitions.IndexOf(frame)) ?? new AttachPoint[0]
         };
     }
 
 }
+
+public class JSONAttachPointRule : JSONValueTypeBaseRule<AttachPoint> { }

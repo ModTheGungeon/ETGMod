@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
 using System.Collections;
+using AttachPoint = tk2dSpriteDefinition.AttachPoint;
 
 public static partial class ETGMod {
     /// <summary>
@@ -100,7 +101,6 @@ public static partial class ETGMod {
             if (file.EndsWithInvariant(".png")) {
                 type = t_Texture2D;
                 file = file.Substring(0, file.Length - 4);
-
             }
 
             return file;
@@ -163,6 +163,10 @@ public static partial class ETGMod {
                 return Resources.Load(Player.CoopReplacement, type) as GameObject;
             }
 
+            if (path.StartsWithInvariant("ITEMDB:")) {
+                return UnityEngine.Object.Instantiate(Databases.Items.GetModItemByName(path.Substring(7)));
+            }
+
             if (DumpResources) {
                 Dump.DumpResource(path);
             }
@@ -193,10 +197,15 @@ public static partial class ETGMod {
                     string[] names;
                     Rect[] regions;
                     Vector2[] anchors;
-                    AssetSpriteData.ToTK2D(JSONHelper.ReadJSON<List<AssetSpriteData>>(json.Stream), out names, out regions, out anchors);
-                    return tk2dSpriteCollectionData.CreateFromTexture(
+                    AttachPoint[][] attachPoints;
+                    AssetSpriteData.ToTK2D(JSONHelper.ReadJSON<List<AssetSpriteData>>(json.Stream), out names, out regions, out anchors, out attachPoints);
+                    tk2dSpriteCollectionData sprites = tk2dSpriteCollectionData.CreateFromTexture(
                         Resources.Load<Texture2D>(path), tk2dSpriteCollectionSize.Default(), names, regions, anchors
                     );
+                    for (int i = 0; i < attachPoints.Length; i++) {
+                        sprites.SetAttachPoints(i, attachPoints[i]);
+                    }
+                    return sprites;
                 }
 
                 if (metadata.AssetType == t_AssetDirectory) {
@@ -255,7 +264,7 @@ public static partial class ETGMod {
             if (!TextureMap.ContainsValue((Texture2D) sprites.materials[0].mainTexture)) {
                      if (TextureMap.TryGetValue(path, out replacement)) { }
                 else if (TryGetMapped          (path, out metadata))    { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
-                /*else {
+                else {
                     foreach (KeyValuePair<string, AssetMetadata> mapping in Map) {
                         if (!mapping.Value.HasData) continue;
                         string resourcePath = mapping.Key;
@@ -270,7 +279,7 @@ public static partial class ETGMod {
                             File.Copy(mapping.Value.File, copyPath);
                         }
                     }
-                }*/
+                }
 
                 if (replacement != null) {
                     // Full atlas texture replacement.
@@ -357,38 +366,47 @@ public static partial class ETGMod {
 
                 } else {
                     // Add new sprite.
-                    replace = true;
                     if (list == null) {
                         list = new List<tk2dSpriteDefinition>(sprites.spriteDefinitions.Length);
                         list.AddRange(sprites.spriteDefinitions);
                     }
                     frame = new tk2dSpriteDefinition();
                     frame.name = name;
-                    frame.material = sprites.material;
+                    frame.material = sprites.materials[0];
                     frame.ReplaceTexture(replacement);
+
+                    AssetSpriteData frameData = new AssetSpriteData();
+                    AssetMetadata jsonMetadata = GetMapped(assetPath + ".json");
+                    if (jsonMetadata != null) {
+                        frameData = JSONHelper.ReadJSON<AssetSpriteData>(jsonMetadata.Stream);
+                    }
 
                     frame.normals = new Vector3[0];
                     frame.tangents = new Vector4[0];
                     frame.indices = new int[] { 0, 3, 1, 2, 3, 0 };
 
-                    // FIXME BLACK MAGIC.
-                    /*
-                    frame.position0 = new Vector3(a3.x + a.x, a3.y + a.y, 0f);
-                    frame.position1 = new Vector3(vector5.x + a.x, a3.y + a.y, 0f);
-                    frame.position2 = new Vector3(a3.x + a.x, vector5.y + a.y, 0f);
-                    frame.position3 = new Vector3(vector5.x + a.x, vector5.y + a.y, 0f);
-                    frame.boundsDataCenter = (a4 + b) / 2f;
-                    frame.boundsDataExtents = a4 - b;
-                    frame.untrimmedBoundsDataCenter = (a4 + b) / 2f;
-                    frame.untrimmedBoundsDataExtents = a4 - b;
-                    */
+                    const float pixelScale = 0.0625f;
+                    float w = replacement.width * pixelScale;
+                    float h = replacement.height * pixelScale;
+                    frame.position0 = new Vector3(0f, 0f, 0f);
+                    frame.position1 = new Vector3(w, 0f, 0f);
+                    frame.position2 = new Vector3(0f, h, 0f);
+                    frame.position3 = new Vector3(w, h, 0f);
+                    frame.boundsDataCenter = frame.untrimmedBoundsDataCenter = new Vector3(w / 2f, h / 2f, 0f);
+                    frame.boundsDataExtents = frame.untrimmedBoundsDataExtents = new Vector3(w, h, 0f);
+
+                    sprites.SetAttachPoints(list.Count, frameData.attachPoints);
 
                     list.Add(frame);
                 }
             }
-            if (replace) {
+            if (list != null) {
                 sprites.spriteDefinitions = list.ToArray();
                 ReflectionHelper.SetValue(f_tk2dSpriteCollectionData_spriteNameLookupDict, sprites, null);
+            }
+
+            if (sprites.hasPlatformData) {
+                sprites.inst.Handle(replace);
             }
         }
 
@@ -412,7 +430,7 @@ public static partial class ETGMod {
 
         public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement) {
             frame.flipped = tk2dSpriteDefinition.FlipMode.None;
-            frame.extractRegion = false;
+            frame.extractRegion = true;
             frame.uvs = _DefaultUVs;
             frame.materialInst = new Material(frame.material);
             frame.materialInst.mainTexture = replacement;

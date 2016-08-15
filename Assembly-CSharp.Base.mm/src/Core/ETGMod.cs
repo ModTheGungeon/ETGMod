@@ -108,17 +108,34 @@ public static partial class ETGMod {
 
         Assets.Crawl(ResourcesDirectory);
 
-        Gun testGun = Databases.Items.NewGun("BKey-47");
-        int testGunId = Databases.Items.Add(testGun);
+        // Blindly check for all objects for the wanted stuff
+        tk2dBaseSprite[] sprites = UnityEngine.Object.FindObjectsOfType<tk2dBaseSprite>();
+        for (int i = 0; i < sprites.Length; i++) {
+            tk2dBaseSprite sprite = sprites[i];
+            if (sprite?.Collection == null) continue;
+            if (sprite.Collection.spriteCollectionName == "ItemCollection") {
+                Databases.Items.ItemCollection = sprite.Collection;
+            }
+            if (sprite.Collection.spriteCollectionName == "WeaponCollection") {
+                Databases.Items.WeaponCollection = sprite.Collection;
+            }
+        }
 
-        ETGModGUI.Start();
         CallInEachModule("Init");
-        // Needs to happen late as mods can add their own guns.
-        StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
     }
 
     public static void Start() {
+        ETGModGUI.Start();
+
+        Gun gun = Databases.Items.NewGun("Test Gun", "gshbd");
+        gun.SetShortDescription("Hello, World!");
+        gun.SetLongDescription("This gun has been handcrafted by a team of Gungeoneers that managed to escape into outer reality. An inscription that roughly reads \"Jason\" is visible on the top of the gun.");
+        gun.SetProjectileFrom("AK-47");
+        Databases.Items.Add(gun);
+
         CallInEachModule("Start");
+        // Needs to happen late as mods can add their own guns.
+        StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
     }
     
     private static void _ScanBackends() {

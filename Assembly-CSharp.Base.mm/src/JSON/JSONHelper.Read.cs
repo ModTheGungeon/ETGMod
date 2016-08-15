@@ -169,9 +169,7 @@ public static partial class JSONHelper {
                 rule = GetJSONRule(type);
             }
         }
-        object obj = rule.New(json, type);
-        json.FillObject(obj, type, rule, true);
-        return obj;
+        return json.FillObject(rule.New(json, type), type, rule, true);
     }
 
     public static object FillObject(this JsonHelperReader json, object obj, Type type = null, JSONRule rule = null, bool skipHeader = false) {

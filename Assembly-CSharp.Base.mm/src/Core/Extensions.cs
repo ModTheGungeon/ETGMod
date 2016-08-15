@@ -72,6 +72,15 @@ public static partial class ETGMod {
         }
     }
 
+    public static int IndexOf(this object[] array, object elem) {
+        for (int i = 0; i < array.Length; i++) {
+            if (array[i] == elem) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public static Texture2D Copy(this Texture2D texture, TextureFormat? format = TextureFormat.ARGB32) {
         if (texture == null) {
             return null;
