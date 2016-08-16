@@ -1,0 +1,15 @@
+{
+  "name": null,
+  "x": 0,
+  "y": 0,
+  "width": 10,
+  "height": 24,
+  "flip": 1,
+  "attachPoints": [
+    {
+      ".": "arraytype",
+      "name": "array",
+      "size": 0
+    }
+  ]
+}

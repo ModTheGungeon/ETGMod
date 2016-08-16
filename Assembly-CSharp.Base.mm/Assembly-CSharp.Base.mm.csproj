@@ -186,6 +186,33 @@
     <EmbeddedResource Include="Content\sprites\Foyer_Collection\top_floor_001.png">
       <LogicalName>Content/sprites/Foyer_Collection/top_floor_001.png</LogicalName>
     </EmbeddedResource>
+	<EmbeddedResource Include="Content\sprites\Ammonomicon Encounter Icon Collection\gshbd_idle_001.png">
+      <LogicalName>Content/sprites/Ammonomicon Encounter Icon Collection/gshbd_idle_001.png</LogicalName>
+    </EmbeddedResource>
+	<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_001.json">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_001.json</LogicalName>
+    </EmbeddedResource>
+	<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_001.png">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_001.png</LogicalName>
+    </EmbeddedResource>
+		<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.json">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_002.json</LogicalName>
+    </EmbeddedResource>
+	<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.png">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_002.png</LogicalName>
+    </EmbeddedResource>
+		<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_001.json">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_001.json</LogicalName>
+    </EmbeddedResource>
+	<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_001.png">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_001.png</LogicalName>
+    </EmbeddedResource>
+		<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_reload_001.json">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_reload_001.json</LogicalName>
+    </EmbeddedResource>
+	<EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_reload_001.png">
+      <LogicalName>Content/sprites/WeaponCollection/gshbd_reload_001.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -200,6 +227,5 @@
     <Folder Include="src\JSON\" />
     <Folder Include="src\JSON\Rules\" />
     <Folder Include="Content\sprites\" />
-    <Folder Include="src\New Folder\" />
   </ItemGroup>
 </Project>
