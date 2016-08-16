@@ -147,6 +147,7 @@
     <Compile Include="src\Core\Databases.cs" />
     <Compile Include="src\Core\Assets.Dump.cs" />
     <Compile Include="src\Core\Assets.Data.cs" />
+    <Compile Include="src\Core\RuntimeAtlas.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

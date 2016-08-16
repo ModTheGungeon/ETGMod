@@ -42,7 +42,7 @@ public static partial class ETGMod {
 
         public static bool DumpSprites = false;
         public static bool DumpSpritesMetadata = false;
-        public static int FramesToHandleAllSpritesIn = 14;
+        public static int FramesToHandleAllSpritesIn = 15;
         private readonly static Vector2[] _DefaultUVs = {
             new Vector2(0f, 0f),
             new Vector2(1f, 0f),
@@ -50,6 +50,8 @@ public static partial class ETGMod {
             new Vector2(1f, 1f)
         };
         public static Shader DefaultSpriteShader;
+
+        public static RuntimeAtlasPacker Packer = new RuntimeAtlasPacker();
 
         public static bool TryGetMapped(string path, out AssetMetadata metadata, bool dataless = false) {
             if (!dataless) {
@@ -248,6 +250,7 @@ public static partial class ETGMod {
             UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix, type);
             if (orig is GameObject) {
                 HandleGameObject((GameObject) orig);
+                Packer.Apply();
             }
             return orig;
         }
@@ -425,15 +428,22 @@ public static partial class ETGMod {
                 sprites[i].Handle();
                 if (i % handleUntilYield == handleUntilYieldM1) yield return null;
             }
+            Packer.Apply();
             yield return null;
         }
 
-        public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement) {
+        public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
             frame.flipped = tk2dSpriteDefinition.FlipMode.None;
-            frame.extractRegion = true;
-            frame.uvs = _DefaultUVs;
             frame.materialInst = new Material(frame.material);
-            frame.materialInst.mainTexture = replacement;
+            frame.extractRegion = pack;
+            if (pack) {
+                RuntimeAtlasSegment segment = Packer.Pack(replacement);
+                frame.materialInst.mainTexture = segment.texture;
+                frame.uvs = segment.uvs;
+            } else {
+                frame.materialInst.mainTexture = replacement;
+                frame.uvs = _DefaultUVs;
+            }
         }
 
     }

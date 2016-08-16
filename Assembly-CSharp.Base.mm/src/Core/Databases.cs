@@ -67,7 +67,6 @@ public sealed class ItemDB {
             value.UpdateAnimations();
             value.GetSprite().SetSprite(WeaponCollection, WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
             value.DefaultSpriteID = value.GetSprite().spriteId;
-            value.GetSprite().ForceUpdateMaterial();
         }
         return id;
     }
@@ -92,6 +91,7 @@ public sealed class ItemDB {
             } else {
                 ItemCollection.Handle();
             }
+            ETGMod.Assets.Packer.Apply();
         }
         return id;
     }
