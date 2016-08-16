@@ -42,7 +42,7 @@ public static partial class ETGMod {
 
         public static bool DumpSprites = false;
         public static bool DumpSpritesMetadata = false;
-        public static int FramesToHandleAllSpritesIn = 15;
+        public static int FramesToHandleAllSpritesIn = 16;
         private readonly static Vector2[] _DefaultUVs = {
             new Vector2(0f, 0f),
             new Vector2(1f, 0f),

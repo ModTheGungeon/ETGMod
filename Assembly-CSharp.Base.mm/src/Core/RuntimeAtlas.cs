@@ -28,7 +28,6 @@ public class RuntimeAtlasPacker {
 
     public RuntimeAtlasSegment Pack(Texture2D tex, bool apply = false) {
         RuntimeAtlasSegment segment;
-        tex = tex.GetRW();
 
         for (int i = 0; i < Pages.Count; i++) {
             if ((segment = Pages[i].Pack(tex, apply)) != null) {
@@ -87,12 +86,12 @@ public class RuntimeAtlasPage {
         Padding = padding;
     }
 
+    private Rect texRect = new Rect();
     public RuntimeAtlasSegment Pack(Texture2D tex, bool apply = false) {
-        tex = tex.GetRW();
-        Rect texRect = new Rect(Padding, Padding, tex.width + Padding, tex.height + Padding);
+        texRect.Set(Padding, Padding, tex.width + Padding, tex.height + Padding);
         bool fit = _Rects.Count == 0;
 
-        for (int i = 0; i < _Rects.Count; i++) {
+        for (int i = _Rects.Count - 1; 0 <= i; i--) {
             Rect existing = _Rects[i];
 
             texRect.x = existing.xMax + Padding;
@@ -155,6 +154,10 @@ public class RuntimeAtlasPage {
         _Changes = 0;
         Texture.Apply(true, false);
     }
+
+}
+
+public class RuntimeAtlasRTPage {
 
 }
 
