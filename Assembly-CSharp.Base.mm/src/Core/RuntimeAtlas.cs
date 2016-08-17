@@ -52,6 +52,13 @@ public class RuntimeAtlasPacker {
         }
     }
 
+    public bool IsPageTexture(Texture2D tex) {
+        for (int i = 0; i < Pages.Count; i++) {
+            if (ReferenceEquals(Pages[i].Texture, tex)) return true;
+        }
+        return false;
+    }
+
 }
 
 public class RuntimeAtlasPage {
@@ -71,9 +78,10 @@ public class RuntimeAtlasPage {
         if (width == 0) width = DefaultSize;
         if (height == 0) height = DefaultSize;
 
-        Texture = new Texture2D(width, height, format, true);
+        Texture = new Texture2D(width, height, format, false);
         Texture.wrapMode = TextureWrapMode.Clamp;
         Texture.filterMode = FilterMode.Point;
+        Texture.anisoLevel = 0;
         Color[] data = new Color[width * height];
         Color blank = new Color(0f, 0f, 0f, 0f);
         for (int i = 0; i < data.Length; i++) {
@@ -87,26 +95,63 @@ public class RuntimeAtlasPage {
     }
 
     private Rect texRect = new Rect();
+    private bool right = true;
     public RuntimeAtlasSegment Pack(Texture2D tex, bool apply = false) {
         texRect.Set(Padding, Padding, tex.width + Padding, tex.height + Padding);
         bool fit = _Rects.Count == 0;
 
-        for (int i = _Rects.Count - 1; 0 <= i; i--) {
-            Rect existing = _Rects[i];
+        if (right) {
+            if (!fit)
+                for (int i = _Rects.Count - 1; 0 <= i; i--) {
+                    Rect existing = _Rects[i];
 
-            texRect.x = existing.xMax + Padding;
-            texRect.y = existing.y + Padding;
-            if (_Feasible(texRect, i)) {
-                fit = true;
-                break;
-            }
+                    texRect.x = existing.xMax + Padding;
+                    texRect.y = existing.y;
+                    if (_Feasible(texRect, i)) {
+                        fit = true;
+                        right = true;
+                        break;
+                    }
+                }
 
-            texRect.x = existing.x + Padding;
-            texRect.y = existing.yMax + Padding;
-            if (_Feasible(texRect, i)) {
-                fit = true;
-                break;
-            }
+            if (!fit)
+                for (int i = 0; i < _Rects.Count; i++) {
+                    Rect existing = _Rects[i];
+
+                    texRect.x = existing.x;
+                    texRect.y = existing.yMax + Padding;
+                    if (_Feasible(texRect, i)) {
+                        fit = true;
+                        right = false;
+                        break;
+                    }
+                }
+        } else {
+            if (!fit)
+                for (int i = 0; i < _Rects.Count; i++) {
+                    Rect existing = _Rects[i];
+
+                    texRect.x = existing.x;
+                    texRect.y = existing.yMax + Padding;
+                    if (_Feasible(texRect, i)) {
+                        fit = true;
+                        right = false;
+                        break;
+                    }
+                }
+
+            if (!fit)
+                for (int i = _Rects.Count - 1; 0 <= i; i--) {
+                    Rect existing = _Rects[i];
+
+                    texRect.x = existing.xMax + Padding;
+                    texRect.y = existing.y;
+                    if (_Feasible(texRect, i)) {
+                        fit = true;
+                        right = true;
+                        break;
+                    }
+                }
         }
 
         if (!fit) {
@@ -152,12 +197,8 @@ public class RuntimeAtlasPage {
             return;
         }
         _Changes = 0;
-        Texture.Apply(true, false);
+        Texture.Apply(false, false);
     }
-
-}
-
-public class RuntimeAtlasRTPage {
 
 }
 

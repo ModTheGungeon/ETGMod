@@ -97,13 +97,21 @@ public class ETGModConsole : IETGModMenu {
         Commands.GetGroup ("test").GetGroup ("resources")
                                   .AddUnit  ("load", ResourcesLoad);
 
+        // DUMP NAMESPACE
+        Commands.AddUnit  ("dump", new ConsoleCommandGroup());
+
+        Commands.GetGroup ("dump")
+                .AddUnit  ("sprites",      (args) => SetBool(args, ref ETGMod.Assets.DumpSprites        ))
+                .AddUnit  ("sprites_data", (args) => SetBool(args, ref ETGMod.Assets.DumpSpritesMetadata))
+                .AddUnit  ("packer",       (args) => ETGMod.Assets.Dump.DumpPacker());
+
         // CONF NAMESPACE
         Commands.AddGroup ("conf");
 
-        Commands.GetGroup("conf")
-                .AddUnit("close_console_on_command",   delegate (string[] args) { _CloseConsoleOnCommand          = SetBool(args, _CloseConsoleOnCommand        );})
-                .AddUnit("cut_input_focus_on_command", delegate (string[] args) { _CutInputFocusOnCommand         = SetBool(args, _CutInputFocusOnCommand       );})
-                .AddUnit("enable_damage_indicators",   delegate (string[] args) { ETGModGUI.UseDamageIndicators   = SetBool(args, ETGModGUI.UseDamageIndicators );});
+        Commands.GetGroup ("conf")
+                .AddUnit  ("close_console_on_command",   (args) => SetBool(args, ref _CloseConsoleOnCommand        ))
+                .AddUnit  ("cut_input_focus_on_command", (args) => SetBool(args, ref _CutInputFocusOnCommand       ))
+                .AddUnit  ("enable_damage_indicators",   (args) => SetBool(args, ref ETGModGUI.UseDamageIndicators ));
     }
 
     public void Update() {
@@ -357,6 +365,9 @@ public class ETGModConsole : IETGModMenu {
         }
     }
 
+    public void SetBool(string[] args, ref bool value) {
+        value = SetBool(args, value);
+    }
     public bool SetBool(string[] args, bool fallbackValue) {
         if (args.Length!=1)
             return fallbackValue;

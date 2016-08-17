@@ -197,6 +197,23 @@ public static partial class ETGMod {
                 }
             }
 
+            public static void DumpPacker() {
+                DumpPacker(Packer, "main");
+            }
+            public static void DumpPacker(RuntimeAtlasPacker packer, string name) {
+                string dir = Path.Combine(ResourcesDirectory, ("DUMPpacker_" + name).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+                if (Directory.Exists(dir)) {
+                    Directory.Delete(dir, true);
+                }
+                Directory.CreateDirectory(dir);
+
+                for (int i = 0; i < packer.Pages.Count; i++) {
+                    RuntimeAtlasPage page = packer.Pages[i];
+                    string diskPath = Path.Combine(dir, i + ".png");
+                    File.WriteAllBytes(diskPath, page.Texture.EncodeToPNG());
+                }
+            }
+
         }
     }
 }

@@ -339,14 +339,21 @@ public static partial class ETGMod {
                     continue;
                 }
 
+                string name = assetPath.Substring(path.Length + 1);
+                tk2dSpriteDefinition frame = sprites.GetSpriteDefinition(name);
+
+                if (frame != null && frame.materialInst != null) {
+                    Texture2D origTex = (Texture2D) frame.materialInst.mainTexture;
+                    if (Packer.IsPageTexture(origTex)) {
+                        continue;
+                    }
+                }
+
                 if (!TextureMap.TryGetValue(assetPath, out replacement))
                     replacement = TextureMap[assetPath] = Resources.Load<Texture2D>(assetPath);
                 if (replacement == null) {
                     continue;
                 }
-
-                string name = assetPath.Substring(path.Length + 1);
-                tk2dSpriteDefinition frame = sprites.GetSpriteDefinition(name);
 
                 if (frame == null && name[0] == '@') {
                     name = name.Substring(1);
@@ -435,6 +442,7 @@ public static partial class ETGMod {
         public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
             frame.flipped = tk2dSpriteDefinition.FlipMode.None;
             frame.materialInst = new Material(frame.material);
+            frame.texelSize = replacement.texelSize;
             frame.extractRegion = pack;
             if (pack) {
                 RuntimeAtlasSegment segment = Packer.Pack(replacement);
@@ -460,8 +468,8 @@ public static partial class ETGMod {
         Assets.Crawl(asm);
     }
 
-    public static void ReplaceTexture(this tk2dSpriteDefinition frame, Texture2D replacement) {
-        Assets.ReplaceTexture(frame, replacement);
+    public static void ReplaceTexture(this tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
+        Assets.ReplaceTexture(frame, replacement, pack);
     }
 
 }
