@@ -2,9 +2,9 @@
   "name": null,
   "x": 0,
   "y": 0,
-  "width": 9,
-  "height": 26,
-  "flip": 1,
+  "width": 26,
+  "height": 10,
+  "flip": 0,
   "attachPoints": [
     {
       ".": "arraytype",
@@ -23,8 +23,8 @@
     {
       "name": "SecondaryHand",
       "position": {
-        "x": 0.9375,
-        "y": 0.0625,
+        "x": 0.875,
+        "y": 0.25,
         "z": 0.0
       },
       "angle": 0.0
@@ -32,8 +32,8 @@
     {
       "name": "Clip",
       "position": {
-        "x": 0.625,
-        "y": 0.1875,
+        "x": 0.6875,
+        "y": 0.0625,
         "z": 0.0
       },
       "angle": 0.0

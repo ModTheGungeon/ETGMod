@@ -61,7 +61,7 @@ public sealed class ItemDB {
     /// </summary>
     public tk2dSpriteCollectionData ItemCollection;
 
-    public int Add(Gun value, bool updateSpriteCollections = true, bool updateAnimations = true) {
+    public int Add(Gun value, bool updateSpriteCollections = false, bool updateAnimations = false) {
         int id = Add((PickupObject) value, updateSpriteCollections);
         if (updateAnimations) {
             value.UpdateAnimations();
@@ -128,17 +128,14 @@ public sealed class ItemDB {
         gun.gunName = gunName;
         gun.gunSwitchGroup = gunNameShort;
 
-        gun.Volley = null;
         gun.modifiedVolley = null;
-        gun.singleModule.runtimeGuid = go.name;
+        gun.singleModule = null;
+
+        gun.RawSourceVolley = ScriptableObject.CreateInstance<ProjectileVolleyData>();
+        gun.Volley.projectiles = new List<ProjectileModule>();
 
         gun.SetBaseMaxAmmo(300);
-        gun.singleModule.numberOfShotsInClip = 10;
-        gun.reloadTime = 0.7f;
-        gun.singleModule.shootStyle = ProjectileModule.ShootStyle.SemiAutomatic;
-
-        gun.singleModule.customAmmoType = null;
-        gun.singleModule.ammoType = GameUIAmmoType.AmmoType.MEDIUM_BULLET;
+        gun.reloadTime = 0.625f;
 
         return gun;
     }
@@ -187,21 +184,20 @@ public static class ItemDBExt {
 
     public static void UpdateAnimations(this Gun gun) {
         gun.idleAnimation               = gun.UpdateAnimation("idle");
-        gun.introAnimation              = gun.UpdateAnimation("intro");
+        gun.introAnimation              = gun.UpdateAnimation("intro", true);
         gun.emptyAnimation              = gun.UpdateAnimation("empty");
         gun.shootAnimation              = gun.UpdateAnimation("fire", true);
-        gun.reloadAnimation             = gun.UpdateAnimation("reload");
+        gun.reloadAnimation             = gun.UpdateAnimation("reload", true);
         gun.chargeAnimation             = gun.UpdateAnimation("charge");
         gun.outOfAmmoAnimation          = gun.UpdateAnimation("out_of_ammo");
         gun.dischargeAnimation          = gun.UpdateAnimation("discharge");
-        gun.finalShootAnimation         = gun.UpdateAnimation("final_fire");
-        gun.emptyReloadAnimation        = gun.UpdateAnimation("empty_reload");
-        gun.criticalFireAnimation       = gun.UpdateAnimation("critical_fire");
+        gun.finalShootAnimation         = gun.UpdateAnimation("final_fire", true);
+        gun.emptyReloadAnimation        = gun.UpdateAnimation("empty_reload", true);
+        gun.criticalFireAnimation       = gun.UpdateAnimation("critical_fire", true);
         gun.enemyPreFireAnimation       = gun.UpdateAnimation("enemy_pre_fire");
-        gun.alternateShootAnimation     = gun.UpdateAnimation("alternate_shoot");
-        gun.alternateReloadAnimation    = gun.UpdateAnimation("alternate_reload");
+        gun.alternateShootAnimation     = gun.UpdateAnimation("alternate_shoot", true);
+        gun.alternateReloadAnimation    = gun.UpdateAnimation("alternate_reload", true);
     }
-
     public static string UpdateAnimation(this Gun gun, string name, bool returnToIdle = false) {
         string clipName = gun.name + "_" + name;
         string prefix = clipName + "_";
@@ -223,17 +219,11 @@ public static class ItemDBExt {
             return null;
         }
 
-        if (returnToIdle) {
-            if (!string.IsNullOrEmpty(gun.idleAnimation)) {
-                tk2dSpriteAnimationClip idle = gun.spriteAnimator.Library.GetClipByName(gun.idleAnimation);
-                frames.Add(idle.frames[idle.frames.Length - 1]);
-            }
-        }
-
         tk2dSpriteAnimationClip clip = gun.spriteAnimator.Library.GetClipByName(clipName);
         if (clip == null) {
             clip = new tk2dSpriteAnimationClip();
             clip.name = clipName;
+            clip.fps = 15;
             if (returnToIdle) {
                 clip.wrapMode = tk2dSpriteAnimationClip.WrapMode.Once;
             }
@@ -250,15 +240,70 @@ public static class ItemDBExt {
         return clipName;
     }
 
-    public static void SetProjectileFrom(this Gun gun, string other) {
-        gun.SetProjectileFrom((Gun) PickupObjectDatabase.GetByName(other));
+    public static void SetAnimationFPS(this Gun gun, int fps) {
+        gun.SetAnimationFPS(gun.idleAnimation,              fps);
+        gun.SetAnimationFPS(gun.introAnimation,             fps);
+        gun.SetAnimationFPS(gun.emptyAnimation,             fps);
+        gun.SetAnimationFPS(gun.shootAnimation,             fps);
+        gun.SetAnimationFPS(gun.reloadAnimation,            fps);
+        gun.SetAnimationFPS(gun.chargeAnimation,            fps);
+        gun.SetAnimationFPS(gun.outOfAmmoAnimation,         fps);
+        gun.SetAnimationFPS(gun.dischargeAnimation,         fps);
+        gun.SetAnimationFPS(gun.finalShootAnimation,        fps);
+        gun.SetAnimationFPS(gun.emptyReloadAnimation,       fps);
+        gun.SetAnimationFPS(gun.criticalFireAnimation,      fps);
+        gun.SetAnimationFPS(gun.enemyPreFireAnimation,      fps);
+        gun.SetAnimationFPS(gun.alternateShootAnimation,    fps);
+        gun.SetAnimationFPS(gun.alternateReloadAnimation,   fps);
     }
-    public static void SetProjectileFrom(this Gun gun, Gun other) {
-        gun.SetProjectile(other.DefaultModule.projectiles[0]);
+    public static void SetAnimationFPS(this Gun gun, string name, int fps) {
+        if (string.IsNullOrEmpty(name)) {
+            return;
+        }
+
+        tk2dSpriteAnimationClip clip = gun.spriteAnimator.Library.GetClipByName(name);
+        if (clip == null) {
+            return;
+        }
+        clip.fps = fps;
     }
-    public static void SetProjectile(this Gun gun, Projectile projectile) {
-        gun.DefaultModule.projectiles.Clear();
+
+    public static Projectile AddProjectileFrom(this Gun gun, string other) {
+        return gun.AddProjectileFrom(UnityEngine.Object.Instantiate(PickupObjectDatabase.GetByName(other).gameObject).GetComponent<Gun>());
+    }
+    public static Projectile AddProjectileFrom(this Gun gun, Gun other) {
+        if (other.DefaultModule.projectiles.Count == 0) {
+            return null;
+        }
+        return gun.AddProjectile(other.DefaultModule.projectiles[0]);
+    }
+    public static Projectile AddProjectile(this Gun gun, Projectile projectile) {
         gun.DefaultModule.projectiles.Add(projectile);
+        return projectile;
+    }
+
+    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other) {
+        return gun.AddProjectileModuleFrom(UnityEngine.Object.Instantiate(PickupObjectDatabase.GetByName(other).gameObject).GetComponent<Gun>());
+    }
+    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other) {
+        return gun.AddProjectileModule(other.DefaultModule);
+    }
+    public static ProjectileModule AddProjectileModule(this Gun gun, ProjectileModule projectile) {
+        gun.Volley.projectiles.Add(projectile);
+        return projectile;
+    }
+
+    public static void SetupSprite(this Gun gun, string defaultSprite = null) {
+        ETGMod.Databases.Items.WeaponCollection.Handle();
+        ETGMod.Databases.Items.WeaponCollection02.Handle();
+
+        if (defaultSprite != null) {
+            gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;
+        }
+
+        gun.UpdateAnimations();
+        gun.GetSprite().SetSprite(ETGMod.Databases.Items.WeaponCollection, ETGMod.Databases.Items.WeaponCollection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
+        gun.DefaultSpriteID = gun.GetSprite().spriteId;
     }
 
 }

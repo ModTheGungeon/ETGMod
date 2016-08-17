@@ -129,10 +129,28 @@ public static partial class ETGMod {
 
         Gun gun = Databases.Items.NewGun("Test Gun", "gshbd");
         gun.SetShortDescription("Hello, World!");
-        gun.SetLongDescription("This gun has been handcrafted by a team of Gungeoneers that managed to escape into outer reality. An inscription that roughly reads \"Jason\" is visible on the top of the gun.");
-        gun.SetProjectileFrom("AK-47");
-        Databases.Items.Add(gun);
+        gun.SetLongDescription("Legend tells that this gun has been handcrafted by a team of Gungeoneers that managed to escape into outer reality. A worn engraving on the barrel reads \"JSON\". Hopefully, the previous owner was a better gunsmith than he was a speller.");
 
+        gun.SetupSprite();
+        gun.SetAnimationFPS(10);
+        gun.SetAnimationFPS(gun.shootAnimation, 40);
+
+        gun.AddProjectileModuleFrom("AK-47");
+
+        gun.DefaultModule.ammoCost = 1;
+        gun.DefaultModule.sequenceStyle = ProjectileModule.ProjectileSequenceStyle.Random;
+        gun.reloadTime = 2f;
+        gun.ammo = 250;
+        gun.DefaultModule.numberOfShotsInClip = 30;
+
+        for (int i = 0; i < ETGMod.Databases.Items.Count; i++) {
+            Gun other = ETGMod.Databases.Items[i] as Gun;
+            if (other == null) continue;
+            if (other.DefaultModule.shootStyle == ProjectileModule.ShootStyle.Beam) continue;
+            gun.AddProjectileFrom(other);
+        }
+
+        Databases.Items.Add(gun);
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
         StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
