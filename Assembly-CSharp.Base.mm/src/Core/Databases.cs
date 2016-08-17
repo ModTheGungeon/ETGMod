@@ -294,6 +294,7 @@ public static class ItemDBExt {
     }
 
     public static void SetupSprite(this Gun gun, string defaultSprite = null) {
+        AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection02.Handle();
 
