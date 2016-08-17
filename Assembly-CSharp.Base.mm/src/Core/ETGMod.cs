@@ -131,7 +131,7 @@ public static partial class ETGMod {
         gun.SetShortDescription("Hello, World!");
         gun.SetLongDescription("Legend tells that this gun has been handcrafted by a team of Gungeoneers that managed to escape into outer reality. A worn engraving on the barrel reads \"JSON\". Hopefully, the previous owner was a better gunsmith than he was a speller.");
 
-        gun.SetupSprite();
+        gun.SetupSprite(defaultSprite: "gshbd_fire_002");
         gun.SetAnimationFPS(10);
         gun.SetAnimationFPS(gun.shootAnimation, 40);
 
