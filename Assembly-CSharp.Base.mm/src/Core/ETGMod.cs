@@ -140,7 +140,7 @@ public static partial class ETGMod {
         gun.DefaultModule.ammoCost = 1;
         gun.DefaultModule.sequenceStyle = ProjectileModule.ProjectileSequenceStyle.Random;
         gun.reloadTime = 2f;
-        gun.ammo = 250;
+        gun.SetBaseMaxAmmo(250);
         gun.DefaultModule.numberOfShotsInClip = 30;
 
         for (int i = 0; i < ETGMod.Databases.Items.Count; i++) {
