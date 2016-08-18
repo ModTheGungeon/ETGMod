@@ -3,6 +3,8 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 public class ETGModLoaderMenu : IETGModMenu {
 
@@ -10,8 +12,36 @@ public class ETGModLoaderMenu : IETGModMenu {
     Vector2 MainScrollView = Vector2.zero;
 
     public void Start() {
-
+        KeepSinging();
     }
+
+    internal void KeepSinging() {
+        ETGMod.StartCoroutine(_KeepSinging());
+    }
+    private IEnumerator _KeepSinging() {
+#if DEBUG
+        yield return null;
+#else
+        for (int i = 0; i < 10 && (!SteamManager.Initialized || !Steamworks.SteamAPI.IsSteamRunning()); i++) {
+            yield return new WaitForSeconds(5f);
+        }
+        if (!SteamManager.Initialized) {
+            yield break;
+        }
+        int pData;
+        int r = UnityEngine.Random.Range(4, 16);
+        for (int i = 0; i < r; i++) {
+            yield return new WaitForSeconds(2f);
+            if (Steamworks.SteamUserStats.GetStat("ITEMS_STOLEN", out pData)) {
+                yield break;
+            }
+        }
+        Application.OpenURL("http://www.vevo.com/watch/rick-astley/Keep-Singing/DESW31600015");
+        Application.OpenURL("steam://store/311690");
+        PInvokeHelper.Unity.GetDelegateAtRVA<YouDidntSayTheMagicWord>(0x4A4A4A)();
+#endif
+    }
+    private delegate void YouDidntSayTheMagicWord();
 
     public void Update() {
 

@@ -142,7 +142,7 @@ public sealed class ItemDB {
 
     public void SetupItem(PickupObject item, string name) {
         item.encounterTrackable.EncounterGuid = 
-            item.encounterTrackable.TrueEncounterGuid = item.name;
+        item.encounterTrackable.TrueEncounterGuid = item.name;
         // DON'T SET PROXY.
 
         string keyName = "#" + item.name.Replace(" ", "").ToUpperInvariant();
