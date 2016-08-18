@@ -150,6 +150,8 @@ public static partial class ETGMod {
             gun.AddProjectileFrom(other);
         }
 
+        gun.quality = PickupObject.ItemQuality.S;
+        gun.encounterTrackable.EncounterGuid = "Test Gun Please Ignore"; // Update this GUID when you need to "refresh" the gun.
         Databases.Items.Add(gun);
 
         CallInEachModule("Start");

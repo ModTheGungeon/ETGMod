@@ -141,9 +141,10 @@ public sealed class ItemDB {
     }
 
     public void SetupItem(PickupObject item, string name) {
-        item.encounterTrackable.EncounterGuid = 
-        item.encounterTrackable.TrueEncounterGuid = item.name;
-        // DON'T SET PROXY.
+        item.encounterTrackable.EncounterGuid = item.name;
+
+        item.encounterTrackable.prerequisites = new DungeonPrerequisite[0];
+        item.encounterTrackable.journalData.SuppressKnownState = true;
 
         string keyName = "#" + item.name.Replace(" ", "").ToUpperInvariant();
         item.encounterTrackable.journalData.PrimaryDisplayName = keyName + "_ENCNAME";
