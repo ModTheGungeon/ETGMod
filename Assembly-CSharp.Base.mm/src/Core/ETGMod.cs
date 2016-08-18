@@ -151,6 +151,7 @@ public static partial class ETGMod {
         }
 
         Databases.Items.Add(gun);
+
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
         StartCoroutine(ETGModGUI.ListAllItemsAndGuns());

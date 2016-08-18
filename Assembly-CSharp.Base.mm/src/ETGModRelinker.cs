@@ -83,11 +83,25 @@ internal static class ETGModRelinker {
         foreach (TypeDefinition nested in type.NestedTypes) {
             RelinkType(nested);
         }
-        
 
         type.BaseType = type.BaseType.Relinked(type);
         for (int i = 0; i < type.Interfaces.Count; i++) {
-            type.Interfaces[i] = type.Interfaces[i].Relinked(type);
+            InterfaceImplementation interf = new InterfaceImplementation(type.Interfaces[i].InterfaceType.Relinked(type));
+            for (int cai = 0; cai < type.Interfaces[i].CustomAttributes.Count; cai++) {
+                CustomAttribute oca = type.Interfaces[i].CustomAttributes[cai];
+                // TODO relink that method
+                CustomAttribute ca = new CustomAttribute(oca.Constructor/*.Relinked(type)*/, oca.GetBlob());
+                for (int caii = 0; caii < oca.ConstructorArguments.Count; caii++) {
+                    //TODO do more with the attributes
+                    CustomAttributeArgument ocaa = oca.ConstructorArguments[caii];
+                    ca.ConstructorArguments.Add(new CustomAttributeArgument(ocaa.Type.Relinked(type),
+                        ocaa.Value is TypeReference ? ocaa.Type.Relinked(type) :
+                        ocaa.Value
+                    ));
+                }
+                interf.CustomAttributes.Add(ca);
+            }
+            type.Interfaces[i] = interf;
         }
         
         foreach (FieldDefinition field in type.Fields) {
@@ -160,7 +174,7 @@ internal static class ETGModRelinker {
         if (type == null) {
             return null;
         }
-        if (!type.Scope.Name.EndsWith(".mm")) {
+        if (!type.Scope.Name.EndsWithInvariant(".mm")) {
             return type;
         }
 
