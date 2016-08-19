@@ -148,6 +148,8 @@
     <Compile Include="src\Core\Assets.Dump.cs" />
     <Compile Include="src\Core\Assets.Data.cs" />
     <Compile Include="src\Core\RuntimeAtlas.cs" />
+    <Compile Include="src\Core\TestGun.cs" />
+    <Compile Include="src\Core\GunBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

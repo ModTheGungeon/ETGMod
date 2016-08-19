@@ -139,6 +139,19 @@ public sealed class ItemDB {
 
         return gun;
     }
+    //FIXME NewGun<> causing issues (MonoMod)
+    /*
+    public Gun NewGun<T>(string gunName, string gunNameShort = null) where T : GunBehaviour {
+        Gun gun = NewGun(gunName, gunNameShort);
+        gun.gameObject.AddComponent<T>();
+        return gun;
+    }
+    public Gun NewGun<T>(string gunName, Gun baseGun, string gunNameShort = null) where T : GunBehaviour {
+        Gun gun = NewGun(gunName, baseGun, gunNameShort);
+        gun.gameObject.AddComponent<T>();
+        return gun;
+    }
+    */
 
     public void SetupItem(PickupObject item, string name) {
         item.encounterTrackable.EncounterGuid = item.name;
@@ -270,13 +283,13 @@ public static class ItemDBExt {
     }
 
     public static Projectile AddProjectileFrom(this Gun gun, string other) {
-        return gun.AddProjectileFrom(UnityEngine.Object.Instantiate(PickupObjectDatabase.GetByName(other).gameObject).GetComponent<Gun>());
+        return gun.AddProjectileFrom((Gun) PickupObjectDatabase.GetByName(other));
     }
     public static Projectile AddProjectileFrom(this Gun gun, Gun other) {
         if (other.DefaultModule.projectiles.Count == 0) {
             return null;
         }
-        return gun.AddProjectile(other.DefaultModule.projectiles[0]);
+        return gun.AddProjectile(UnityEngine.Object.Instantiate(other.gameObject).GetComponent<Gun>().DefaultModule.projectiles[0]);
     }
     public static Projectile AddProjectile(this Gun gun, Projectile projectile) {
         gun.DefaultModule.projectiles.Add(projectile);
@@ -284,10 +297,10 @@ public static class ItemDBExt {
     }
 
     public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other) {
-        return gun.AddProjectileModuleFrom(UnityEngine.Object.Instantiate(PickupObjectDatabase.GetByName(other).gameObject).GetComponent<Gun>());
+        return gun.AddProjectileModuleFrom((Gun) PickupObjectDatabase.GetByName(other));
     }
     public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other) {
-        return gun.AddProjectileModule(other.DefaultModule);
+        return gun.AddProjectileModule(UnityEngine.Object.Instantiate(other.gameObject).GetComponent<Gun>().DefaultModule);
     }
     public static ProjectileModule AddProjectileModule(this Gun gun, ProjectileModule projectile) {
         gun.Volley.projectiles.Add(projectile);

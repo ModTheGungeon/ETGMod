@@ -26,7 +26,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, ""); // no tag
+        new Profile(0, "b6"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -127,32 +127,7 @@ public static partial class ETGMod {
     public static void Start() {
         ETGModGUI.Start();
 
-        Gun gun = Databases.Items.NewGun("Test Gun", "gshbd");
-        gun.SetShortDescription("Hello, World!");
-        gun.SetLongDescription("Legend tells that this gun has been handcrafted by a team of Gungeoneers that managed to escape into outer reality. A worn engraving on the barrel reads \"JSON\". Hopefully, the previous owner was a better gunsmith than he was a speller.");
-
-        gun.SetupSprite(defaultSprite: "gshbd_fire_002");
-        gun.SetAnimationFPS(10);
-        gun.SetAnimationFPS(gun.shootAnimation, 40);
-
-        gun.AddProjectileModuleFrom("AK-47");
-
-        gun.DefaultModule.ammoCost = 1;
-        gun.DefaultModule.sequenceStyle = ProjectileModule.ProjectileSequenceStyle.Random;
-        gun.reloadTime = 2f;
-        gun.SetBaseMaxAmmo(250);
-        gun.DefaultModule.numberOfShotsInClip = 30;
-
-        for (int i = 0; i < ETGMod.Databases.Items.Count; i++) {
-            Gun other = ETGMod.Databases.Items[i] as Gun;
-            if (other == null) continue;
-            if (other.DefaultModule.shootStyle == ProjectileModule.ShootStyle.Beam) continue;
-            gun.AddProjectileFrom(other);
-        }
-
-        gun.quality = PickupObject.ItemQuality.S;
-        gun.encounterTrackable.EncounterGuid = "Test Gun Please Ignore"; // Update this GUID when you need to "refresh" the gun.
-        Databases.Items.Add(gun);
+        TestGun.Add();
 
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
