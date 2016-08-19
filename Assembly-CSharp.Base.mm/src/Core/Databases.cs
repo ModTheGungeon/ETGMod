@@ -330,7 +330,7 @@ public static class ItemDBExt {
         return projectile;
     }
 
-    public static void SetupSprite(this Gun gun, string defaultSprite = null) {
+    public static void SetupSprite(this Gun gun, string defaultSprite = null, int fps = 0) {
         AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection02.Handle();
@@ -342,6 +342,10 @@ public static class ItemDBExt {
         gun.UpdateAnimations();
         gun.GetSprite().SetSprite(ETGMod.Databases.Items.WeaponCollection, ETGMod.Databases.Items.WeaponCollection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
         gun.DefaultSpriteID = gun.GetSprite().spriteId;
+
+        if (fps != 0) {
+            gun.SetAnimationFPS(fps);
+        }
     }
 
 }

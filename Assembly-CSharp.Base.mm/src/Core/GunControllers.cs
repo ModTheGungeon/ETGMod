@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TestGun : GunBehaviour {
+public class TestGunController : GunBehaviour {
 
     public static void Add() {
         Gun gun = ETGMod.Databases.Items.NewGun("Test Gun", "gshbd");
-        gun.gameObject.AddComponent<TestGun>(); //FIXME NewGun<> causing issues (MonoMod)
+        gun.gameObject.AddComponent<TestGunController>(); //FIXME NewGun<> causing issues (MonoMod)
         gun.SetShortDescription("Hello, World!");
         gun.SetLongDescription("Legend tells that this gun has been handcrafted by a team of Gungeoneers that managed to escape into outer reality. A worn engraving on the barrel reads \"JSON\". Hopefully, the previous owner was a better gunsmith than he was a speller.");
 
-        gun.SetupSprite(defaultSprite: "gshbd_fire_002");
-        gun.SetAnimationFPS(10);
+        gun.SetupSprite(defaultSprite: "gshbd_fire_002", fps: 10);
         gun.SetAnimationFPS(gun.shootAnimation, 40);
 
         gun.AddProjectileModuleFrom("AK-47");
@@ -38,7 +37,7 @@ public class TestGun : GunBehaviour {
         PlayerController player = gun.CurrentOwner as PlayerController;
         if (player == null) return;
 
-        if (Mathf.Lerp(0.002f, 0.001f, gun.ammo / 300f) < UnityEngine.Random.value) return;
+        if (Mathf.Lerp(0.005f, 0.002f, gun.ammo / 300f) < Random.value) return;
         gun.Volley.projectiles.Clear();
         gun.RuntimeModuleData.Clear();
         for (int i = 0; i < ETGMod.Databases.Items.Count; i++) {

@@ -26,7 +26,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, "b6"); // no tag
+        new Profile(0, "b7"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -127,7 +127,7 @@ public static partial class ETGMod {
     public static void Start() {
         ETGModGUI.Start();
 
-        TestGun.Add();
+        TestGunController.Add();
 
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
