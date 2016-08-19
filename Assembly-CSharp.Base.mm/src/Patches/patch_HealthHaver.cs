@@ -16,7 +16,8 @@ internal class patch_HealthHaver : HealthHaver {
         if (currentHealth == 0f || damage<=0) 
             return;
 
-        ETGDamageIndicatorGUI.HealthHaverTookDamage(this, damage);
+        if(ETGModGUI.UseDamageIndicators)
+            ETGDamageIndicatorGUI.HealthHaverTookDamage(this, damage);
     }
 
 }
