@@ -19,7 +19,10 @@ namespace Dungeonator {
 
             if (ETGMod.Initialized) {
                 ETGMod.Assets.HandleAll();
+                ETGMod.Databases.Items.DungeonStart();
             }
+
+            IsGlitchDungeon = true;
 
             return list.GetEnumerator();
         }

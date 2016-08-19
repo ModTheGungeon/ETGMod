@@ -47,6 +47,7 @@ public sealed class ItemDB {
     }
 
     public List<PickupObject> ModItems = new List<PickupObject>();
+    public Dictionary<string, List<WeightedGameObject>> ModLootPerFloor = new Dictionary<string, List<WeightedGameObject>>();
 
     /// <summary>
     /// Sprite collection used by the guns.
@@ -61,8 +62,8 @@ public sealed class ItemDB {
     /// </summary>
     public tk2dSpriteCollectionData ItemCollection;
 
-    public int Add(Gun value, bool updateSpriteCollections = false, bool updateAnimations = false) {
-        int id = Add((PickupObject) value, updateSpriteCollections);
+    public int Add(Gun value, bool updateSpriteCollections = false, bool updateAnimations = false, string floor = "ANY") {
+        int id = Add(value, updateSpriteCollections, floor);
         if (updateAnimations) {
             value.UpdateAnimations();
             value.GetSprite().SetSprite(WeaponCollection, WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
@@ -70,29 +71,35 @@ public sealed class ItemDB {
         }
         return id;
     }
-    public int Add(PickupObject value, bool updateSpriteCollections = true) {
+    public int Add(PickupObject value, bool updateSpriteCollections = true, string floor = "ANY") {
         int id = PickupObjectDatabase.Instance.Objects.Count;
         PickupObjectDatabase.Instance.Objects.Add(value);
         ModItems.Add(value);
         if (value != null) {
             UnityEngine.Object.DontDestroyOnLoad(value.gameObject);
+
             value.PickupObjectId = id;
+
             EncounterDatabaseEntry edbEntry = new EncounterDatabaseEntry(value.encounterTrackable);
             edbEntry.ProxyEncounterGuid =
             edbEntry.myGuid = value.encounterTrackable.EncounterGuid;
             edbEntry.path = "Assets/Resources/ITEMDB:" + value.name + ".prefab";
             EncounterDatabase.Instance.Entries.Add(edbEntry);
+
+            WeightedGameObject lootGameObject = new WeightedGameObject() {
+                gameObject = value.gameObject,
+                weight = 1f
+            };
             if (value is Gun) {
-                GameManager.Instance.RewardManager.GunsLootTable.defaultItemDrops.Add(new WeightedGameObject() {
-                    gameObject = value.gameObject,
-                    weight = 1f
-                });
+                GameManager.Instance.RewardManager.GunsLootTable.defaultItemDrops.Add(lootGameObject);
             } else {
-                GameManager.Instance.RewardManager.ItemsLootTable.defaultItemDrops.Add(new WeightedGameObject() {
-                    gameObject = value.gameObject,
-                    weight = 1f
-                });
+                GameManager.Instance.RewardManager.ItemsLootTable.defaultItemDrops.Add(lootGameObject);
             }
+            List<WeightedGameObject> loot;
+            if (!ModLootPerFloor.TryGetValue(floor, out loot)) {
+                loot = ModLootPerFloor[floor] = new List<WeightedGameObject>();
+            }
+            loot.Add(lootGameObject);
         }
         if (updateSpriteCollections) {
             AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
@@ -107,13 +114,15 @@ public sealed class ItemDB {
         return id;
     }
 
-    public void Remap() {
-        for (int i = 0; i < ModItems.Count; i++) {
-            PickupObject item = ModItems[i];
-            if (item == null) {
-                continue;
+    public void DungeonStart() {
+        string floorNameKey = GameManager.Instance.Dungeon.DungeonFloorName;
+        string floorName = floorNameKey.Substring(1, floorNameKey.IndexOf('_') - 1);
+
+        for (int i = 0; i < 2; i++) {
+            List<WeightedGameObject> loot;
+            if (ModLootPerFloor.TryGetValue(i == 0 ? "ANY" : floorName, out loot)) {
+                GameManager.Instance.Dungeon.baseChestContents.defaultItemDrops.elements.AddRange(loot);
             }
-            PickupObjectDatabase.Instance.Objects[item.PickupObjectId] = item;
         }
     }
 
