@@ -105,9 +105,11 @@ public class ETGModConsole : IETGModMenu {
         Commands.AddUnit  ("dump", new ConsoleCommandGroup());
 
         Commands.GetGroup ("dump")
-                .AddUnit  ("sprites",      (args) => SetBool(args, ref ETGMod.Assets.DumpSprites        ))
-                .AddUnit  ("sprites_data", (args) => SetBool(args, ref ETGMod.Assets.DumpSpritesMetadata))
+                .AddGroup ("sprites",      (args) => SetBool(args, ref ETGMod.Assets.DumpSprites        ))
                 .AddUnit  ("packer",       (args) => ETGMod.Assets.Dump.DumpPacker());
+
+        Commands.GetGroup ("dump").GetGroup ("sprites")
+                .AddUnit  ("metadata", (args) => SetBool (args, ref ETGMod.Assets.DumpSpritesMetadata));
 
         // CONF NAMESPACE
         Commands.AddGroup ("conf");
