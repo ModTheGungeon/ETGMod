@@ -90,12 +90,16 @@ public class ETGModConsole : IETGModMenu {
         Commands.AddUnit  ("test", new ConsoleCommandGroup());
 
         Commands.GetGroup ("test")
-                .AddUnit  ("spawn", SpawnGUID)
-                .AddGroup ("resources");
+            .AddGroup ("spawn", SpawnGUID)
+            .AddGroup ("resources");
 
         //// TEST.RESOURCES NAMESPACE
         Commands.GetGroup ("test").GetGroup ("resources")
-                                  .AddUnit  ("load", ResourcesLoad);
+            .AddUnit  ("load", ResourcesLoad);
+
+        //// TEST.SPAWN NAMESPACE
+        Commands.GetGroup ("test").GetGroup ("spawn")
+            .AddUnit ("chest", SpawnChest);
 
         // DUMP NAMESPACE
         Commands.AddUnit  ("dump", new ConsoleCommandGroup());
@@ -423,49 +427,123 @@ public class ETGModConsole : IETGModMenu {
     }
 
     void SpawnGUID(string[] args) {
-		if (!ArgCount (args, 1, 1)) return;
-		AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid (args[0]);
+        if (!ArgCount (args, 1, 2)) return;
+        AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid (args[0]);
         if (enemyPrefab == null) {
-          LoggedText.Add("GUID " + args[0] + " doesn't exist");
-          return;
+            LoggedText.Add("GUID " + args[0] + " doesn't exist");
+            return;
         }
         LoggedText.Add ("Spawning GUID " + args[0]);
-        IntVector2? targetCenter = new IntVector2? (GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2 (VectorConversions.Floor));
-        Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {
-            for (int j = 0; j < enemyPrefab.Clearance.x; j++) {
-                for (int k = 0; k < enemyPrefab.Clearance.y; k++) {
-                    if (GameManager.Instance.Dungeon.data.isTopWall (c.x + j, c.y + k)) {
-                        return false;
-                    }
-                    if (targetCenter.HasValue) {
-                        if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) < 4) {
+        int count = 1;
+        if (args.Length > 1) {
+            bool success = int.TryParse (args[1], out count);
+            if (!success) {
+                LoggedText.Add ("Second argument must be an integer (number)");
+                return;
+            }
+        }
+        for (int i = 0; i < count; i++) {
+            IntVector2? targetCenter = new IntVector2? (GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2 (VectorConversions.Floor));
+            Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {
+                for (int j = 0; j < enemyPrefab.Clearance.x; j++) {
+                    for (int k = 0; k < enemyPrefab.Clearance.y; k++) {
+                        if (GameManager.Instance.Dungeon.data.isTopWall (c.x + j, c.y + k)) {
                             return false;
                         }
-                        if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) > 20) {
-                            return false;
+                        if (targetCenter.HasValue) {
+                            if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) < 4) {
+                                return false;
+                            }
+                            if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) > 20) {
+                                return false;
+                            }
                         }
                     }
                 }
+                return true;
+            };
+            IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell (new IntVector2? (enemyPrefab.Clearance), new Dungeonator.CellTypes? (enemyPrefab.PathableTiles), false, cellValidator);
+            if (randomAvailableCell.HasValue) {
+                AIActor aIActor = AIActor.Spawn (enemyPrefab, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
+                aIActor.HandleReinforcementFallIntoRoom (0);
             }
-            return true;
-        };
-        IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell (new IntVector2? (enemyPrefab.Clearance), new Dungeonator.CellTypes? (enemyPrefab.PathableTiles), false, cellValidator);
-        if (randomAvailableCell.HasValue) {
-            AIActor aIActor = AIActor.Spawn (enemyPrefab, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
-            aIActor.HandleReinforcementFallIntoRoom (0);
         }
-	}
+    }
 
+    void SpawnChest(string[] args) {
+        if (!ArgCount (args, 1, 2)) return;
+        Dungeonator.RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
+        RewardManager rewardManager = GameManager.Instance.RewardManager;
+        Chest chest;
+        bool glitched = false;
+        string name = args [0].ToLower ();
+        switch (name) {
+        case "brown":
+        case "d":
+            chest = rewardManager.D_Chest;
+            break;
+        case "blue":
+        case "c":
+            chest = rewardManager.C_Chest;
+            break;
+        case "green":
+        case "b":
+            chest = rewardManager.B_Chest;
+            break;
+        case "red":
+        case "a":
+            chest = rewardManager.A_Chest;
+            break;
+        case "black":
+        case "s":
+            chest = rewardManager.S_Chest;
+            break;
+        case "rainbow":
+        case "r":
+            chest = rewardManager.Rainbow_Chest;
+            break;
+        case "glitched":
+        case "g":
+            chest = rewardManager.B_Chest;
+            glitched = true;
+            break;
+        default:
+            LoggedText.Add ("Chest type " + args [0] + " doesn't exist! Valid types: brown, blue, green, red, black, rainbow");
+            return;
+        }
+        WeightedGameObject wGameObject = new WeightedGameObject ();
+        wGameObject.gameObject = chest.gameObject;
+        WeightedGameObjectCollection wGameObjectCollection = new WeightedGameObjectCollection ();
+        wGameObjectCollection.Add (wGameObject);
+        int count = 1;
+        float origMimicChance = chest.overrideMimicChance;
+        chest.overrideMimicChance = 0f;
+        if (args.Length > 1) {
+            bool success = int.TryParse (args[1], out count);
+            if (!success) {
+                LoggedText.Add ("Second argument must be an integer (number)");
+                return;
+            }
+        }
+        for (int i = 0; i < count; i++) {
+            Chest spawnedChest = currentRoom.SpawnRoomRewardChest (wGameObjectCollection, currentRoom.GetBestRewardLocation (new IntVector2 (2, 1), Dungeonator.RoomHandler.RewardLocationStyle.PlayerCenter, true));
+            spawnedChest.ForceUnlock ();
+            if (glitched) {
+                spawnedChest.BecomeGlitchChest ();
+            }
+        }
+        chest.overrideMimicChance = origMimicChance;
+    }
 
     void ResourcesLoad(string[] args) {
-      if (!ArgCount (args, 1)) return;
-      string resourcepath = String.Join(" ", args);
-      object resource = Resources.Load(resourcepath);
-      if (resource == null) {
-        LoggedText.Add("Couldn't load resource " + resourcepath);
-        return;
-     }
-      LoggedText.Add("Loaded (and threw away) " + resourcepath);
+        if (!ArgCount (args, 1)) return;
+        string resourcepath = String.Join(" ", args);
+        object resource = Resources.Load(resourcepath);
+        if (resource == null) {
+            LoggedText.Add("Couldn't load resource " + resourcepath);
+            return;
+        }
+        LoggedText.Add("Loaded (and threw away) " + resourcepath);
     }
 }
 

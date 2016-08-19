@@ -55,6 +55,11 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
       return this;
     }
 
+    public ConsoleCommandGroup AddGroup(string name, Action<string[]> action) {
+        AddUnit(name, new ConsoleCommandGroup(action));
+        return this;
+    }
+
     public UnitSearchResult SearchUnit(string[] path) {
         ConsoleCommandGroup currentgroup = this;
         UnitSearchResult result = new UnitSearchResult();

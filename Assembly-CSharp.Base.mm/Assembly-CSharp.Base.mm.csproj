@@ -216,7 +216,7 @@
     <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_001.png">
       <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_001.png</LogicalName>
     </EmbeddedResource>
-        <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.json">
+    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.json">
       <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_002.json</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.png">
@@ -228,7 +228,7 @@
     <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_003.png">
       <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_003.png</LogicalName>
     </EmbeddedResource>
-        <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_004.json">
+    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_004.json">
       <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_004.json</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_004.png">
