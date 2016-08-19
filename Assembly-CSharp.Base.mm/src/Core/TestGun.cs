@@ -38,7 +38,7 @@ public class TestGun : GunBehaviour {
         PlayerController player = gun.CurrentOwner as PlayerController;
         if (player == null) return;
 
-        if (0.0001f < UnityEngine.Random.value) return;
+        if (0.0005f < UnityEngine.Random.value) return;
         for (int i = 0; i < player.inventory.AllGuns.Count; i++) {
             Gun other = player.inventory.AllGuns[i];
             if (other == gun) continue;
@@ -55,7 +55,8 @@ public class TestGun : GunBehaviour {
             ModuleShootData moduleData = new ModuleShootData();
             gun.RuntimeModuleData[module] = moduleData;
         }
-        gun.DefaultModule.ammoCost = 5;
+        gun.ammo = gun.GetBaseMaxAmmo();
+        gun.DefaultModule.ammoCost = 10;
 
         StartCoroutine(EjectFrom(player));
     }
