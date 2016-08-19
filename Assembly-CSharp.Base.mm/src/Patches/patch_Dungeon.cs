@@ -22,8 +22,6 @@ namespace Dungeonator {
                 ETGMod.Databases.Items.DungeonStart();
             }
 
-            IsGlitchDungeon = true;
-
             return list.GetEnumerator();
         }
 

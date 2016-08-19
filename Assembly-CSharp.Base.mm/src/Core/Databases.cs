@@ -97,9 +97,10 @@ public sealed class ItemDB {
             }
             List<WeightedGameObject> loot;
             if (!ModLootPerFloor.TryGetValue(floor, out loot)) {
-                loot = ModLootPerFloor[floor] = new List<WeightedGameObject>();
+                loot = new List<WeightedGameObject>();
             }
             loot.Add(lootGameObject);
+            ModLootPerFloor[floor] = loot;
         }
         if (updateSpriteCollections) {
             AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
@@ -115,14 +116,16 @@ public sealed class ItemDB {
     }
 
     public void DungeonStart() {
+        List<WeightedGameObject> loot;
+
+        if (ModLootPerFloor.TryGetValue("ANY", out loot)) {
+            GameManager.Instance.Dungeon.baseChestContents.defaultItemDrops.elements.AddRange(loot);
+        }
+
         string floorNameKey = GameManager.Instance.Dungeon.DungeonFloorName;
         string floorName = floorNameKey.Substring(1, floorNameKey.IndexOf('_') - 1);
-
-        for (int i = 0; i < 2; i++) {
-            List<WeightedGameObject> loot;
-            if (ModLootPerFloor.TryGetValue(i == 0 ? "ANY" : floorName, out loot)) {
-                GameManager.Instance.Dungeon.baseChestContents.defaultItemDrops.elements.AddRange(loot);
-            }
+        if (ModLootPerFloor.TryGetValue(floorName, out loot)) {
+            GameManager.Instance.Dungeon.baseChestContents.defaultItemDrops.elements.AddRange(loot);
         }
     }
 
@@ -327,7 +330,7 @@ public static class ItemDBExt {
         return projectile;
     }
 
-    public static void SetupSprite(this Gun gun, string defaultSprite = null) {
+    public static void SetupSprite(this Gun gun, string defaultSprite = null, int fps = 0) {
         AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection02.Handle();
@@ -339,6 +342,10 @@ public static class ItemDBExt {
         gun.UpdateAnimations();
         gun.GetSprite().SetSprite(ETGMod.Databases.Items.WeaponCollection, ETGMod.Databases.Items.WeaponCollection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
         gun.DefaultSpriteID = gun.GetSprite().spriteId;
+
+        if (fps != 0) {
+            gun.SetAnimationFPS(fps);
+        }
     }
 
 }
