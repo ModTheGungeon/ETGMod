@@ -82,6 +82,17 @@ public sealed class ItemDB {
             edbEntry.myGuid = value.encounterTrackable.EncounterGuid;
             edbEntry.path = "Assets/Resources/ITEMDB:" + value.name + ".prefab";
             EncounterDatabase.Instance.Entries.Add(edbEntry);
+            if (value is Gun) {
+                GameManager.Instance.RewardManager.GunsLootTable.defaultItemDrops.Add(new WeightedGameObject() {
+                    gameObject = value.gameObject,
+                    weight = 1f
+                });
+            } else {
+                GameManager.Instance.RewardManager.ItemsLootTable.defaultItemDrops.Add(new WeightedGameObject() {
+                    gameObject = value.gameObject,
+                    weight = 1f
+                });
+            }
         }
         if (updateSpriteCollections) {
             AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
