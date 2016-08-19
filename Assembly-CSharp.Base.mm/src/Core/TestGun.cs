@@ -38,12 +38,7 @@ public class TestGun : GunBehaviour {
         PlayerController player = gun.CurrentOwner as PlayerController;
         if (player == null) return;
 
-        if (0.0005f < UnityEngine.Random.value) return;
-        for (int i = 0; i < player.inventory.AllGuns.Count; i++) {
-            Gun other = player.inventory.AllGuns[i];
-            if (other == gun) continue;
-            other.ammo = 0;
-        }
+        if (Mathf.Lerp(0.002f, 0.001f, gun.ammo / 300f) < UnityEngine.Random.value) return;
         gun.Volley.projectiles.Clear();
         gun.RuntimeModuleData.Clear();
         for (int i = 0; i < ETGMod.Databases.Items.Count; i++) {
@@ -56,13 +51,14 @@ public class TestGun : GunBehaviour {
             gun.RuntimeModuleData[module] = moduleData;
         }
         gun.ammo = gun.GetBaseMaxAmmo();
-        gun.DefaultModule.ammoCost = 10;
+        gun.DefaultModule.ammoCost = 1;
 
         StartCoroutine(EjectFrom(player));
     }
 
     public IEnumerator EjectFrom(PlayerController player) {
         yield return new WaitForSeconds(3f);
+        gun.ammo = 0;
         player.ForceDropGun(gun);
     }
 
