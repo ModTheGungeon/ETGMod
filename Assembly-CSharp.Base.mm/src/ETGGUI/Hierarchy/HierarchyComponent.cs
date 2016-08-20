@@ -1,48 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace ETGGUI.Hierarchy {
-    class HierarchyComponent {
-        public GameObject reference;
-        public bool showChildren;
+    public class HierarchyComponent {
+        public GameObject Reference;
+        public bool ShowChildren;
 
-        public Dictionary<Transform, HierarchyComponent> children = new Dictionary<Transform, HierarchyComponent>();
+        public Dictionary<Transform, HierarchyComponent> Children = new Dictionary<Transform, HierarchyComponent>();
 
         public HierarchyComponent(GameObject _ref, bool show) {
-            reference=_ref;
-            showChildren=show;
+            Reference = _ref;
+            ShowChildren = show;
         }
 
-        public static int spaceAmount = 0;
+        public static int SpaceAmount = 0;
 
         public void OnGUI() {
-
-            if (reference==null)
+            if (Reference==null)
                 return;
 
-            spaceAmount++;
+            SpaceAmount++;
 
             GUILayout.BeginVertical();
-            if (showChildren) {
-                foreach (HierarchyComponent c in children.Values) {
-                    if (c.reference==null)
+            if (ShowChildren) {
+                foreach (HierarchyComponent c in Children.Values) {
+                    if (c.Reference==null)
                         continue;
                     GUILayout.BeginHorizontal();
-                    GUILayout.Space(spaceAmount*20);
-                    bool isButton = GUILayout.Button(c.reference.name);
-                    c.showChildren=isButton ? !c.showChildren : c.showChildren;
+                    GUILayout.Space(SpaceAmount * 20f);
+                    bool isButton = GUILayout.Button(c.Reference.name);
+                    c.ShowChildren=isButton ? !c.ShowChildren : c.ShowChildren;
                     if (isButton)
-                        ETGModInspector.targetObject=c.reference;
+                        ETGModInspector.targetObject=c.Reference;
                     GUILayout.EndHorizontal();
                     c.OnGUI();
                 }
             }
             GUILayout.EndVertical();
 
-            spaceAmount--;
+            SpaceAmount--;
         }
     }
 }

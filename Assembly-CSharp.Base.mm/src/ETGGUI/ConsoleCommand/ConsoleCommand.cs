@@ -1,24 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
 
 public class ConsoleCommand : ConsoleCommandUnit {
 
-    private string[] _EmptyStringArray = new string[] {};
+    private string[] _EmptyStringArray = {};
 
-    public ConsoleCommand(System.Action<string[]> cmdref, AutocompletionSettings autocompletion) {
+    public ConsoleCommand(Action<string[]> cmdref, AutocompletionSettings autocompletion) {
         CommandReference = cmdref;
         Autocompletion = autocompletion;
     }
 
-    public ConsoleCommand(System.Action<string[]> cmdref) {
+    public ConsoleCommand(Action<string[]> cmdref) {
         CommandReference = cmdref;
-        Autocompletion = new AutocompletionSettings (delegate (string input) {
-            return _EmptyStringArray;
-        });
+        Autocompletion = new AutocompletionSettings ((string input) => _EmptyStringArray);
     }
 
 }

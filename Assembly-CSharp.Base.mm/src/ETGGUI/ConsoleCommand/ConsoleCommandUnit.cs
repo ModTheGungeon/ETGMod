@@ -3,7 +3,7 @@
 public class ConsoleCommandUnit {
     public string Name;
 
-    public System.Action<string[]> CommandReference;
+    public Action<string[]> CommandReference;
 
     public void RunCommand(string[] args) {
         CommandReference(args);
