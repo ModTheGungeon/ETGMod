@@ -12,6 +12,14 @@ public static partial class ETGMod {
         return o == null ? null : o is string ? (string) o : o.ToString();
     }
 
+    private static readonly long _DoubleNegativeZero = BitConverter.DoubleToInt64Bits(-0D);
+    public static bool IsNegativeZero(this double d) {
+        return BitConverter.DoubleToInt64Bits(d) == _DoubleNegativeZero;
+    }
+    public static bool IsNegativeZero(this float f) {
+        return BitConverter.DoubleToInt64Bits(f) == _DoubleNegativeZero;
+    }
+
     public static T GetFirst<T>(this IEnumerable<T> e) {
         foreach (T t in e) {
             return t;

@@ -19,12 +19,12 @@ namespace ETGGUI.Inspector {
         private static PropertyInfo p_GameObject_activeSelf = typeof(GameObject).GetProperty("activeSelf");
         private static PropertyInfo p_Transform_position = typeof(Transform).GetProperty("position");
 
-        private List<string> crawled = new List<string>();
+        private List<string> _Crawled = new List<string>();
         public void OnGUI(object instance) {
-            crawled.Clear();
-            crawled.Add("name");
-            crawled.Add("tag");
-            crawled.Add("position");
+            _Crawled.Clear();
+            _Crawled.Add("name");
+            _Crawled.Add("tag");
+            _Crawled.Add("position");
             PropertyInfo[] allProperties = instance.GetType().GetProperties(
                 BindingFlags.Public |
                 BindingFlags.Instance |
@@ -54,13 +54,13 @@ namespace ETGGUI.Inspector {
             foreach (PropertyInfo inf in allProperties) {
                 string fullName = inf.DeclaringType.FullName + "::" + inf.Name;
                 if (PropertyBlacklist.Contains(fullName) ||
-                    crawled.Contains(fullName) ||
+                    _Crawled.Contains(fullName) ||
                     inf.MemberType == MemberTypes.Method ||
                     inf.GetIndexParameters().Length != 0 ||
                     !inf.CanRead || !inf.CanWrite) {
                     continue;
                 }
-                crawled.Add(inf.Name);
+                _Crawled.Add(inf.Name);
 
                 try {
                     object getProperty = ReflectionHelper.GetValue(inf, instance);

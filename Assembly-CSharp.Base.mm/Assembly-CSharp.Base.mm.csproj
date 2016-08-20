@@ -67,7 +67,6 @@
     <Compile Include="src\ETGGUI\Inspector\Properties\FloatPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\StringPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
-    <Compile Include="src\ETGGUI\Inspector\EnumExtensions.cs" />
     <Compile Include="src\ETGGUI\Inspector\Components\GenericComponentInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\VectorPropertyInspector.cs" />
     <Compile Include="src\ETGGUI\RandomSelector.cs" />
