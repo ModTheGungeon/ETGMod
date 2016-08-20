@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#pragma warning disable 0414
 
 namespace UnityEngine {
     /// <summary>
