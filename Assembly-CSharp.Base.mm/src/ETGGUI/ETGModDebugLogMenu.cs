@@ -9,9 +9,8 @@ public class ETGModDebugLogMenu : IETGModMenu {
     /// <summary>
     /// All debug logged text lines. Feel free to add your lines here!
     /// </summary>
-    public static List<string> LoggedText = new List<string>();
-    public static List<string> stackTraces = new List<string>();
-    public static List<bool> isTraceShown = new List<bool>();
+    private static Dictionary<string, LoggedText> allLoggedText = new Dictionary<string, LoggedText>();
+
     public static Vector2 ScrollPos;
 
     private static Rect _MainBoxRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
@@ -52,23 +51,18 @@ public class ETGModDebugLogMenu : IETGModMenu {
 
         ScrollPos=GUILayout.BeginScrollView(ScrollPos);
 
-        for (int i = 0; i<LoggedText.Count; i++) {
-            try {
-                if (LoggedText[i]=="\n") {
-                    GUILayout.Label(LoggedText[i]);
-                    continue;
-                }
-                GUILayout.BeginHorizontal();
-                isTraceShown[i]=GUILayout.Toggle(isTraceShown[i], "", GUILayout.Width(15), GUILayout.Height(15));
-                GUILayout.Label(LoggedText[i]);
-                GUILayout.EndHorizontal();
+        foreach (KeyValuePair<string, LoggedText> msg in allLoggedText) {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("", GUILayout.Width(20)))
+                msg.Value.IsStacktraceShown=!msg.Value.IsStacktraceShown;
+            GUILayout.Label(( msg.Value.LogCount>0 ? "("+ msg.Value.LogCount + ")" : "") + msg.Value.LogMessage);
+            GUILayout.EndHorizontal();
 
-                if (isTraceShown[i]) {
-                    GUILayout.Label("<color=green>"+stackTraces[i]+"</color>");
-                }
-            } catch {
-                continue;
+            if (msg.Value.IsStacktraceShown) {
+                GUILayout.Label("----Stacktrace---- \n" + "    " + msg.Value.Stacktace);
             }
+
+            GUILayout.Space(3);
         }
 
         GUILayout.EndScrollView();
@@ -76,27 +70,41 @@ public class ETGModDebugLogMenu : IETGModMenu {
 
     }
 
+    public static void Log(string Log) {
+        Logger(Log, StackTraceUtility.ExtractStackTrace(), LogType.Log);
+    }
+
+    public static void LogError(string Log) {
+        Logger(Log, StackTraceUtility.ExtractStackTrace(), LogType.Error);
+    }
+
+    public static void LogWarning(string Log) {
+        Logger(Log, StackTraceUtility.ExtractStackTrace(), LogType.Warning);
+    }
+
     public static void Logger(string text, string stackTrace, LogType type) {
-        if (text.Contains("\n")) {
-            LoggedText.AddRange(text.Split('\n'));
-            for (int i = 0; i<text.Split('\n').Length; i++) {
-                stackTraces.Add(System.Environment.StackTrace);
-                isTraceShown.Add(false);
-            }
+
+        if (allLoggedText.ContainsKey(text)) {
+            allLoggedText[text].LogCount++;
         } else {
-            LoggedText.Add(text);
-            stackTraces.Add(System.Environment.StackTrace);
-            isTraceShown.Add(false);
-        }
-        if (type==LogType.Error||type==LogType.Exception) {
-            LoggedText.AddRange(stackTrace.Split('\n'));
-            for (int i = 0; i<text.Split('\n').Length; i++) {
-                stackTraces.Add(System.Environment.StackTrace);
-                isTraceShown.Add(false);
-            }
+            allLoggedText.Add(text, new LoggedText(text, StackTraceUtility.ExtractStackTrace(), type));
         }
 
-        ScrollPos=new Vector2(ScrollPos.x, _ViewRect.height);
+    }
+
+    class LoggedText {
+
+        public LoggedText(string logMessage,string stackTrace, LogType type) {
+            this.LogMessage=logMessage;
+            this.Stacktace=stackTrace;
+            this.LogType=type;
+        }
+
+        public string LogMessage;
+        public string Stacktace;
+        public bool IsStacktraceShown=false;
+        public int LogCount=0;
+        public LogType LogType;
     }
 
 }
