@@ -249,7 +249,7 @@ public static partial class ETGMod {
             Texture2D replacement;
             AssetMetadata metadata;
 
-            if (sprites.materials[0].mainTexture.name.Length != 0 && sprites.materials[0].mainTexture.name[0] == '~') {
+            if (string.IsNullOrEmpty(sprites.materials[0].mainTexture.name) || sprites.materials[0].mainTexture.name[0] != '~') {
                      if (TextureMap.TryGetValue(path, out replacement)) { }
                 else if (TryGetMapped          (path, out metadata))    { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
                 else {
@@ -264,7 +264,6 @@ public static partial class ETGMod {
                                 File.Copy(mapping.Value.File, copyPath);
                             }
                             TextureMap[path] = replacement = Resources.Load<Texture2D>(resourcePath);
-                            replacement.name = '~' + replacement.name;
                             break;
                         }
                     }
@@ -272,6 +271,7 @@ public static partial class ETGMod {
 
                 if (replacement != null) {
                     // Full atlas texture replacement.
+                    replacement.name = '~' + sprites.materials[0].mainTexture.name;
                     for (int i = 0; i < sprites.materials.Length; i++) {
                         sprites.materials[i].mainTexture = replacement;
                     }
@@ -398,9 +398,7 @@ public static partial class ETGMod {
 
         public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
             frame.flipped = tk2dSpriteDefinition.FlipMode.None;
-            if (frame.materialInst == null) {
-                frame.materialInst = new Material(frame.material);
-            }
+            frame.materialInst = new Material(frame.material);
             frame.texelSize = replacement.texelSize;
             frame.extractRegion = pack;
             if (pack) {
