@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using InControl;
 using UnityEngine;
 using Steamworks;
 using ETGMultiplayer;
@@ -71,7 +67,7 @@ public class MultiplayerManager : MonoBehaviour {
     public IEnumerator UpdatePlayerNames() {
         KeepUpdatingPlayerNames = true;
         while (KeepUpdatingPlayerNames) {
-            if (SteamHelper.isInLobby)
+            if (SteamHelper.IsInLobby)
                 SteamHelper.UpdatePlayerList();
             yield return new WaitForSecondsRealtime(1f);
         }
@@ -154,8 +150,8 @@ public class MultiplayerManager : MonoBehaviour {
             GUI.Box(UserListBox, "Users in lobby");
             GUILayout.BeginArea(UserListBox);
             GUILayout.Space(25f);
-            for (int i = 0; i < SteamHelper.playerNamesInLobby.Count; i++) {
-                GUILayout.Label(SteamHelper.playerNamesInLobby[i]);
+            for (int i = 0; i < SteamHelper.PlayerNamesInLobby.Count; i++) {
+                GUILayout.Label(SteamHelper.PlayerNamesInLobby[i]);
             }
             GUILayout.EndArea();
 
