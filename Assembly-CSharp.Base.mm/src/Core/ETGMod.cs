@@ -23,7 +23,7 @@ public static partial class ETGMod {
         #if TRAVIS
         new Profile(2, "travis");
         #elif DEBUG
-        new Profile(1337, "anteater");
+        new Profile(1, "debug");
         #else
         new Profile(0, "b7"); // no tag
         #endif
