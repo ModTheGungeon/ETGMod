@@ -143,7 +143,6 @@ public static class PInvokeHelper {
         return s.AsDelegate<T>();
     }
     public static T GetDelegateAtRVA<T>(this IntPtr basea, long rva) where T : class {
-        // FIXME does this even work?!
         return new IntPtr(basea.ToInt64() + rva).AsDelegate<T>();
     }
     public static T AsDelegate<T>(this IntPtr s) where T : class {

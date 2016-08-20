@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#pragma warning disable 0626
+#pragma warning disable 0649
 
-class patch_FoyerCharacterSelectFlag : FoyerCharacterSelectFlag {
+internal class patch_FoyerCharacterSelectFlag : FoyerCharacterSelectFlag {
 
     public extern void orig_Update();
     public void Update() {
-        if (MultiplayerManager.isPlayingMultiplayer&&!GameManager.Instance.SecondaryPlayer) {
+        if (MultiplayerManager.isPlayingMultiplayer && !GameManager.Instance.SecondaryPlayer) {
             ToggleSelf(true);
         } else {
             orig_Update();

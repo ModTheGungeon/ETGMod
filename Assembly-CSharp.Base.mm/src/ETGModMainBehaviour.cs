@@ -21,8 +21,4 @@ public class ETGModMainBehaviour : MonoBehaviour {
         ETGMod.Start();
     }
 
-    public void OnGUI() {
-
-    }
-
 }

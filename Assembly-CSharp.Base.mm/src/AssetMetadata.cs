@@ -1,6 +1,4 @@
-﻿using UnityEngine; // Replace with System in non-Unity context
-using Ionic.Zip;
-using System.Collections.Generic;
+﻿using Ionic.Zip;
 using System.IO;
 using IOFile = System.IO.File;
 using System.Reflection;
