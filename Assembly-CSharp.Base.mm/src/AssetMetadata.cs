@@ -10,7 +10,7 @@ using System.Reflection;
 /// </summary>
 public class AssetMetadata {
 
-    public EType Type;
+    public ContainerType Container;
     public System.Type AssetType = null;
 
     public string File;
@@ -31,9 +31,9 @@ public class AssetMetadata {
         get {
             if (!HasData) return null;
             Stream stream = null;
-            if (Type == EType.File) {
+            if (Container == ContainerType.Filesystem) {
                 stream = IOFile.OpenRead(File);
-            } else if (Type == EType.Zipped) {
+            } else if (Container == ContainerType.Zip) {
                 string file = File.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
                 using (ZipFile zip = ZipFile.Read(Zip)) {
                     foreach (ZipEntry entry in zip.Entries) {
@@ -45,7 +45,7 @@ public class AssetMetadata {
                         }
                     }
                 }
-            } else if (Type == EType.Assembly) {
+            } else if (Container == ContainerType.Assembly) {
                 stream = Assembly.GetManifestResourceStream(File);
             }
 
@@ -86,7 +86,7 @@ public class AssetMetadata {
     }
 
     public AssetMetadata() {
-        Type = EType.File;
+        Container = ContainerType.Filesystem;
     }
 
     public AssetMetadata(string file)
@@ -101,21 +101,21 @@ public class AssetMetadata {
 
     public AssetMetadata(string zip, string file)
         : this(file) {
-        Type = EType.Zipped;
+        Container = ContainerType.Zip;
         Zip = zip;
         File = file;
     }
 
     public AssetMetadata(Assembly assembly, string file)
         : this(file) {
-        Type = EType.Assembly;
+        Container = ContainerType.Assembly;
         Assembly = assembly;
         AssemblyName = assembly.GetName().Name;
     }
 
-    public enum EType {
-        File,
-        Zipped,
+    public enum ContainerType {
+        Filesystem,
+        Zip,
         Assembly
     }
 

@@ -260,7 +260,7 @@ public static partial class ETGMod {
                         string spriteName = resourcePath.Substring(9);
                         if (sprites.spriteCollectionName.Contains(spriteName)) {
                             string copyPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
-                            if (mapping.Value.Type == AssetMetadata.EType.File && !File.Exists(copyPath)) {
+                            if (mapping.Value.Container == AssetMetadata.ContainerType.Filesystem && !File.Exists(copyPath)) {
                                 File.Copy(mapping.Value.File, copyPath);
                             }
                             TextureMap[path] = replacement = Resources.Load<Texture2D>(resourcePath);
