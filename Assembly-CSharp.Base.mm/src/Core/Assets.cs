@@ -249,7 +249,8 @@ public static partial class ETGMod {
             Texture2D replacement;
             AssetMetadata metadata;
 
-            if (string.IsNullOrEmpty(sprites.materials[0].mainTexture.name) || sprites.materials[0].mainTexture.name[0] != '~') {
+            string atlasName = sprites.materials[0].mainTexture == null ? null : sprites.materials[0].mainTexture.name;
+            if (sprites.materials[0].mainTexture != null && (atlasName == null || atlasName.Length == 0 || atlasName[0] != '~')) {
                      if (TextureMap.TryGetValue(path, out replacement)) { }
                 else if (TryGetMapped          (path, out metadata))    { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
                 else {
@@ -271,7 +272,7 @@ public static partial class ETGMod {
 
                 if (replacement != null) {
                     // Full atlas texture replacement.
-                    replacement.name = '~' + sprites.materials[0].mainTexture.name;
+                    replacement.name = '~' + atlasName;
                     for (int i = 0; i < sprites.materials.Length; i++) {
                         sprites.materials[i].mainTexture = replacement;
                     }
