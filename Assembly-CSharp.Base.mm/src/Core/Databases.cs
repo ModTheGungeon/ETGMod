@@ -47,6 +47,7 @@ public sealed class ItemDB {
     }
 
     public List<PickupObject> ModItems = new List<PickupObject>();
+    public Dictionary<string, PickupObject> ModItemMap = new Dictionary<string, PickupObject>();
     public Dictionary<string, List<WeightedGameObject>> ModLootPerFloor = new Dictionary<string, List<WeightedGameObject>>();
 
     /// <summary>
@@ -77,7 +78,7 @@ public sealed class ItemDB {
         ModItems.Add(value);
         if (value != null) {
             UnityEngine.Object.DontDestroyOnLoad(value.gameObject);
-
+            ModItemMap[value.name] = value;
             value.PickupObjectId = id;
 
             EncounterDatabaseEntry edbEntry = new EncounterDatabaseEntry(value.encounterTrackable);
@@ -191,11 +192,9 @@ public sealed class ItemDB {
     }
 
     public PickupObject GetModItemByName(string name) {
-        for (int i = 0; i < ModItems.Count; i++) {
-            PickupObject item = ModItems[i];
-            if (item != null && item.name == name) {
-                return item;
-            }
+        PickupObject item;
+        if (ModItemMap.TryGetValue(name, out item)) {
+            return item;
         }
         return null;
     }
