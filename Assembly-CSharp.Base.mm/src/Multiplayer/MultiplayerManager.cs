@@ -113,7 +113,7 @@ public class MultiplayerManager : MonoBehaviour {
         if (!SteamManager.Initialized)
             return;
 
-        GUILayout.Label(NetworkInput.displayBytesRecieved + "\n" + NetworkInput.displayBytesSent);
+        GUILayout.Label(NetworkInput.DisplayBytesRecieved + "\n" + NetworkInput.DisplayBytesSent);
 
         if (IsOnMainMenu && State == MultiplayerMenuState.Closed) {
             

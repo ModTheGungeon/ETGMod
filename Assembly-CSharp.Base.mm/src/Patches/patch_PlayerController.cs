@@ -17,8 +17,8 @@ internal class patch_PlayerController : PlayerController {
 
         if (GameManager.Instance.SecondaryPlayer == this && MultiplayerManager.IsPlayingMultiplayer) {
             Vector2 v = new Vector2(
-                NetworkInput.directions[0] > 0f && NetworkInput.directions[1] > 0f ? 0f : NetworkInput.directions[0] > 0f ? NetworkInput.directions[0] : -NetworkInput.directions[1],
-                NetworkInput.directions[2] > 0f && NetworkInput.directions[3] > 0f ? 0f : NetworkInput.directions[2] > 0f ? NetworkInput.directions[2] : -NetworkInput.directions[3]
+                NetworkInput.Directions[0] > 0f && NetworkInput.Directions[1] > 0f ? 0f : NetworkInput.Directions[0] > 0f ? NetworkInput.Directions[0] : -NetworkInput.Directions[1],
+                NetworkInput.Directions[2] > 0f && NetworkInput.Directions[3] > 0f ? 0f : NetworkInput.Directions[2] > 0f ? NetworkInput.Directions[2] : -NetworkInput.Directions[3]
             );
             return Vector2.ClampMagnitude(v, 1f);
         }
