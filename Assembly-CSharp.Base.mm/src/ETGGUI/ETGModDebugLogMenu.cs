@@ -9,7 +9,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
     /// <summary>
     /// All debug logged text lines. Feel free to add your lines here!
     /// </summary>
-    private static Dictionary<string, LoggedText> allLoggedText = new Dictionary<string, LoggedText>();
+    private static List<LoggedText> allLoggedText = new List<LoggedText>();
 
     public static Vector2 ScrollPos;
 
@@ -51,15 +51,15 @@ public class ETGModDebugLogMenu : IETGModMenu {
 
         ScrollPos=GUILayout.BeginScrollView(ScrollPos);
 
-        foreach (KeyValuePair<string, LoggedText> msg in allLoggedText) {
+        foreach ( LoggedText msg in allLoggedText) {
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("", GUILayout.Width(20)))
-                msg.Value.IsStacktraceShown=!msg.Value.IsStacktraceShown;
-            GUILayout.Label(( msg.Value.LogCount>0 ? "("+ msg.Value.LogCount + ")" : "") + msg.Value.LogMessage);
+                msg.IsStacktraceShown=!msg.IsStacktraceShown;
+            GUILayout.Label(( msg.LogCount>0 ? "("+ msg.LogCount + ")" : "") + msg.LogMessage);
             GUILayout.EndHorizontal();
 
-            if (msg.Value.IsStacktraceShown) {
-                GUILayout.Label("----Stacktrace---- \n" + "    " + msg.Value.Stacktace);
+            if (msg.IsStacktraceShown) {
+                GUILayout.Label("----Stacktrace---- \n" + "    " + msg.Stacktace);
             }
 
             GUILayout.Space(3);
@@ -84,10 +84,10 @@ public class ETGModDebugLogMenu : IETGModMenu {
 
     public static void Logger(string text, string stackTrace, LogType type) {
 
-        if (allLoggedText.ContainsKey(text)) {
-            allLoggedText[text].LogCount++;
+        if (allLoggedText[allLoggedText.Count-1].LogMessage==text) {
+            allLoggedText[allLoggedText.Count-1].LogCount++;
         } else {
-            allLoggedText.Add(text, new LoggedText(text, StackTraceUtility.ExtractStackTrace(), type));
+            allLoggedText.Add(new LoggedText(text, StackTraceUtility.ExtractStackTrace(), type));
         }
 
     }
