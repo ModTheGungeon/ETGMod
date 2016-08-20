@@ -1,10 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using Ionic.Zip;
-using Mono.Cecil;
 
 public static partial class ETGMod {
 
@@ -67,12 +63,11 @@ public sealed class ItemDB {
         int id = Add(value, updateSpriteCollections, floor);
         if (updateAnimations) {
             value.UpdateAnimations();
-            value.GetSprite().SetSprite(WeaponCollection, WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
-            value.DefaultSpriteID = value.GetSprite().spriteId;
+            value.GetSprite().SetSprite(WeaponCollection, value.DefaultSpriteID = WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
         }
         return id;
     }
-    public int Add(PickupObject value, bool updateSpriteCollections = true, string floor = "ANY") {
+    public int Add(PickupObject value, bool updateSpriteCollections = false, string floor = "ANY") {
         int id = PickupObjectDatabase.Instance.Objects.Count;
         PickupObjectDatabase.Instance.Objects.Add(value);
         ModItems.Add(value);

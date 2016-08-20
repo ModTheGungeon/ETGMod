@@ -26,15 +26,18 @@ public abstract class ETGModule {
     }
 
     /// <summary>
-    /// This method gets called when ETGMod "starts" (inits), after all mods have been loaded.
+    /// This method gets called when ETGMod initializes, after all mods have been loaded.
+    /// Do not depend on any specific order in which the mods get initialized.
+    /// </summary>
+    public virtual void Init() { }
+
+    /// <summary>
+    /// This method gets called when ETGMod enters its first frame, after all mods have been loaded.
     /// Do not depend on any specific order in which the mods get started.
     /// </summary>
     public virtual void Start() { }
 
-    /// <summary>
-    /// This method gets called each update.
-    /// Do not depend on any specific order in which the mods get poked.
-    /// </summary>
+    [Obsolete("Use a new GameObject with your own MonoBehaviour instead!")]
     public virtual void Update() { }
 
     /// <summary>

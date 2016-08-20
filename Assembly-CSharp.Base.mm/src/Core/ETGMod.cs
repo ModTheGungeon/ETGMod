@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Ionic.Zip;
-using Mono.Cecil;
 using System.Runtime.InteropServices;
 using System.Collections;
 
@@ -24,7 +23,7 @@ public static partial class ETGMod {
         #if TRAVIS
         new Profile(2, "travis");
         #elif DEBUG
-        new Profile(3, "anteater");
+        new Profile(1337, "anteater");
         #else
         new Profile(0, "b7"); // no tag
         #endif
@@ -177,7 +176,7 @@ public static partial class ETGMod {
                 string[] files = Directory.GetFiles(ModsDirectory);
                 for (int i = 0; i < files.Length; i++) {
                     string file = Path.GetFileName(files[i]);
-                    if (!file.EndsWith(".zip")) {
+                    if (!file.EndsWithInvariant(".zip")) {
                         continue;
                     }
                     writer.WriteLine(file);
@@ -226,7 +225,7 @@ public static partial class ETGMod {
     }
 
     public static void InitMod(string path) {
-        if (path.EndsWith(".zip")) {
+        if (path.EndsWithInvariant(".zip")) {
             InitModZIP(path);
         } else {
             InitModDir(path);
@@ -425,12 +424,6 @@ public static partial class ETGMod {
             };
         }
         return null;
-    }
-
-    public static void Update() {
-        // TODO
-
-        CallInEachModule("Update");
     }
 
     public static void Exit() {

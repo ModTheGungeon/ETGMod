@@ -1,12 +1,4 @@
-﻿using System;
-using UnityEngine;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using Ionic.Zip;
-using Mono.Cecil;
-using System.Runtime.InteropServices;
-using System.Collections;
+﻿using UnityEngine;
 
 public class GunBehaviour : MonoBehaviour {
 
