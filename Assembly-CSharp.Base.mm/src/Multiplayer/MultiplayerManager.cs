@@ -8,45 +8,47 @@ using UnityEngine;
 using Steamworks;
 using ETGMultiplayer;
 
-class MultiplayerManager : MonoBehaviour {
+public class MultiplayerManager : MonoBehaviour {
 
-    public static bool isOnMainMenu {
+    public static MultiplayerManager Instance;
+
+    public static bool MultiplayerEnabled = false;
+
+    public static bool IsOnMainMenu {
         get {
-            return Foyer.DoMainMenu&&!Foyer.DoIntroSequence;
+            return Foyer.DoMainMenu && !Foyer.DoIntroSequence;
         }
     }
 
-    public static bool isPlayingMultiplayer = false;
+    public static bool IsPlayingMultiplayer = false;
 
     public enum MultiplayerMenuState {
         Closed,
         SelectingMode,
         PublicLobby,
-        PrivateLobby,
+        PrivateLobby
     }
 
-    public static MultiplayerMenuState state = MultiplayerMenuState.Closed;
+    public static MultiplayerMenuState State = MultiplayerMenuState.Closed;
 
-    Texture2D backgroundTex;
+    protected Texture2D _BackgroundTex;
 
-    public static List<string> allText = new List<string>();
+    public static List<string> AllText = new List<string>();
 
     public static void Create() {
-        return;
-        GameObject newObject = new GameObject();
-        newObject.AddComponent<MultiplayerManager>();
-        newObject.name="MultiplayerManager";
-        DontDestroyOnLoad(newObject);
+        if (MultiplayerEnabled) {
+            Instance = new GameObject("MultiplayerManager").AddComponent<MultiplayerManager>();
+        }
     }
 
     public void Awake() {
-
+        DontDestroyOnLoad(gameObject);
     }
 
     public void Start() {
-        backgroundTex=new Texture2D(1, 1);
-        backgroundTex.SetPixel(1, 1, Color.white);
-        backgroundTex.Apply();
+        _BackgroundTex = new Texture2D(1, 1);
+        _BackgroundTex.SetPixel(0, 0, Color.white);
+        _BackgroundTex.Apply();
         SteamHelper.Init();
         PacketHelper.Init();
         StartCoroutine(UpdatePlayerNames());
@@ -54,7 +56,6 @@ class MultiplayerManager : MonoBehaviour {
     }
 
     public void Update() {
-
         if (!SteamManager.Initialized)
             return;
 
@@ -64,41 +65,44 @@ class MultiplayerManager : MonoBehaviour {
 
         PacketHelper.PacketCollectionThread();
         PacketHelper.RunReadyPackets();
-
     }
 
+    public bool KeepUpdatingPlayerNames;
     public IEnumerator UpdatePlayerNames() {
-        while (true) {
+        KeepUpdatingPlayerNames = true;
+        while (KeepUpdatingPlayerNames) {
             if (SteamHelper.isInLobby)
                 SteamHelper.UpdatePlayerList();
-            yield return new WaitForSecondsRealtime(1);
+            yield return new WaitForSecondsRealtime(1f);
         }
     }
 
+    public bool KeepSendingNetworkInput;
     public IEnumerator SendNetworkInput() {
-        yield return new WaitForSeconds(10);
-        NetworkInput.SyncPos=new Position(528,326);
-        while (true) {
-                if(BraveInput.PrimaryPlayerInstance && BraveInput.PrimaryPlayerInstance.ActiveActions!=null)
-                    NetworkInput.SendUpdatePacket(BraveInput.PrimaryPlayerInstance);
+        KeepSendingNetworkInput = true;
+        yield return new WaitForSeconds(10f);
+        NetworkInput.SyncPos =new Position(528f, 326f);
+        while (KeepSendingNetworkInput) {
+            if (BraveInput.PrimaryPlayerInstance && BraveInput.PrimaryPlayerInstance.ActiveActions != null)
+                NetworkInput.SendUpdatePacket(BraveInput.PrimaryPlayerInstance);
             yield return new WaitForSecondsRealtime(0.025f);
         }
     }
 
     public static void OpenGUI() {
-        patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive=false;
-        patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive=false;
-        patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive=false;
+        patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive = false;
+        patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive = false;
+        patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive = false;
     }
 
     public void CloseGUI() {
-        if (state==MultiplayerMenuState.SelectingMode) {
-            state=MultiplayerMenuState.Closed;
-            patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive=true;
-            patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive=true;
-            patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive=true;
-        } else if (state!=MultiplayerMenuState.Closed) {
-            state=MultiplayerMenuState.SelectingMode;
+        if (State == MultiplayerMenuState.SelectingMode) {
+            State = MultiplayerMenuState.Closed;
+            patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive = true;
+            patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive = true;
+            patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive = true;
+        } else if (State != MultiplayerMenuState.Closed) {
+            State = MultiplayerMenuState.SelectingMode;
             SteamHelper.LeaveLobby();
         }
     }
@@ -107,112 +111,84 @@ class MultiplayerManager : MonoBehaviour {
         PacketHelper.StopThread();
     }
 
-    string input = "";
+    private string _Input;
 
     public void OnGUI() {
-
         if (!SteamManager.Initialized)
             return;
 
         GUILayout.Label(NetworkInput.displayBytesRecieved + "\n" + NetworkInput.displayBytesSent);
 
-        if (isOnMainMenu&&state==MultiplayerMenuState.Closed) {
+        if (IsOnMainMenu && State == MultiplayerMenuState.Closed) {
+            
+            if (GUI.Button(new Rect(Screen.width - 210f, Screen.height - 110f, 200f, 100f), "Multiplayer"))
+                State = MultiplayerMenuState.SelectingMode;
 
-            if (GUI.Button(new Rect(Screen.width-210, Screen.height-110, 200, 100), "Multiplayer"))
-                state=MultiplayerMenuState.SelectingMode;
-
-        } else if (state==MultiplayerMenuState.SelectingMode) {
-
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundTex);
-
+        } else if (State == MultiplayerMenuState.SelectingMode) {
+            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), _BackgroundTex);
             OpenGUI();
-
-            GUI.Box(new Rect(15, 15, Screen.width-30, Screen.height-30), "Multiplayer menu");
-
-            if (GUI.Button(new Rect(Screen.width/2-125, Screen.height/2-40, 250, 45), "Host Public Game")) {
-                state=MultiplayerMenuState.PublicLobby;
+            GUI.Box(new Rect(15f, 15f, Screen.width - 30f, Screen.height - 30f), "Multiplayer menu");
+            if (GUI.Button(new Rect(Screen.width / 2f - 125f, Screen.height / 2f - 40f, 250f, 45f), "Host Public Game")) {
+                State = MultiplayerMenuState.PublicLobby;
                 SteamHelper.CreateLobby(true);
             }
-
-            if (GUI.Button(new Rect(Screen.width/2-125, Screen.height/2+40, 250, 45), "Host Private Game")) {
-                state=MultiplayerMenuState.PrivateLobby;
+            if (GUI.Button(new Rect(Screen.width / 2f - 125f, Screen.height / 2f + 40f, 250f, 45f), "Host Private Game")) {
+                State = MultiplayerMenuState.PrivateLobby;
                 SteamHelper.CreateLobby(false);
             }
 
-        } else if (state==MultiplayerMenuState.PublicLobby) {
-
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundTex);
-
-            GUI.Box(new Rect(15, 15, Screen.width-30, Screen.height-30), "Public game");
-
-            GUILayout.BeginArea(new Rect(15, 15, Screen.width-30, Screen.height-30));
-
-
-
+        } else if (State == MultiplayerMenuState.PublicLobby) {
+            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), _BackgroundTex);
+            GUI.Box(new Rect(15f, 15f, Screen.width - 30f, Screen.height - 30f), "Public game");
+            GUILayout.BeginArea(new Rect(15f, 15f, Screen.width - 30f, Screen.height - 30f));
             GUILayout.EndArea();
-        } else if (state==MultiplayerMenuState.PrivateLobby) {
 
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundTex);
-
-            Rect backgroundBox = new Rect(15, 15, Screen.width-30, Screen.height-30);
+        } else if (State == MultiplayerMenuState.PrivateLobby) {
+            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), _BackgroundTex);
+            Rect backgroundBox = new Rect(15f, 15f, Screen.width - 30f, Screen.height - 30f);
 
             GUI.Box(backgroundBox, "Private game");
             GUILayout.BeginArea(backgroundBox);
 
-            Rect UserListBox = new Rect(15, 30, Screen.width/2-30, 145);
-
+            Rect UserListBox = new Rect(15f, 30f, Screen.width / 2f - 30f, 145f);
             GUI.Box(UserListBox, "Users in lobby");
             GUILayout.BeginArea(UserListBox);
-
-            GUILayout.Space(25);
-
-            foreach (string s in SteamHelper.playerNamesInLobby)
-                GUILayout.Label(s);
-
+            GUILayout.Space(25f);
+            for (int i = 0; i < SteamHelper.playerNamesInLobby.Count; i++) {
+                GUILayout.Label(SteamHelper.playerNamesInLobby[i]);
+            }
             GUILayout.EndArea();
 
-            Rect chatLog = new Rect(15, 190, Screen.width/2-30, Screen.height-235);
+            Rect chatLog = new Rect(15f, 190f, Screen.width / 2f - 30f, Screen.height - 235f);
             GUI.Box(chatLog, "ChatBox");
             GUILayout.BeginArea(chatLog);
-
-            GUILayout.Space(25);
-            bool enteredText = Event.current.type==EventType.KeyDown&&Event.current.keyCode==KeyCode.Return&&input.Length>0;
-            input=GUILayout.TextField(input);
-
-            if (enteredText) {
-                string msg = "<"+Steamworks.SteamFriends.GetPersonaName()+">:"+input;
+            GUILayout.Space(25f);
+            bool sendText = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && _Input.Length > 0;
+            _Input = GUILayout.TextField(_Input);
+            if (sendText) {
+                string msg = "<" + SteamFriends.GetPersonaName() + ">:" + _Input;
                 PacketHelper.SendRPCToPlayersInGame("ChatMessage", true, msg);
-                allText.Add(msg);
-                input="";
+                AllText.Add(msg);
+                _Input = "";
             }
-
-            List<string> msgs = new List<string>(allText);
-
-            msgs.Reverse();
-
-            foreach (string s in msgs)
-                GUILayout.Label(s);
-
+            for (int i = AllText.Count - 1; 0 <= i; i--) {
+                GUILayout.Label(AllText[i]);
+            }
             GUILayout.EndArea();
 
-            Rect optionsBox = new Rect(Screen.width/2+45, 30, Screen.width/2-90, Screen.height-75);
-
+            Rect optionsBox = new Rect(Screen.width / 2f + 45f, 30f, Screen.width / 2f - 90f, Screen.height - 75f);
             GUI.Box(optionsBox, "Options");
             GUILayout.BeginArea(optionsBox);
-
             GUILayout.Space(35);
-
             if (GUILayout.Button("Invite friends")) {
                 SteamHelper.OpenInviteMenu();
             }
-
             if(GUILayout.Button("Start game")) {
-                state=MultiplayerMenuState.Closed;
+                State=MultiplayerMenuState.Closed;
                 patch_MainMenuFoyerController.Instance.NewGameButton.IsInteractive=true;
                 patch_MainMenuFoyerController.Instance.QuitGameButton.IsInteractive=true;
                 patch_MainMenuFoyerController.Instance.ControlsButton.IsInteractive=true;
             }
-
             GUILayout.EndArea();
 
             GUILayout.EndArea();

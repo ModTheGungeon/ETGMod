@@ -15,12 +15,12 @@ internal class patch_PlayerController : PlayerController {
     public new Vector2 HandlePlayerInput() {
         Vector2 orig = orig_HandlePlayerInput();
 
-        if (GameManager.Instance.SecondaryPlayer == this && MultiplayerManager.isPlayingMultiplayer) {
+        if (GameManager.Instance.SecondaryPlayer == this && MultiplayerManager.IsPlayingMultiplayer) {
             Vector2 v = new Vector2(
-                NetworkInput.directions[0] > 0 && NetworkInput.directions[1] > 0 ? 0 : NetworkInput.directions[0] > 0 ? NetworkInput.directions[0] : -NetworkInput.directions[1],
-                NetworkInput.directions[2] > 0 && NetworkInput.directions[3] > 0 ? 0 : NetworkInput.directions[2] > 0 ? NetworkInput.directions[2] : -NetworkInput.directions[3]
-                );
-            return Vector2.ClampMagnitude(v,1);
+                NetworkInput.directions[0] > 0f && NetworkInput.directions[1] > 0f ? 0f : NetworkInput.directions[0] > 0f ? NetworkInput.directions[0] : -NetworkInput.directions[1],
+                NetworkInput.directions[2] > 0f && NetworkInput.directions[3] > 0f ? 0f : NetworkInput.directions[2] > 0f ? NetworkInput.directions[2] : -NetworkInput.directions[3]
+            );
+            return Vector2.ClampMagnitude(v, 1f);
         }
 
         return orig;

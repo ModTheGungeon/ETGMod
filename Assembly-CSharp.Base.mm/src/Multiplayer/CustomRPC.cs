@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using Steamworks;
 using ETGMultiplayer;
 
-class CustomRPC : Attribute{
+public class CustomRPC : Attribute{
 
-    string name;
+    private readonly static Type t_CustomRPC = typeof(CustomRPC);
+
+    string Name;
 
     public CustomRPC(string functionName) {
-        name=functionName;
+        Name = functionName;
     }
 
     public static void DocAllRPCAttributes() {
@@ -20,32 +17,24 @@ class CustomRPC : Attribute{
 
         Type[] allTypes = curr.GetTypes();
 
-        for(int i = 0; i < allTypes.Length; i++) {
-            Type iType = allTypes[i];
+        for (int ti = 0; ti < allTypes.Length; ti++) {
+            Type type = allTypes[ti];
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
 
-            MethodInfo[] pubMethods = iType.GetMethods();
+            for (int mi = 0; mi < methods.Length; mi++) {
+                MethodInfo method = methods[mi];
+                ParameterInfo[] args = method.GetParameters();
+                object[] attributes = method.GetCustomAttributes(false);
 
-            for (int j = 0; j < pubMethods.Length; j++) {
-                MethodInfo jInf = pubMethods[j];
+                for (int ai = 0; ai < attributes.Length; ai++) {
+                    object attribute = attributes[ai];
 
-                if (!jInf.IsStatic)
-                    continue;
-
-                ParameterInfo[] param = jInf.GetParameters();
-
-                object[] attributes = jInf.GetCustomAttributes(false);
-
-                for (int k = 0; k < attributes.Length; k++) {
-                    object kAt = attributes[k];
-
-                    if (kAt.GetType()==typeof(CustomRPC)) {
-                        PacketHelper.allRPCs.Add(((CustomRPC)kAt).name,jInf);
+                    if (t_CustomRPC.IsAssignableFrom(attribute.GetType())) {
+                        PacketHelper.allRPCs.Add(((CustomRPC) attribute).Name, method);
                     }
                 }
             }
-
         }
-
     }
 
 }

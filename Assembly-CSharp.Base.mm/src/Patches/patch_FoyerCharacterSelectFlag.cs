@@ -5,7 +5,7 @@ internal class patch_FoyerCharacterSelectFlag : FoyerCharacterSelectFlag {
 
     public extern void orig_Update();
     public void Update() {
-        if (MultiplayerManager.isPlayingMultiplayer && !GameManager.Instance.SecondaryPlayer) {
+        if (MultiplayerManager.IsPlayingMultiplayer && !GameManager.Instance.SecondaryPlayer) {
             ToggleSelf(true);
         } else {
             orig_Update();
