@@ -5,10 +5,10 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
     private Dictionary<string, ConsoleCommand> _Commands = new Dictionary<string, ConsoleCommand>();
     private Dictionary<string, ConsoleCommandGroup> _Groups = new Dictionary<string, ConsoleCommandGroup>();
 
-    public ConsoleCommandGroup (System.Action<string[]> cmdref) {
+    public ConsoleCommandGroup (Action<string[]> cmdref) {
         Autocompletion = new AutocompletionSettings (delegate(string input) {
             string[] list = GetAllUnitNames();
-            List<String> ret = new List<String>();
+            List<string> ret = new List<string>();
             for (int i = 0; i < list.Length; i++) {
                 string name = list[i];
                 if (name.StartsWith(input)) {
@@ -20,9 +20,9 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
         CommandReference = cmdref;
     }
 
-    public ConsoleCommandGroup () : this(delegate (string[] args) {
-        ETGModConsole.LoggedText.Add("Command group does not have an assigned action");
-    }) {}
+    public ConsoleCommandGroup ()
+        : this((string[] args) => ETGModConsole.LoggedText.Add("Command group does not have an assigned action")) {
+    }
 
     public ConsoleCommandGroup AddUnit(string name, ConsoleCommand command) {
         command.Name = name;
@@ -79,18 +79,18 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
         return result;
     }
 
-    public List<List<String>> ConstructPaths() {
-        List<List<String>> ret = new List<List<String>>();
+    public List<List<string>> ConstructPaths() {
+        List<List<string>> ret = new List<List<string>>();
         foreach (string key in _Commands.Keys) {
-            List<String> tmp = new List<String> ();;
+            List<string> tmp = new List<string> ();
             tmp.Add (key);
             ret.Add (tmp);
         }
 
         foreach (string key in _Groups.Keys) {
-            List<List<String>> tmp = _Groups [key].ConstructPaths ();
+            List<List<string>> tmp = _Groups [key].ConstructPaths ();
             for (int i = 0; i < tmp.Count; i++) {
-                List<String> prefixtmp = new List<String> ();
+                List<string> prefixtmp = new List<string> ();
                 prefixtmp.Add (key);
                 for (int j = 0; j < tmp [i].Count; j++) {
                     prefixtmp.Add (tmp[i][j]);
@@ -103,7 +103,7 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
     }
 
     public string[] GetAllUnitNames() {
-        List<String> ret = new List<String>();
+        List<string> ret = new List<string>();
 
         foreach (string key in _Groups.Keys) {
             ret.Add(key);

@@ -136,8 +136,11 @@ public static class ReflectionHelper {
     }
 
     public static Action<byte[]> CreateRPCDelegate(this MethodInfo info, object instance = null) {
+        object[] args = new object[1];
+        DynamicMethodDelegate d = GetDelegate(info);
         return delegate (byte[] b) {
-            info.Invoke(instance, new object[] { b });
+            args[0] = b;
+            d(instance, args);
         };
     }
 

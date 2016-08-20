@@ -7,8 +7,6 @@ internal class patch_MainMenuFoyerController : MainMenuFoyerController {
 
     public static MainMenuFoyerController Instance;
 
-    private bool isMatched;
-
     protected extern void orig_Awake();
     protected void Awake() {
         orig_Awake();
@@ -17,22 +15,22 @@ internal class patch_MainMenuFoyerController : MainMenuFoyerController {
         VersionLabel.Text = VersionLabel.Text + " | " + ETGMod.BaseUIVersion;
     }
 
-    Texture2D tex;
+    private Texture2D logo;
+    private bool logoReplaced;
 
     protected extern void orig_Update();
     protected void Update() {
         orig_Update();
-        if (!isMatched) {
-            if (tex==null)
-                tex=Resources.Load<Texture2D>("etgmod/logo");
-            if (tex==null)
+        if (!logoReplaced) {
+            if (logo == null) {
+                logo = Resources.Load<Texture2D>("etgmod/logo");
+                logo.filterMode = FilterMode.Point;
+            }
+            if (logo == null) {
                 return;
-            ( (dfTextureSprite)TitleCard ).Texture=tex;
-            ( (dfTextureSprite)TitleCard ).Texture.filterMode=FilterMode.Point;
-            if (( (dfTextureSprite)TitleCard ).Texture!=tex)
-                isMatched=false;
-            else
-                isMatched=true;
+            }
+            ((dfTextureSprite) TitleCard).Texture = logo;
+            logoReplaced = true;
         }
     }
 

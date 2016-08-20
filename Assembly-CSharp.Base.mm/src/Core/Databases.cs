@@ -1,10 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using Ionic.Zip;
-using Mono.Cecil;
 
 public static partial class ETGMod {
 
@@ -47,6 +43,7 @@ public sealed class ItemDB {
     }
 
     public List<PickupObject> ModItems = new List<PickupObject>();
+    public Dictionary<string, PickupObject> ModItemMap = new Dictionary<string, PickupObject>();
     public Dictionary<string, List<WeightedGameObject>> ModLootPerFloor = new Dictionary<string, List<WeightedGameObject>>();
 
     /// <summary>
@@ -66,18 +63,17 @@ public sealed class ItemDB {
         int id = Add(value, updateSpriteCollections, floor);
         if (updateAnimations) {
             value.UpdateAnimations();
-            value.GetSprite().SetSprite(WeaponCollection, WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
-            value.DefaultSpriteID = value.GetSprite().spriteId;
+            value.GetSprite().SetSprite(WeaponCollection, value.DefaultSpriteID = WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
         }
         return id;
     }
-    public int Add(PickupObject value, bool updateSpriteCollections = true, string floor = "ANY") {
+    public int Add(PickupObject value, bool updateSpriteCollections = false, string floor = "ANY") {
         int id = PickupObjectDatabase.Instance.Objects.Count;
         PickupObjectDatabase.Instance.Objects.Add(value);
         ModItems.Add(value);
         if (value != null) {
             UnityEngine.Object.DontDestroyOnLoad(value.gameObject);
-
+            ModItemMap[value.name] = value;
             value.PickupObjectId = id;
 
             EncounterDatabaseEntry edbEntry = new EncounterDatabaseEntry(value.encounterTrackable);
@@ -191,11 +187,9 @@ public sealed class ItemDB {
     }
 
     public PickupObject GetModItemByName(string name) {
-        for (int i = 0; i < ModItems.Count; i++) {
-            PickupObject item = ModItems[i];
-            if (item != null && item.name == name) {
-                return item;
-            }
+        PickupObject item;
+        if (ModItemMap.TryGetValue(name, out item)) {
+            return item;
         }
         return null;
     }

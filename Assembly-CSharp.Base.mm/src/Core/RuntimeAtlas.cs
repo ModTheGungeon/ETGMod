@@ -1,11 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using Newtonsoft.Json;
-using System.Collections;
-using AttachPoint = tk2dSpriteDefinition.AttachPoint;
 
 public class RuntimeAtlasPacker {
 

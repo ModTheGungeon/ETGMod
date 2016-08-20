@@ -91,9 +91,6 @@ public class ETGModGUI : MonoBehaviour {
 
         guiSkin.font.RequestCharactersInTexture("abcdefghijklmnopqrstuvwxyz",12);
 
-        foreach (CharacterInfo inf in guiSkin.font.characterInfo)
-            Debug.Log(inf.uv);
-
         Debug.Log("Font is " + guiSkin.font);
         Debug.Log("Font name: " + guiSkin.font.name);
     }

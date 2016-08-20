@@ -193,8 +193,7 @@ public class LimitedStream : MemoryStream {
         
     protected override void Dispose(bool disposing) {
         if (!LimitStreamShared) {
-            //LimitStream.Dispose(disposing);
-            //Dispose and close are not the same, but whatever
+            LimitStream.Dispose();
             LimitStream.Close();
         }
         base.Dispose(disposing);
