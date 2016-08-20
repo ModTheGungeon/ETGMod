@@ -12,11 +12,9 @@ public static partial class JSONHelper {
     private readonly static Assembly _Asm;
     private readonly static Type[] _RuleTypes;
     private readonly static Type t_JSONRule = typeof(JSONRule);
-    private readonly static Type t_DictionaryEntry = typeof(DictionaryEntry);
     private readonly static Type t_string = typeof(string);
     private readonly static Type t_byte_a = typeof(byte[]);
     private readonly static Type t_Type = typeof(Type);
-    private readonly static Type t_IList_1 = typeof(IList<>);
     private readonly static object[] a_object_0 = new object[0];
 
     private readonly static Dictionary<string, Type> _TypeCache = new Dictionary<string, Type>();

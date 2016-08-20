@@ -20,30 +20,31 @@ public class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     public void Update() {
-        foreach (DamageIndicator d in DamageIndicator.allIndicators)
-            d.Update();
+        for (int i = 0; i < DamageIndicator.AllIndicators.Count; i++)
+            DamageIndicator.AllIndicators[0].Update();
 
-        foreach (DamageIndicator d in DamageIndicator.removeIndicators)
-            DamageIndicator.allIndicators.Remove(d);
+        if (DamageIndicator.RemoveIndicators.Count != 0) {
+            for (int i = 0; i < DamageIndicator.RemoveIndicators.Count; i++)
+                DamageIndicator.AllIndicators.Remove(DamageIndicator.RemoveIndicators[i]);
 
-        DamageIndicator.removeIndicators.Clear();
+            DamageIndicator.RemoveIndicators.Clear();
+        }
     }
 
     public void OnGUI() {
-        foreach (DamageIndicator d in DamageIndicator.allIndicators)
-            d.OnGUI();
+        for (int i = 0; i < DamageIndicator.AllIndicators.Count; i++)
+            DamageIndicator.AllIndicators[0].OnGUI();
     }
 
     public static void HealthHaverTookDamage(HealthHaver dmg, float damage) {
         if (!_AllBars.ContainsKey(dmg)) {
             HealthHaverTracker tracker = new HealthHaverTracker();
-
-            tracker.thisHaver=dmg;
+            tracker.thisHaver = dmg;
             _AllBars.Add(dmg,tracker);
         }
 
         if (RenderIndicators) {
-            DamageIndicator newIndicator = new DamageIndicator(dmg.specRigidbody.UnitCenter,damage);
+            DamageIndicator.AllIndicators.Add(new DamageIndicator(dmg.specRigidbody.UnitCenter, damage));
         }
     }
 
@@ -55,14 +56,14 @@ public class ETGDamageIndicatorGUI : MonoBehaviour {
     public class DamageIndicator {
         private readonly static Vector2 _Vector2_250 = new Vector2(250f, 250f);
 
-        Vector3 Position = Vector3.zero;
-        float DamageTaken = 0;
-        float WiggleAmount = 0;
-        float Lifetime = 1;
-        float Speed = 1;
+        public Vector3 Position;
+        public float DamageTaken;
+        public float WiggleAmount;
+        public float Lifetime;
+        public float Speed;
 
-        public static List<DamageIndicator> allIndicators = new List<DamageIndicator>();
-        public static List<DamageIndicator> removeIndicators = new List<DamageIndicator>();
+        public static List<DamageIndicator> AllIndicators = new List<DamageIndicator>();
+        public static List<DamageIndicator> RemoveIndicators = new List<DamageIndicator>();
 
         public DamageIndicator(Vector3 wPosStart, float damageTaken = 0, float wiggleAmount = 0, float lifetime = 1, float speed = 1) {
             Position = wPosStart;
@@ -70,8 +71,6 @@ public class ETGDamageIndicatorGUI : MonoBehaviour {
             WiggleAmount = wiggleAmount;
             Lifetime = lifetime;
             Speed = speed;
-
-            allIndicators.Add(this);
         }
 
         public void Update() {
@@ -90,7 +89,7 @@ public class ETGDamageIndicatorGUI : MonoBehaviour {
         }
 
         public void Destroy() {
-            removeIndicators.Add(this);
+            RemoveIndicators.Add(this);
         }
     }
 

@@ -15,16 +15,15 @@ namespace ETGGUI.Inspector {
         };
 
         private static PropertyInfo p_Object_name = typeof(UnityEngine.Object).GetProperty("name");
-        private static PropertyInfo p_Transform_tag = typeof(Transform).GetProperty("tag");
         private static PropertyInfo p_GameObject_activeSelf = typeof(GameObject).GetProperty("activeSelf");
-        private static PropertyInfo p_Transform_position = typeof(Transform).GetProperty("position");
+        private static PropertyInfo p_Transform_tag = typeof(Transform).GetProperty("tag");
 
         private List<string> _Crawled = new List<string>();
         public void OnGUI(object instance) {
             _Crawled.Clear();
             _Crawled.Add("name");
+            _Crawled.Add("activeSelf");
             _Crawled.Add("tag");
-            _Crawled.Add("position");
             PropertyInfo[] allProperties = instance.GetType().GetProperties(
                 BindingFlags.Public |
                 BindingFlags.Instance |

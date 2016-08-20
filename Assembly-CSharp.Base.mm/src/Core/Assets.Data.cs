@@ -57,7 +57,6 @@ public struct AssetSpriteData {
         }
         int texWidth = sprites.materials[0].mainTexture.width;
         int texHeight = sprites.materials[0].mainTexture.height;
-        AttachPoint[] attachPoints = sprites.GetAttachPoints(sprites.spriteDefinitions.IndexOf(frame));
         return new AssetSpriteData {
             name = separate ? null : frame.name,
 

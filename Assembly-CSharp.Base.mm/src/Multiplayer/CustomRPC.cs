@@ -23,7 +23,6 @@ public class CustomRPC : Attribute{
 
             for (int mi = 0; mi < methods.Length; mi++) {
                 MethodInfo method = methods[mi];
-                ParameterInfo[] args = method.GetParameters();
                 object[] attributes = method.GetCustomAttributes(false);
 
                 for (int ai = 0; ai < attributes.Length; ai++) {
