@@ -13,31 +13,25 @@ public class FloatPropertyInspector : IBasePropertyInspector {
         return input;
     }
 
+#pragma warning disable RECS0018
     public static void TextAreaFloat(ref float f) {
         f = TextAreaFloat(f);
     }
     public static float TextAreaFloat(float f) {
         string s = f.ToString();
-        bool zero = false;
-#pragma warning disable RECS0018
         if (f == 0f) {
-#pragma warning restore RECS0018
             s = "";
-            zero = true;
         }
         if (f.IsNegativeZero()) {
             s = "-";
-            zero = true;
         }
         s = GUILayout.TextArea(s);
-        if (zero) {
-            s += "0";
-        }
         float result;
         if (!float.TryParse(s, out result)) {
-            return f;
+            return s.Length != 0 && s[0] == '-' ? -0f : 0f;
         }
         return result;
     }
+#pragma warning restore RECS0018
 }
 
