@@ -4,11 +4,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Text;
-using System.IO;
-using System.Reflection;
-using System.Linq;
 using System;
-using Object = UnityEngine.Object;
 
 public class ETGModConsole : IETGModMenu {
 
@@ -36,9 +32,9 @@ public class ETGModConsole : IETGModMenu {
     public static Vector2 MainScrollPos;
     public static Vector2 CorrectScrollPos;
 
-    private Rect _MainBoxRect     = new Rect(16,                 16 , Screen.width - 32, Screen.height - 32 );
-    private Rect _InputBox        = new Rect(16, Screen.height - 32 , Screen.width - 32,                 32 );
-    private Rect _AutocompletionBox  = new Rect(16, Screen.height - 184, Screen.width - 32,                 120);
+    private Rect _MainBoxRect           = new Rect(16f,                 16f , Screen.width - 32f, Screen.height - 32f );
+    private Rect _InputBox              = new Rect(16f, Screen.height - 32f , Screen.width - 32f,                 32f );
+    private Rect _AutocompletionBox     = new Rect(16f, Screen.height - 184f, Screen.width - 32f,                 120f);
 
     private bool _CloseConsoleOnCommand = false;
     private bool _CutInputFocusOnCommand = false;
@@ -52,19 +48,17 @@ public class ETGModConsole : IETGModMenu {
     private static bool _FocusOnInputBox = true;
 
     public void Start() {
-
-
         // GLOBAL NAMESPACE
         Commands
                 .AddUnit ("help", delegate(string[] args) {
-                    List<List<String>> paths = Commands.ConstructPaths();
+                    List<List<string>> paths = Commands.ConstructPaths();
                     for (int i = 0; i < paths.Count; i++) {
                         LoggedText.Add(String.Join(" ", paths[i].ToArray()));
                     }
                 })
                 .AddUnit ("exit", (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None)
                 .AddUnit ("give", GiveItem, new AutocompletionSettings(delegate(string input) {
-                    List<String> ret = new List<String>();
+                    List<string> ret = new List<string>();
                     foreach (string key in AllItems.Keys) {
                         if (key.StartsWith(input)) {
                             ret.Add(key);
@@ -125,7 +119,7 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public TextEditor GetTextEditor() {
-        return (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+        return (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
     }
 
     public string[] SplitArgs(string args) {
@@ -140,14 +134,14 @@ public class ETGModConsole : IETGModMenu {
             string[] input = SplitArgs(te.text.Trim());
             int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
 
-            List<String> path = new List<String>();
+            List<string> path = new List<string>();
             for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
-                if (!String.IsNullOrEmpty(input[i])) path.Add(input[i]);
+                if (!string.IsNullOrEmpty(input[i])) path.Add(input[i]);
             }
 
-            List<String> args = new List<String>();
+            List<string> args = new List<string>();
             for (int i = commandindex; i < input.Length; i++) {
-                if (!String.IsNullOrEmpty(input[i])) args.Add(input[i]);
+                if (!string.IsNullOrEmpty(input[i])) args.Add(input[i]);
             }
             RunCommand(path.ToArray(), args.ToArray());
         }
@@ -234,7 +228,7 @@ public class ETGModConsole : IETGModMenu {
             }
             // Get where the command appears in the path so that we know where the arguments start
             int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
-            List<String> pathcreation = new List<String>();
+            List<string> pathcreation = new List<string>();
             for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
                 pathcreation.Add (input [i]);
             }

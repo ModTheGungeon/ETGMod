@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-class ETGDamageIndicatorGUI : MonoBehaviour {
+public class ETGDamageIndicatorGUI : MonoBehaviour {
 
     private static Dictionary<HealthHaver, HealthHaverTracker> _AllBars = new Dictionary<HealthHaver, HealthHaverTracker>();
 
@@ -12,10 +12,7 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     public static bool RenderIndicators = true;
 
     public static void Create() {
-        GameObject newObject = new GameObject();
-        newObject.name="Damage Indicators";
-        newObject.AddComponent<ETGDamageIndicatorGUI>();
-        newObject.transform.SetParent(ETGModGUI.MenuObject.transform);
+        new GameObject("Damage Indicators").AddComponent<ETGDamageIndicatorGUI>().transform.SetParent(ETGModGUI.MenuObject.transform);
     }
 
     public void Start() {
@@ -23,7 +20,6 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
     }
 
     public void Update() {
-
         foreach (DamageIndicator d in DamageIndicator.allIndicators)
             d.Update();
 
@@ -31,18 +27,14 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
             DamageIndicator.allIndicators.Remove(d);
 
         DamageIndicator.removeIndicators.Clear();
-
     }
 
     public void OnGUI() {
-
         foreach (DamageIndicator d in DamageIndicator.allIndicators)
             d.OnGUI();
-
     }
 
     public static void HealthHaverTookDamage(HealthHaver dmg, float damage) {
-
         if (!_AllBars.ContainsKey(dmg)) {
             HealthHaverTracker tracker = new HealthHaverTracker();
 
@@ -55,62 +47,51 @@ class ETGDamageIndicatorGUI : MonoBehaviour {
         }
     }
 
-    class HealthHaverTracker {
+    public class HealthHaverTracker {
         public HealthHaver thisHaver;
 
-
-
     }
 
-    class HealthBar {
-        public HealthHaverTracker tracker;
+    public class DamageIndicator {
+        private readonly static Vector2 _Vector2_250 = new Vector2(250f, 250f);
 
-
-    }
-
-    class DamageIndicator {
-
-        Vector3 position = Vector3.zero;
-        float damageTaken = 0;
-        float wiggleAmount = 0;
-        float lifetime = 1;
-        float speed = 1;
+        Vector3 Position = Vector3.zero;
+        float DamageTaken = 0;
+        float WiggleAmount = 0;
+        float Lifetime = 1;
+        float Speed = 1;
 
         public static List<DamageIndicator> allIndicators = new List<DamageIndicator>();
         public static List<DamageIndicator> removeIndicators = new List<DamageIndicator>();
 
         public DamageIndicator(Vector3 wPosStart, float damageTaken = 0, float wiggleAmount = 0, float lifetime = 1, float speed = 1) {
-            this.position=wPosStart;
-            this.damageTaken=damageTaken;
-            this.wiggleAmount=wiggleAmount;
-            this.lifetime=lifetime;
-            this.speed=speed;
+            Position = wPosStart;
+            DamageTaken = damageTaken;
+            WiggleAmount = wiggleAmount;
+            Lifetime = lifetime;
+            Speed = speed;
 
             allIndicators.Add(this);
         }
 
         public void Update() {
+            Position += Vector3.up * Speed * Time.deltaTime;
 
-            position+=Vector3.up*speed*Time.deltaTime;
-
-            lifetime-=Time.deltaTime;
-            if (lifetime<=0)
+            Lifetime -= Time.deltaTime;
+            if (Lifetime <= 0)
                 Destroy();
         }
 
         public void OnGUI() {
+            Vector2 worldToScreenPoint = Camera.main.WorldToScreenPoint(Position);
+            worldToScreenPoint = new Vector2(worldToScreenPoint.x, Screen.height - worldToScreenPoint.y);
 
-            Vector2 worldToScreenPoint = Camera.main.WorldToScreenPoint(position);
-            worldToScreenPoint=new Vector2(worldToScreenPoint.x, Screen.height-worldToScreenPoint.y);
-
-            GUI.Label(new Rect(worldToScreenPoint,Vector2.one*250), "<size=30> " + damageTaken.ToString() + " </size>");
-
+            GUI.Label(new Rect(worldToScreenPoint, _Vector2_250), "<size=30> " + DamageTaken + " </size>");
         }
 
         public void Destroy() {
             removeIndicators.Add(this);
         }
-
     }
 
 }

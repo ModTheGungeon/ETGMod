@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 
 namespace ETGGUI {
-    static class FontConverter {
+    public static class FontConverter {
 
         public static Vector3 Offset = new Vector3 (0, 0, 0);
         public static Vector3 Size = new Vector3(0, 0, 0);
@@ -13,9 +13,9 @@ namespace ETGGUI {
         public static Font GetFontFromdfFont(dfFont font) {
             Font f = new Font();
 
-            f.material=new Material(GUI.skin.font.material);
-            f.material.mainTexture=font.Texture;
-            f.material.mainTexture.wrapMode=TextureWrapMode.Repeat;
+            f.material = new Material(GUI.skin.font.material);
+            f.material.mainTexture = font.Texture;
+            f.material.mainTexture.wrapMode = TextureWrapMode.Repeat;
 
             CharacterInfo[] chars = new CharacterInfo[font.Glyphs.Count];
 
@@ -30,37 +30,37 @@ namespace ETGGUI {
 
                 dfAtlas.ItemInfo itemInfo = font.Atlas[font.Sprite];
 
-                inf.glyphWidth=glyphDefinition.width;
-                inf.glyphHeight=glyphDefinition.height;
+                inf.glyphWidth = glyphDefinition.width;
+                inf.glyphHeight = glyphDefinition.height;
 
-                inf.size=(int)Size.x;
+                inf.size = (int) Size.x;
 
                 if (inf.glyphHeight>maxHeight)
-                    maxHeight=inf.glyphHeight;
+                    maxHeight = inf.glyphHeight;
 
-                inf.index=glyphDefinition.id;
+                inf.index = glyphDefinition.id;
 
-                float num9 = itemInfo.region.x+(float)glyphDefinition.x*f.material.mainTexture.texelSize.x;
-                float num10 = itemInfo.region.yMax-(float)glyphDefinition.y*f.material.mainTexture.texelSize.y;
-                float num11 = num9+(float)glyphDefinition.width*f.material.mainTexture.texelSize.x;
-                float num12 = num10-(float)glyphDefinition.height*f.material.mainTexture.texelSize.y;
+                float left = itemInfo.region.x + glyphDefinition.x * f.material.mainTexture.texelSize.x;
+                float top = itemInfo.region.yMax - glyphDefinition.y * f.material.mainTexture.texelSize.y;
+                float right = left + glyphDefinition.width * f.material.mainTexture.texelSize.x;
+                float bottom = top - glyphDefinition.height * f.material.mainTexture.texelSize.y;
 
-                inf.uvBottomLeft=( new Vector2(num9, num12) );
-                inf.uvBottomRight=( new Vector2(num11, num12) );
-                inf.uvTopRight=( new Vector2(num11, num10) );
-                inf.uvTopLeft=( new Vector2(num9, num10) );
+                inf.uvBottomLeft = new Vector2(left, bottom);
+                inf.uvBottomRight = new Vector2(right, bottom);
+                inf.uvTopRight = new Vector2(right, top);
+                inf.uvTopLeft = new Vector2(left, top);
 
-                inf.advance=glyphDefinition.xadvance;
+                inf.advance = glyphDefinition.xadvance;
 
                 inf.minY=0;
-                inf.maxY=inf.glyphHeight;
+                inf.maxY = inf.glyphHeight;
                 inf.minX=0;
-                inf.maxX=inf.glyphWidth;
+                inf.maxX = inf.glyphWidth;
 
-                chars[i]=inf;
+                chars[i] = inf;
             }
 
-            f.characterInfo=chars;
+            f.characterInfo = chars;
 
             return f;
         }
