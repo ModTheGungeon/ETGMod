@@ -154,6 +154,7 @@
     <Compile Include="src\SGUI\Elements\SGUILabel.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="src\SGUI\Backends\SGUIIMBackend.cs" />
+    <Compile Include="src\SGUI\Elements\SGUITextField.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

@@ -42,9 +42,15 @@ public sealed class SGUIIMBackend : ISGUIBackend {
                 throw new InvalidOperationException("StartRender already called! Call EndRender first!");
             }
             CurrentRoot = root;
+
             if (Font == null) {
                 Font = GUI.skin.font;
             }
+
+            GUI.skin.textField.normal.background = CurrentRoot.TextFieldBackground[0];
+            GUI.skin.textField.active.background = CurrentRoot.TextFieldBackground[1];
+            GUI.skin.textField.hover.background = CurrentRoot.TextFieldBackground[2];
+            GUI.skin.textField.focused.background = CurrentRoot.TextFieldBackground[3];
         }
 
         public void EndRender(SGUIRoot root) {
@@ -54,24 +60,44 @@ public sealed class SGUIIMBackend : ISGUIBackend {
             CurrentRoot = null;
         }
 
-        public bool IsWindow(SGUIElement elem) {
+        public bool IsRelative(SGUIElement elem) {
             if (elem == null) {
+                // Root is absolute.
                 return true;
             }
-            // TODO check if the element would render as a window
+
+            // TODO check if the element would render its children relative to itself
             return false;
         }
 
-        public void Text(SGUIElement elem, string text, Vector2 position) {
+        public void PreparePosition(SGUIElement elem, ref Vector2 position) {
             // IMGUI draws relative to the current window.
-            // If this is a window, don't add the absolute offset.
+            // If this is a window or similar, don't add the absolute offset.
             // If not, add the element position to draw relative to *that*.
-            if (!IsWindow(elem) && elem != null) {
+            if (!IsRelative(elem) && elem != null) {
                 position += elem.Position;
             }
-            // Direct texts in windows will have some text bounds issues - but they should use WTFGUILabels in the first place...
+        }
+
+        public void Text(SGUIElement elem, Vector2 position, string text) {
+            PreparePosition(elem, ref position);
+
             GUI.skin.label.normal.textColor = elem.Foreground;
-            GUI.Label(new Rect(position, elem.Size), text);
+            // Direct texts in anything with an unfitting size will have some text bounds issues - use SGUILabel...
+            GUI.Label(new Rect(position, elem != null ? elem.Size : Vector2.zero), text);
+        }
+
+        public void TextField(SGUIElement elem, Vector2 position, ref string text) {
+            if (!IsRelative(elem) && elem != null) {
+                position += elem.Position;
+            }
+
+            GUI.skin.textField.normal.textColor = elem.Foreground;
+            GUI.skin.textField.active.textColor = elem.Foreground;
+            GUI.skin.textField.hover.textColor = elem.Foreground;
+            GUI.skin.textField.focused.textColor = elem.Foreground;
+            GUI.backgroundColor = elem.Background;
+            text = GUI.TextField(new Rect(position, elem.Size), text);
         }
 
         public Vector2 MeasureText(string text, Vector2? size = null) {

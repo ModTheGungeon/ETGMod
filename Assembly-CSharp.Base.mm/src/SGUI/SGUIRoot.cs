@@ -45,6 +45,12 @@ namespace SGUI {
             }
         }
 
+        public static Texture2D White;
+        /// <summary>
+        /// Normal, active, hover, focused.
+        /// </summary>
+        public Texture2D[] TextFieldBackground;
+
         public static void Setup() {
             Main = new GameObject("WTFGUI Root").AddComponent<SGUIRoot>();
             Main.Backend = new SGUIIMBackend();
@@ -57,6 +63,13 @@ namespace SGUI {
 
             Foreground = new Color(1f, 1f, 1f, 1f);
             Background = new Color(0f, 0f, 0f, 0.8f);
+
+            if (White == null) {
+                White = new Texture2D(1, 1);
+                White.SetPixel(0, 0, Color.white);
+                White.Apply();
+            }
+            TextFieldBackground = new Texture2D[] { White, White, White, White };
         }
 
         public void Start() {

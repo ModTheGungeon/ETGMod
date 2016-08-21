@@ -26,9 +26,17 @@ namespace SGUI {
         /// Render the specified text on screen.
         /// </summary>
         /// <param name="elem">Element instance. Null for root.</param>
-        /// <param name="text">Text to render.</param>
         /// <param name="position">Relative position to render the text at.</param>
-        void Text(SGUIElement elem, string text, Vector2 position);
+        /// <param name="text">Text to render.</param>
+        void Text(SGUIElement elem, Vector2 position, string text);
+
+        /// <summary>
+        /// Render a text field on screen.
+        /// </summary>
+        /// <param name="elem">Element instance. Null for root.</param>
+        /// <param name="position">Position.</param>
+        /// <param name="text">Text.</param>
+        void TextField(SGUIElement elem, Vector2 position, ref string text);
 
         /// <summary>
         /// Gets the size of the text.

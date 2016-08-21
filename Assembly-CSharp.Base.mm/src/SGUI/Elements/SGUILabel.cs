@@ -21,7 +21,7 @@ namespace SGUI {
         }
 
         public override void Render() {
-            Draw.Text(this, Text, Vector2.zero);
+            Draw.Text(this, Vector2.zero, Text);
         }
 
     }

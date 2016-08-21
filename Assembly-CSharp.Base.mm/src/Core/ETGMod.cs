@@ -140,6 +140,15 @@ public static partial class ETGMod {
             Foreground = new Color(1f, 0f, 0f, 0.5f)
         };
 
+        new SGUITextField {
+            Text = "Sample.",
+            OnUpdateStyle = delegate (SGUIElement elem) {
+                elem.Size.x = elem.Root.Size.x - 32f;
+                elem.Position = elem.Centered - new Vector2(0f, elem.Backend.LineHeight);
+            },
+            OnTextChanged = (SGUITextField elem, string prevText) => Console.WriteLine("Changed text from " + prevText + " to " + elem.Text)
+        };
+
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
         StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
