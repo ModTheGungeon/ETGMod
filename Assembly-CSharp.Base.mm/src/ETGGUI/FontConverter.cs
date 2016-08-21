@@ -9,7 +9,6 @@ namespace ETGGUI {
 
         public static Font GetFontFromdfFont(dfFont font, int scale = 1) {
             Font f = new Font(font.name);
-            f.fontNames = new string[] { f.name };
 
             f.material = new Material(GUI.skin.font.material);
             f.material.mainTexture = font.Texture;

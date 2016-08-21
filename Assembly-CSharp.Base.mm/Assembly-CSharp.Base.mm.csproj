@@ -148,6 +148,12 @@
     <Compile Include="src\Core\GunBehaviour.cs" />
     <Compile Include="src\Core\Platform.cs" />
     <Compile Include="src\Patches\patch_PlatformInterface.cs" />
+    <Compile Include="src\SGUI\SGUIRoot.cs" />
+    <Compile Include="src\SGUI\SGUIElement.cs" />
+    <Compile Include="src\SGUI\ISGUIBackend.cs" />
+    <Compile Include="src\SGUI\Elements\SGUILabel.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="src\SGUI\Backends\SGUIIMBackend.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -290,5 +296,8 @@
     <Folder Include="src\JSON\" />
     <Folder Include="src\JSON\Rules\" />
     <Folder Include="Content\sprites\" />
+    <Folder Include="src\SGUI\" />
+    <Folder Include="src\SGUI\Elements\" />
+    <Folder Include="src\SGUI\Backends\" />
   </ItemGroup>
 </Project>

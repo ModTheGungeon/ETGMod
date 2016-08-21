@@ -47,8 +47,8 @@ public static partial class ETGMod {
                 Color[] texRWData = null;
                 for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
                     tk2dSpriteDefinition frame = sprites.spriteDefinitions[i];
-                    Texture2D texOrig = (Texture2D) frame.material.mainTexture;
-                    if (!frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D) frame.materialInst.mainTexture))) {
+                    Texture2D texOrig = frame.material.mainTexture as Texture2D;
+                    if (texOrig == null || !frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D) frame.materialInst.mainTexture))) {
                         continue;
                     }
                     string pathFull = path + "/" + frame.name;

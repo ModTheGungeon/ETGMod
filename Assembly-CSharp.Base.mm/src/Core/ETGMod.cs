@@ -6,6 +6,7 @@ using System.Reflection;
 using Ionic.Zip;
 using System.Runtime.InteropServices;
 using System.Collections;
+using SGUI;
 
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
@@ -96,6 +97,7 @@ public static partial class ETGMod {
         Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();
+        SGUIRoot.Setup();
         MultiplayerManager.Create();
 
         Debug.Log("ETGMod " + BaseVersion);
@@ -127,6 +129,16 @@ public static partial class ETGMod {
         ETGModGUI.Start();
 
         TestGunController.Add();
+
+        new SGUILabel {
+            Text = "CENTE<color=#ff0000ff>RED</color>.",
+            OnUpdateStyle = (SGUIElement elem) => elem.Position = elem.Centered
+        };
+        new SGUILabel {
+            Text = "redcente.",
+            OnUpdateStyle = (SGUIElement elem) => elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight),
+            Foreground = new Color(1f, 0f, 0f, 0.5f)
+        };
 
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.

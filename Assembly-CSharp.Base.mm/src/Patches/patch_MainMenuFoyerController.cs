@@ -24,11 +24,11 @@ internal class patch_MainMenuFoyerController : MainMenuFoyerController {
         if (!logoReplaced) {
             if (logo == null) {
                 logo = Resources.Load<Texture2D>("etgmod/logo");
-                logo.filterMode = FilterMode.Point;
             }
             if (logo == null) {
                 return;
             }
+            logo.filterMode = FilterMode.Point;
             ((dfTextureSprite) TitleCard).Texture = logo;
             logoReplaced = true;
         }
