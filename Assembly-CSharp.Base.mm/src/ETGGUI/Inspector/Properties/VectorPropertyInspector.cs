@@ -31,7 +31,7 @@ public class VectorPropertyInspector : IBasePropertyInspector {
         GUILayout.BeginHorizontal();
         GUILayout.Label(name, GUILayout.Width(100f));
         for (int i = 0; i < 2; i++) {
-            input[i] = FloatPropertyInspector.TextAreaFloat(input[i]);
+            input[i] = FloatPropertyInspector.TextFieldFloat(input[i]);
         }
         GUILayout.EndHorizontal();
         return input;
@@ -41,7 +41,7 @@ public class VectorPropertyInspector : IBasePropertyInspector {
         GUILayout.BeginHorizontal();
         GUILayout.Label(name, GUILayout.Width(100f));
         for (int i = 0; i < 3; i++) {
-            input[i] = FloatPropertyInspector.TextAreaFloat(input[i]);
+            input[i] = FloatPropertyInspector.TextFieldFloat(input[i]);
         }
         GUILayout.EndHorizontal();
         return input;
@@ -51,7 +51,7 @@ public class VectorPropertyInspector : IBasePropertyInspector {
         GUILayout.BeginHorizontal();
         GUILayout.Label(name, GUILayout.Width(100f));
         for (int i = 0; i < 4; i++) {
-            input[i] = FloatPropertyInspector.TextAreaFloat(input[i]);
+            input[i] = FloatPropertyInspector.TextFieldFloat(input[i]);
         }
         GUILayout.EndHorizontal();
         return input;

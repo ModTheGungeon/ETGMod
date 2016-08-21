@@ -34,7 +34,7 @@ public class ETGModGUI : MonoBehaviour {
     public static Texture2D TestTexture;
     public static Texture2D BoxTexture;
 
-    public static GUISkin guiSkin;
+    public static GUISkin GuiSkin;
 
     private static IETGModMenu _CurrentMenuScript {
         get {
@@ -86,13 +86,6 @@ public class ETGModGUI : MonoBehaviour {
         _InspectorMenu.Start();
 
         TestTexture = Resources.Load<Texture2D>("test/texture");
-
-        guiSkin = Resources.Load<GUISkin>("Gungeon Font");
-
-        guiSkin.font.RequestCharactersInTexture("abcdefghijklmnopqrstuvwxyz",12);
-
-        Debug.Log("Font is " + guiSkin.font);
-        Debug.Log("Font name: " + guiSkin.font.name);
     }
 
     public void Update() {
@@ -170,6 +163,17 @@ public class ETGModGUI : MonoBehaviour {
     // Font f;
 
     public void OnGUI() {
+        if (GuiSkin == null) {
+            GuiSkin = GUI.skin;
+            GuiSkin.font = FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font);
+            float height = 26f;
+            GuiSkin.label.fixedHeight = height;
+            GuiSkin.button.fixedHeight = height;
+            GuiSkin.toggle.fixedHeight = height;
+            GuiSkin.textField.fixedHeight = height;
+            GuiSkin.textField.alignment = TextAnchor.MiddleLeft;
+        }
+        GUI.skin = GuiSkin;
 
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
             if (!StoredTimeScale.HasValue) {
@@ -179,7 +183,7 @@ public class ETGModGUI : MonoBehaviour {
 
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) {
                 _CurrentMenuScript.OnClose ();
-                ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
+                ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
                 ETGModGUI.UpdateTimeScale ();
                 ETGModGUI.UpdatePlayerState ();
             }
@@ -196,7 +200,7 @@ public class ETGModGUI : MonoBehaviour {
 
         int count = 0;
 
-        while (PickupObjectDatabase.Instance==null)
+        while (PickupObjectDatabase.Instance == null)
             yield return new WaitForEndOfFrame();
 
         // TODO: bleh, foreach

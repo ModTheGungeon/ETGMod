@@ -7,17 +7,17 @@ public class FloatPropertyInspector : IBasePropertyInspector {
         GUILayout.BeginHorizontal();
         GUILayout.Label(info.Name, GUILayout.Width(100f));
         if (input != null) {
-            input = TextAreaFloat((float) input);
+            input = TextFieldFloat((float) input);
         }
         GUILayout.EndHorizontal();
         return input;
     }
 
 #pragma warning disable RECS0018
-    public static void TextAreaFloat(ref float f) {
-        f = TextAreaFloat(f);
+    public static void TextFieldFloat(ref float f) {
+        f = TextFieldFloat(f);
     }
-    public static float TextAreaFloat(float f) {
+    public static float TextFieldFloat(float f) {
         string s = f.ToString();
         if (f == 0f) {
             s = "";
@@ -25,7 +25,7 @@ public class FloatPropertyInspector : IBasePropertyInspector {
         if (f.IsNegativeZero()) {
             s = "-";
         }
-        s = GUILayout.TextArea(s);
+        s = GUILayout.TextField(s);
         float result;
         if (!float.TryParse(s, out result)) {
             return s.Length != 0 && s[0] == '-' ? -0f : 0f;
