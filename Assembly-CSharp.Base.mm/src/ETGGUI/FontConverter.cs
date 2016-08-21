@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ETGGUI {
     public static class FontConverter {
 
-        public static Font GetFontFromdfFont(dfFont font) {
+        public static Font GetFontFromdfFont(dfFont font, int scale = 1) {
             Font f = new Font(font.name);
             f.fontNames = new string[] { f.name };
 
@@ -22,8 +22,8 @@ namespace ETGGUI {
                 dfFont.GlyphDefinition glyphDefinition = font.Glyphs[i];
                 dfAtlas.ItemInfo itemInfo = font.Atlas[font.Sprite];
 
-                inf.glyphWidth = glyphDefinition.width * 2;
-                inf.glyphHeight = glyphDefinition.height * 2;
+                inf.glyphWidth = glyphDefinition.width * scale;
+                inf.glyphHeight = glyphDefinition.height * scale;
                 inf.size = 0; // Must be 0
 
                 inf.index = glyphDefinition.id;
@@ -38,10 +38,10 @@ namespace ETGGUI {
                 inf.uvBottomLeft = new Vector2(left, bottom);
                 inf.uvBottomRight = new Vector2(right, bottom);
 
-                inf.advance = glyphDefinition.xadvance * 2;
+                inf.advance = glyphDefinition.xadvance * scale;
 
-                inf.minY = -glyphDefinition.height;
-                inf.maxY = glyphDefinition.height;
+                inf.minY = scale * -glyphDefinition.height / 2;
+                inf.maxY = scale * glyphDefinition.height / 2;
 
                 chars[i] = inf;
             }
