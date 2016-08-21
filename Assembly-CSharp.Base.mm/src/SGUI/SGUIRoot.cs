@@ -8,8 +8,8 @@ namespace SGUI {
         public static SGUIRoot Main;
         public ISGUIBackend Backend;
 
-        public readonly BindingList<SGUIElement> Children = new BindingList<SGUIElement>();
-        public readonly List<SGUIElement> AdoptedChildren = new List<SGUIElement>();
+        public readonly BindingList<SElement> Children = new BindingList<SElement>();
+        public readonly List<SElement> AdoptedChildren = new List<SElement>();
 
         protected Color _Foreground;
         public Color Foreground {
@@ -78,7 +78,7 @@ namespace SGUI {
         public void HandleChange(object sender, ListChangedEventArgs e) {
             // TODO Also send event to backend.
             if (e.ListChangedType == ListChangedType.ItemAdded) {
-                SGUIElement child = Children[e.NewIndex];
+                SElement child = Children[e.NewIndex];
                 child.Root = this;
                 child.Parent = null;
                 if (Backend.UpdateStyleOnRender) {
@@ -100,7 +100,7 @@ namespace SGUI {
                 return;
             }
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = this;
                 child.Parent = null;
                 child.UpdateStyle();
@@ -109,7 +109,7 @@ namespace SGUI {
 
         public void Update() {
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = this;
                 child.Parent = null;
                 child.Update();
@@ -117,7 +117,7 @@ namespace SGUI {
 
             if (AdoptedChildren.Count != 0) {
                 for (int i = 0; i < AdoptedChildren.Count; i++) {
-                    SGUIElement child = AdoptedChildren[i];
+                    SElement child = AdoptedChildren[i];
                     if (child.Parent == null && !Children.Contains(child)) {
                         Children.Add(child);
                     }
@@ -141,7 +141,7 @@ namespace SGUI {
             }
 
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = this;
                 child.Parent = null;
                 child.Render();

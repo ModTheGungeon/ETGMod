@@ -4,10 +4,10 @@ using System.ComponentModel;
 using UnityEngine;
 
 namespace SGUI {
-	public abstract class SGUIElement {
+	public abstract class SElement {
 
         public SGUIRoot Root;
-        public SGUIElement Parent;
+        public SElement Parent;
 
         public ISGUIBackend Backend {
             get {
@@ -20,15 +20,15 @@ namespace SGUI {
             }
         }
 
-        public SGUIElement ParentTop {
+        public SElement ParentTop {
             get {
-                SGUIElement parent = this;
+                SElement parent = this;
                 while ((parent = parent.Parent) != null) { }
                 return parent;
             }
         }
 
-        public readonly BindingList<SGUIElement> Children = new BindingList<SGUIElement>();
+        public readonly BindingList<SElement> Children = new BindingList<SElement>();
 
         public Vector2 Position = new Vector2(0f, 0f);
         public Vector2 Size = new Vector2(32f, 32f);
@@ -40,7 +40,7 @@ namespace SGUI {
                 float x = 0f;
                 float y = 0f;
                 Vector2 offset = new Vector2(0f, 0f);
-                for (SGUIElement parent = Parent; parent != null; parent = parent.Parent) {
+                for (SElement parent = Parent; parent != null; parent = parent.Parent) {
                     x += parent.Position.x;
                     y += parent.Position.y;
                 }
@@ -59,9 +59,9 @@ namespace SGUI {
         public Color Foreground;
         public Color Background;
 
-        public Action<SGUIElement> OnUpdateStyle;
+        public Action<SElement> OnUpdateStyle;
 
-        public SGUIElement() {
+        public SElement() {
             Children.ListChanged += HandleChange;
             if (SGUIRoot.Main != null) {
                 SGUIRoot.Main.AdoptedChildren.Add(this);
@@ -101,7 +101,7 @@ namespace SGUI {
 
         public void UpdateChildrenStyles() {
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = Root;
                 child.Parent = this;
                 child.UpdateStyle();
@@ -112,7 +112,7 @@ namespace SGUI {
         }
         public void UpdateChildren() {
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = Root;
                 child.Parent = this;
                 child.Update();
@@ -122,7 +122,7 @@ namespace SGUI {
         public abstract void Render();
         public void RenderChildren() {
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = Root;
                 child.Parent = this;
                 child.Render();

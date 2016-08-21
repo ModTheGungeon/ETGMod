@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
 namespace SGUI {
-    public class SGUILabel : SGUIElement {
+    public class SLabel : SElement {
 
         public string Text;
 
-        public SGUILabel()
+        public SLabel()
             : this("") { }
-        public SGUILabel(string text) {
+        public SLabel(string text) {
             Text = text;
             Background.a = 0f;
         }

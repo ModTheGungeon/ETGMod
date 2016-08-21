@@ -60,7 +60,7 @@ public sealed class SGUIIMBackend : ISGUIBackend {
             CurrentRoot = null;
         }
 
-        public bool IsRelative(SGUIElement elem) {
+        public bool IsRelative(SElement elem) {
             if (elem == null) {
                 // Root is absolute.
                 return true;
@@ -70,7 +70,7 @@ public sealed class SGUIIMBackend : ISGUIBackend {
             return false;
         }
 
-        public void PreparePosition(SGUIElement elem, ref Vector2 position) {
+        public void PreparePosition(SElement elem, ref Vector2 position) {
             // IMGUI draws relative to the current window.
             // If this is a window or similar, don't add the absolute offset.
             // If not, add the element position to draw relative to *that*.
@@ -79,7 +79,7 @@ public sealed class SGUIIMBackend : ISGUIBackend {
             }
         }
 
-        public void Text(SGUIElement elem, Vector2 position, string text) {
+        public void Text(SElement elem, Vector2 position, string text) {
             PreparePosition(elem, ref position);
 
             GUI.skin.label.normal.textColor = elem.Foreground;
@@ -87,7 +87,7 @@ public sealed class SGUIIMBackend : ISGUIBackend {
             GUI.Label(new Rect(position, elem != null ? elem.Size : Vector2.zero), text);
         }
 
-        public void TextField(SGUIElement elem, Vector2 position, ref string text) {
+        public void TextField(SElement elem, Vector2 position, ref string text) {
             if (!IsRelative(elem) && elem != null) {
                 position += elem.Position;
             }

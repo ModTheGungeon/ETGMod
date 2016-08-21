@@ -130,23 +130,23 @@ public static partial class ETGMod {
 
         TestGunController.Add();
 
-        new SGUILabel {
+        new SLabel {
             Text = "CENTE<color=#ff0000ff>RED</color>.",
-            OnUpdateStyle = (SGUIElement elem) => elem.Position = elem.Centered
+            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered
         };
-        new SGUILabel {
+        new SLabel {
             Text = "redcente.",
-            OnUpdateStyle = (SGUIElement elem) => elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight),
+            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight),
             Foreground = new Color(1f, 0f, 0f, 0.5f)
         };
 
-        new SGUITextField {
+        new STextField {
             Text = "Sample.",
-            OnUpdateStyle = delegate (SGUIElement elem) {
+            OnUpdateStyle = delegate (SElement elem) {
                 elem.Size.x = elem.Root.Size.x - 32f;
                 elem.Position = elem.Centered - new Vector2(0f, elem.Backend.LineHeight);
             },
-            OnTextChanged = (SGUITextField elem, string prevText) => Console.WriteLine("Changed text from " + prevText + " to " + elem.Text)
+            OnTextChanged = (STextField elem, string prevText) => Console.WriteLine("Changed text from " + prevText + " to " + elem.Text)
         };
 
         CallInEachModule("Start");

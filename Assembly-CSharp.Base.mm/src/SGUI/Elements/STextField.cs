@@ -2,15 +2,15 @@
 using UnityEngine;
 
 namespace SGUI {
-    public class SGUITextField : SGUIElement {
+    public class STextField : SElement {
 
         public string Text;
 
-        public Action<SGUITextField, string> OnTextChanged;
+        public Action<STextField, string> OnTextChanged;
 
-        public SGUITextField()
+        public STextField()
             : this("") { }
-        public SGUITextField(string text) {
+        public STextField(string text) {
             Text = text;
             Background = Color.white;
             Foreground = Color.black;
