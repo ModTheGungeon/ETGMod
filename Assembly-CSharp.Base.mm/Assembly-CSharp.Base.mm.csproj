@@ -146,6 +146,8 @@
     <Compile Include="src\Core\RuntimeAtlas.cs" />
     <Compile Include="src\Core\GunControllers.cs" />
     <Compile Include="src\Core\GunBehaviour.cs" />
+    <Compile Include="src\Core\Platform.cs" />
+    <Compile Include="src\Patches\patch_PlatformInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

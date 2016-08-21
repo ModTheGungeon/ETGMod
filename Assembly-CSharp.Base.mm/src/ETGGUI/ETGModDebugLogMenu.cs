@@ -14,7 +14,6 @@ public class ETGModDebugLogMenu : IETGModMenu {
     public static Vector2 ScrollPos;
 
     private static Rect _MainBoxRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
-    private static Rect _ViewRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
 
     public void Start() {
     }

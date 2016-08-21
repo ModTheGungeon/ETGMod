@@ -1,21 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ConsoleCommandGroup : ConsoleCommandUnit {
     private Dictionary<string, ConsoleCommand> _Commands = new Dictionary<string, ConsoleCommand>();
     private Dictionary<string, ConsoleCommandGroup> _Groups = new Dictionary<string, ConsoleCommandGroup>();
 
-    public ConsoleCommandGroup (Action<string[]> cmdref) {
-        Autocompletion = new AutocompletionSettings (delegate(string input) {
-            string[] list = GetAllUnitNames();
-            List<string> ret = new List<string>();
+    private AutocompletionSettings _CreateDefaultAutocompletion() {
+        return new AutocompletionSettings (delegate(string input) {
+            string[] list = GetAllUnitNames ();
+            List<string> ret = new List<string> ();
             for (int i = 0; i < list.Length; i++) {
-                string name = list[i];
-                if (name.StartsWith(input)) {
-                    ret.Add(name);
+                string name = list [i];
+                if (name.StartsWith (input)) {
+                    ret.Add (name);
                 }
             }
-            return ret.ToArray();
+            return ret.ToArray ();
+        });
+    }
+
+    public ConsoleCommandGroup (Action<string[]> cmdref) {
+        Autocompletion = _CreateDefaultAutocompletion();
+        CommandReference = cmdref;
+    }
+
+    public ConsoleCommandGroup(Action<string[]> cmdref, AutocompletionSettings additionalautocompletion) {
+        Autocompletion = new AutocompletionSettings (delegate(int index, string keyword) {
+            string[] additionalresults = additionalautocompletion.Match(index, keyword);
+            string[] membersresults = _CreateDefaultAutocompletion().Match(index, keyword);
+            if (additionalresults != null) {
+                return membersresults.Concat(additionalresults).ToArray();
+            } else {
+                return membersresults;
+            }
         });
         CommandReference = cmdref;
     }
@@ -51,12 +69,17 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
     }
 
     public ConsoleCommandGroup AddGroup(string name) {
-      AddUnit(name, new ConsoleCommandGroup());
-      return this;
+        AddUnit(name, new ConsoleCommandGroup());
+        return this;
     }
 
     public ConsoleCommandGroup AddGroup(string name, Action<string[]> action) {
         AddUnit(name, new ConsoleCommandGroup(action));
+        return this;
+    }
+
+    public ConsoleCommandGroup AddGroup(string name, Action<string[]> action, AutocompletionSettings autocompletion) {
+        AddUnit (name, new ConsoleCommandGroup (action, autocompletion));
         return this;
     }
 
@@ -88,6 +111,10 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
         }
 
         foreach (string key in _Groups.Keys) {
+            List<string> groupkeytmp = new List<string> ();
+            groupkeytmp.Add (key);
+            ret.Add (groupkeytmp);
+
             List<List<string>> tmp = _Groups [key].ConstructPaths ();
             for (int i = 0; i < tmp.Count; i++) {
                 List<string> prefixtmp = new List<string> ();

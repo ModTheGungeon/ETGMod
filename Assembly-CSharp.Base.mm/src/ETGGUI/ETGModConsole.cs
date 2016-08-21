@@ -12,7 +12,7 @@ public class ETGModConsole : IETGModMenu {
     /// All commands supported by the ETGModConsole. Add your own commands here!
     /// </summary>
     public static ConsoleCommandGroup Commands = new ConsoleCommandGroup(delegate (string[] args) {
-      LoggedText.Add("Command/group " + args[0] + " doesn't exist");
+      LoggedText.Add("Command or group " + args[0] + " doesn't exist");
     });
 
     /// <summary>
@@ -28,6 +28,8 @@ public class ETGModConsole : IETGModMenu {
     /// The currently typed in command in the text box.
     /// </summary>
     public static string CurrentTextFieldText = "";
+
+    public static bool StatSetEnabled = false;
 
     public static Vector2 MainScrollPos;
     public static Vector2 CorrectScrollPos;
@@ -47,31 +49,58 @@ public class ETGModConsole : IETGModMenu {
 
     private static bool _FocusOnInputBox = true;
 
+    private static char[] _SplitArgsCharacters = new char[] {' '};
+
+    private static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
+        List<string> ret = new List<string>();
+        foreach (string key in AllItems.Keys) {
+            if (key.AutocompletionMatch(input.ToLower())) {
+                ret.Add(key);
+            }
+        }
+        return ret.ToArray();
+    });
+
+    private static AutocompletionSettings _StatAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
+        List<string> ret = new List<string>();
+        foreach (string key in Enum.GetNames(typeof(TrackedStats))) {
+            if (key.AutocompletionMatch(input.ToUpper())) {
+                ret.Add(key.ToLower());
+            }
+        }
+        return ret.ToArray();
+    });
+
     public void Start() {
         // GLOBAL NAMESPACE
         Commands
                 .AddUnit ("help", delegate(string[] args) {
                     List<List<string>> paths = Commands.ConstructPaths();
                     for (int i = 0; i < paths.Count; i++) {
-                        LoggedText.Add(String.Join(" ", paths[i].ToArray()));
+                        LoggedText.Add(string.Join(" ", paths[i].ToArray()));
                     }
                 })
                 .AddUnit ("exit", (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None)
-                .AddUnit ("give", GiveItem, new AutocompletionSettings(delegate(string input) {
-                    List<string> ret = new List<string>();
-                    foreach (string key in AllItems.Keys) {
-                        if (key.StartsWith(input)) {
-                            ret.Add(key);
-                        }
-                    }
-                    return ret.ToArray();
-                }))
+                .AddUnit ("give", GiveItem, _GiveAutocompletionSettings)
                 .AddUnit ("screenshake", SetShake)
                 .AddUnit ("echo",        Echo    )
                 .AddUnit ("tp",          Teleport)
+                .AddUnit ("clear",       (string[] args) => LoggedText.Clear())
                 .AddUnit ("godmode", delegate(string[] args) {
                     GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
                 });
+
+        // STAT NAMESPACE
+        Commands.AddGroup("stat");
+
+        Commands.GetGroup("stat")
+                .AddUnit ("get",  StatGet, _StatAutocompletionSettings)
+                .AddGroup("set",  StatSetCurrentCharacter, _StatAutocompletionSettings)
+                .AddUnit ("mod",  StatMod, _StatAutocompletionSettings)
+                .AddUnit ("list", StatList);
+
+        Commands.GetGroup ("stat").GetGroup ("set")
+                                  .AddUnit  ("session", StatSetSession, _StatAutocompletionSettings);
 
         // ROLL NAMESPACE
         Commands.AddGroup ("roll");
@@ -84,16 +113,16 @@ public class ETGModConsole : IETGModMenu {
         Commands.AddUnit  ("test", new ConsoleCommandGroup());
 
         Commands.GetGroup ("test")
-            .AddGroup ("spawn", SpawnGUID)
-            .AddGroup ("resources");
+                .AddGroup ("spawn", SpawnGUID)
+                .AddGroup ("resources");
 
         //// TEST.RESOURCES NAMESPACE
         Commands.GetGroup ("test").GetGroup ("resources")
-            .AddUnit  ("load", ResourcesLoad);
+                .AddUnit  ("load", ResourcesLoad);
 
         //// TEST.SPAWN NAMESPACE
         Commands.GetGroup ("test").GetGroup ("spawn")
-            .AddUnit ("chest", SpawnChest);
+                .AddUnit  ("chest", SpawnChest);
 
         // DUMP NAMESPACE
         Commands.AddUnit  ("dump", new ConsoleCommandGroup());
@@ -109,9 +138,12 @@ public class ETGModConsole : IETGModMenu {
         Commands.AddGroup ("conf");
 
         Commands.GetGroup ("conf")
-                .AddUnit  ("close_console_on_command",   (args) => SetBool(args, ref _CloseConsoleOnCommand        ))
-                .AddUnit  ("cut_input_focus_on_command", (args) => SetBool(args, ref _CutInputFocusOnCommand       ))
-                .AddUnit  ("enable_damage_indicators",   (args) => SetBool(args, ref ETGModGUI.UseDamageIndicators ));
+                .AddUnit  ("close_console_on_command", (args) => SetBool (args, ref _CloseConsoleOnCommand))
+                .AddUnit  ("cut_input_focus_on_command", (args) => SetBool (args, ref _CutInputFocusOnCommand))
+                .AddUnit  ("enable_damage_indicators", (args) => SetBool (args, ref ETGModGUI.UseDamageIndicators))
+                .AddUnit  ("match_contains", (args) => SetBool (args, ref AutocompletionSettings.MatchContains))
+                .AddUnit  ("enable_achievements", (args) => SetBool (args, ref ETGMod.Platform.EnableAchievements))
+                .AddUnit  ("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled));
     }
 
     public void Update() {
@@ -123,7 +155,7 @@ public class ETGModConsole : IETGModMenu {
     }
 
     public string[] SplitArgs(string args) {
-        return args.Split (new char[] { ' ' });
+        return args.Split (_SplitArgsCharacters, StringSplitOptions.RemoveEmptyEntries);
     }
 
     public void OnGUI() {
@@ -218,30 +250,49 @@ public class ETGModConsole : IETGModMenu {
         // TODO: Make Tab autocomplete to the shared part of completions
         // TODO: AutocompletionRule interface and class per rule?
         var autocompletionrequested = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Tab;
-        if(autocompletionrequested){
+        if (autocompletionrequested) {
             // Create an input array by splitting it on spaces
-            string inputtext = te.text.Substring(0, te.cursorIndex);
-            string[] input = SplitArgs(inputtext);
-            string otherinput = String.Empty;
+            string inputtext = te.text.Substring (0, te.cursorIndex);
+            string[] input = SplitArgs (inputtext);
+            string otherinput = string.Empty;
             if (te.cursorIndex < te.text.Length) {
                 otherinput = te.text.Substring (te.cursorIndex + 1);
             }
             // Get where the command appears in the path so that we know where the arguments start
-            int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
-            List<string> pathcreation = new List<string>();
+            int commandindex = Commands.GetFirstNonUnitIndexInPath (input);
+            List<string> pathlist = new List<string> ();
             for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
-                pathcreation.Add (input [i]);
+                pathlist.Add (input [i]);
             }
 
-            string[] path = pathcreation.ToArray();
+            string[] path = pathlist.ToArray ();
 
             ConsoleCommandUnit unit = Commands.GetUnit (path);
             // Get an array of available completions
-            string[] completions = unit.Autocompletion.Match (input [input.Length - 1]);
+            int matchindex = input.Length - path.Length;
+            /*
+            HACK! blame Zatherz
+            matchindex will be off by +1 if the current keyword your cursor is on isn't empty
+            this will check if there are no spaces on the left on the cursor
+            and if so, decrease matchindex
+            if there *are* spaces on the left of the cursor, that means the current
+            "token" the cursor is on is an empty string, so that doesn't have any problems
+            Hopefully this is a good enough explanation, if not, ping @Zatherz on Discord
+            */
 
-            if (completions.Length == 1) {
+            string matchkeyword = string.Empty;
+            if (!inputtext.EndsWith (" ")) {
+                matchindex--;
+                matchkeyword = input[input.Length - 1];
+            }
+
+            string[] completions = unit.Autocompletion.Match (matchindex, matchkeyword);
+
+            if (completions == null) {
+                Debug.Log ("ETGModConsole: no completions available (match returned null)");
+            } else if (completions.Length == 1) {
                 if (path.Length > 0) {
-                    CurrentTextFieldText = String.Join (" ", path) + " " + completions [0] + " " + otherinput;
+                    CurrentTextFieldText = string.Join (" ", path) + " " + completions [0] + " " + otherinput;
                 } else {
                     CurrentTextFieldText = completions [0] + " " + otherinput;
                 }
@@ -533,13 +584,116 @@ public class ETGModConsole : IETGModMenu {
 
     void ResourcesLoad(string[] args) {
         if (!ArgCount (args, 1)) return;
-        string resourcepath = String.Join(" ", args);
+        string resourcepath = string.Join(" ", args);
         object resource = Resources.Load(resourcepath);
         if (resource == null) {
             LoggedText.Add("Couldn't load resource " + resourcepath);
             return;
         }
         LoggedText.Add("Loaded (and threw away) " + resourcepath);
+    }
+
+    private TrackedStats? _GetStatFromString(string statname) {
+        TrackedStats stat;
+        try {
+            stat = (TrackedStats)Enum.Parse(typeof(TrackedStats), statname);
+        } catch {
+            return null;
+        }
+        return stat;
+    }
+
+    private bool _VerifyStatSetEnabled(string command) {
+        if (!StatSetEnabled) {
+            LoggedText.Add ("The '" + command + "' command is disabled by default!");
+            LoggedText.Add ("This command can be very damaging as it sets arbitrary values in your save file.");
+            LoggedText.Add ("There is *no way* to undo this action.");
+            LoggedText.Add ("If someone told you to run this command, there is a high chance they are");
+            LoggedText.Add ("maliciously trying to destroy your save file.");
+            LoggedText.Add ("This command can also cause achievements to be unlocked. Achievements are");
+            LoggedText.Add ("disabled by default, but they can be enabled with 'conf enable_achievements true'.");
+            LoggedText.Add ("If you are *CERTAIN* that you want to run this command, you can enable it by");
+            LoggedText.Add ("running the following command: 'conf enable_stat_set true'.");
+            LoggedText.Add ("");
+            LoggedText.Add ("Be careful.");
+            return false;
+        }
+        return true;
+    }
+
+    void StatGet(string[] args) {
+        if (!ArgCount (args, 1)) return;
+        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!stat.HasValue) {
+            LoggedText.Add ("The stat isn't a real TrackedStat");
+            return;
+        }
+        if (GameManager.Instance.PrimaryPlayer != null) {
+            float characterstat = GameStatsManager.Instance.GetCharacterStatValue (stat.Value);
+            LoggedText.Add ("Character: " + characterstat);
+            float sessionstat = GameStatsManager.Instance.GetSessionStatValue (stat.Value);
+            LoggedText.Add ("Session: " + sessionstat);
+        } else {
+            LoggedText.Add ("Character and Session stats are unavailable, please select a character first");
+        }
+        float playerstat = GameStatsManager.Instance.GetPlayerStatValue (stat.Value);
+        LoggedText.Add ("This save file: " + playerstat);
+    }
+
+    void StatSetSession(string[] args) {
+        if (!_VerifyStatSetEnabled ("stat set session")) return;
+        if (!ArgCount (args, 2)) return;
+        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!stat.HasValue) {
+            LoggedText.Add ("The stat isn't a real TrackedStat");
+            return;
+        }
+        float value;
+        if (!float.TryParse (args [1], out value)) {
+            LoggedText.Add ("The value isn't a proper number");
+            return;
+        }
+        GameStatsManager.Instance.SetStat (stat.Value, value);
+    }
+
+    void StatSetCurrentCharacter(string[] args) {
+        if (!_VerifyStatSetEnabled ("stat set")) return;
+        if (!ArgCount (args, 2)) return;
+        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!stat.HasValue) {
+            LoggedText.Add ("The stat isn't a real TrackedStat");
+            return;
+        }
+        float value;
+        if (!float.TryParse (args [1], out value)) {
+            LoggedText.Add ("The value isn't a proper number");
+            return;
+        }
+        PlayableCharacters currentCharacter = GameManager.Instance.PrimaryPlayer.characterIdentity;
+        GameStatsManager.Instance.m_characterStats [currentCharacter].SetStat (stat.Value, value);
+    }
+
+    void StatMod(string[] args) {
+        if (!_VerifyStatSetEnabled ("stat mod")) return;
+        if (!ArgCount (args, 2)) return;
+        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!stat.HasValue) {
+            LoggedText.Add ("The value isn't a proper number");
+            return;
+        }
+        float value;
+        if (!float.TryParse (args [1], out value)) {
+            LoggedText.Add ("The value isn't a proper number");
+            return;
+        }
+        GameStatsManager.Instance.RegisterStatChange (stat.Value, value);
+    }
+
+    void StatList(string[] args) {
+        if (!ArgCount (args, 0)) return;
+        foreach (var value in Enum.GetValues(typeof(TrackedStats))) {
+            LoggedText.Add (value.ToString().ToLower());
+        }
     }
 }
 
