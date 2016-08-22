@@ -10,12 +10,11 @@ namespace SGUI {
         public Vector2 ScrollPosition;
         public Vector2 InnerSize = new Vector2(128f, 128f);
 
-        public Func<SGroup, Action<SElement>> AutoLayout;
+        public Func<SGroup, Action<int, SElement>> AutoLayout;
         public float AutoLayoutPadding = 4f;
-        protected Action<SElement> _AutoLayout;
-        protected int _AutoLayoutIndex;
-
         public EDirection AutoGrowDirection = EDirection.None;
+
+        protected Action<int, SElement> _AutoLayout;
 
         public SGroup()
             : this(null) { }
@@ -24,6 +23,9 @@ namespace SGUI {
         }
 
         public override void UpdateStyle() {
+            // This will get called again once this element gets added to the root.
+            if (Root == null) return;
+
             if (Size.x <= 0f) {
                 AutoGrowDirection |= EDirection.Horizontal;
             }
@@ -37,12 +39,11 @@ namespace SGUI {
             }
 
             if (_AutoLayout != null) {
-                _AutoLayoutIndex = 0;
                 // Apply auto layout to any child that has no layout settings.
                 for (int i = 0; i < Children.Count; i++) {
                     SElement child = Children[i];
                     if (child.OnUpdateStyle == null) {
-                        _AutoLayout(child);
+                        _AutoLayout(i, child);
                     }
                 }
             }
@@ -58,11 +59,11 @@ namespace SGUI {
         }
 
         protected float _CurrentAutoLayoutRow;
-        public void AutoLayoutRow(SElement elem) {
+        public void AutoLayoutRows(int index, SElement elem) {
             if (elem == null) {
                 return;
             }
-            if (_AutoLayoutIndex == 0) {
+            if (index == 0) {
                 _CurrentAutoLayoutRow = 0f;
             }
 
@@ -75,17 +76,47 @@ namespace SGUI {
             _CurrentAutoLayoutRow += elem.Size.y + AutoLayoutPadding;
 
             GrowToFit(elem);
+        }
 
-            ++_AutoLayoutIndex;
+        public float AutoLayoutLabelWidth;
+        public void AutoLayoutLabeledInput(int index, SElement elem) {
+            if (elem == null || index >= 2) {
+                return;
+            }
+
+            if (index == 0) {
+                Background = Background.WithAlpha(0f);
+
+                if ((AutoGrowDirection & EDirection.Horizontal) == EDirection.Horizontal) {
+                    Size.x = Parent.Size.x;
+                }
+
+                elem.Position = Vector2.zero;
+                if (AutoLayoutLabelWidth <= 0f) {
+                    elem.Size = Backend.MeasureText(((SLabel) elem).Text);
+                } else {
+                    elem.Size = new Vector2(AutoLayoutLabelWidth, Backend.LineHeight);
+                }
+                if ((AutoGrowDirection & EDirection.Vertical) == EDirection.Vertical) {
+                    Size.y = elem.Size.y;
+                }
+            } else if (index == 1) {
+                elem.Position = new Vector2(Children[0].Size.x + AutoLayoutPadding, 0f);
+                elem.Size = new Vector2(Size.x - Children[0].Size.x - AutoLayoutPadding, Size.y);
+            }
         }
 
         public void GrowToFit(SElement elem) {
             Vector2 max = elem.Position + elem.Size;
+
+            InnerSize.x = Mathf.Max(InnerSize.x, max.x);
+            InnerSize.y = Mathf.Max(InnerSize.y, max.y);
+
             if ((AutoGrowDirection & EDirection.Horizontal) == EDirection.Horizontal) {
-                Size.x = max.x;
+                Size.x = InnerSize.x;
             }
             if ((AutoGrowDirection & EDirection.Vertical) == EDirection.Vertical) {
-                Size.y = max.y;
+                Size.y = InnerSize.y;
             }
         }
 

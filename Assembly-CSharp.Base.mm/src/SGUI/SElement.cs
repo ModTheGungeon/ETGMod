@@ -24,11 +24,19 @@ namespace SGUI {
             get {
                 SElement parent = this;
                 while ((parent = parent.Parent) != null) { }
-                return parent;
+                return parent ?? this;
             }
         }
 
         public readonly BindingList<SElement> Children = new BindingList<SElement>();
+        public SElement this[int id] {
+            get {
+                return Children[id];
+            }
+            set {
+                Children[id] = value;
+            }
+        }
 
         public Vector2 Position = new Vector2(0f, 0f);
         public Vector2 Size = new Vector2(32f, 32f);
@@ -83,10 +91,13 @@ namespace SGUI {
         }
 
         public virtual void HandleChange(object sender, ListChangedEventArgs e) {
-            (ParentTop ?? this).UpdateStyle();
+            ParentTop.UpdateStyle();
         }
 
         public virtual void UpdateStyle() {
+            // This will get called again once this element gets added to the root.
+            if (Root == null) return;
+
             if (
                 Foreground.r == SGUIRoot.Main.Foreground.r &&
                 Foreground.g == SGUIRoot.Main.Foreground.g &&
@@ -105,7 +116,6 @@ namespace SGUI {
             OnUpdateStyle?.Invoke(this);
             UpdateChildrenStyles();
         }
-
         public void UpdateChildrenStyles() {
             for (int i = 0; i < Children.Count; i++) {
                 SElement child = Children[i];
@@ -114,6 +124,7 @@ namespace SGUI {
                 child.UpdateStyle();
             }
         }
+
         public virtual void Update() {
             UpdateChildren();
         }

@@ -135,31 +135,36 @@ public static partial class ETGMod {
         TestGunController.Add();
 
         SGroup centeredGroup = new SGroup {
-            Size = new Vector2(256f, /*match auto inner-size*/ 0f),
-            AutoLayout = (g) => g.AutoLayoutRow,
+            Size = new Vector2(312f, /*match auto inner-size*/ 0f),
+            AutoLayout = (g) => g.AutoLayoutRows,
             OnUpdateStyle = delegate (SElement elem) {
                 elem.Position = elem.Centered;
             }
         };
 
         new SLabel {
-            Text = "CENTE<color=#ff0000ff>RED</color>.",
             Parent = centeredGroup,
+            Text = "CENTE<color=#ff0000ff>RED</color>.",
         };
 
-        STextField fieldA = new STextField {
-            Parent = centeredGroup,
-            OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox A: " + text),
-        };
-        STextField fieldB = new STextField {
-            Parent = centeredGroup,
-            OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox B: " + text),
-        };
+        for (int i = 0; i < 10; i++) {
+            new SGroup {
+                Parent = centeredGroup,
+                Size = new Vector2(/*match auto parent*/ 0f, /*match auto inner-size*/ 0f),
+                AutoLayout = (g) => g.AutoLayoutLabeledInput,
+                Children = {
+                    new SLabel("#" + (i + 1)),
+                    new STextField {
+                        OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox #" + i + ": " + text),
+                    }
+                }
+            };
+        }
 
         new SButton {
             Parent = centeredGroup,
-            Text = "FOCUS FIELD A",
-            OnClick = (SButton elem) => fieldA.Focus(),
+            Text = "FOCUS FIELD #2",
+            OnClick = (SButton elem) => centeredGroup[/*third row (first is label)*/ 2][/*STextField*/ 1].Focus(),
         };
 
         STextField commandField = new STextField {

@@ -26,6 +26,9 @@ namespace SGUI {
         }
 
         public override void UpdateStyle() {
+            // This will get called again once this element gets added to the root.
+            if (Root == null) return;
+
             if (UpdateBounds) {
                 Size.y = Backend.LineHeight;
             }
