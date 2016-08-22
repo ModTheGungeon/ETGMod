@@ -138,27 +138,31 @@ public static partial class ETGMod {
             Text = "CENTE<color=#ff0000ff>RED</color>.",
             OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered
         };
-        new SLabel {
-            Text = "redcente.",
-            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight),
-            Foreground = new Color(1f, 0f, 0f, 0.5f)
-        };
 
-        new STextField {
+        STextField fieldA = new STextField {
             Text = "Sample.",
             OnUpdateStyle = delegate (SElement elem) {
-                elem.Size.x = elem.Root.Size.x - 32f;
-                elem.Position = elem.Centered - new Vector2(0f, elem.Backend.LineHeight);
+                elem.Size.x = 256f;
+                elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight + 4f);
             },
             OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox A: " + text),
         };
-        new STextField {
+        STextField fieldB = new STextField {
             Text = "Another text box.",
             OnUpdateStyle = delegate (SElement elem) {
-                elem.Size.x = elem.Root.Size.x - 256f;
-                elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight * 2f);
+                elem.Size.x = 256f;
+                elem.Position = fieldA.Position + new Vector2(0f, elem.Backend.LineHeight + 4f);
             },
             OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox B: " + text),
+        };
+
+        new SButton {
+            Text = "FOCUS FIELD A",
+            OnUpdateStyle = delegate (SElement elem) {
+                elem.Size.x = 256f;
+                elem.Position = fieldB.Position + new Vector2(0f, elem.Backend.LineHeight + 4f);
+            },
+            OnClick = (SButton elem) => fieldA.Focus(),
         };
 
         CallInEachModule("Start");

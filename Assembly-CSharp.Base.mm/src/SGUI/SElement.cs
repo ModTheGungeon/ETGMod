@@ -56,8 +56,8 @@ namespace SGUI {
             }
         }
 
-        public Color Foreground;
-        public Color Background;
+        public virtual Color Foreground { get; set; }
+        public virtual Color Background { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="T:SGUI.SElement"/> is interactive.
@@ -93,18 +93,14 @@ namespace SGUI {
                 Foreground.g == SGUIRoot.Main.Foreground.g &&
                 Foreground.b == SGUIRoot.Main.Foreground.b
             ) {
-                Foreground.r = SGUIRoot.Main.Foreground.r;
-                Foreground.g = SGUIRoot.Main.Foreground.g;
-                Foreground.b = SGUIRoot.Main.Foreground.b;
+                Foreground = SGUIRoot.Main.Foreground.WithAlpha(Foreground.a);
             }
             if (
                 Background.r == SGUIRoot.Main.Background.r &&
                 Background.g == SGUIRoot.Main.Background.g &&
                 Background.b == SGUIRoot.Main.Background.b
             ) {
-                Background.r = SGUIRoot.Main.Background.r;
-                Background.g = SGUIRoot.Main.Background.g;
-                Background.b = SGUIRoot.Main.Background.b;
+                Background = SGUIRoot.Main.Background.WithAlpha(Background.a);
             }
 
             OnUpdateStyle?.Invoke(this);
@@ -131,6 +127,9 @@ namespace SGUI {
             }
         }
 
+        public virtual void RenderBackground() {
+            Draw.Rect(this, Vector2.zero, Size, Background);
+        }
         public abstract void Render();
         public void RenderChildren() {
             for (int i = 0; i < Children.Count; i++) {

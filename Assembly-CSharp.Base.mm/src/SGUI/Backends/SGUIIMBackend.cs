@@ -11,9 +11,11 @@ namespace SGUI {
         private readonly static TextGenerator _TextGenerator = new TextGenerator();
         private TextGenerationSettings _TextGenerationSettings = new TextGenerationSettings();
 
-        private static List<SElement> _Elements = new List<SElement>();
+        private readonly static List<SElement> _Elements = new List<SElement>();
         private static int _GlobalElementSemaphore;
         private int _ElementSemaphore;
+
+        private readonly List<int> _ClickedButtons = new List<int>();
 
         public SGUIRoot CurrentRoot { get; private set; }
 
@@ -56,13 +58,7 @@ namespace SGUI {
                 }
                 Font = GUI.skin.font;
 
-                if (Font.dynamic) {
-                    GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                } else {
-                    // Fixes labels completely hidden with non-dynamic fonts.
-                    GUI.skin.label.clipping = TextClipping.Overflow;
-                }
-
+                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                 GUI.skin.textField.alignment = TextAnchor.MiddleLeft;
             }
 
@@ -73,12 +69,13 @@ namespace SGUI {
 
             GUI.skin.settings.selectionColor = new Color(0.3f, 0.6f, 0.9f, 1f);
 
-            GUI.depth = -1337;
+            GUI.depth = -0x0ade;
 
             _ElementSemaphore = 0;
             if (_GlobalElementSemaphore == 0) {
                 _Elements.Clear();
             }
+            _ClickedButtons.Clear();
         }
 
         public void EndRender(SGUIRoot root) {
@@ -96,24 +93,54 @@ namespace SGUI {
             _Elements.Add(elem);
             return (_Elements.Count - 1).ToString();
         }
+        private bool _RegisteredNextElement = false;
+        /// <summary>
+        /// Registers the next element, mapping it to the element.
+        /// </summary>
+        /// <param name="elem">Element containing the next element.</param>
         private void _RegisterNextElement(SElement elem) {
+            _RegisteredNextElement = true;
             GUI.SetNextControlName(_NewElementName(elem));
         }
+        /// <summary>
+        /// Registers the next element when not already registered.
+        /// </summary>
+        private void _RegisterNextElement() {
+            if (!_RegisteredNextElement) {
+                GUI.SetNextControlName(_NewElementName(null));
+            }
+            _RegisteredNextElement = false;
+        }
 
-        public int GetCurrentElementID() {
-            return _Elements.Count - 1;
+        public int CurrentElementID {
+            get {
+                return _Elements.Count - 1;
+            }
         }
         public int GetElementID(SElement elem) {
             return _Elements.IndexOf(elem);
         }
 
-        public bool IsFocused(SElement elem) {
-            return GUI.GetNameOfFocusedControl() == GetElementID(elem).ToString();
-        }
         public void Focus(SElement elem) {
             string id = GetElementID(elem).ToString();
             // if window, use GUI.FocusWindow
             GUI.FocusControl(id);
+        }
+        public void Focus(int id) {
+            GUI.FocusControl(id.ToString());
+        }
+        public bool IsFocused(SElement elem) {
+            return GUI.GetNameOfFocusedControl() == GetElementID(elem).ToString();
+        }
+        public bool IsFocused(int id) {
+            return GUI.GetNameOfFocusedControl() == id.ToString();
+        }
+
+        public bool IsClicked(SElement elem) {
+            return IsClicked(GetElementID(elem));
+        }
+        public bool IsClicked(int id) {
+            return _ClickedButtons.Contains(id);
         }
 
         public bool IsRelative(SElement elem) {
@@ -135,6 +162,17 @@ namespace SGUI {
             }
         }
 
+        public void Rect(SElement elem, Vector2 position, Vector2 size, Color color) {
+            PreparePosition(elem, ref position);
+            Rect(new Rect(position, size), color);
+        }
+        public void Rect(Rect bounds, Color color) {
+            Color prevGUIColor = GUI.color;
+            GUI.color = color;
+            GUI.DrawTexture(bounds, SGUIRoot.White, ScaleMode.StretchToFill, false);
+            GUI.color = prevGUIColor;
+        }
+
         public void Text(SElement elem, Vector2 position, string text) {
             PreparePosition(elem, ref position);
 
@@ -144,22 +182,27 @@ namespace SGUI {
             GUI.Label(new Rect(position, elem != null ? elem.Size : Vector2.zero), text);
         }
 
-        public void TextField(SElement elem, Vector2 position, ref string text) {
-            if (!IsRelative(elem) && elem != null) {
-                position += elem.Position;
+        public bool TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
+            PreparePosition(elem, ref position);
+
+            if (elem != null) {
+                GUI.skin.textField.normal.textColor = elem.Foreground * 0.8f;
+                GUI.skin.textField.active.textColor = elem.Foreground;
+                GUI.skin.textField.hover.textColor = elem.Foreground;
+                GUI.skin.textField.focused.textColor = elem.Foreground;
+                GUI.skin.settings.cursorColor = elem.Foreground;
+                GUI.backgroundColor = elem.Background;
             }
 
-            GUI.skin.textField.normal.textColor = elem.Foreground * 0.75f;
-            GUI.skin.textField.active.textColor = elem.Foreground;
-            GUI.skin.textField.hover.textColor = elem.Foreground;
-            GUI.skin.textField.focused.textColor = elem.Foreground;
-            GUI.skin.settings.cursorColor = elem.Foreground;
-            GUI.backgroundColor = elem.Background;
             _RegisterNextElement(elem);
-            Rect bounds = new Rect(position, elem.Size);
+            return TextField(new Rect(position, size), ref text);
+        }
+        public bool TextField(Rect bounds, ref string text) {
+            _RegisterNextElement();
             text = GUI.TextField(bounds, text);
+            bool focused = IsFocused(CurrentElementID);
 
-            if (!Font.dynamic && IsFocused(elem)) {
+            if (!Font.dynamic && focused) {
                 TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 #pragma warning disable CS0618
                 // TextEditor.content is obsolete, yet it must be accessed.
@@ -182,17 +225,17 @@ namespace SGUI {
                     GUI.color = GUI.skin.settings.selectionColor;
                     GUI.DrawTexture(new Rect(
                         selectFrom.x,
-                        position.y + editor.style.padding.top,
+                        bounds.y + editor.style.padding.top,
                         selectTo.x - selectFrom.x,
                         bounds.height - editor.style.padding.top - editor.style.padding.bottom
                     ), SGUIRoot.White, ScaleMode.StretchToFill, false);
 
                     GUI.color = prevGUIColor;
-                    GUI.skin.label.normal.textColor = elem.Background;
+                    GUI.skin.label.normal.textColor = GUI.backgroundColor;
                     // Draw over the text field. Again. Because.
                     GUI.Label(new Rect(
                         selectFrom.x,
-                        position.y + LineHeight / 2f - GUI.skin.label.padding.top,
+                        bounds.y,
                         selectTo.x - selectFrom.x,
                         bounds.height
                     ), editor.SelectedText);
@@ -202,13 +245,40 @@ namespace SGUI {
                 GUI.color = GUI.skin.settings.cursorColor;
                 GUI.DrawTexture(new Rect(
                     cursor.x - 2f,
-                    position.y + editor.style.padding.top,
+                    bounds.y + editor.style.padding.top,
                     1f,
                     bounds.height - editor.style.padding.top - editor.style.padding.bottom
                 ), SGUIRoot.White, ScaleMode.StretchToFill, false);
 
                 GUI.color = prevGUIColor;
             }
+
+            return focused;
+        }
+
+        // IMGUI doesn't seem to have something similar to TextEditor for buttons... so SButton.OnChange stays untouched.
+        public bool Button(SElement elem, Vector2 position, Vector2 size, string text) {
+            PreparePosition(elem, ref position);
+
+            if (elem != null) {
+                GUI.skin.button.normal.textColor = elem.Foreground * 0.8f;
+                GUI.skin.button.active.textColor = elem.Foreground;
+                GUI.skin.button.hover.textColor = elem.Foreground;
+                GUI.skin.button.focused.textColor = elem.Foreground;
+                GUI.backgroundColor = elem.Background;
+            }
+
+            _RegisterNextElement(elem);
+            return Button(new Rect(position, size), text);
+        }
+        public bool Button(Rect bounds, string text) {
+            _RegisterNextElement();
+            GUI.skin.button.fixedHeight = bounds.height;
+            if (GUI.Button(bounds, text)) {
+                _ClickedButtons.Add(CurrentElementID);
+                return true;
+            }
+            return false;
         }
 
         public Vector2 MeasureText(string text, Vector2? size = null) {
@@ -230,7 +300,7 @@ namespace SGUI {
 
             return new Vector2(
                 _TextGenerator.GetPreferredWidth(text, _TextGenerationSettings),
-                _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings)
+                Font.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
             );
         }
 

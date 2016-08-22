@@ -9,7 +9,7 @@ namespace SGUI {
             : this("") { }
         public SLabel(string text) {
             Text = text;
-            Background.a = 0f;
+            Background = Background.WithAlpha(0f);
         }
 
         public override void UpdateStyle() {
@@ -21,6 +21,7 @@ namespace SGUI {
         }
 
         public override void Render() {
+            RenderBackground();
             Draw.Text(this, Vector2.zero, Text);
         }
 

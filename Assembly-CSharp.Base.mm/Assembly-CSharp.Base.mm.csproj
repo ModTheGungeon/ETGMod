@@ -155,6 +155,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="src\SGUI\Backends\SGUIIMBackend.cs" />
     <Compile Include="src\SGUI\Elements\STextField.cs" />
+    <Compile Include="src\SGUI\Elements\SButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

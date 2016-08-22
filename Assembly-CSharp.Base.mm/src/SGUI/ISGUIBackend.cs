@@ -25,10 +25,19 @@ namespace SGUI {
 
         void StartRender(SGUIRoot root);
 
-        int GetCurrentElementID();
+        int CurrentElementID { get; }
         int GetElementID(SElement elem);
-        bool IsFocused(SElement elem);
+
         void Focus(SElement elem);
+        void Focus(int id);
+        bool IsFocused(SElement elem);
+        bool IsFocused(int id);
+
+        bool IsClicked(SElement elem);
+        bool IsClicked(int id);
+
+        void Rect(SElement elem, Vector2 position, Vector2 size, Color color);
+        void Rect(Rect bounds, Color color);
 
         /// <summary>
         /// Render the specified text on screen.
@@ -43,8 +52,20 @@ namespace SGUI {
         /// </summary>
         /// <param name="elem">Element instance. Null for root.</param>
         /// <param name="position">Position.</param>
+        /// <param name="size">Size.</param>
         /// <param name="text">Text.</param>
-        void TextField(SElement elem, Vector2 position, ref string text);
+        /// <returns>Whether the element is focused or not.</returns>
+        bool TextField(SElement elem, Vector2 position, Vector2 size, ref string text);
+        /// <summary>
+        /// Render a text field on screen.
+        /// </summary>
+        /// <param name="bounds">Bounds.</param>
+        /// <param name="text">Text.</param>
+        /// <returns>Whether the element is focused or not.</returns>
+        bool TextField(Rect bounds, ref string text);
+
+        bool Button(SElement elem, Vector2 position, Vector2 size, string text);
+        bool Button(Rect bounds, string text);
 
         /// <summary>
         /// Gets the size of the text.

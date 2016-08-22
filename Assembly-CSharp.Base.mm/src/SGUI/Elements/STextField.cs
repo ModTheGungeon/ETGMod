@@ -33,13 +33,15 @@ namespace SGUI {
             base.UpdateStyle();
         }
 
+        public override void RenderBackground() { }
         public override void Render() {
+            // Do not render background - background should be handled by Draw.TextField
+
             Event e = Event.current; // Store the event; check if text field focused after drawing (after events used).
             bool submit = e.type == EventType.KeyDown && e.keyCode == KeyCode.Return;
 
             string prevText = Text;
-            Draw.TextField(this, Vector2.zero, ref Text);
-            if (IsFocused = Backend.IsFocused(this)) {
+            if (IsFocused = Draw.TextField(this, Vector2.zero, Size, ref Text)) {
                 if (submit) {
                     Text = TextOnSubmit ?? prevText;
                 }

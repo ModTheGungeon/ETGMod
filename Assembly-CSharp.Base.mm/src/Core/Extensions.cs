@@ -20,6 +20,13 @@ public static partial class ETGMod {
         return BitConverter.DoubleToInt64Bits(f) == _DoubleNegativeZero;
     }
 
+    public static int Count(this string @in, char c) {
+        int count = 0;
+        int lastIndex = 0;
+        while ((lastIndex = @in.IndexOf(c, lastIndex)) != -1) ++count;
+        return count;
+    }
+
     public static T GetFirst<T>(this IEnumerable<T> e) {
         foreach (T t in e) {
             return t;
