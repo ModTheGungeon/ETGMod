@@ -135,7 +135,8 @@ public static partial class ETGMod {
         TestGunController.Add();
 
         SGroup centeredGroup = new SGroup {
-            Size = new Vector2(312f, /*match auto inner-size*/ 0f),
+            Size = new Vector2(312f, 200f),
+            ScrollDirection = SGroup.EDirection.Vertical,
             AutoLayout = (g) => g.AutoLayoutRows,
             OnUpdateStyle = delegate (SElement elem) {
                 elem.Position = elem.Centered;

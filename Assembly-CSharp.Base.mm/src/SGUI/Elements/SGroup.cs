@@ -51,6 +51,9 @@ namespace SGUI {
             base.UpdateStyle();
         }
 
+        public override void RenderBackground() {
+            Draw.Rect(this, Vector2.zero, InnerSize, Background);
+        }
         public override void Render() {
             Backend.StartGroup(this);
             RenderBackground();
