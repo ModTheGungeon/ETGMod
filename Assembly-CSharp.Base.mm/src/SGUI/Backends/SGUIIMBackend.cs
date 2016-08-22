@@ -73,6 +73,8 @@ namespace SGUI {
 
             GUI.skin.settings.selectionColor = new Color(0.3f, 0.6f, 0.9f, 1f);
 
+            GUI.depth = -1337;
+
             _ElementSemaphore = 0;
             if (_GlobalElementSemaphore == 0) {
                 _Elements.Clear();
@@ -154,7 +156,59 @@ namespace SGUI {
             GUI.skin.settings.cursorColor = elem.Foreground;
             GUI.backgroundColor = elem.Background;
             _RegisterNextElement(elem);
-            text = GUI.TextField(new Rect(position, elem.Size), text);
+            Rect bounds = new Rect(position, elem.Size);
+            text = GUI.TextField(bounds, text);
+
+            if (!Font.dynamic && IsFocused(elem)) {
+                TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+#pragma warning disable CS0618
+                // TextEditor.content is obsolete, yet it must be accessed.
+                // Alternatively access TextEditor.m_Content via reflection.
+                GUIContent content = editor.content;
+#pragma warning restore CS0618
+                Color prevGUIColor = GUI.color;
+
+                if (editor.cursorIndex != editor.selectIndex) {
+                    Vector2 selectA = editor.style.GetCursorPixelPosition(bounds, content, editor.cursorIndex);
+                    Vector2 selectB = editor.style.GetCursorPixelPosition(bounds, content, editor.selectIndex);
+                    Vector2 selectFrom, selectTo;
+                    if (selectA.x <= selectB.x) {
+                        selectFrom = selectA;
+                        selectTo = selectB;
+                    } else {
+                        selectFrom = selectB;
+                        selectTo = selectA;
+                    }
+                    GUI.color = GUI.skin.settings.selectionColor;
+                    GUI.DrawTexture(new Rect(
+                        selectFrom.x,
+                        position.y + editor.style.padding.top,
+                        selectTo.x - selectFrom.x,
+                        bounds.height - editor.style.padding.top - editor.style.padding.bottom
+                    ), SGUIRoot.White, ScaleMode.StretchToFill, false);
+
+                    GUI.color = prevGUIColor;
+                    GUI.skin.label.normal.textColor = elem.Background;
+                    // Draw over the text field. Again. Because.
+                    GUI.Label(new Rect(
+                        selectFrom.x,
+                        position.y + LineHeight / 2f - GUI.skin.label.padding.top,
+                        selectTo.x - selectFrom.x,
+                        bounds.height
+                    ), editor.SelectedText);
+                }
+
+                Vector2 cursor = editor.style.GetCursorPixelPosition(bounds, content, editor.cursorIndex);
+                GUI.color = GUI.skin.settings.cursorColor;
+                GUI.DrawTexture(new Rect(
+                    cursor.x - 2f,
+                    position.y + editor.style.padding.top,
+                    1f,
+                    bounds.height - editor.style.padding.top - editor.style.padding.bottom
+                ), SGUIRoot.White, ScaleMode.StretchToFill, false);
+
+                GUI.color = prevGUIColor;
+            }
         }
 
         public Vector2 MeasureText(string text, Vector2? size = null) {
