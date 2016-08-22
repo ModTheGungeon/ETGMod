@@ -47,7 +47,7 @@ namespace SGUI {
 
         public static Texture2D White;
         /// <summary>
-        /// Normal, active, hover, focused.
+        /// Order of textures depending on backend. For SGUI-IM: Normal, active, hover, focused.
         /// </summary>
         public Texture2D[] TextFieldBackground;
 

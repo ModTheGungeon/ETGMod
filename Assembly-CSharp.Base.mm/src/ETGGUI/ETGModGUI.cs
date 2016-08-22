@@ -165,13 +165,13 @@ public class ETGModGUI : MonoBehaviour {
     public void OnGUI() {
         if (GuiSkin == null) {
             GuiSkin = GUI.skin;
-            GuiSkin.font = FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
-            float height = 26f;
+            // GuiSkin.font = FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
+            /*float height = 26f;
             GuiSkin.label.fixedHeight = height;
             GuiSkin.button.fixedHeight = height;
             GuiSkin.toggle.fixedHeight = height;
             GuiSkin.textField.fixedHeight = height;
-            GuiSkin.textField.alignment = TextAnchor.MiddleLeft;
+            GuiSkin.textField.alignment = TextAnchor.MiddleLeft;*/
         }
         GUI.skin = GuiSkin;
 

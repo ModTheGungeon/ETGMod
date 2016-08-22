@@ -59,6 +59,18 @@ namespace SGUI {
         public Color Foreground;
         public Color Background;
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="T:SGUI.SElement"/> is interactive.
+        /// </summary>
+        /// <value><c>true</c> if is interactive; otherwise, <c>false</c>.</value>
+        public virtual bool IsInteractive {
+            get {
+                return false;
+            }
+        }
+
+        public bool IsFocused { get; protected set; }
+
         public Action<SElement> OnUpdateStyle;
 
         public SElement() {
@@ -130,7 +142,9 @@ namespace SGUI {
         }
 
         public virtual void Dispose() {
+        }
 
+        public virtual void Focus() {
         }
 
 	}

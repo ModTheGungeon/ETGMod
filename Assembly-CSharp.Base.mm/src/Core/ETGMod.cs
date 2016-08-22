@@ -7,6 +7,7 @@ using Ionic.Zip;
 using System.Runtime.InteropServices;
 using System.Collections;
 using SGUI;
+using ETGGUI;
 
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
@@ -97,7 +98,10 @@ public static partial class ETGMod {
         Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();
+
+        SGUIIMBackend.GetFont = (SGUIIMBackend backend, SGUIRoot root) => FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
         SGUIRoot.Setup();
+
         MultiplayerManager.Create();
 
         Debug.Log("ETGMod " + BaseVersion);
@@ -146,7 +150,15 @@ public static partial class ETGMod {
                 elem.Size.x = elem.Root.Size.x - 32f;
                 elem.Position = elem.Centered - new Vector2(0f, elem.Backend.LineHeight);
             },
-            OnTextChanged = (STextField elem, string prevText) => Console.WriteLine("Changed text from " + prevText + " to " + elem.Text)
+            OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox A: " + text),
+        };
+        new STextField {
+            Text = "Another text box.",
+            OnUpdateStyle = delegate (SElement elem) {
+                elem.Size.x = elem.Root.Size.x - 256f;
+                elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight * 2f);
+            },
+            OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox B: " + text),
         };
 
         CallInEachModule("Start");

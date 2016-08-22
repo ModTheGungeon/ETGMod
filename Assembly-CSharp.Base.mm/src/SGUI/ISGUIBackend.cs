@@ -2,6 +2,9 @@
 using UnityEngine;
 
 namespace SGUI {
+    /// <summary>
+    /// A SGUI backend. Only use it in a valid context (when rendering)!
+    /// </summary>
     public interface ISGUIBackend {
 
         /// <summary>
@@ -21,6 +24,11 @@ namespace SGUI {
         float LineHeight { get; set; }
 
         void StartRender(SGUIRoot root);
+
+        int GetCurrentElementID();
+        int GetElementID(SElement elem);
+        bool IsFocused(SElement elem);
+        void Focus(SElement elem);
 
         /// <summary>
         /// Render the specified text on screen.
