@@ -83,11 +83,10 @@ namespace SGUI {
         }
 
         public virtual void HandleChange(object sender, ListChangedEventArgs e) {
-            ParentTop.UpdateStyle();
+            (ParentTop ?? this).UpdateStyle();
         }
 
         public virtual void UpdateStyle() {
-
             if (
                 Foreground.r == SGUIRoot.Main.Foreground.r &&
                 Foreground.g == SGUIRoot.Main.Foreground.g &&

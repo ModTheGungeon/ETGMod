@@ -5,7 +5,9 @@ using UnityEngine;
 namespace SGUI {
     public sealed class SGUIIMBackend : ISGUIBackend {
 
-        public static Func<SGUIIMBackend, SGUIRoot, Font> GetFont;
+        public static Func<SGUIIMBackend, Font> GetFont;
+
+        private readonly static Color _Transparent = new Color(0f, 0f, 0f, 0f);
 
         // IDisposable, yet cannot be disposed. Let's keep one reference for the lifetime of all backend instances.
         private readonly static TextGenerator _TextGenerator = new TextGenerator();
@@ -46,21 +48,26 @@ namespace SGUI {
             }
         }
 
-        public void StartRender(SGUIRoot root) {
-            if (CurrentRoot != null) {
-                throw new InvalidOperationException("StartRender already called! Call EndRender first!");
-            }
-            CurrentRoot = root;
-
+        public bool Initialized { get; private set; }
+        public void Init() {
             if (Font == null) {
                 if (GetFont != null) {
-                    GUI.skin.font = GetFont(this, root);
+                    GUI.skin.font = GetFont(this);
                 }
                 Font = GUI.skin.font;
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                 GUI.skin.textField.alignment = TextAnchor.MiddleLeft;
             }
+
+            Initialized = true;
+        }
+
+        public void StartRender(SGUIRoot root) {
+            if (CurrentRoot != null) {
+                throw new InvalidOperationException("StartRender already called! Call EndRender first!");
+            }
+            CurrentRoot = root;
 
             GUI.skin.textField.normal.background = CurrentRoot.TextFieldBackground[0];
             GUI.skin.textField.active.background = CurrentRoot.TextFieldBackground[1];
@@ -98,18 +105,20 @@ namespace SGUI {
         /// Registers the next element, mapping it to the element.
         /// </summary>
         /// <param name="elem">Element containing the next element.</param>
-        private void _RegisterNextElement(SElement elem) {
+        private int _RegisterNextElement(SElement elem) {
             _RegisteredNextElement = true;
             GUI.SetNextControlName(_NewElementName(elem));
+            return CurrentElementID;
         }
         /// <summary>
         /// Registers the next element when not already registered.
         /// </summary>
-        private void _RegisterNextElement() {
+        private int _RegisterNextElement() {
             if (!_RegisteredNextElement) {
                 GUI.SetNextControlName(_NewElementName(null));
             }
             _RegisteredNextElement = false;
+            return CurrentElementID;
         }
 
         public int CurrentElementID {
@@ -149,18 +158,27 @@ namespace SGUI {
                 return true;
             }
 
-            // TODO check if the element would render its children relative to itself
+            if (elem is SGroup) {
+                return true;
+            }
+
             return false;
         }
 
         public void PreparePosition(SElement elem, ref Vector2 position) {
+            if (elem == null) {
+                return;
+            }
             // IMGUI draws relative to the current window.
             // If this is a window or similar, don't add the absolute offset.
             // If not, add the element position to draw relative to *that*.
-            if (!IsRelative(elem) && elem != null) {
-                position += elem.Position;
+            if (IsRelative(elem)) {
+                return;
             }
+            position += elem.Position;
+            PreparePosition(elem.Parent, ref position);
         }
+
 
         public void Rect(SElement elem, Vector2 position, Vector2 size, Color color) {
             PreparePosition(elem, ref position);
@@ -173,6 +191,7 @@ namespace SGUI {
             GUI.color = prevGUIColor;
         }
 
+
         public void Text(SElement elem, Vector2 position, string text) {
             PreparePosition(elem, ref position);
 
@@ -181,6 +200,7 @@ namespace SGUI {
             _RegisterNextElement(elem);
             GUI.Label(new Rect(position, elem != null ? elem.Size : Vector2.zero), text);
         }
+
 
         public bool TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
             PreparePosition(elem, ref position);
@@ -262,12 +282,13 @@ namespace SGUI {
             return focused;
         }
 
+
         // IMGUI doesn't seem to have something similar to TextEditor for buttons... so SButton.OnChange stays untouched.
         public bool Button(SElement elem, Vector2 position, Vector2 size, string text) {
             PreparePosition(elem, ref position);
 
             if (elem != null) {
-                GUI.skin.button.normal.textColor = elem.Foreground * 0.8f;
+                GUI.skin.button.normal.textColor = elem.Foreground * 0.9f;
                 GUI.skin.button.active.textColor = elem.Foreground;
                 GUI.skin.button.hover.textColor = elem.Foreground;
                 GUI.skin.button.focused.textColor = elem.Foreground;
@@ -286,6 +307,42 @@ namespace SGUI {
             }
             return false;
         }
+
+
+        public void StartGroup(SGroup group) {
+            Vector2 position = group.Position;
+            PreparePosition(group, ref position);
+            Rect bounds = new Rect(position, group.Size);
+
+            GUI.backgroundColor = _Transparent;
+            Color prevGUIColor = GUI.color;
+            GUI.color = group.Foreground;
+
+            if (group.Title != null) {
+                GUI.BeginGroup(bounds, group.Title);
+                bounds = new Rect(Vector2.zero, group.Size);
+            } else if (group.ScrollDirection == SGroup.EDirection.None) {
+                GUI.BeginGroup(bounds);
+            }
+
+            if (group.ScrollDirection != SGroup.EDirection.None) {
+                group.ScrollPosition = GUI.BeginScrollView(
+                    bounds, group.ScrollPosition, new Rect(Vector2.zero, group.InnerSize),
+                    (group.ScrollDirection & SGroup.EDirection.Horizontal) == SGroup.EDirection.Horizontal,
+                    (group.ScrollDirection & SGroup.EDirection.Vertical) == SGroup.EDirection.Vertical
+                );
+            }
+
+            GUI.color = prevGUIColor;
+        }
+        public void EndGroup(SGroup group) {
+            if (group.ScrollDirection != SGroup.EDirection.None) {
+                GUI.EndScrollView();
+            }
+
+            GUI.EndGroup();
+        }
+
 
         public Vector2 MeasureText(string text, Vector2? size = null) {
             _TextGenerationSettings.richText = true;

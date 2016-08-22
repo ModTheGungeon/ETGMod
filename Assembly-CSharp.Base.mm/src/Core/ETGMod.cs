@@ -99,7 +99,7 @@ public static partial class ETGMod {
 
         ETGModGUI.Create();
 
-        SGUIIMBackend.GetFont = (SGUIIMBackend backend, SGUIRoot root) => FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
+        SGUIIMBackend.GetFont = (SGUIIMBackend backend) => FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
         SGUIRoot.Setup();
 
         MultiplayerManager.Create();
@@ -134,35 +134,42 @@ public static partial class ETGMod {
 
         TestGunController.Add();
 
+        SGroup centeredGroup = new SGroup {
+            Size = new Vector2(256f, /*match auto inner-size*/ 0f),
+            AutoLayout = (g) => g.AutoLayoutRow,
+            OnUpdateStyle = delegate (SElement elem) {
+                elem.Position = elem.Centered;
+            }
+        };
+
         new SLabel {
             Text = "CENTE<color=#ff0000ff>RED</color>.",
-            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered
+            Parent = centeredGroup,
         };
 
         STextField fieldA = new STextField {
-            Text = "Sample.",
-            OnUpdateStyle = delegate (SElement elem) {
-                elem.Size.x = 256f;
-                elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight + 4f);
-            },
+            Parent = centeredGroup,
             OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox A: " + text),
         };
         STextField fieldB = new STextField {
-            Text = "Another text box.",
-            OnUpdateStyle = delegate (SElement elem) {
-                elem.Size.x = 256f;
-                elem.Position = fieldA.Position + new Vector2(0f, elem.Backend.LineHeight + 4f);
-            },
+            Parent = centeredGroup,
             OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox B: " + text),
         };
 
         new SButton {
+            Parent = centeredGroup,
             Text = "FOCUS FIELD A",
-            OnUpdateStyle = delegate (SElement elem) {
-                elem.Size.x = 256f;
-                elem.Position = fieldB.Position + new Vector2(0f, elem.Backend.LineHeight + 4f);
-            },
             OnClick = (SButton elem) => fieldA.Focus(),
+        };
+
+        STextField commandField = new STextField {
+            Text = "",
+            OnUpdateStyle = delegate (SElement elem) {
+                elem.Size.x = elem.Root.Size.x - 16f;
+                elem.Position.x = elem.Centered.x;
+                elem.Position.y = elem.Root.Size.y - elem.Size.y - 8f;
+            },
+            OnSubmit = (STextField elem, string text) => Console.WriteLine("TODO: HANDLE COMMANDS. In the meantime, " + text),
         };
 
         CallInEachModule("Start");

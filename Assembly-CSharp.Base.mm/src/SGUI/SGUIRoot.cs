@@ -73,6 +73,11 @@ namespace SGUI {
         }
 
         public void Start() {
+            if (!Backend.RenderOnGUI) {
+                Backend.Init();
+            } else {
+                _ScheduledBackendInit = true;
+            }
         }
 
         public void HandleChange(object sender, ListChangedEventArgs e) {
@@ -108,6 +113,10 @@ namespace SGUI {
         }
 
         public void Update() {
+            if (!Backend.Initialized) {
+                return;
+            }
+
             for (int i = 0; i < Children.Count; i++) {
                 SElement child = Children[i];
                 child.Root = this;
@@ -131,9 +140,15 @@ namespace SGUI {
             }
         }
 
+        protected bool _ScheduledBackendInit = false;
         public void OnGUI() {
             if (!Backend.RenderOnGUI) {
                 return;
+            }
+
+            if (_ScheduledBackendInit) {
+                _ScheduledBackendInit = false;
+                Backend.Init();
             }
 
             CheckForResize();
