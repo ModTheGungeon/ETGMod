@@ -40,7 +40,7 @@ namespace SGUI {
             }
             set {
                 if (_Font != value) {
-                    LineHeight = value.dynamic ? value.lineHeight * 2f : value.characterInfo[0].glyphHeight;
+                    LineHeight = value.dynamic ? value.lineHeight * 2f : (value.characterInfo[0].glyphHeight + 4f);
                 }
                 _Font = value;
             }
@@ -212,8 +212,9 @@ namespace SGUI {
                 Color prevGUIColor = GUI.color;
 
                 if (editor.cursorIndex != editor.selectIndex) {
-                    Vector2 selectA = editor.style.GetCursorPixelPosition(bounds, content, editor.cursorIndex);
-                    Vector2 selectB = editor.style.GetCursorPixelPosition(bounds, content, editor.selectIndex);
+                    Rect boundsRelative = new Rect(0, 0, bounds.width, bounds.height);
+                    Vector2 selectA = editor.style.GetCursorPixelPosition(boundsRelative, content, editor.cursorIndex) - editor.scrollOffset;
+                    Vector2 selectB = editor.style.GetCursorPixelPosition(boundsRelative, content, editor.selectIndex) - editor.scrollOffset;
                     Vector2 selectFrom, selectTo;
                     if (selectA.x <= selectB.x) {
                         selectFrom = selectA;
@@ -222,10 +223,13 @@ namespace SGUI {
                         selectFrom = selectB;
                         selectTo = selectA;
                     }
+
+                    GUI.BeginClip(bounds);
+
                     GUI.color = GUI.skin.settings.selectionColor;
                     GUI.DrawTexture(new Rect(
                         selectFrom.x,
-                        bounds.y + editor.style.padding.top,
+                        editor.style.padding.top,
                         selectTo.x - selectFrom.x,
                         bounds.height - editor.style.padding.top - editor.style.padding.bottom
                     ), SGUIRoot.White, ScaleMode.StretchToFill, false);
@@ -235,13 +239,15 @@ namespace SGUI {
                     // Draw over the text field. Again. Because.
                     GUI.Label(new Rect(
                         selectFrom.x,
-                        bounds.y,
+                        0f,
                         selectTo.x - selectFrom.x,
                         bounds.height
                     ), editor.SelectedText);
+
+                    GUI.EndClip();
                 }
 
-                Vector2 cursor = editor.style.GetCursorPixelPosition(bounds, content, editor.cursorIndex);
+                Vector2 cursor = editor.style.GetCursorPixelPosition(bounds, content, editor.cursorIndex) - editor.scrollOffset;
                 GUI.color = GUI.skin.settings.cursorColor;
                 GUI.DrawTexture(new Rect(
                     cursor.x - 2f,

@@ -116,10 +116,15 @@ namespace SGUI {
             }
 
             if (AdoptedChildren.Count != 0) {
+                // Adopting children!
                 for (int i = 0; i < AdoptedChildren.Count; i++) {
                     SElement child = AdoptedChildren[i];
                     if (child.Parent == null && !Children.Contains(child)) {
+                        // Child had no memory who its parents were, so let's just adopt it.
                         Children.Add(child);
+                    } else if (child.Parent != null && !child.Parent.Children.Contains(child)) {
+                        // Child remembers about its parents, but parents not about child. Let's force parents to care.
+                        child.Parent.Children.Add(child);
                     }
                 }
                 AdoptedChildren.Clear();
