@@ -31,7 +31,7 @@ namespace SGUI {
             if (Root == null) return;
 
             if (UpdateBounds) {
-                Size = Backend.MeasureText(Text);
+                Size = Backend.MeasureText(Text) + new Vector2(16f, 2f);
             }
 
             base.UpdateStyle();
