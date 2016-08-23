@@ -74,6 +74,10 @@ namespace SGUI {
         void StartGroup(SGroup group);
         void EndGroup(SGroup group);
 
+        void Window(SGroup group);
+        void StartWindow(SGroup group);
+        void EndWindow(SGroup group);
+
         /// <summary>
         /// Gets the size of the text.
         /// </summary>

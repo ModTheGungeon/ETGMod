@@ -78,10 +78,6 @@ namespace SGUI {
 
             GUI.depth = -0x0ade;
 
-            _ElementSemaphore = 0;
-            if (_GlobalElementSemaphore == 0) {
-                _Elements.Clear();
-            }
             _ClickedButtons.Clear();
         }
 
@@ -91,7 +87,12 @@ namespace SGUI {
             }
             CurrentRoot = null;
 
+            Console.WriteLine("EndRender, global: " + _GlobalElementSemaphore + ", local: " + _ElementSemaphore);
             _GlobalElementSemaphore -= _ElementSemaphore;
+            _ElementSemaphore = 0;
+            if (_GlobalElementSemaphore == 0) {
+                _Elements.Clear();
+            }
         }
 
         private string _NewElementName(SElement elem) {
@@ -100,7 +101,7 @@ namespace SGUI {
             _Elements.Add(elem);
             return (_Elements.Count - 1).ToString();
         }
-        private bool _RegisteredNextElement = false;
+        private bool _RegisteredNextElement;
         /// <summary>
         /// Registers the next element, mapping it to the element.
         /// </summary>
@@ -315,32 +316,57 @@ namespace SGUI {
             Rect bounds = new Rect(position, group.Size);
 
             GUI.backgroundColor = _Transparent;
-            Color prevGUIColor = GUI.color;
-            GUI.color = group.Foreground;
-
-            if (group.Title != null) {
-                GUI.BeginGroup(bounds, group.Title);
-                bounds = new Rect(Vector2.zero, group.Size);
-            } else if (group.ScrollDirection == SGroup.EDirection.None) {
+            _RegisterNextElement(group);
+            if (group.ScrollDirection == SGroup.EDirection.None) {
                 GUI.BeginGroup(bounds);
-            }
-
-            if (group.ScrollDirection != SGroup.EDirection.None) {
+            } else {
                 group.ScrollPosition = GUI.BeginScrollView(
                     bounds, group.ScrollPosition, new Rect(Vector2.zero, group.InnerSize),
                     (group.ScrollDirection & SGroup.EDirection.Horizontal) == SGroup.EDirection.Horizontal,
                     (group.ScrollDirection & SGroup.EDirection.Vertical) == SGroup.EDirection.Vertical
                 );
             }
-
-            GUI.color = prevGUIColor;
         }
         public void EndGroup(SGroup group) {
             if (group.ScrollDirection != SGroup.EDirection.None) {
                 GUI.EndScrollView();
+            } else {
+                GUI.EndGroup();
+            }
+        }
+
+
+        public void Window(SGroup group) {
+            Vector2 position = group.Position;
+            PreparePosition(group, ref position);
+            Rect bounds = new Rect(position, group.Size);
+
+            GUI.backgroundColor = _Transparent;
+            bounds = GUI.Window(_RegisterNextElement(group), bounds, group.RenderWindow, string.Empty);
+
+            group.Position = bounds.position;
+            group.Size = bounds.size;
+        }
+        public void StartWindow(SGroup group) {
+            if (group.WindowID == -1 || group.ScrollDirection == SGroup.EDirection.None) {
+                return;
             }
 
-            GUI.EndGroup();
+            Rect bounds = new Rect(Vector2.zero, group.Size);
+            GUI.backgroundColor = _Transparent;
+            _RegisterNextElement(group);
+            group.ScrollPosition = GUI.BeginScrollView(
+                bounds, group.ScrollPosition, new Rect(Vector2.zero, group.InnerSize),
+                (group.ScrollDirection & SGroup.EDirection.Horizontal) == SGroup.EDirection.Horizontal,
+                (group.ScrollDirection & SGroup.EDirection.Vertical) == SGroup.EDirection.Vertical
+            );
+        }
+        public void EndWindow(SGroup group) {
+            if (group.WindowID == -1 || group.ScrollDirection == SGroup.EDirection.None) {
+                return;
+            }
+
+            GUI.EndScrollView();
         }
 
 

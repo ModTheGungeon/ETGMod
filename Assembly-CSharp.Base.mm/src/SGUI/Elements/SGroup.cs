@@ -4,22 +4,24 @@ using UnityEngine;
 namespace SGUI {
     public class SGroup : SElement {
 
-        public string Title;
+        public string WindowTitle;
+        public int WindowID { get; protected set; }
 
         public EDirection ScrollDirection;
         public Vector2 ScrollPosition;
         public Vector2 InnerSize = new Vector2(128f, 128f);
 
         public Func<SGroup, Action<int, SElement>> AutoLayout;
-        public float AutoLayoutPadding = 4f;
+        public float AutoLayoutPadding = 2f;
+        public float AutoLayoutBorder = 2f;
         public EDirection AutoGrowDirection = EDirection.None;
 
         protected Action<int, SElement> _AutoLayout;
 
         public SGroup()
             : this(null) { }
-        public SGroup(string title) {
-            Title = title;
+        public SGroup(string windowTitle) {
+            WindowTitle = windowTitle;
         }
 
         public override void UpdateStyle() {
@@ -55,11 +57,22 @@ namespace SGUI {
             Draw.Rect(this, Vector2.zero, InnerSize, Background);
         }
         public override void Render() {
-            Backend.StartGroup(this);
+            if (WindowTitle == null) {
+                Draw.StartGroup(this);
+                RenderWindow(-1);
+                Draw.EndGroup(this);
+            } else {
+                Draw.Window(this);
+            }
+        }
+        public void RenderWindow(int id) {
+            WindowID = id;
+            Draw.StartWindow(this);
             RenderBackground();
             RenderChildren();
-            Backend.EndGroup(this);
+            Draw.EndWindow(this);
         }
+
 
         protected float _CurrentAutoLayoutRow;
         public void AutoLayoutRows(int index, SElement elem) {
@@ -72,14 +85,14 @@ namespace SGUI {
 
             elem.UpdateBounds = false;
 
-            if ((AutoGrowDirection & EDirection.Horizontal) != EDirection.Horizontal) {
-                elem.Size.x = Size.x;
-            }
-            elem.Position.y = _CurrentAutoLayoutRow;
+            // FIXME border.
+            elem.Size.x = Size.x - AutoLayoutBorder * 2f;
+            elem.Position = new Vector2(AutoLayoutBorder, _CurrentAutoLayoutRow);
             _CurrentAutoLayoutRow += elem.Size.y + AutoLayoutPadding;
 
             GrowToFit(elem);
         }
+
 
         public float AutoLayoutLabelWidth;
         public void AutoLayoutLabeledInput(int index, SElement elem) {
@@ -122,6 +135,7 @@ namespace SGUI {
                 Size.y = InnerSize.y;
             }
         }
+
 
         [Flags]
         public enum EDirection {

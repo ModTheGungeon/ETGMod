@@ -134,7 +134,8 @@ public static partial class ETGMod {
 
         TestGunController.Add();
 
-        SGroup centeredGroup = new SGroup {
+        SGroup window = new SGroup {
+            WindowTitle = "A WINDOW.",
             Size = new Vector2(312f, 200f),
             ScrollDirection = SGroup.EDirection.Vertical,
             AutoLayout = (g) => g.AutoLayoutRows,
@@ -144,13 +145,13 @@ public static partial class ETGMod {
         };
 
         new SLabel {
-            Parent = centeredGroup,
+            Parent = window,
             Text = "CENTE<color=#ff0000ff>RED</color>.",
         };
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 6; i++) {
             new SGroup {
-                Parent = centeredGroup,
+                Parent = window,
                 Size = new Vector2(/*match auto parent*/ 0f, /*match auto inner-size*/ 0f),
                 AutoLayout = (g) => g.AutoLayoutLabeledInput,
                 Children = {
@@ -163,9 +164,9 @@ public static partial class ETGMod {
         }
 
         new SButton {
-            Parent = centeredGroup,
+            Parent = window,
             Text = "FOCUS FIELD #2",
-            OnClick = (SButton elem) => centeredGroup[/*third row (first is label)*/ 2][/*STextField*/ 1].Focus(),
+            OnClick = (SButton elem) => window[/*third row (first is label)*/ 2][/*STextField*/ 1].Focus(),
         };
 
         STextField commandField = new STextField {
