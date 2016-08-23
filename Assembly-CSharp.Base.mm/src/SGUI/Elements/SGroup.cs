@@ -1,10 +1,13 @@
 ﻿using System;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace SGUI {
     public class SGroup : SElement {
 
         public string WindowTitle;
+        public readonly SWindowTitleBar WindowTitleBar;
+        public bool IsWindow;
         public int WindowID { get; protected set; }
 
         public EDirection ScrollDirection;
@@ -13,15 +16,27 @@ namespace SGUI {
 
         public Func<SGroup, Action<int, SElement>> AutoLayout;
         public float AutoLayoutPadding = 2f;
-        public float AutoLayoutBorder = 2f;
+        public float Border = 2f;
         public EDirection AutoGrowDirection = EDirection.None;
 
         protected Action<int, SElement> _AutoLayout;
 
-        public SGroup()
-            : this(null) { }
-        public SGroup(string windowTitle) {
-            WindowTitle = windowTitle;
+        public SGroup() {
+            WindowTitleBar = new SWindowTitleBar {
+                Parent = this
+            };
+        }
+
+        public override void HandleChange(object sender, ListChangedEventArgs e) {
+            if (e.ListChangedType == ListChangedType.ItemAdded) {
+                SElement elem = Children[e.NewIndex];
+                if (elem is SWindowTitleBar) {
+                    Children.RemoveAt(e.NewIndex);
+                    return;
+                }
+            }
+
+            ParentTop.UpdateStyle();
         }
 
         public override void UpdateStyle() {
@@ -38,6 +53,8 @@ namespace SGUI {
             if (AutoLayout != null) {
                 _AutoLayout = AutoLayout(this);
                 AutoLayout = null;
+
+                IsWindow = WindowTitle != null;
             }
 
             if (_AutoLayout != null) {
@@ -52,23 +69,32 @@ namespace SGUI {
 
             base.UpdateStyle();
         }
+        public override void UpdateChildrenStyles() {
+            WindowTitleBar.Root = Root;
+            WindowTitleBar.Parent = this;
+            WindowTitleBar.UpdateStyle();
+
+            base.UpdateChildrenStyles();
+        }
 
         public override void RenderBackground() {
-            Draw.Rect(this, Vector2.zero, InnerSize, Background);
+            Draw.Rect(this, ScrollPosition, new Vector2(Size.x + Border * 2f, Size.y + Border * 2f), Background.WithAlpha(Background.a * 0.5f));
         }
         public override void Render() {
-            if (WindowTitle == null) {
-                Draw.StartGroup(this);
-                RenderWindow(-1);
-                Draw.EndGroup(this);
-            } else {
+            if (IsWindow) {
                 Draw.Window(this);
+
+            } else {
+                WindowID = -1;
+                Draw.StartGroup(this);
+                RenderBackground();
+                RenderChildren();
+                Draw.EndGroup(this);
             }
         }
-        public void RenderWindow(int id) {
-            WindowID = id;
+        public virtual void RenderGroup(int windowID) {
+            WindowID = windowID;
             Draw.StartWindow(this);
-            RenderBackground();
             RenderChildren();
             Draw.EndWindow(this);
         }
@@ -85,9 +111,8 @@ namespace SGUI {
 
             elem.UpdateBounds = false;
 
-            // FIXME border.
-            elem.Size.x = Size.x - AutoLayoutBorder * 2f;
-            elem.Position = new Vector2(AutoLayoutBorder, _CurrentAutoLayoutRow);
+            elem.Size.x = Size.x;
+            elem.Position = new Vector2(0f, _CurrentAutoLayoutRow);
             _CurrentAutoLayoutRow += elem.Size.y + AutoLayoutPadding;
 
             GrowToFit(elem);

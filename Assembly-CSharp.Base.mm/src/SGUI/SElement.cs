@@ -94,6 +94,15 @@ namespace SGUI {
             ParentTop.UpdateStyle();
         }
 
+        protected bool _CenteredOnce;
+        public void CenterOnce() {
+            if (_CenteredOnce) {
+                return;
+            }
+            _CenteredOnce = true;
+            Position = Centered;
+        }
+
         public virtual void UpdateStyle() {
             // This will get called again once this element gets added to the root.
             if (Root == null) return;
@@ -116,7 +125,7 @@ namespace SGUI {
             OnUpdateStyle?.Invoke(this);
             UpdateChildrenStyles();
         }
-        public void UpdateChildrenStyles() {
+        public virtual void UpdateChildrenStyles() {
             for (int i = 0; i < Children.Count; i++) {
                 SElement child = Children[i];
                 child.Root = Root;

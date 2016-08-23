@@ -24,6 +24,7 @@ namespace SGUI {
         float LineHeight { get; set; }
 
         void Init();
+
         bool Initialized { get; }
 
         void StartRender(SGUIRoot root);
@@ -43,6 +44,11 @@ namespace SGUI {
         void Rect(SElement elem, Vector2 position, Vector2 size, Color color);
         void Rect(Rect bounds, Color color);
 
+        void StartClip(SElement elem);
+        void StartClip(SElement elem, Rect bounds);
+        void StartClip(Rect bounds);
+        void EndClip();
+
         /// <summary>
         /// Render the specified text on screen.
         /// </summary>
@@ -50,6 +56,13 @@ namespace SGUI {
         /// <param name="position">Relative position to render the text at.</param>
         /// <param name="text">Text to render.</param>
         void Text(SElement elem, Vector2 position, string text);
+        /// <summary>
+        /// Render the specified text on screen.
+        /// </summary>
+        /// <param name="elem">Element instance. Null for root.</param>
+        /// <param name="bounds">Bounds to render the text in.</param>
+        /// <param name="text">Text to render.</param>
+        void Text(SElement elem, Rect bounds, string text);
 
         /// <summary>
         /// Render a text field on screen.
@@ -77,6 +90,7 @@ namespace SGUI {
         void Window(SGroup group);
         void StartWindow(SGroup group);
         void EndWindow(SGroup group);
+        void WindowTitleBar(SWindowTitleBar bar);
 
         /// <summary>
         /// Gets the size of the text.

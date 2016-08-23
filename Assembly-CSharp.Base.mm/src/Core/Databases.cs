@@ -51,10 +51,6 @@ public sealed class ItemDB {
     /// </summary>
     public tk2dSpriteCollectionData WeaponCollection;
     /// <summary>
-    /// Sprite collection used for the gun collected popup.
-    /// </summary>
-    public tk2dSpriteCollectionData WeaponCollection02;
-    /// <summary>
     /// Sprite collection used by the items.
     /// </summary>
     public tk2dSpriteCollectionData ItemCollection;
@@ -102,7 +98,6 @@ public sealed class ItemDB {
             AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
             if (value is Gun) {
                 WeaponCollection.Handle();
-                WeaponCollection02.Handle();
             } else {
                 ItemCollection.Handle();
             }
@@ -129,7 +124,6 @@ public sealed class ItemDB {
     public Gun NewGun(string gunName, string gunNameShort = null) {
         if (_GunGivenPrototype == null) {
             _GunGivenPrototype = (Gun) PickupObjectDatabase.GetByName("Pea_Shooter");
-            WeaponCollection02 = _GunGivenPrototype.sprite.Collection;
         }
 
         return NewGun(gunName, _GunGivenPrototype, gunNameShort);
@@ -327,7 +321,6 @@ public static class ItemDBExt {
     public static void SetupSprite(this Gun gun, string defaultSprite = null, int fps = 0) {
         AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
         ETGMod.Databases.Items.WeaponCollection.Handle();
-        ETGMod.Databases.Items.WeaponCollection02.Handle();
 
         if (defaultSprite != null) {
             gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;

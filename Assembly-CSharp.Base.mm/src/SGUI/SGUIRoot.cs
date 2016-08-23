@@ -62,7 +62,7 @@ namespace SGUI {
             Children.ListChanged += HandleChange;
 
             Foreground = new Color(1f, 1f, 1f, 1f);
-            Background = new Color(0f, 0f, 0f, 0.8f);
+            Background = new Color(0f, 0f, 0f, 0.65f);
 
             if (White == null) {
                 White = new Texture2D(1, 1);

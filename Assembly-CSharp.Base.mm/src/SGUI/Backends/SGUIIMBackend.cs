@@ -5,6 +5,9 @@ using UnityEngine;
 namespace SGUI {
     public sealed class SGUIIMBackend : ISGUIBackend {
 
+        public static int DefaultDepth = 0x0ade;
+        public int Depth = DefaultDepth;
+
         public static Func<SGUIIMBackend, Font> GetFont;
 
         private readonly static Color _Transparent = new Color(0f, 0f, 0f, 0f);
@@ -58,6 +61,9 @@ namespace SGUI {
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                 GUI.skin.textField.alignment = TextAnchor.MiddleLeft;
+
+                GUI.skin.verticalScrollbar.fixedWidth = 0f;
+                GUI.skin.verticalScrollbarThumb.fixedWidth = 0f;
             }
 
             Initialized = true;
@@ -76,7 +82,7 @@ namespace SGUI {
 
             GUI.skin.settings.selectionColor = new Color(0.3f, 0.6f, 0.9f, 1f);
 
-            GUI.depth = -0x0ade;
+            GUI.depth = Depth;
 
             _ClickedButtons.Clear();
         }
@@ -87,7 +93,6 @@ namespace SGUI {
             }
             CurrentRoot = null;
 
-            Console.WriteLine("EndRender, global: " + _GlobalElementSemaphore + ", local: " + _ElementSemaphore);
             _GlobalElementSemaphore -= _ElementSemaphore;
             _ElementSemaphore = 0;
             if (_GlobalElementSemaphore == 0) {
@@ -153,13 +158,17 @@ namespace SGUI {
             return _ClickedButtons.Contains(id);
         }
 
-        public bool IsRelative(SElement elem) {
+        public bool IsRelativeContext(SElement elem) {
             if (elem == null) {
                 // Root is absolute.
                 return true;
             }
 
             if (elem is SGroup) {
+                return true;
+            }
+            // SWindowTitleBar gets rendered with the SGroup
+            if (elem is SWindowTitleBar) {
                 return true;
             }
 
@@ -173,10 +182,11 @@ namespace SGUI {
             // IMGUI draws relative to the current window.
             // If this is a window or similar, don't add the absolute offset.
             // If not, add the element position to draw relative to *that*.
-            if (IsRelative(elem)) {
+            if (IsRelativeContext(elem)) {
                 return;
             }
             position += elem.Position;
+
             PreparePosition(elem.Parent, ref position);
         }
 
@@ -188,8 +198,27 @@ namespace SGUI {
         public void Rect(Rect bounds, Color color) {
             Color prevGUIColor = GUI.color;
             GUI.color = color;
-            GUI.DrawTexture(bounds, SGUIRoot.White, ScaleMode.StretchToFill, false);
+            GUI.DrawTexture(bounds, SGUIRoot.White, ScaleMode.StretchToFill, color.a < 1f);
             GUI.color = prevGUIColor;
+        }
+
+
+        public void StartClip(SElement elem) {
+            Vector2 position = elem.Position;
+            PreparePosition(elem, ref position);
+            StartClip(new Rect(position, elem.Size));
+        }
+        public void StartClip(SElement elem, Rect bounds) {
+            Vector2 position = Vector2.zero;
+            PreparePosition(elem, ref position);
+            bounds.position += position;
+            StartClip(bounds);
+        }
+        public void StartClip(Rect bounds) {
+            GUI.BeginClip(bounds);
+        }
+        public void EndClip() {
+            GUI.EndClip();
         }
 
 
@@ -197,11 +226,19 @@ namespace SGUI {
             PreparePosition(elem, ref position);
 
             GUI.skin.label.normal.textColor = elem.Foreground;
-            // Direct texts in anything with an unfitting size will have some text bounds issues - use SGUILabel...
+            // Direct texts in anything with an unfitting size will have some text bounds issues - use SGUILabel or the Rect variant.
             _RegisterNextElement(elem);
             GUI.Label(new Rect(position, elem != null ? elem.Size : Vector2.zero), text);
         }
+        public void Text(SElement elem, Rect bounds, string text) {
+            Vector2 position = Vector2.zero;
+            PreparePosition(elem, ref position);
+            bounds.position += position;
 
+            GUI.skin.label.normal.textColor = elem.Foreground;
+            _RegisterNextElement(elem);
+            GUI.Label(bounds, text);
+        }
 
         public bool TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
             PreparePosition(elem, ref position);
@@ -339,34 +376,83 @@ namespace SGUI {
         public void Window(SGroup group) {
             Vector2 position = group.Position;
             PreparePosition(group, ref position);
-            Rect bounds = new Rect(position, group.Size);
+            Rect bounds = new Rect(
+                position.x, position.y,
+                group.Size.x + group.Border * 2f,
+                group.Size.y + group.Border * 2f + group.WindowTitleBar.Size.y * 0.5f
+            );
 
             GUI.backgroundColor = _Transparent;
-            bounds = GUI.Window(_RegisterNextElement(group), bounds, group.RenderWindow, string.Empty);
+            bounds = GUI.Window(_RegisterNextElement(group), bounds, group.RenderGroup, string.Empty);
 
             group.Position = bounds.position;
-            group.Size = bounds.size;
         }
         public void StartWindow(SGroup group) {
-            if (group.WindowID == -1 || group.ScrollDirection == SGroup.EDirection.None) {
+            if (group.WindowID == -1) {
                 return;
             }
 
-            Rect bounds = new Rect(Vector2.zero, group.Size);
+            Rect(new Rect(
+                0f, group.WindowTitleBar.Size.y,
+                group.Size.x + group.Border * 2f,
+                group.Size.y + group.Border * 2f
+            ), group.Background);
+
+            Rect bounds = new Rect(
+                group.Border,
+                group.WindowTitleBar.Size.y + group.Border,
+                group.Size.x, group.Size.y
+            );
             GUI.backgroundColor = _Transparent;
             _RegisterNextElement(group);
-            group.ScrollPosition = GUI.BeginScrollView(
-                bounds, group.ScrollPosition, new Rect(Vector2.zero, group.InnerSize),
-                (group.ScrollDirection & SGroup.EDirection.Horizontal) == SGroup.EDirection.Horizontal,
-                (group.ScrollDirection & SGroup.EDirection.Vertical) == SGroup.EDirection.Vertical
-            );
+            if (group.ScrollDirection == SGroup.EDirection.None) {
+                GUI.BeginClip(
+                    bounds,
+                    Vector2.zero,
+                    new Vector2(0f, group.WindowTitleBar.Size.y),
+                    true
+                );
+            } else {
+                group.ScrollPosition = GUI.BeginScrollView(
+                    bounds, group.ScrollPosition, new Rect(Vector2.zero, group.InnerSize),
+                    (group.ScrollDirection & SGroup.EDirection.Horizontal) == SGroup.EDirection.Horizontal,
+                    (group.ScrollDirection & SGroup.EDirection.Vertical) == SGroup.EDirection.Vertical
+                );
+            }
         }
         public void EndWindow(SGroup group) {
-            if (group.WindowID == -1 || group.ScrollDirection == SGroup.EDirection.None) {
+            if (group.WindowID == -1) {
                 return;
             }
 
-            GUI.EndScrollView();
+            if (group.ScrollDirection != SGroup.EDirection.None) {
+                GUI.EndScrollView();
+            } else {
+                GUI.EndClip();
+            }
+
+            group.WindowTitleBar.Root = group.Root;
+            group.WindowTitleBar.Parent = group;
+            group.WindowTitleBar.Render();
+        }
+        public void WindowTitleBar(SWindowTitleBar bar) {
+            Rect bounds = new Rect(Vector2.zero, bar.Size);
+
+            SGroup group = (SGroup) bar.Parent;
+            string title = group.WindowTitle;
+            Event e = Event.current;
+
+            Rect(bar, Vector2.zero, bar.Size, group.Background);
+
+            if (!string.IsNullOrEmpty(title)) {
+                Vector2 titleSize = MeasureText(title);
+                Text(bar, new Rect(group.Border, 0f, titleSize.x, titleSize.y), title);
+            }
+
+            // TODO Window header buttons.
+
+            // TODO Fix drag overlap.
+            GUI.DragWindow(bounds);
         }
 
 
