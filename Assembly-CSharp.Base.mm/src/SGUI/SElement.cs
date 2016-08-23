@@ -47,12 +47,11 @@ namespace SGUI {
             get {
                 float x = 0f;
                 float y = 0f;
-                Vector2 offset = new Vector2(0f, 0f);
                 for (SElement parent = Parent; parent != null; parent = parent.Parent) {
                     x += parent.Position.x;
                     y += parent.Position.y;
                 }
-                return offset;
+                return new Vector2(x, y);
             }
         }
         public Vector2 Centered {
@@ -92,6 +91,21 @@ namespace SGUI {
 
         public virtual void HandleChange(object sender, ListChangedEventArgs e) {
             ParentTop.UpdateStyle();
+
+            // TODO Also send event to backend.
+            if (Root != null) {
+                if (e.ListChangedType == ListChangedType.ItemAdded) {
+                    SElement child = Children[e.NewIndex];
+                    int disposeIndex = Root.DisposingChildren.IndexOf(child);
+                    if (0 <= disposeIndex) {
+                        Root.DisposingChildren.RemoveAt(disposeIndex);
+                    }
+
+                } else if (e.ListChangedType == ListChangedType.ItemDeleted) {
+                    // TODO Dispose.
+                    // Root.DisposingChildren.Add(null);
+                }
+            }
         }
 
         protected bool _CenteredOnce;
@@ -160,6 +174,7 @@ namespace SGUI {
         }
 
         public virtual void Dispose() {
+            Backend.Dispose(this);
         }
 
         public virtual void Focus() {

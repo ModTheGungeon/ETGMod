@@ -91,6 +91,8 @@ namespace SGUI {
         void StartWindow(SGroup group);
         void EndWindow(SGroup group);
         void WindowTitleBar(SWindowTitleBar bar);
+        void UpdateWindows();
+        bool UpdateWindow(SGroup group);
 
         /// <summary>
         /// Gets the size of the text.
@@ -104,11 +106,17 @@ namespace SGUI {
         /// <summary>
         /// Releases all resource used by the <see cref="T:WTFGUI.IWTFGUIBackend"/> object.
         /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="T:WTFGUI.IWTFGUIBackend"/>. The
-        /// <see cref="Dispose"/> method leaves the <see cref="T:WTFGUI.IWTFGUIBackend"/> in an unusable state. After
-        /// calling <see cref="Dispose"/>, you must release all references to the <see cref="T:WTFGUI.IWTFGUIBackend"/>
+        /// <remarks>Call <see cref="Dispose()"/> when you are finished using the <see cref="T:WTFGUI.IWTFGUIBackend"/>. The
+        /// <see cref="Dispose()"/> method leaves the <see cref="T:WTFGUI.IWTFGUIBackend"/> in an unusable state. After
+        /// calling <see cref="Dispose()"/>, you must release all references to the <see cref="T:WTFGUI.IWTFGUIBackend"/>
         /// so the garbage collector can reclaim the memory that the <see cref="T:WTFGUI.IWTFGUIBackend"/> was occupying.</remarks>
         void Dispose();
+
+        /// <summary>
+        /// Dispose the specified elem.
+        /// </summary>
+        /// <param name="elem">Element.</param>
+        void Dispose(SElement elem);
 
     }
 }

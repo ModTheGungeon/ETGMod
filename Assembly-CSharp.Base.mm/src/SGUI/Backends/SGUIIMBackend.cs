@@ -383,9 +383,12 @@ namespace SGUI {
             );
 
             GUI.backgroundColor = _Transparent;
-            bounds = GUI.Window(_RegisterNextElement(group), bounds, group.RenderGroup, string.Empty);
+            _RegisterNextElement(group);
+            GUI.BeginGroup(bounds);
 
-            group.Position = bounds.position;
+            group.RenderGroup(CurrentElementID);
+
+            GUI.EndGroup();
         }
         public void StartWindow(SGroup group) {
             if (group.WindowID == -1) {
@@ -440,7 +443,6 @@ namespace SGUI {
 
             SGroup group = (SGroup) bar.Parent;
             string title = group.WindowTitle;
-            Event e = Event.current;
 
             Rect(bar, Vector2.zero, bar.Size, group.Background);
 
@@ -450,11 +452,66 @@ namespace SGUI {
             }
 
             // TODO Window header buttons.
-
-            // TODO Fix drag overlap.
-            GUI.DragWindow(bounds);
         }
+        public void UpdateWindows() {
+            while (0 < Event.GetEventCount() && (!Event.current.isMouse)) {
+                Event.PopEvent(Event.current);
+            };
 
+            if (!UpdateWindowsIn(null) && _WindowDragging != null) {
+                IList<SElement> children = _WindowDragging.Parent?.Children ?? _WindowDragging.Root.Children;
+                children.Remove(_WindowDragging);
+                children.Add(_WindowDragging);
+            }
+        }
+        public bool UpdateWindowsIn(SElement elem) {
+            IList<SElement> children = elem?.Children ?? CurrentRoot.Children;
+            for (int i = children.Count - 1; 0 <= i; i--) {
+                if (UpdateWindowsIn(children[i])) return true;
+            }
+
+            if (elem is SGroup) {
+                if (UpdateWindow((SGroup) elem)) return true;
+            }
+
+            return false;
+        }
+        private Vector2 _WindowDragOffset;
+        private SGroup _WindowDragging;
+        public bool UpdateWindow(SGroup group) {
+            if (!group.IsWindow) {
+                return false;
+            }
+            Event e = Event.current;
+            SWindowTitleBar bar = group.WindowTitleBar;
+
+            if (e.type == EventType.MouseDown) {
+                Rect screenBounds = new Rect(group.AbsoluteOffset + group.Position, bar.Size);
+                if (screenBounds.Contains(e.mousePosition)) {
+                    bar.Dragging = true;
+                    _WindowDragOffset = group.Position - e.mousePosition;
+                    _WindowDragging = group;
+                    e.Use();
+                    return false; // False because other windows need to be marked as not dragging.
+                } else {
+                    bar.Dragging = false;
+                    return false;
+                }
+
+            } else if (bar.Dragging) {
+                if (e.type == EventType.MouseDrag) {
+                    group.Position = _WindowDragOffset + e.mousePosition;
+                } else if (e.type == EventType.MouseUp) {
+                    bar.Dragging = false;
+                    _WindowDragging = null;
+                }
+                e.Use();
+                return true;
+            }
+
+            bar.Dragging = false;
+            return false;
+        }
 
         public Vector2 MeasureText(string text, Vector2? size = null) {
             _TextGenerationSettings.richText = true;
@@ -480,6 +537,9 @@ namespace SGUI {
         }
 
         public void Dispose() {
+        }
+
+        public void Dispose(SElement elem) {
         }
 
     }

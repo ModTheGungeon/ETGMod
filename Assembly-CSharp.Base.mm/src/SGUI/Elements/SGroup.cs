@@ -36,7 +36,7 @@ namespace SGUI {
                 }
             }
 
-            ParentTop.UpdateStyle();
+            base.HandleChange(sender, e);
         }
 
         public override void UpdateStyle() {

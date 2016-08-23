@@ -10,6 +10,7 @@ namespace SGUI {
 
         public readonly BindingList<SElement> Children = new BindingList<SElement>();
         public readonly List<SElement> AdoptedChildren = new List<SElement>();
+        public readonly List<SElement> DisposingChildren = new List<SElement>();
 
         protected Color _Foreground;
         public Color Foreground {
@@ -92,9 +93,14 @@ namespace SGUI {
                 } else {
                     child.UpdateStyle();
                 }
-            }
-            if (e.ListChangedType == ListChangedType.ItemDeleted) {
+                int disposeIndex = DisposingChildren.IndexOf(child);
+                if (0 <= disposeIndex) {
+                    DisposingChildren.RemoveAt(disposeIndex);
+                }
+
+            } else if (e.ListChangedType == ListChangedType.ItemDeleted) {
                 // TODO Dispose.
+                // DisposingChildren.Add(null);
             }
         }
 
@@ -125,7 +131,6 @@ namespace SGUI {
             }
 
             if (AdoptedChildren.Count != 0) {
-                // Adopting children!
                 for (int i = 0; i < AdoptedChildren.Count; i++) {
                     SElement child = AdoptedChildren[i];
                     if (child.Parent == null && !Children.Contains(child)) {
@@ -137,6 +142,13 @@ namespace SGUI {
                     }
                 }
                 AdoptedChildren.Clear();
+            }
+
+            if (DisposingChildren.Count != 0 && !Backend.RenderOnGUI) {
+                for (int i = 0; i < DisposingChildren.Count; i++) {
+                    DisposingChildren[i].Dispose();
+                }
+                DisposingChildren.Clear();
             }
         }
 
@@ -165,6 +177,16 @@ namespace SGUI {
                 child.Root = this;
                 child.Parent = null;
                 child.Render();
+            }
+
+            // Windows need special reverse-ordered mouse event magic.
+            Backend.UpdateWindows();
+
+            if (DisposingChildren.Count != 0) {
+                for (int i = 0; i < DisposingChildren.Count; i++) {
+                    DisposingChildren[i].Dispose();
+                }
+                DisposingChildren.Clear();
             }
 
             Backend.EndRender(this);
