@@ -63,7 +63,7 @@ namespace SGUI {
             Children.ListChanged += HandleChange;
 
             Foreground = new Color(1f, 1f, 1f, 1f);
-            Background = new Color(0f, 0f, 0f, 0.65f);
+            Background = new Color(0f, 0f, 0f, 0.75f);
 
             if (White == null) {
                 White = new Texture2D(1, 1);
@@ -167,14 +167,14 @@ namespace SGUI {
 
             CheckForResize();
 
-            Backend.StartRender(this);
+            Backend.StartOnGUI(this);
 
             if (_ScheduledUpdateStyle) {
                 _ScheduledUpdateStyle = false;
                 UpdateStyle();
             }
 
-            Backend.Render();
+            Backend.OnGUI();
 
             if (DisposingChildren.Count != 0) {
                 for (int i = 0; i < DisposingChildren.Count; i++) {
@@ -183,7 +183,7 @@ namespace SGUI {
                 DisposingChildren.Clear();
             }
 
-            Backend.EndRender(this);
+            Backend.EndOnGUI(this);
         }
 
         protected int _LastScreenWidth;

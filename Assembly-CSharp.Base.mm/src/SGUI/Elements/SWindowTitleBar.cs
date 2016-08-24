@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SGUI {
     public class SWindowTitleBar : SElement {

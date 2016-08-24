@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SGUI {
     /// <summary>
@@ -32,9 +31,9 @@ namespace SGUI {
 
         bool Initialized { get; }
 
-        void StartRender(SGUIRoot root);
-        void EndRender(SGUIRoot root);
-        void Render();
+        void StartOnGUI(SGUIRoot root);
+        void EndOnGUI(SGUIRoot root);
+        void OnGUI();
 
         int CurrentComponentID { get; }
         int GetFirstComponentID(SElement elem);

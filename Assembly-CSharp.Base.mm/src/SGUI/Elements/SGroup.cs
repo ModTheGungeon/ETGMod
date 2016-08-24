@@ -12,6 +12,9 @@ namespace SGUI {
 
         public EDirection ScrollDirection;
         public Vector2 ScrollPosition;
+        public Vector2 ScrollMomentum;
+        public float ScrollInitialMomentum = 8f;
+        public float ScrollDecayFactor = 0.45f;
         public Vector2 InnerSize = new Vector2(128f, 128f);
 
         public Func<SGroup, Action<int, SElement>> AutoLayout;
@@ -81,6 +84,9 @@ namespace SGUI {
             Draw.Rect(this, ScrollPosition, new Vector2(Size.x + Border * 2f, Size.y + Border * 2f), Background.WithAlpha(Background.a * 0.5f));
         }
         public override void Render() {
+            ScrollPosition += ScrollMomentum;
+            ScrollMomentum *= ScrollDecayFactor;
+
             if (IsWindow) {
                 Draw.Window(this);
 

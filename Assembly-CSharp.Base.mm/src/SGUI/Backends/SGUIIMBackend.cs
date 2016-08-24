@@ -23,7 +23,6 @@ namespace SGUI {
         private int _ComponentSemaphore;
 
         private readonly List<SElement> _Elements = new List<SElement>();
-        private int _ElementSemaphore;
 
         private readonly List<int> _ClickedButtons = new List<int>();
 
@@ -99,9 +98,9 @@ namespace SGUI {
             Initialized = true;
         }
 
-        public void StartRender(SGUIRoot root) {
+        public void StartOnGUI(SGUIRoot root) {
             if (CurrentRoot != null) {
-                throw new InvalidOperationException("StartRender already called! Call EndRender first!");
+                throw new InvalidOperationException("StartOnGUI already called! Call EndOnGUI first!");
             }
             CurrentRoot = root;
             _Reason = Event.current;
@@ -116,7 +115,6 @@ namespace SGUI {
             GUI.depth = Depth;
 
             if (Repainting) {
-                _ElementSemaphore = 0;
                 _Elements.Clear();
 
                 _OPs.Clear();
@@ -129,9 +127,9 @@ namespace SGUI {
 
             // Console.WriteLine("SGUI-IM: Starting new render with following reason: " + _Reason);
         }
-        public void EndRender(SGUIRoot root) {
+        public void EndOnGUI(SGUIRoot root) {
             if (CurrentRoot == null) {
-                throw new InvalidOperationException("EndRender already called! Call StartRender first!");
+                throw new InvalidOperationException("EndOnGUI already called! Call StartOnGUI first!");
             }
             // Console.WriteLine("SGUI-IM: Ending render with " + _GlobalComponentSemaphore + " components, of which " + _ComponentSemaphore + " are local.");
 
@@ -148,10 +146,10 @@ namespace SGUI {
 
             CurrentRoot = null;
         }
-        public void Render() {
+        public void OnGUI() {
             SGUIRoot root = CurrentRoot;
             // TODO or use GUI.tooltip..?! WHY THE FUCK DID NOBODY TELL ME ABOUT THIS?!
-            if (_Reason.isMouse) {
+            if (_Reason.isMouse || _Reason.type == EventType.ScrollWheel) {
                 HandleMouseEvent();
                 return;
             }
@@ -168,7 +166,6 @@ namespace SGUI {
         public bool HandleMouseEvent() {
             // Console.WriteLine();
             // Console.WriteLine("SGUI-IM: Handling mouse event " + Event.current);
-            _ElementSemaphore = _Elements.Count;
             SGroup lastWindowDragging = _WindowDragging;
 
             bool handled = HandleMouseEventIn(null);
@@ -191,8 +188,8 @@ namespace SGUI {
             return handled;
         }
         public bool HandleMouseEventIn(SElement elem) {
-            if (elem is SGroup && UpdateWindow((SGroup) elem)) {
-                return true;
+            if (elem != null) {
+                if (elem is SGroup) return HandleMouseEventInGroup((SGroup) elem);
             }
 
             IList<SElement> children = elem?.Children ?? CurrentRoot.Children;
@@ -200,53 +197,64 @@ namespace SGUI {
                 if (HandleMouseEventIn(children[i])) return true;
             }
 
-            if (!(elem is SGroup) && elem != null) {
+            if (!Event.current.isMouse || Event.current.type == EventType.ScrollWheel) {
+                return false;
+            }
+
+            if (elem != null) {
                 // Simple bounding box check.
                 if (new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(Event.current.mousePosition)) {
                     // Console.WriteLine("SGUI-IM: Bounding box check passed for " + elem);
                     return true;
                 }
-
             }
 
-            _ElementSemaphore--;
             return false;
         }
         private SGroup _WindowDragging;
-        public bool UpdateWindow(SGroup group) {
-            if (!group.IsWindow) {
-                return false;
-            }
+        public bool HandleMouseEventInGroup(SGroup group) {
             Event e = Event.current;
-            SWindowTitleBar bar = group.WindowTitleBar;
+            bool containsMouse = new Rect(group.AbsoluteOffset + group.Position, group.Size).Contains(e.mousePosition);
 
-            if (e.type == EventType.MouseDown) {
+            if (group.IsWindow) {
+                SWindowTitleBar bar = group.WindowTitleBar;
+
                 Rect bounds = (_ClipScopeRects.Count == 0 || !Repainting) ?
-                    new Rect(group.AbsoluteOffset + group.Position, bar.Size) :
-                    new Rect(Vector2.zero, bar.Size);
-                if (bounds.Contains(e.mousePosition)) {
+                        new Rect(group.AbsoluteOffset + group.Position, bar.Size) :
+                        new Rect(Vector2.zero, bar.Size);
+                if (e.type == EventType.MouseDown && bounds.Contains(e.mousePosition)) {
                     bar.Dragging = true;
                     _WindowDragging = group;
                     e.Use();
                     return true;
                 }
 
+                if (bar.Dragging) {
+                    if (e.type == EventType.MouseDrag) {
+                        group.Position += e.delta;
+                    } else if (e.type == EventType.MouseUp) {
+                        bar.Dragging = false;
+                        _WindowDragging = null;
+                    }
+                    e.Use();
+                    return true;
+                }
+
                 bar.Dragging = false;
-                return false;
             }
 
-            if (bar.Dragging) {
-                if (e.type == EventType.MouseDrag) {
-                    group.Position += e.delta;
-                } else if (e.type == EventType.MouseUp) {
-                    bar.Dragging = false;
-                    _WindowDragging = null;
+            IList<SElement> children = group.Children;
+            for (int i = children.Count - 1; 0 <= i; i--) {
+                if (HandleMouseEventIn(children[i])) return true;
+            }
+
+            if (containsMouse) {
+                if (e.type == EventType.ScrollWheel && group.ScrollDirection != SGroup.EDirection.None) {
+                    group.ScrollMomentum = e.delta * group.ScrollInitialMomentum;
                 }
                 e.Use();
                 return true;
             }
-
-            bar.Dragging = false;
             return false;
         }
 
@@ -262,7 +270,6 @@ namespace SGUI {
             GUI.SetNextControlName(NextComponentName(elem));
             if (!_Elements.Contains(elem)) {
                 _Elements.Add(elem);
-                ++_ElementSemaphore;
             }
             // Console.WriteLine("SGUI-IM: Registered E" + CurrentElementID + "C" + CurrentComponentID + " (" + elem + ")");
             return CurrentComponentID;
@@ -309,22 +316,10 @@ namespace SGUI {
             switch (op) {
                 case EGUIOperation.Draw:
                     switch (elemGUI) {
-                        /*case EGUIComponent.Rect:
-                            // Don't draw the rect. Only check for input.
-                            if (e.isMouse && bounds.Contains(e.mousePosition)) {
-                                e.Use();
-                                return true;
-                            }
-                            break;*/
-
                         case EGUIComponent.Label:
                             RegisterNextComponent();
                             // Label isn't solid by default.
                             GUI.Label(bounds, (string) data[0]);
-                            if (e.isMouse && bounds.Contains(e.mousePosition)) {
-                                e.Use();
-                                return true;
-                            }
                             break;
 
                         case EGUIComponent.TextField:
