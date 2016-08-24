@@ -174,19 +174,6 @@ public static partial class ETGMod {
             }
         };
 
-        new STextField {
-            Text = "A",
-            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered
-        };
-        new STextField {
-            Text = "B",
-            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered + new Vector2(0f, elem.Backend.LineHeight + 2f)
-        };
-        new STextField {
-            Text = "C",
-            OnUpdateStyle = (SElement elem) => elem.Position = elem.Centered + new Vector2(0f, 2f * (elem.Backend.LineHeight + 2f))
-        };
-
         STextField commandField = new STextField {
             Text = "",
             OnUpdateStyle = delegate (SElement elem) {

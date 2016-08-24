@@ -78,15 +78,13 @@ namespace SGUI {
         /// <param name="position">Position.</param>
         /// <param name="size">Size.</param>
         /// <param name="text">Text.</param>
-        /// <returns>Whether the element is focused or not.</returns>
-        bool TextField(SElement elem, Vector2 position, Vector2 size, ref string text);
+        void TextField(SElement elem, Vector2 position, Vector2 size, ref string text);
         /// <summary>
         /// Render a text field on screen.
         /// </summary>
         /// <param name="bounds">Bounds.</param>
         /// <param name="text">Text.</param>
-        /// <returns>Whether the element is focused or not.</returns>
-        bool TextField(Rect bounds, ref string text);
+        void TextField(Rect bounds, ref string text);
 
         bool Button(SElement elem, Vector2 position, Vector2 size, string text);
         bool Button(Rect bounds, string text);

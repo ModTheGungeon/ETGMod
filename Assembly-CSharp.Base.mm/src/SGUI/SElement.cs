@@ -88,7 +88,7 @@ namespace SGUI {
             }
         }
 
-        public bool IsFocused { get; protected set; }
+        public bool IsFocused;
 
         public Action<SElement> OnUpdateStyle;
 

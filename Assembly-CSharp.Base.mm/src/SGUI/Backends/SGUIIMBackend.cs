@@ -148,7 +148,6 @@ namespace SGUI {
         }
         public void OnGUI() {
             SGUIRoot root = CurrentRoot;
-            // TODO or use GUI.tooltip..?! WHY THE FUCK DID NOBODY TELL ME ABOUT THIS?!
             if (_Reason.isMouse || _Reason.type == EventType.ScrollWheel) {
                 HandleMouseEvent();
                 return;
@@ -550,7 +549,7 @@ namespace SGUI {
             GUI.Label(bounds, text);
         }
 
-        public bool TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
+        public void TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
             PreparePosition(elem, ref position);
 
             if (elem != null && Repainting) {
@@ -562,16 +561,30 @@ namespace SGUI {
                 GUI.backgroundColor = elem.Background;
             }
 
+            Event e = Event.current;
+            bool submit = e.type == EventType.KeyDown && e.keyCode == KeyCode.Return;
+
             RegisterNextComponentIn(elem);
-            return TextField(new Rect(position, size), ref text);
+            string prevText = text;
+            TextField(new Rect(position, elem.Size), ref text);
+
+            if (Repainting) {
+                elem.IsFocused = IsFocused(CurrentComponentID);
+            } else if (elem is STextField && elem.IsFocused) {
+                STextField field = (STextField) elem;
+                if (submit) text = field.TextOnSubmit ?? prevText;
+
+                if (prevText != text) field.OnTextUpdate?.Invoke(field, prevText);
+                if (e.type == EventType.KeyDown || e.type == EventType.KeyUp) field.OnKey?.Invoke(field, e);
+                if (submit) field.OnSubmit?.Invoke(field, prevText);
+            }
         }
-        public bool TextField(Rect bounds, ref string text) {
+        public void TextField(Rect bounds, ref string text) {
             RegisterNextComponent();
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.TextField, bounds, text);
             text = GUI.TextField(bounds, text);
-            bool focused = IsFocused(CurrentComponentID);
 
-            if (!Font.dynamic && focused && Repainting) {
+            if (!Font.dynamic && IsFocused(CurrentComponentID) && Repainting) {
                 TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 #pragma warning disable CS0618
                 // TextEditor.content is obsolete, yet it must be accessed.
@@ -627,8 +640,6 @@ namespace SGUI {
 
                 GUI.color = prevGUIColor;
             }
-
-            return focused;
         }
 
 
