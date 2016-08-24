@@ -405,14 +405,13 @@ public class ETGModConsole : IETGModMenu {
     }
 
     void Teleport(string[] args) {
-        if (!ArgCount (args, 3, 3)) return;
+        if (!ArgCount (args, 2, 2)) return;
 
         if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
-            GameManager.Instance.PrimaryPlayer.transform.position = new Vector3(
+            GameManager.Instance.PrimaryPlayer.TeleportToPoint(new Vector2(
                 float.Parse(args[0]),
-                float.Parse(args[1]),
-                float.Parse(args[2])
-            );
+                float.Parse(args[1])
+            ),true);
         }
     }
 
