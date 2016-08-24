@@ -1,18 +1,21 @@
 ﻿using UnityEngine;
 
 namespace SGUI {
-    public class SGUILabel : SGUIElement {
+    public class SLabel : SElement {
 
         public string Text;
 
-        public SGUILabel()
+        public SLabel()
             : this("") { }
-        public SGUILabel(string text) {
+        public SLabel(string text) {
             Text = text;
-            Background.a = 0f;
+            Background = Background.WithAlpha(0f);
         }
 
         public override void UpdateStyle() {
+            // This will get called again once this element gets added to the root.
+            if (Root == null) return;
+
             if (UpdateBounds) {
                 Size = Backend.MeasureText(Text);
             }
@@ -21,7 +24,8 @@ namespace SGUI {
         }
 
         public override void Render() {
-            Draw.Text(this, Text, Vector2.zero);
+            RenderBackground();
+            Draw.Text(this, Vector2.zero, Text);
         }
 
     }

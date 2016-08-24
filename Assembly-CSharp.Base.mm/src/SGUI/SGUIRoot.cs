@@ -8,8 +8,9 @@ namespace SGUI {
         public static SGUIRoot Main;
         public ISGUIBackend Backend;
 
-        public readonly BindingList<SGUIElement> Children = new BindingList<SGUIElement>();
-        public readonly List<SGUIElement> AdoptedChildren = new List<SGUIElement>();
+        public readonly BindingList<SElement> Children = new BindingList<SElement>();
+        public readonly List<SElement> AdoptedChildren = new List<SElement>();
+        public readonly List<SElement> DisposingChildren = new List<SElement>();
 
         protected Color _Foreground;
         public Color Foreground {
@@ -45,6 +46,12 @@ namespace SGUI {
             }
         }
 
+        public static Texture2D White;
+        /// <summary>
+        /// Order of textures depending on backend. For SGUI-IM: Normal, active, hover, focused.
+        /// </summary>
+        public Texture2D[] TextFieldBackground;
+
         public static void Setup() {
             Main = new GameObject("WTFGUI Root").AddComponent<SGUIRoot>();
             Main.Backend = new SGUIIMBackend();
@@ -56,16 +63,30 @@ namespace SGUI {
             Children.ListChanged += HandleChange;
 
             Foreground = new Color(1f, 1f, 1f, 1f);
-            Background = new Color(0f, 0f, 0f, 0.8f);
+            Background = new Color(0f, 0f, 0f, 0.75f);
+
+            if (White == null) {
+                White = new Texture2D(1, 1);
+                White.SetPixel(0, 0, Color.white);
+                White.Apply();
+            }
+            TextFieldBackground = new Texture2D[] { White, White, White, White };
         }
 
         public void Start() {
+            if (!Backend.RenderOnGUI) {
+                Backend.Init();
+                useGUILayout = false;
+            } else {
+                _ScheduledBackendInit = true;
+                useGUILayout = Backend.RenderOnGUILayout;
+            }
         }
 
         public void HandleChange(object sender, ListChangedEventArgs e) {
             // TODO Also send event to backend.
             if (e.ListChangedType == ListChangedType.ItemAdded) {
-                SGUIElement child = Children[e.NewIndex];
+                SElement child = Children[e.NewIndex];
                 child.Root = this;
                 child.Parent = null;
                 if (Backend.UpdateStyleOnRender) {
@@ -74,9 +95,14 @@ namespace SGUI {
                 } else {
                     child.UpdateStyle();
                 }
-            }
-            if (e.ListChangedType == ListChangedType.ItemDeleted) {
+                int disposeIndex = DisposingChildren.IndexOf(child);
+                if (0 <= disposeIndex) {
+                    DisposingChildren.RemoveAt(disposeIndex);
+                }
+
+            } else if (e.ListChangedType == ListChangedType.ItemDeleted) {
                 // TODO Dispose.
+                // DisposingChildren.Add(null);
             }
         }
 
@@ -87,7 +113,7 @@ namespace SGUI {
                 return;
             }
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = this;
                 child.Parent = null;
                 child.UpdateStyle();
@@ -95,8 +121,12 @@ namespace SGUI {
         }
 
         public void Update() {
+            if (!Backend.Initialized) {
+                return;
+            }
+
             for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
+                SElement child = Children[i];
                 child.Root = this;
                 child.Parent = null;
                 child.Update();
@@ -104,37 +134,56 @@ namespace SGUI {
 
             if (AdoptedChildren.Count != 0) {
                 for (int i = 0; i < AdoptedChildren.Count; i++) {
-                    SGUIElement child = AdoptedChildren[i];
+                    SElement child = AdoptedChildren[i];
                     if (child.Parent == null && !Children.Contains(child)) {
+                        // Child had no memory who its parents were, so let's just adopt it.
                         Children.Add(child);
+                    } else if (child.Parent != null && !child.Parent.Children.Contains(child)) {
+                        // Child remembers about its parents, but parents not about child. Let's force parents to care.
+                        child.Parent.Children.Add(child);
                     }
                 }
                 AdoptedChildren.Clear();
             }
+
+            if (DisposingChildren.Count != 0 && !Backend.RenderOnGUI) {
+                for (int i = 0; i < DisposingChildren.Count; i++) {
+                    DisposingChildren[i].Dispose();
+                }
+                DisposingChildren.Clear();
+            }
         }
 
+        protected bool _ScheduledBackendInit;
         public void OnGUI() {
             if (!Backend.RenderOnGUI) {
                 return;
             }
 
+            if (_ScheduledBackendInit) {
+                _ScheduledBackendInit = false;
+                Backend.Init();
+            }
+
             CheckForResize();
 
-            Backend.StartRender(this);
+            Backend.StartOnGUI(this);
 
             if (_ScheduledUpdateStyle) {
                 _ScheduledUpdateStyle = false;
                 UpdateStyle();
             }
 
-            for (int i = 0; i < Children.Count; i++) {
-                SGUIElement child = Children[i];
-                child.Root = this;
-                child.Parent = null;
-                child.Render();
+            Backend.OnGUI();
+
+            if (DisposingChildren.Count != 0) {
+                for (int i = 0; i < DisposingChildren.Count; i++) {
+                    DisposingChildren[i].Dispose();
+                }
+                DisposingChildren.Clear();
             }
 
-            Backend.EndRender(this);
+            Backend.EndOnGUI(this);
         }
 
         protected int _LastScreenWidth;

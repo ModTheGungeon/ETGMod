@@ -52,6 +52,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PEG">
+      <HintPath>..\libs\PEG.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -149,11 +152,15 @@
     <Compile Include="src\Core\Platform.cs" />
     <Compile Include="src\Patches\patch_PlatformInterface.cs" />
     <Compile Include="src\SGUI\SGUIRoot.cs" />
-    <Compile Include="src\SGUI\SGUIElement.cs" />
+    <Compile Include="src\SGUI\SElement.cs" />
     <Compile Include="src\SGUI\ISGUIBackend.cs" />
-    <Compile Include="src\SGUI\Elements\SGUILabel.cs" />
+    <Compile Include="src\SGUI\Elements\SLabel.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="src\SGUI\Backends\SGUIIMBackend.cs" />
+    <Compile Include="src\SGUI\Elements\STextField.cs" />
+    <Compile Include="src\SGUI\Elements\SButton.cs" />
+    <Compile Include="src\SGUI\Elements\SGroup.cs" />
+    <Compile Include="src\SGUI\Elements\SWindowTitleBar.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
