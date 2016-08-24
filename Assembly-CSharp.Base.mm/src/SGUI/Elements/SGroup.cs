@@ -84,8 +84,15 @@ namespace SGUI {
             Draw.Rect(this, ScrollPosition, new Vector2(Size.x + Border * 2f, Size.y + Border * 2f), Background.WithAlpha(Background.a * 0.5f));
         }
         public override void Render() {
-            ScrollPosition += ScrollMomentum;
-            ScrollMomentum *= ScrollDecayFactor;
+            if (ScrollDirection != EDirection.None) {
+                ScrollPosition = new Vector2(
+                    Mathf.Clamp(ScrollPosition.x + ScrollMomentum.x, 0f, InnerSize.x - Size.x),
+                    Mathf.Clamp(ScrollPosition.y + ScrollMomentum.y, 0f, InnerSize.y - Size.y + (IsWindow ? WindowTitleBar.Size.y : 0f))
+                );
+                ScrollMomentum *= ScrollDecayFactor;
+            } else {
+                ScrollPosition = ScrollMomentum = Vector2.zero;
+            }
 
             if (IsWindow) {
                 Draw.Window(this);

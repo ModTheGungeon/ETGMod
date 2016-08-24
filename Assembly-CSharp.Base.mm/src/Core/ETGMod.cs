@@ -135,11 +135,12 @@ public static partial class ETGMod {
 
         TestGunController.Add();
 
+        int windowNum = 0;
         new SButton {
             Text = "NEW WINDOW",
             OnClick = delegate {
                 SGroup window = new SGroup {
-                    WindowTitle = "A WINDOW.",
+                    WindowTitle = "WINDOW " + (++windowNum),
                     Size = new Vector2(312f, 200f),
                     ScrollDirection = SGroup.EDirection.Vertical,
                     AutoLayout = (g) => g.AutoLayoutRows,

@@ -115,6 +115,10 @@ namespace SGUI {
             GUI.depth = Depth;
 
             if (Repainting) {
+                if (_GlobalComponentSemaphore == 0) {
+                    _ComponentElements.Clear();
+                }
+
                 _Elements.Clear();
 
                 _OPs.Clear();
@@ -135,10 +139,6 @@ namespace SGUI {
 
             _GlobalComponentSemaphore -= _ComponentSemaphore;
             _ComponentSemaphore = 0;
-
-            if (_GlobalComponentSemaphore == 0) {
-                _ComponentElements.Clear();
-            }
 
             if (Repainting) {
                 _ClickedButtons.Clear();
@@ -163,17 +163,17 @@ namespace SGUI {
             }
         }
 
-        public bool HandleMouseEvent() {
+        public int HandleMouseEvent() {
             // Console.WriteLine();
             // Console.WriteLine("SGUI-IM: Handling mouse event " + Event.current);
             SGroup lastWindowDragging = _WindowDragging;
 
-            bool handled = HandleMouseEventIn(null);
+            int handled = HandleMouseEventIn(null);
 
-            if (handled) {
+            if (handled != -1) {
                 _RegisteredNextElement = false;
                 for (int i = 0; i < _OPs.Count; i++) {
-                    _RecreateOperation(i);
+                    _RecreateOperation(i, handled);
                 }
             }
 
@@ -187,34 +187,42 @@ namespace SGUI {
             // Console.WriteLine();
             return handled;
         }
-        public bool HandleMouseEventIn(SElement elem) {
+        public int HandleMouseEventIn(SElement elem) {
+            int handled;
             if (elem != null) {
                 if (elem is SGroup) return HandleMouseEventInGroup((SGroup) elem);
+
+                if (!new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(Event.current.mousePosition)) {
+                    return -1;
+                }
             }
 
             IList<SElement> children = elem?.Children ?? CurrentRoot.Children;
             for (int i = children.Count - 1; 0 <= i; i--) {
-                if (HandleMouseEventIn(children[i])) return true;
+                if ((handled = HandleMouseEventIn(children[i])) != -1) return handled;
             }
 
-            if (!Event.current.isMouse || Event.current.type == EventType.ScrollWheel) {
-                return false;
+            if (elem == null) {
+                return -1;
             }
 
-            if (elem != null) {
-                // Simple bounding box check.
-                if (new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(Event.current.mousePosition)) {
-                    // Console.WriteLine("SGUI-IM: Bounding box check passed for " + elem);
-                    return true;
-                }
+            if (Event.current.type == EventType.ScrollWheel) {
+                return -1;
             }
 
-            return false;
+            return _ComponentElements.IndexOf(elem);
         }
         private SGroup _WindowDragging;
-        public bool HandleMouseEventInGroup(SGroup group) {
+        public int HandleMouseEventInGroup(SGroup group) {
+            int handled;
+            int groupFirstComponent = _ComponentElements.IndexOf(group);
             Event e = Event.current;
-            bool containsMouse = new Rect(group.AbsoluteOffset + group.Position, group.Size).Contains(e.mousePosition);
+            bool containsMouse = new Rect(
+                group.AbsoluteOffset.x + group.Position.x,
+                group.AbsoluteOffset.y + group.Position.y,
+                group.Size.x + group.Border * 2f,
+                group.Size.y + (group.IsWindow ? group.WindowTitleBar.Size.y : 0f) + group.Border * 2f
+            ).Contains(e.mousePosition);
 
             if (group.IsWindow) {
                 SWindowTitleBar bar = group.WindowTitleBar;
@@ -226,7 +234,7 @@ namespace SGUI {
                     bar.Dragging = true;
                     _WindowDragging = group;
                     e.Use();
-                    return true;
+                    return groupFirstComponent;
                 }
 
                 if (bar.Dragging) {
@@ -237,25 +245,29 @@ namespace SGUI {
                         _WindowDragging = null;
                     }
                     e.Use();
-                    return true;
+                    return groupFirstComponent;
                 }
 
                 bar.Dragging = false;
             }
 
-            IList<SElement> children = group.Children;
-            for (int i = children.Count - 1; 0 <= i; i--) {
-                if (HandleMouseEventIn(children[i])) return true;
+            if (!containsMouse) {
+                return -1;
             }
 
-            if (containsMouse) {
-                if (e.type == EventType.ScrollWheel && group.ScrollDirection != SGroup.EDirection.None) {
-                    group.ScrollMomentum = e.delta * group.ScrollInitialMomentum;
-                }
+            if (e.type == EventType.ScrollWheel && group.ScrollDirection != SGroup.EDirection.None) {
+                group.ScrollMomentum = e.delta * group.ScrollInitialMomentum;
                 e.Use();
-                return true;
+                return groupFirstComponent;
             }
-            return false;
+
+            IList<SElement> children = group.Children;
+            for (int i = children.Count - 1; 0 <= i; i--) {
+                if ((handled = HandleMouseEventIn(children[i])) != -1) return handled;
+            }
+
+            e.Use(); // Window background would be click-through otherwise.
+            return groupFirstComponent;
         }
 
         public string NextComponentName(SElement elem) {
@@ -291,7 +303,7 @@ namespace SGUI {
             _OPData.Add(args);
             // Console.WriteLine("SGUI-IM: Registered OP " + op + " " + elem + " @ " + bounds + " for E" + CurrentElementID + "C" + CurrentComponentID);
         }
-        private bool _RecreateOperation(int opID = -1) {
+        private bool _RecreateOperation(int opID, int handledComponentID = -1) {
             if (opID < 0) {
                 opID = _OPs.Count + opID;
             }
@@ -308,9 +320,16 @@ namespace SGUI {
 
             SElement elem = _Elements[elemID];
 
-            if (e.type == EventType.Used && op == EGUIOperation.Draw) {
-                // Console.WriteLine("SGUI-IM: Current event used - recreating operation @ NULLRECT");
-                bounds = NULLRECT;
+            if (op == EGUIOperation.Draw) {
+                if (e.type == EventType.Used) {
+                    // Console.WriteLine("SGUI-IM: Current event used - recreating operation @ NULLRECT");
+                    bounds = NULLRECT;
+                }
+
+                if (compID < handledComponentID) {
+                    // Console.WriteLine("SGUI-IM: Current component before handled component (" + handledComponentID + ") - recreating operation @ NULLRECT");
+                    bounds = NULLRECT;
+                }
             }
 
             switch (op) {
@@ -318,7 +337,6 @@ namespace SGUI {
                     switch (elemGUI) {
                         case EGUIComponent.Label:
                             RegisterNextComponent();
-                            // Label isn't solid by default.
                             GUI.Label(bounds, (string) data[0]);
                             break;
 
@@ -394,7 +412,7 @@ namespace SGUI {
 
         public int CurrentComponentID {
             get {
-                return _ComponentElements.Count - 1;
+                return _GlobalComponentSemaphore - 1;
             }
         }
         public int GetFirstComponentID(SElement elem) {
@@ -695,6 +713,7 @@ namespace SGUI {
 
             group.RenderGroup(CurrentComponentID);
 
+            RegisterOperation(EGUIOperation.End, EGUIComponent.Group, NULLRECT);
             GUI.EndGroup();
             _ClipScopeTypes.Pop();
             _ClipScopeRects.Pop();
