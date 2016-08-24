@@ -151,7 +151,8 @@ namespace SGUI {
         public void Render() {
             SGUIRoot root = CurrentRoot;
             // TODO or use GUI.tooltip..?! WHY THE FUCK DID NOBODY TELL ME ABOUT THIS?!
-            if (_Reason.isMouse && HandleMouseEvent()) {
+            if (_Reason.isMouse) {
+                HandleMouseEvent();
                 return;
             }
 
@@ -199,7 +200,7 @@ namespace SGUI {
                 if (HandleMouseEventIn(children[i])) return true;
             }
 
-            if (elem != null) {
+            if (!(elem is SGroup) && elem != null) {
                 // Simple bounding box check.
                 if (new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(Event.current.mousePosition)) {
                     // Console.WriteLine("SGUI-IM: Bounding box check passed for " + elem);

@@ -8,3 +8,4 @@ Files that are not stripped as their full functionality is required:
 
 * Ionic.Zip.dll
 * Mono.Cecil.dll
+* PEG.dll (npeg)
