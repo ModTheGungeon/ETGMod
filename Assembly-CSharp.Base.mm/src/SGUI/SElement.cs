@@ -50,6 +50,18 @@ namespace SGUI {
                 for (SElement parent = Parent; parent != null; parent = parent.Parent) {
                     x += parent.Position.x;
                     y += parent.Position.y;
+                    SGroup group = parent as SGroup;
+                    if (group != null) {
+                        x += group.Border;
+                        y += group.Border;
+                        if (group.ScrollDirection != SGroup.EDirection.None) {
+                            x -= group.ScrollPosition.x;
+                            y -= group.ScrollPosition.y;
+                        }
+                        if (group.IsWindow) {
+                            y += group.WindowTitleBar.Size.y;
+                        }
+                    }
                 }
                 return new Vector2(x, y);
             }
