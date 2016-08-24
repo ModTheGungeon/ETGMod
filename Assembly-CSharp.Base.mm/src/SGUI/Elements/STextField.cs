@@ -40,6 +40,8 @@ namespace SGUI {
         public override void Render() {
             // Do not render background - background should be handled by Draw.TextField
 
+            // TODO move event handling code to backend!!
+
             Event e = Event.current; // Store the event; check if text field focused after drawing (after events used).
             bool submit = e.type == EventType.KeyDown && e.keyCode == KeyCode.Return;
 

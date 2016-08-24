@@ -76,8 +76,10 @@ namespace SGUI {
         public void Start() {
             if (!Backend.RenderOnGUI) {
                 Backend.Init();
+                useGUILayout = false;
             } else {
                 _ScheduledBackendInit = true;
+                useGUILayout = Backend.RenderOnGUILayout;
             }
         }
 
@@ -152,7 +154,7 @@ namespace SGUI {
             }
         }
 
-        protected bool _ScheduledBackendInit = false;
+        protected bool _ScheduledBackendInit;
         public void OnGUI() {
             if (!Backend.RenderOnGUI) {
                 return;
@@ -172,15 +174,7 @@ namespace SGUI {
                 UpdateStyle();
             }
 
-            for (int i = 0; i < Children.Count; i++) {
-                SElement child = Children[i];
-                child.Root = this;
-                child.Parent = null;
-                child.Render();
-            }
-
-            // Windows need special reverse-ordered mouse event magic.
-            Backend.UpdateWindows();
+            Backend.Render();
 
             if (DisposingChildren.Count != 0) {
                 for (int i = 0; i < DisposingChildren.Count; i++) {

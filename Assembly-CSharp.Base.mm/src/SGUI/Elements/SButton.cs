@@ -44,6 +44,9 @@ namespace SGUI {
             if (IsClicked = Draw.Button(this, Vector2.zero, Size, Text)) {
                 OnClick?.Invoke(this);
             }
+            if (_StatusChanged) {
+                OnChange?.Invoke(this, _Status);
+            }
 
             // Focusing should happen when the element has got a valid ID (after rendering the element).
             if (_ScheduleFocus) {
@@ -55,6 +58,13 @@ namespace SGUI {
         protected bool _ScheduleFocus;
         public override void Focus() {
             _ScheduleFocus = true;
+        }
+
+        protected bool _StatusChanged;
+        protected bool _Status;
+        public virtual void HandleStatus(bool status) {
+            _StatusChanged = _Status != status;
+            _Status = status;
         }
 
     }

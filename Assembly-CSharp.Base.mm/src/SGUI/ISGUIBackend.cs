@@ -20,6 +20,11 @@ namespace SGUI {
         /// </summary>
         /// <value><c>true</c> if the children of CurrentRoot should be rendered on and Start-/EndRender should get called in OnGUI.</value>
         bool RenderOnGUI { get; }
+        /// <summary>
+        /// Whether GUILayout is used in OnGUI or not. Returning false here cuts half the OnGUI calls, but disables GUILayout / GUI.Window.
+        /// </summary>
+        /// <value><c>true</c> if the backend uses GUILayout.</value>
+        bool RenderOnGUILayout { get; }
 
         float LineHeight { get; set; }
 
@@ -29,7 +34,10 @@ namespace SGUI {
 
         void StartRender(SGUIRoot root);
         void EndRender(SGUIRoot root);
+        void Render();
 
+        int CurrentComponentID { get; }
+        int GetFirstComponentID(SElement elem);
         int CurrentElementID { get; }
         int GetElementID(SElement elem);
 
@@ -91,8 +99,6 @@ namespace SGUI {
         void StartWindow(SGroup group);
         void EndWindow(SGroup group);
         void WindowTitleBar(SWindowTitleBar bar);
-        void UpdateWindows();
-        bool UpdateWindow(SGroup group);
 
         /// <summary>
         /// Gets the size of the text.
