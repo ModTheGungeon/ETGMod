@@ -80,6 +80,24 @@ namespace SGUI {
             }
         }
 
+        private System.Random _SecretPRNG = new System.Random();
+        private int _CurrentSecret;
+        private int _Secret {
+            get {
+                return _CurrentSecret = _SecretPRNG.Next();
+            }
+        }
+        public bool IsValidSecret(long secret) {
+            bool valid = _CurrentSecret == secret;
+            int newSecret = _Secret;
+            return valid;
+        }
+        public void VerifySecret(long secret) {
+            if (!IsValidSecret(secret)) {
+                throw new InvalidOperationException("Invalid secret!");
+            }
+        }
+
         public bool Initialized { get; private set; }
         public void Init() {
             if (Font == null) {
@@ -569,7 +587,7 @@ namespace SGUI {
             TextField(new Rect(position, elem.Size), ref text);
 
             if (Repainting) {
-                elem.IsFocused = IsFocused(CurrentComponentID);
+                elem.SetFocused(_Secret, IsFocused(CurrentComponentID));
             } else if (elem is STextField && elem.IsFocused) {
                 STextField field = (STextField) elem;
                 if (submit) text = field.TextOnSubmit ?? prevText;

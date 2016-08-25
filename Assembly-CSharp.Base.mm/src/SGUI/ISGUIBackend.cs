@@ -27,6 +27,9 @@ namespace SGUI {
 
         float LineHeight { get; set; }
 
+        bool IsValidSecret(long secret);
+        void VerifySecret(long secret);
+
         void Init();
 
         bool Initialized { get; }

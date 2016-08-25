@@ -42,6 +42,8 @@ namespace SGUI {
         public Vector2 Size = new Vector2(32f, 32f);
 
         public bool UpdateBounds = true;
+        public bool Enabled = true;
+        public bool Visible = true;
 
         public Vector2 AbsoluteOffset {
             get {
@@ -88,7 +90,11 @@ namespace SGUI {
             }
         }
 
-        public bool IsFocused;
+        public bool IsFocused { get; protected set; }
+        public void SetFocused(int secret, bool value) {
+            Backend.VerifySecret(secret);
+            IsFocused = value;
+        }
 
         public Action<SElement> OnUpdateStyle;
 
