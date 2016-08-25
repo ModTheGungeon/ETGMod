@@ -228,9 +228,6 @@ public class ETGModConsole : ETGModMenu {
         // Create an input array by splitting it on spaces
         string inputtext = field.Text.Substring(0, field.CursorIndex);
         string[] input = SplitArgs(inputtext);
-        if (input.Length == 0) {
-            return;
-        }
         string otherinput = string.Empty;
         if (field.CursorIndex < field.Text.Length) {
             otherinput = field.Text.Substring(field.CursorIndex + 1);
