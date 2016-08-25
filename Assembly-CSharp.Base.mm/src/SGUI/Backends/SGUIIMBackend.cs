@@ -366,7 +366,46 @@ namespace SGUI {
                             RegisterNextComponent();
                             // TextField and Button use mouse input by themselves.
                             if (elemGUI == EGUIComponent.TextField) {
-                                GUI.TextField(bounds, (string) data[0]);
+                                if (e.isMouse && bounds.Contains(e.mousePosition)) {
+                                    // ... although the TextField mouse input requires some help with the cursor placement.
+                                    string text = (string) data[0];
+                                    Vector2 mousePosition = e.mousePosition;
+                                    EventType type = e.type;
+                                    Event.current.Use();
+                                    GUI.TextField(bounds, text);
+                                    // Focus(compID); // Actually kills focus.
+                                    TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+#pragma warning disable CS0618
+                                    // TextEditor.content is obsolete, yet it must be accessed.
+                                    // Alternatively access TextEditor.m_Content via reflection.
+                                    GUIContent content = editor.content;
+#pragma warning restore CS0618
+
+                                    // editor.style.GetCursorStringIndex(this.position, this.m_Content, cursorPosition + this.scrollOffset);
+                                    // GetCursorStringIndex seems broken.
+                                    int index = 0;
+                                    Vector2 position = -editor.scrollOffset;
+                                    PreparePosition(elem, ref position);
+                                    Rect boundsScrolled = new Rect(position.x, position.y, bounds.size.x, bounds.size.y);
+                                    for (; index < text.Length; index++) {
+                                        if (mousePosition.x < editor.style.GetCursorPixelPosition(boundsScrolled, content, index).x - LineHeight * 0.5f) {
+                                            break;
+                                        }
+                                    }
+
+                                    if (type == EventType.MouseDown) {
+                                        editor.cursorIndex = index;
+                                        editor.selectIndex = index;
+                                    } else if (type == EventType.MouseDrag) {
+                                        editor.selectIndex = index;
+                                    }
+
+                                    editor.UpdateScrollOffsetIfNeeded();
+                                    return true;
+
+                                } else {
+                                    GUI.TextField(bounds, (string) data[0]);
+                                }
 
                             } else {
                                 if (GUI.Button(bounds, (string) data[0])) {
@@ -629,9 +668,9 @@ namespace SGUI {
                 Color prevGUIColor = GUI.color;
 
                 if (editor.cursorIndex != editor.selectIndex) {
-                    Rect boundsRelative = new Rect(0, 0, bounds.width, bounds.height);
-                    Vector2 selectA = editor.style.GetCursorPixelPosition(boundsRelative, content, editor.cursorIndex) - editor.scrollOffset;
-                    Vector2 selectB = editor.style.GetCursorPixelPosition(boundsRelative, content, editor.selectIndex) - editor.scrollOffset;
+                    Rect boundsRelative = new Rect(-editor.scrollOffset, bounds.size);
+                    Vector2 selectA = editor.style.GetCursorPixelPosition(boundsRelative, content, editor.cursorIndex);
+                    Vector2 selectB = editor.style.GetCursorPixelPosition(boundsRelative, content, editor.selectIndex);
                     Vector2 selectFrom, selectTo;
                     if (selectA.x <= selectB.x) {
                         selectFrom = selectA;
