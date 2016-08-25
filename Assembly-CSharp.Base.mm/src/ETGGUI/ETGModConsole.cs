@@ -263,7 +263,7 @@ public class ETGModConsole : ETGModMenu {
             matchkeyword = input[input.Length - 1];
         }
 
-        string[] completions = unit.Autocompletion.Match(matchindex, matchkeyword);
+        string[] completions = unit.Autocompletion.Match(Math.Max(matchindex, 0), matchkeyword);
 
         if (completions == null || completions.Length == 0) {
             Debug.Log ("ETGModConsole: no completions available (match returned null)");
