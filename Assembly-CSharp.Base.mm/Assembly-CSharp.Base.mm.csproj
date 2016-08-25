@@ -161,6 +161,7 @@
     <Compile Include="src\SGUI\Elements\SButton.cs" />
     <Compile Include="src\SGUI\Elements\SGroup.cs" />
     <Compile Include="src\SGUI\Elements\SWindowTitleBar.cs" />
+    <Compile Include="src\SGUI\DFEXT\SGUIDFInput.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -306,5 +307,6 @@
     <Folder Include="src\SGUI\" />
     <Folder Include="src\SGUI\Elements\" />
     <Folder Include="src\SGUI\Backends\" />
+    <Folder Include="src\SGUI\DFEXT\" />
   </ItemGroup>
 </Project>

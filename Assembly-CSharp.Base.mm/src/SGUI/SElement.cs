@@ -187,6 +187,7 @@ namespace SGUI {
                 SElement child = Children[i];
                 child.Root = Root;
                 child.Parent = this;
+                if (!child.Visible) continue;
                 child.Render();
             }
         }

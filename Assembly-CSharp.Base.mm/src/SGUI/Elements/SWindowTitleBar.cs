@@ -7,6 +7,10 @@ namespace SGUI {
 
         public SWindowTitleBar() {
             Background = Background.WithAlpha(Background.a * 2f);
+
+            Children.Add(new SButton {
+
+            });
         }
 
         public override void UpdateStyle() {

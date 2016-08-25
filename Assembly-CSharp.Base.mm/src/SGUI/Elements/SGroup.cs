@@ -81,7 +81,7 @@ namespace SGUI {
         }
 
         public override void RenderBackground() {
-            Draw.Rect(this, ScrollPosition, new Vector2(Size.x + Border * 2f, Size.y + Border * 2f), Background.WithAlpha(Background.a * 0.5f));
+            Draw.Rect(this, ScrollPosition, new Vector2(Size.x + Border * 2f, Size.y + Border * 2f), Background);
         }
         public override void Render() {
             if (ScrollDirection != EDirection.None) {

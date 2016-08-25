@@ -5,6 +5,7 @@ namespace SGUI {
     public class SButton : SElement {
 
         public string Text;
+        public Texture Icon;
 
         /// <summary>
         /// On button status event. Gets fired by the backend itself if it supports listening for this.
@@ -32,6 +33,9 @@ namespace SGUI {
 
             if (UpdateBounds) {
                 Size = Backend.MeasureText(Text) + new Vector2(16f, 2f);
+                if (Icon != null) {
+                    Size = Size.WithX(Size.x + Size.y + 4f);
+                }
             }
 
             base.UpdateStyle();
@@ -41,28 +45,19 @@ namespace SGUI {
         public override void Render() {
             // Do not render background - background should be handled by Draw.Button
 
-            if (IsClicked = Draw.Button(this, Vector2.zero, Size, Text)) {
+            if (IsClicked = Draw.Button(this, Vector2.zero, Size, Text, Icon)) {
                 OnClick?.Invoke(this);
             }
+
             if (_StatusChanged) {
                 OnChange?.Invoke(this, _Status);
             }
-
-            // Focusing should happen when the element has got a valid ID (after rendering the element).
-            if (_ScheduleFocus) {
-                _ScheduleFocus = false;
-                Backend.Focus(this);
-            }
-        }
-
-        protected bool _ScheduleFocus;
-        public override void Focus() {
-            _ScheduleFocus = true;
         }
 
         protected bool _StatusChanged;
         protected bool _Status;
-        public virtual void HandleStatus(bool status) {
+        public virtual void SetStatus(int secret, bool status) {
+            Backend.VerifySecret(secret);
             _StatusChanged = _Status != status;
             _Status = status;
         }

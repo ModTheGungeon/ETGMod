@@ -47,7 +47,7 @@ namespace SGUI {
 
         public SGUIRoot CurrentRoot { get; private set; }
 
-        public bool UpdateStyleOnRender {
+        public bool UpdateStyleOnGUI {
             get {
                 return true;
             }
@@ -79,6 +79,8 @@ namespace SGUI {
                 _Font = value;
             }
         }
+
+        public bool LastMouseEventConsumed { get; private set; }
 
         private System.Random _SecretPRNG = new System.Random();
         private int _CurrentSecret;
@@ -167,7 +169,7 @@ namespace SGUI {
         public void OnGUI() {
             SGUIRoot root = CurrentRoot;
             if (_Reason.isMouse || _Reason.type == EventType.ScrollWheel) {
-                HandleMouseEvent();
+                LastMouseEventConsumed = HandleMouseEvent() != -1;
                 return;
             }
 
@@ -176,6 +178,7 @@ namespace SGUI {
                 SElement child = root.Children[i];
                 child.Root = root;
                 child.Parent = null;
+                if (!child.Visible) continue;
                 child.Render();
             }
         }
@@ -207,6 +210,7 @@ namespace SGUI {
         public int HandleMouseEventIn(SElement elem) {
             int handled;
             if (elem != null) {
+                if (!elem.Visible) return -1;
                 if (elem is SGroup) return HandleMouseEventInGroup((SGroup) elem);
 
                 if (!new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(Event.current.mousePosition)) {
@@ -367,10 +371,10 @@ namespace SGUI {
                             } else {
                                 if (GUI.Button(bounds, (string) data[0])) {
                                     _ClickedButtons.Add(CurrentComponentID);
-                                    (elem as SButton)?.HandleStatus(true);
+                                    (elem as SButton)?.SetStatus(_Secret, true);
                                 } else {
                                     _ClickedButtons.Remove(CurrentComponentID);
-                                    (elem as SButton)?.HandleStatus(false);
+                                    (elem as SButton)?.SetStatus(_Secret, false);
                                 }
                             }
 
@@ -662,7 +666,7 @@ namespace SGUI {
 
 
         // IMGUI doesn't seem to have something similar to TextEditor for buttons... so SButton.OnChange stays untouched.
-        public bool Button(SElement elem, Vector2 position, Vector2 size, string text) {
+        public bool Button(SElement elem, Vector2 position, Vector2 size, string text, Texture icon = null) {
             PreparePosition(elem, ref position);
 
             if (elem != null && Repainting) {
@@ -674,13 +678,13 @@ namespace SGUI {
             }
 
             RegisterNextComponentIn(elem);
-            return Button(new Rect(position, size), text);
+            return Button(new Rect(position, size), text, icon);
         }
-        public bool Button(Rect bounds, string text) {
+        public bool Button(Rect bounds, string text, Texture icon = null) {
             RegisterNextComponent();
             GUI.skin.button.fixedHeight = bounds.height;
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Button, bounds, text);
-            GUI.Button(bounds, text); // Input handled elsewhere.
+            GUI.Button(bounds, new GUIContent((icon == null ? "" : " ") + text, icon)); // Input handled elsewhere.
             return _ClickedButtons.Contains(CurrentComponentID);
         }
 

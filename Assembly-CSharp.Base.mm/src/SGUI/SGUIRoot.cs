@@ -63,7 +63,7 @@ namespace SGUI {
             Children.ListChanged += HandleChange;
 
             Foreground = new Color(1f, 1f, 1f, 1f);
-            Background = new Color(0f, 0f, 0f, 0.75f);
+            Background = new Color(0f, 0f, 0f, 0.85f);
 
             if (White == null) {
                 White = new Texture2D(1, 1);
@@ -89,7 +89,7 @@ namespace SGUI {
                 SElement child = Children[e.NewIndex];
                 child.Root = this;
                 child.Parent = null;
-                if (Backend.UpdateStyleOnRender) {
+                if (Backend.UpdateStyleOnGUI) {
                     // TODO individual scheduled updates
                     _ScheduledUpdateStyle = true;
                 } else {
@@ -108,7 +108,7 @@ namespace SGUI {
 
         protected bool _ScheduledUpdateStyle = true;
         public void UpdateStyle() {
-            if (Backend.UpdateStyleOnRender && Backend.CurrentRoot == null) {
+            if (Backend.UpdateStyleOnGUI && Backend.CurrentRoot == null) {
                 _ScheduledUpdateStyle = true;
                 return;
             }

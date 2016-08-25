@@ -135,9 +135,13 @@ public static partial class ETGMod {
 
         TestGunController.Add();
 
+        dfInputManager manager = GameUIRoot.Instance.Manager.GetComponent<dfInputManager>();
+        manager.Adapter = new SGUIDFInput(manager.Adapter);
+
         int windowNum = 0;
         new SButton {
             Text = "NEW WINDOW",
+            Icon = ETGModGUI.TestTexture,
             OnClick = delegate {
                 SGroup window = new SGroup {
                     WindowTitle = "WINDOW " + (++windowNum),
