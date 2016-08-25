@@ -133,6 +133,26 @@ namespace SGUI {
             GrowToFit(elem);
         }
 
+        protected float _CurrentAutoLayoutColumn;
+        public bool AutoLayoutColumnsStretch = true;
+        public void AutoLayoutColumns(int index, SElement elem) {
+            if (elem == null) {
+                return;
+            }
+            if (index == 0) {
+                _CurrentAutoLayoutColumn = 0f;
+            }
+
+            if (AutoLayoutRowsStretch) {
+                elem.UpdateBounds = false;
+                elem.Size.y = Size.y;
+            }
+            elem.Position = new Vector2(_CurrentAutoLayoutColumn, 0f);
+            _CurrentAutoLayoutColumn += elem.Size.y + AutoLayoutPadding;
+
+            GrowToFit(elem);
+        }
+
 
         public float AutoLayoutLabelWidth;
         public void AutoLayoutLabeledInput(int index, SElement elem) {
