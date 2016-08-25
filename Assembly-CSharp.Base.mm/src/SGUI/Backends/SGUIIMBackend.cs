@@ -550,22 +550,24 @@ namespace SGUI {
         }
 
 
-        public void Text(SElement elem, Vector2 position, string text) {
+        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter) {
+            if (text.Contains("\n")) {
+                string[] lines = text.Split('\n');
+                float y = 0f;
+                for (int i = 0; i < lines.Length; i++) {
+                    string line = lines[i];
+                    Vector2 lineSize = MeasureText(line, size);
+                    Text(elem, position + new Vector2(0f, y), lineSize, line, alignment);
+                    y += lineSize.y;
+                }
+                return;
+            }
+
             PreparePosition(elem, ref position);
-            Rect bounds = new Rect(position, elem != null ? elem.Size : Vector2.zero);
+            Rect bounds = new Rect(position, size);
 
             GUI.skin.label.normal.textColor = elem.Foreground;
-            // Direct texts in anything with an unfitting size will have some text bounds issues - use SGUILabel or the Rect variant.
-            RegisterNextComponentIn(elem);
-            RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, bounds, text);
-            GUI.Label(bounds, text);
-        }
-        public void Text(SElement elem, Rect bounds, string text) {
-            Vector2 position = Vector2.zero;
-            PreparePosition(elem, ref position);
-            bounds.position += position;
-
-            GUI.skin.label.normal.textColor = elem.Foreground;
+            GUI.skin.label.alignment = alignment;
             RegisterNextComponentIn(elem);
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, bounds, text);
             GUI.Label(bounds, text);
@@ -584,7 +586,10 @@ namespace SGUI {
             }
 
             Event e = Event.current;
-            bool submit = e.type == EventType.KeyDown && e.keyCode == KeyCode.Return;
+            bool keyEvent = e.isKey;
+            bool keyDown = e.type == EventType.KeyDown;
+            KeyCode keyCode = e.keyCode;
+            bool submit = keyDown && keyCode == KeyCode.Return;
 
             RegisterNextComponentIn(elem);
             string prevText = text;
@@ -597,7 +602,7 @@ namespace SGUI {
                 if (submit) text = field.TextOnSubmit ?? prevText;
 
                 if (prevText != text) field.OnTextUpdate?.Invoke(field, prevText);
-                if (e.type == EventType.KeyDown || e.type == EventType.KeyUp) field.OnKey?.Invoke(field, e);
+                if (keyEvent) field.OnKey?.Invoke(field, keyDown, keyCode);
                 if (submit) field.OnSubmit?.Invoke(field, prevText);
             }
         }
@@ -821,7 +826,7 @@ namespace SGUI {
 
             if (!string.IsNullOrEmpty(title)) {
                 Vector2 titleSize = MeasureText(title);
-                Text(bar, new Rect(group.Border, 0f, titleSize.x, titleSize.y), title);
+                Text(bar, new Vector2(group.Border, 0f), titleSize, title);
             }
 
             // TODO Window header buttons.

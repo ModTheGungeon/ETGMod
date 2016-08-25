@@ -8,7 +8,7 @@ namespace SGUI {
         public string TextOnSubmit = "";
 
         public Action<STextField, string> OnTextUpdate;
-        public Action<STextField, Event> OnKey;
+        public Action<STextField, bool, KeyCode> OnKey;
         public Action<STextField, string> OnSubmit;
 
         public override bool IsInteractive {

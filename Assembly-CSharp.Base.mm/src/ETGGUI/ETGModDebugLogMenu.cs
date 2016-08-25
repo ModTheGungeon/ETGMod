@@ -3,6 +3,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using SGUI;
 
 public class ETGModDebugLogMenu : IETGModMenu {
 
@@ -14,6 +15,8 @@ public class ETGModDebugLogMenu : IETGModMenu {
     public static Vector2 ScrollPos;
 
     private static Rect _MainBoxRect = new Rect(16, 16, Screen.width-32, Screen.height-32);
+
+    public SGroup GUI { get; protected set; }
 
     public void Start() {
     }
@@ -41,7 +44,7 @@ public class ETGModDebugLogMenu : IETGModMenu {
     public void OnDestroy() { }
 
     private void _DrawMainBox() {
-        GUI.Box(_MainBoxRect, string.Empty);
+        UnityEngine.GUI.Box(_MainBoxRect, string.Empty);
     }
 
     private void _DrawLoggedText() {

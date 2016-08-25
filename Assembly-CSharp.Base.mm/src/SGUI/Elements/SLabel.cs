@@ -5,6 +5,8 @@ namespace SGUI {
 
         public string Text;
 
+        public TextAnchor Alignment = TextAnchor.MiddleCenter;
+
         public SLabel()
             : this("") { }
         public SLabel(string text) {
@@ -17,7 +19,11 @@ namespace SGUI {
             if (Root == null) return;
 
             if (UpdateBounds) {
-                Size = Backend.MeasureText(Text);
+                if (Parent == null) {
+                    Size = Backend.MeasureText(Text);
+                } else {
+                    Size = Backend.MeasureText(Text, Parent.Size);
+                }
             }
 
             base.UpdateStyle();
@@ -25,7 +31,7 @@ namespace SGUI {
 
         public override void Render() {
             RenderBackground();
-            Draw.Text(this, Vector2.zero, Text);
+            Draw.Text(this, Vector2.zero, Size, Text, Alignment);
         }
 
     }

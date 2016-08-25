@@ -66,15 +66,9 @@ namespace SGUI {
         /// </summary>
         /// <param name="elem">Element instance. Null for root.</param>
         /// <param name="position">Relative position to render the text at.</param>
+        /// <param name="size">Size in which the text should fit in.</param>
         /// <param name="text">Text to render.</param>
-        void Text(SElement elem, Vector2 position, string text);
-        /// <summary>
-        /// Render the specified text on screen.
-        /// </summary>
-        /// <param name="elem">Element instance. Null for root.</param>
-        /// <param name="bounds">Bounds to render the text in.</param>
-        /// <param name="text">Text to render.</param>
-        void Text(SElement elem, Rect bounds, string text);
+        void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter);
 
         /// <summary>
         /// Render a text field on screen.

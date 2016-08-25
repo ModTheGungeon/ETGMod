@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using ETGGUI;
 using System;
-using Object = UnityEngine.Object;
 
 public class ETGModGUI : MonoBehaviour {
 
@@ -18,38 +17,51 @@ public class ETGModGUI : MonoBehaviour {
         Inspector
     };
 
-    public static MenuOpened CurrentMenu;
+    private static MenuOpened _CurrentMenu = MenuOpened.None;
+    public static MenuOpened CurrentMenu {
+        get {
+            return _CurrentMenu;
+        }
+        set {
+            bool change = _CurrentMenu != value;
+            if (change) {
+                CurrentMenuInstance.OnClose();
+            }
+            _CurrentMenu = value;
+            if (change) {
+                CurrentMenuInstance.OnOpen();
+                UpdateTimeScale();
+                UpdatePlayerState();
+            }
+        }
+    }
 
     public static GameObject MenuObject;
-    private readonly static ETGModNullMenu _NullMenu = new ETGModNullMenu();
-    private static ETGModLoaderMenu _LoaderMenu;
-    private static ETGModConsole _ConsoleMenu;
-    private static ETGModDebugLogMenu _LoggerMenu;
-    private static ETGModInspector _InspectorMenu;
+    public readonly static ETGModNullMenu NullMenu = new ETGModNullMenu();
+    public static ETGModLoaderMenu LoaderMenu;
+    public static ETGModConsole ConsoleMenu;
+    public static ETGModDebugLogMenu LoggerMenu;
+    public static ETGModInspector InspectorMenu;
 
     public static float? StoredTimeScale = null;
 
     public static bool UseDamageIndicators = false;
 
     public static Texture2D TestTexture;
-    public static Texture2D BoxTexture;
 
-    public static GUISkin GuiSkin;
-
-    private static IETGModMenu _CurrentMenuScript {
+    public static IETGModMenu CurrentMenuInstance {
         get {
             switch (CurrentMenu) {
                 case MenuOpened.Loader:
-                    return _LoaderMenu;
+                    return LoaderMenu;
                 case MenuOpened.Console:
-                    return _ConsoleMenu;
+                    return ConsoleMenu;
                 case MenuOpened.Logger:
-                    return _LoggerMenu;
+                    return LoggerMenu;
                 case MenuOpened.Inspector:
-                    return _InspectorMenu;
-
+                    return InspectorMenu;
             }
-            return _NullMenu;
+            return NullMenu;
         }
     }
 
@@ -67,23 +79,19 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public void Awake() {
-        BoxTexture = new Texture2D(1,1);
-        BoxTexture.SetPixel(0,0,Color.white);
-        BoxTexture.Apply();
-
-        _LoggerMenu = new ETGModDebugLogMenu();
-        _LoaderMenu = new ETGModLoaderMenu();
-        _ConsoleMenu = new ETGModConsole();
-        _InspectorMenu = new ETGModInspector();
+        LoggerMenu = new ETGModDebugLogMenu();
+        LoaderMenu = new ETGModLoaderMenu();
+        ConsoleMenu = new ETGModConsole();
+        InspectorMenu = new ETGModInspector();
 
         ETGDamageIndicatorGUI.Create();
     }
 
     public static void Start() {
-        _LoggerMenu.Start();
-        _LoaderMenu.Start();
-        _ConsoleMenu.Start();
-        _InspectorMenu.Start();
+        LoggerMenu.Start();
+        LoaderMenu.Start();
+        ConsoleMenu.Start();
+        InspectorMenu.Start();
 
         TestTexture = Resources.Load<Texture2D>("test/texture");
     }
@@ -91,11 +99,11 @@ public class ETGModGUI : MonoBehaviour {
     public void Update() {
         if (Input.GetKeyDown(KeyCode.F1)) {
             if (CurrentMenu == MenuOpened.Loader) {
+                CurrentMenuInstance.OnClose();
                 CurrentMenu = MenuOpened.None;
-                _CurrentMenuScript.OnClose ();
             } else {
                 CurrentMenu = MenuOpened.Loader;
-                _CurrentMenuScript.OnOpen ();
+                CurrentMenuInstance.OnOpen ();
             }
 
             UpdateTimeScale ();
@@ -105,44 +113,35 @@ public class ETGModGUI : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.Slash) || Input.GetKeyDown(KeyCode.BackQuote)) {
             if (CurrentMenu == MenuOpened.Console) {
                 CurrentMenu = MenuOpened.None;
-                _CurrentMenuScript.OnClose ();
             } else {
                 CurrentMenu = MenuOpened.Console;
-                _CurrentMenuScript.OnOpen ();
             }
-
-            UpdateTimeScale ();
-            UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F3)) {
             if (CurrentMenu == MenuOpened.Logger) {
                 CurrentMenu = MenuOpened.None;
-                _CurrentMenuScript.OnClose ();
             } else {
                 CurrentMenu = MenuOpened.Logger;
-                _CurrentMenuScript.OnOpen ();
             }
-
-            UpdateTimeScale ();
-            UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F4)) {
             if (CurrentMenu == MenuOpened.Inspector) {
+                CurrentMenuInstance.OnClose();
                 CurrentMenu = MenuOpened.None;
-                _CurrentMenuScript.OnClose ();
             } else {
                 CurrentMenu = MenuOpened.Inspector;
-                _CurrentMenuScript.OnOpen ();
+                CurrentMenuInstance.OnOpen ();
             }
+        }
 
-            UpdateTimeScale ();
-            UpdatePlayerState();
+        if (CurrentMenu != MenuOpened.None && Input.GetKeyDown(KeyCode.Escape)) {
+            CurrentMenu = MenuOpened.None;
         }
 
 
-        _CurrentMenuScript.Update();
+        CurrentMenuInstance.Update();
     }
 
     public static void UpdateTimeScale() {
@@ -153,8 +152,8 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public static void UpdatePlayerState() {
-        if (GameManager.Instance != null&&GameManager.Instance.PrimaryPlayer!=null) {
-            bool set = (CurrentMenu == MenuOpened.None);
+        if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer!=null) {
+            bool set = CurrentMenu == MenuOpened.None;
             GameManager.Instance.PrimaryPlayer.enabled = set;
             Camera.main.GetComponent<CameraController>().enabled = set;
         }
@@ -163,33 +162,14 @@ public class ETGModGUI : MonoBehaviour {
     // Font f;
 
     public void OnGUI() {
-        if (GuiSkin == null) {
-            GuiSkin = GUI.skin;
-            // GuiSkin.font = FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
-            /*float height = 26f;
-            GuiSkin.label.fixedHeight = height;
-            GuiSkin.button.fixedHeight = height;
-            GuiSkin.toggle.fixedHeight = height;
-            GuiSkin.textField.fixedHeight = height;
-            GuiSkin.textField.alignment = TextAnchor.MiddleLeft;*/
-        }
-        GUI.skin = GuiSkin;
-
         if (ETGModGUI.CurrentMenu != ETGModGUI.MenuOpened.None) {
             if (!StoredTimeScale.HasValue) {
                 StoredTimeScale = Time.timeScale;
                 Time.timeScale = 0;
             }
-
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) {
-                _CurrentMenuScript.OnClose ();
-                ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
-                ETGModGUI.UpdateTimeScale ();
-                ETGModGUI.UpdatePlayerState ();
-            }
         }
 
-        _CurrentMenuScript.OnGUI();
+        CurrentMenuInstance.OnGUI();
         //RandomSelector.OnGUI();
 
     }
@@ -203,7 +183,6 @@ public class ETGModGUI : MonoBehaviour {
         while (PickupObjectDatabase.Instance == null)
             yield return new WaitForEndOfFrame();
 
-        // TODO: bleh, foreach
         for (int i = 0; i < PickupObjectDatabase.Instance.Objects.Count; i++) {
             PickupObject obj = PickupObjectDatabase.Instance.Objects[i];
 

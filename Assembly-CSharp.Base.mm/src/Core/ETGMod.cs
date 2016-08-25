@@ -138,56 +138,6 @@ public static partial class ETGMod {
         dfInputManager manager = GameUIRoot.Instance.Manager.GetComponent<dfInputManager>();
         manager.Adapter = new SGUIDFInput(manager.Adapter);
 
-        int windowNum = 0;
-        new SButton {
-            Text = "NEW WINDOW",
-            Icon = ETGModGUI.TestTexture,
-            OnClick = delegate {
-                SGroup window = new SGroup {
-                    WindowTitle = "WINDOW " + (++windowNum),
-                    Size = new Vector2(312f, 200f),
-                    ScrollDirection = SGroup.EDirection.Vertical,
-                    AutoLayout = (g) => g.AutoLayoutRows,
-                    OnUpdateStyle = (SElement elem) => elem.CenterOnce()
-                };
-
-                new SLabel {
-                    Parent = window,
-                    Text = "CENTE<color=#ff0000ff>RED</color>.",
-                };
-
-                for (int i = 0; i < 6; i++) {
-                    new SGroup {
-                        Parent = window,
-                        Size = new Vector2(/*match auto parent*/ 0f, /*match auto inner-size*/ 0f),
-                        AutoLayout = (g) => g.AutoLayoutLabeledInput,
-                        Children = {
-                            new SLabel("#" + (i + 1)),
-                            new STextField {
-                                OnSubmit = (STextField elem, string text) => Console.WriteLine("Submitting text in textbox #" + i + ": " + text),
-                            }
-                        }
-                    };
-                }
-
-                new SButton {
-                    Parent = window,
-                    Text = "FOCUS FIELD #2",
-                    OnClick = (SButton elem) => window[/*third row (first is label)*/ 2][/*STextField*/ 1].Focus(),
-                };
-            }
-        };
-
-        STextField commandField = new STextField {
-            Text = "",
-            OnUpdateStyle = delegate (SElement elem) {
-                elem.Size.x = elem.Root.Size.x - 16f;
-                elem.Position.x = elem.Centered.x;
-                elem.Position.y = elem.Root.Size.y - elem.Size.y - 8f;
-            },
-            OnSubmit = (STextField elem, string text) => Console.WriteLine("TODO: HANDLE COMMANDS. In the meantime, " + text),
-        };
-
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
         StartCoroutine(ETGModGUI.ListAllItemsAndGuns());

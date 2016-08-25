@@ -5,11 +5,14 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using SGUI;
 
 public class ETGModLoaderMenu : IETGModMenu {
 
     Rect WindowRect = new Rect(15, 15, 300, Screen.height / 2);
     Vector2 MainScrollView = Vector2.zero;
+
+    public SGroup GUI { get; protected set; }
 
     public void Start() {
         KeepSinging();
@@ -52,8 +55,8 @@ public class ETGModLoaderMenu : IETGModMenu {
 
         WindowRect = new Rect(15, 15, Screen.width - 30,Screen.height - 30);
 
-        GUI.Box(WindowRect, "Mod Loader");
-        GUI.Box(new Rect(30, 30, 300, Screen.height - 60), "Mods");
+        UnityEngine.GUI.Box(WindowRect, "Mod Loader");
+        UnityEngine.GUI.Box(new Rect(30, 30, 300, Screen.height - 60), "Mods");
         GUILayout.BeginArea(WindowRect);
         GUISelector();
         GUILayout.EndArea();

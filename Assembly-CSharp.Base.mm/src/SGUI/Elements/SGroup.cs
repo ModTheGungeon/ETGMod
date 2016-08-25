@@ -114,6 +114,7 @@ namespace SGUI {
 
 
         protected float _CurrentAutoLayoutRow;
+        public bool AutoLayoutRowsStretch = true;
         public void AutoLayoutRows(int index, SElement elem) {
             if (elem == null) {
                 return;
@@ -122,9 +123,10 @@ namespace SGUI {
                 _CurrentAutoLayoutRow = 0f;
             }
 
-            elem.UpdateBounds = false;
-
-            elem.Size.x = Size.x;
+            if (AutoLayoutRowsStretch) {
+                elem.UpdateBounds = false;
+                elem.Size.x = Size.x;
+            }
             elem.Position = new Vector2(0f, _CurrentAutoLayoutRow);
             _CurrentAutoLayoutRow += elem.Size.y + AutoLayoutPadding;
 

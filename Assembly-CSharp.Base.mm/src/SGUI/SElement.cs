@@ -134,6 +134,14 @@ namespace SGUI {
             _CenteredOnce = true;
             Position = Centered;
         }
+        public void Fill(float padding = 16f) {
+            Position = new Vector2(padding, padding);
+            if (Parent != null) {
+                Size = Parent.Size - Position * 2f;
+            } else {
+                Size = Root.Size - Position * 2f;
+            }
+        }
 
         public virtual void UpdateStyle() {
             // This will get called again once this element gets added to the root.

@@ -5,14 +5,20 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Text;
 using System;
+using SGUI;
 
-public class ETGModConsole : IETGModMenu {
+public class ETGModConsole : ETGModMenu {
+
+    public static ETGModConsole Instance { get; protected set; }
+    public ETGModConsole() {
+        Instance = this;
+    }
 
     /// <summary>
     /// All commands supported by the ETGModConsole. Add your own commands here!
     /// </summary>
     public static ConsoleCommandGroup Commands = new ConsoleCommandGroup(delegate (string[] args) {
-      LoggedText.Add("Command or group " + args[0] + " doesn't exist");
+      Log("Command or group " + args[0] + " doesn't exist");
     });
 
     /// <summary>
@@ -20,38 +26,16 @@ public class ETGModConsole : IETGModMenu {
     /// </summary>
     public static Dictionary<string, int> AllItems = new Dictionary<string, int>();
 
-    /// <summary>
-    /// All console logged text lines. Feel free to add your lines here!
-    /// </summary>
-    public static List<string> LoggedText = new List<string>();
-    /// <summary>
-    /// The currently typed in command in the text box.
-    /// </summary>
-    public static string CurrentTextFieldText = "";
-
     public static bool StatSetEnabled = false;
 
-    public static Vector2 MainScrollPos;
-    public static Vector2 CorrectScrollPos;
+    protected bool _CloseConsoleOnCommand = false;
+    protected bool _CutInputFocusOnCommand = false;
 
-    private Rect _MainBoxRect           = new Rect(16f,                 16f , Screen.width - 32f, Screen.height - 32f );
-    private Rect _InputBox              = new Rect(16f, Screen.height - 32f , Screen.width - 32f,                 32f );
-    private Rect _AutocompletionBox     = new Rect(16f, Screen.height - 184f, Screen.width - 32f,                 120f);
+    protected string[] _CurrentAutocompletionData = null;
 
-    private bool _CloseConsoleOnCommand = false;
-    private bool _CutInputFocusOnCommand = false;
+    protected static char[] _SplitArgsCharacters = {' '};
 
-    private bool _AutocompleteOnNextFrame = false;
-
-    private bool _NeedCorrectInput = false;
-
-    private string[] _CurrentAutocompletionData = null;
-
-    private static bool _FocusOnInputBox = true;
-
-    private static char[] _SplitArgsCharacters = new char[] {' '};
-
-    private static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
+    protected static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
         List<string> ret = new List<string>();
         foreach (string key in AllItems.Keys) {
             if (key.AutocompletionMatch(input.ToLower())) {
@@ -61,7 +45,7 @@ public class ETGModConsole : IETGModMenu {
         return ret.ToArray();
     });
 
-    private static AutocompletionSettings _StatAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
+    protected static AutocompletionSettings _StatAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
         List<string> ret = new List<string>();
         foreach (string key in Enum.GetNames(typeof(TrackedStats))) {
             if (key.AutocompletionMatch(input.ToUpper())) {
@@ -71,13 +55,78 @@ public class ETGModConsole : IETGModMenu {
         return ret.ToArray();
     });
 
-    public void Start() {
+    public override void Start() {
+        // GUI
+        GUI = new SGroup {
+            Visible = false,
+            OnUpdateStyle = (SElement elem) => elem.Fill(),
+            Children = {
+                new SGroup {
+                    Background = new Color(0f, 0f, 0f, 0f),
+                    AutoLayout = (SGroup g) => g.AutoLayoutRows,
+                    AutoLayoutRowsStretch = false,
+                    ScrollDirection = SGroup.EDirection.Vertical,
+                    OnUpdateStyle = delegate (SElement elem) {
+                        elem.Fill();
+                        elem.Size -= new Vector2(0f, elem.Backend.LineHeight - 4f); // Command line input space
+                    },
+                    Children = {
+                        new SLabel("THIS CONSOLE IS <color=#ff0000ff>WORK IN PROGRESS</color>."),
+                        new SLabel("IT NO MORE DIRECTLY RELIES ON IMGUI, BUT USES SGUI."),
+                        new SLabel("THAT MEANS IT'S PRETTIER."),
+                        new SLabel("DAMN BROKEN CAPslock key. -- 0x0ade"),
+                        new SLabel("")
+                    }
+                },
+                new STextField {
+                    OnUpdateStyle = delegate (SElement elem) {
+                        elem.Size.x = elem.Parent.Size.x;
+                        elem.Position.x = elem.Centered.x;
+                        elem.Position.y = elem.Parent.Size.y - elem.Size.y;
+                    },
+                    OnTextUpdate = delegate(STextField elem, string prevText) {
+                        _CurrentAutocompletionData = null;
+                    },
+                    OnKey = delegate(STextField field, bool keyDown, KeyCode keyCode) {
+                        if (!keyDown) {
+                            return;
+                        }
+                        if (keyCode == KeyCode.Escape || keyCode == KeyCode.F2 || keyCode == KeyCode.Slash || keyCode == KeyCode.BackQuote) {
+                            ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
+                            return;
+                        }
+                    },
+                    OnSubmit = delegate(STextField elem, string text) {
+                        if (text.Length == 0) return;
+
+                        string[] input = SplitArgs(text.Trim());
+                        int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
+
+                        List<string> path = new List<string>();
+                        for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
+                            if (!string.IsNullOrEmpty(input[i])) path.Add(input[i]);
+                        }
+
+                        List<string> args = new List<string>();
+                        for (int i = commandindex; i < input.Length; i++) {
+                            if (!string.IsNullOrEmpty(input[i])) args.Add(input[i]);
+                        }
+                        RunCommand(path.ToArray(), args.ToArray());
+
+                        if (_CloseConsoleOnCommand) {
+                            ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
+                        }
+                    }
+                }
+            }
+        };
+
         // GLOBAL NAMESPACE
         Commands
                 .AddUnit ("help", delegate(string[] args) {
                     List<List<string>> paths = Commands.ConstructPaths();
                     for (int i = 0; i < paths.Count; i++) {
-                        LoggedText.Add(string.Join(" ", paths[i].ToArray()));
+                        Log(string.Join(" ", paths[i].ToArray()));
                     }
                 })
                 .AddUnit ("exit", (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None)
@@ -85,7 +134,7 @@ public class ETGModConsole : IETGModMenu {
                 .AddUnit ("screenshake", SetShake)
                 .AddUnit ("echo",        Echo    )
                 .AddUnit ("tp",          Teleport)
-                .AddUnit ("clear",       (string[] args) => LoggedText.Clear())
+                .AddUnit ("clear",       (string[] args) => GUI[0].Children.Clear())
                 .AddUnit ("godmode", delegate(string[] args) {
                     GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
                 });
@@ -146,80 +195,26 @@ public class ETGModConsole : IETGModMenu {
                 .AddUnit  ("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled));
     }
 
-    public void Update() {
+    public override void Update() {
 
     }
 
-    public TextEditor GetTextEditor() {
-        return (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+    protected virtual void _Log(string text) {
+        GUI[0].Children.Add(new SLabel(text) {
+            Alignment = TextAnchor.UpperLeft
+        });
+    }
+    public static void Log(string text) {
+        Instance._Log(text);
     }
 
     public string[] SplitArgs(string args) {
         return args.Split (_SplitArgsCharacters, StringSplitOptions.RemoveEmptyEntries);
     }
 
-    public void OnGUI() {
-
-        TextEditor te = GetTextEditor();
-        bool rancommand = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && CurrentTextFieldText.Length > 0;
-        if (rancommand) {
-            string[] input = SplitArgs(te.text.Trim());
-            int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
-
-            List<string> path = new List<string>();
-            for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
-                if (!string.IsNullOrEmpty(input[i])) path.Add(input[i]);
-            }
-
-            List<string> args = new List<string>();
-            for (int i = commandindex; i < input.Length; i++) {
-                if (!string.IsNullOrEmpty(input[i])) args.Add(input[i]);
-            }
-            RunCommand(path.ToArray(), args.ToArray());
-        }
-
-        //GUI.skin=skin;
-
-        //THIS HAS TO BE CALLED TWICE, once on input, and once the frame after!
-        //For some reason?....
-
-        if (_NeedCorrectInput) {
-            TextEditor texteditor = GetTextEditor ();
-            if (texteditor != null) {
-                texteditor.MoveTextEnd();
-            }
-            _NeedCorrectInput=false;
-        }
-
-        //Input
-        GUI.SetNextControlName("CommandBox");
-        string textfieldvalue = GUI.TextField(_InputBox, CurrentTextFieldText);
-        if (textfieldvalue != CurrentTextFieldText) {
-            _OnTextChanged (CurrentTextFieldText, textfieldvalue);
-            CurrentTextFieldText = textfieldvalue;
-        }
-
-        if (_FocusOnInputBox) {
-            GUI.FocusControl ("CommandBox");
-            _FocusOnInputBox = false;
-        }
-
-        _MainBoxRect       = new Rect(16,                      16 , Screen.width - 32, Screen.height - 32 - 29 );
-        _InputBox          = new Rect(16, Screen.height - 16 - 24 , Screen.width - 32,                      24 );
+    public override void OnGUI() {
+        /*
         _AutocompletionBox = new Rect(16, Screen.height - 16 - 144, Screen.width - 32,                     120 );
-
-        GUI.Box(_MainBoxRect   , "Console");
-
-        //Logged text
-        GUILayout.BeginArea(_MainBoxRect);
-        MainScrollPos = GUILayout.BeginScrollView(MainScrollPos);
-
-        for (int i = 0; i < LoggedText.Count; i++) {
-            GUILayout.Label(LoggedText[i]);
-        }
-
-        GUILayout.EndScrollView();
-        GUILayout.EndArea();
 
         if (_AutocompleteOnNextFrame) {
             // HACK
@@ -278,7 +273,7 @@ public class ETGModConsole : IETGModMenu {
             if there *are* spaces on the left of the cursor, that means the current
             "token" the cursor is on is an empty string, so that doesn't have any problems
             Hopefully this is a good enough explanation, if not, ping @Zatherz on Discord
-            */
+            *//*
 
             string matchkeyword = string.Empty;
             if (!inputtext.EndsWith (" ")) {
@@ -302,34 +297,12 @@ public class ETGModConsole : IETGModMenu {
                 _CurrentAutocompletionData = completions;
             }
         }
-
-        //Command handling
-        if (rancommand && Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.Return) {
-
-            //If this command is valid
-            // No new line when we ran a command.
-            CurrentTextFieldText="";
-            if (_CutInputFocusOnCommand)
-                GUI.FocusControl("");
-            if (_CloseConsoleOnCommand) {
-                ETGModGUI.CurrentMenu=ETGModGUI.MenuOpened.None;
-                ETGModGUI.UpdatePlayerState();
-            }
-        }
-
-
+    */
     }
 
-    public void OnOpen() { }
-
-    public void OnClose() {
-        _FocusOnInputBox = true;
-    }
-
-    public void OnDestroy() { }
-
-    private void _OnTextChanged(string previous, string current) {
-        _CurrentAutocompletionData = null;
+    public override void OnOpen() {
+        base.OnOpen();
+        GUI[1].Focus();
     }
 
     // Use like this:
@@ -338,16 +311,16 @@ public class ETGModConsole : IETGModMenu {
     // ALL VALUES INCLUSIVE!
     public static bool ArgCount(string[] args, int min) {
         if (args.Length >= min) return true;
-        LoggedText.Add ("Error: need at least " + min + " argument(s)");
+        Log("Error: need at least " + min + " argument(s)");
         return false;
     }
 
     public static bool ArgCount(string[] args, int min, int max) {
         if (args.Length >= min && args.Length <= max) return true;
         if (min == max) {
-            LoggedText.Add ("Error: need exactly " + min + " argument(s)");
+            Log("Error: need exactly " + min + " argument(s)");
         } else {
-            LoggedText.Add ("Error: need between " + min + " and " + max + " argument(s)");
+            Log("Error: need between " + min + " and " + max + " argument(s)");
         }
         return false;
     }
@@ -359,16 +332,15 @@ public class ETGModConsole : IETGModMenu {
         ConsoleCommandUnit command = Commands.GetUnit (unit);
         if (command == null) {
             if (Commands.GetGroup (unit) == null) {
-                LoggedText.Add ("Command doesn't exist");
+                Log("Command doesn't exist");
             }
         } else {
             try {
                 command.RunCommand (args);
             } catch (Exception e) {
-                LoggedText.Add (e.ToString ());
+                Log(e.ToString ());
             }
         }
-        CurrentTextFieldText = string.Empty;
     }
 
     // Example commands
@@ -383,7 +355,7 @@ public class ETGModConsole : IETGModMenu {
         }
         string str = combined.ToString();
         Debug.Log(str);
-        LoggedText.Add(str);
+        Log(str);
     }
 
     void DodgeRollDistance(string[] args) {
@@ -434,7 +406,7 @@ public class ETGModConsole : IETGModMenu {
         if (!ArgCount (args, 1, 2)) return;
 
         if (!GameManager.Instance.PrimaryPlayer) {
-            LoggedText.Add ("Couldn't access Player Controller");
+            Log("Couldn't access Player Controller");
             return;
         }
 
@@ -450,11 +422,11 @@ public class ETGModConsole : IETGModMenu {
         }
 
         if (id==-1) {
-            LoggedText.Add("Invalid item ID/name!");
+            Log("Invalid item ID/name!");
             return;
         }
 
-        LoggedText.Add ("Attempting to spawn item ID " + args[0] + " (numeric " + id.ToString() + ")" + ", class " + PickupObjectDatabase.GetById (id).GetType());
+        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + PickupObjectDatabase.GetById (id).GetType());
 
         if (args.Length == 2) {
             int count = int.Parse(args[1]);
@@ -468,7 +440,7 @@ public class ETGModConsole : IETGModMenu {
 
     void SetShake(string[] args) {
         if (!ArgCount (args, 1, 1)) return;
-        LoggedText.Add ("Vlambeer set to " + args[0]);
+        Log("Vlambeer set to " + args[0]);
         ScreenShakeSettings.GLOBAL_SHAKE_MULTIPLIER = float.Parse (args [0]);
     }
 
@@ -476,15 +448,15 @@ public class ETGModConsole : IETGModMenu {
         if (!ArgCount (args, 1, 2)) return;
         AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid (args[0]);
         if (enemyPrefab == null) {
-            LoggedText.Add("GUID " + args[0] + " doesn't exist");
+            Log("GUID " + args[0] + " doesn't exist");
             return;
         }
-        LoggedText.Add ("Spawning GUID " + args[0]);
+        Log("Spawning GUID " + args[0]);
         int count = 1;
         if (args.Length > 1) {
             bool success = int.TryParse (args[1], out count);
             if (!success) {
-                LoggedText.Add ("Second argument must be an integer (number)");
+                Log("Second argument must be an integer (number)");
                 return;
             }
         }
@@ -554,7 +526,7 @@ public class ETGModConsole : IETGModMenu {
             glitched = true;
             break;
         default:
-            LoggedText.Add ("Chest type " + args [0] + " doesn't exist! Valid types: brown, blue, green, red, black, rainbow");
+            Log("Chest type " + args [0] + " doesn't exist! Valid types: brown, blue, green, red, black, rainbow");
             return;
         }
         WeightedGameObject wGameObject = new WeightedGameObject ();
@@ -567,7 +539,7 @@ public class ETGModConsole : IETGModMenu {
         if (args.Length > 1) {
             bool success = int.TryParse (args[1], out count);
             if (!success) {
-                LoggedText.Add ("Second argument must be an integer (number)");
+                Log("Second argument must be an integer (number)");
                 return;
             }
         }
@@ -586,13 +558,13 @@ public class ETGModConsole : IETGModMenu {
         string resourcepath = string.Join(" ", args);
         object resource = Resources.Load(resourcepath);
         if (resource == null) {
-            LoggedText.Add("Couldn't load resource " + resourcepath);
+            Log("Couldn't load resource " + resourcepath);
             return;
         }
-        LoggedText.Add("Loaded (and threw away) " + resourcepath);
+        Log("Loaded (and threw away) " + resourcepath);
     }
 
-    private TrackedStats? _GetStatFromString(string statname) {
+    protected TrackedStats? _GetStatFromString(string statname) {
         TrackedStats stat;
         try {
             stat = (TrackedStats)Enum.Parse(typeof(TrackedStats), statname);
@@ -602,19 +574,19 @@ public class ETGModConsole : IETGModMenu {
         return stat;
     }
 
-    private bool _VerifyStatSetEnabled(string command) {
+    protected bool _VerifyStatSetEnabled(string command) {
         if (!StatSetEnabled) {
-            LoggedText.Add ("The '" + command + "' command is disabled by default!");
-            LoggedText.Add ("This command can be very damaging as it sets arbitrary values in your save file.");
-            LoggedText.Add ("There is *no way* to undo this action.");
-            LoggedText.Add ("If someone told you to run this command, there is a high chance they are");
-            LoggedText.Add ("maliciously trying to destroy your save file.");
-            LoggedText.Add ("This command can also cause achievements to be unlocked. Achievements are");
-            LoggedText.Add ("disabled by default, but they can be enabled with 'conf enable_achievements true'.");
-            LoggedText.Add ("If you are *CERTAIN* that you want to run this command, you can enable it by");
-            LoggedText.Add ("running the following command: 'conf enable_stat_set true'.");
-            LoggedText.Add ("");
-            LoggedText.Add ("Be careful.");
+            Log("The '" + command + "' command is disabled by default!");
+            Log("This command can be very damaging as it sets arbitrary values in your save file.");
+            Log("There is *no way* to undo this action.");
+            Log("If someone told you to run this command, there is a high chance they are");
+            Log("maliciously trying to destroy your save file.");
+            Log("This command can also cause achievements to be unlocked. Achievements are");
+            Log("disabled by default, but they can be enabled with 'conf enable_achievements true'.");
+            Log("If you are *CERTAIN* that you want to run this command, you can enable it by");
+            Log("running the following command: 'conf enable_stat_set true'.");
+            Log("");
+            Log("Be careful.");
             return false;
         }
         return true;
@@ -624,19 +596,19 @@ public class ETGModConsole : IETGModMenu {
         if (!ArgCount (args, 1)) return;
         TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
         if (!stat.HasValue) {
-            LoggedText.Add ("The stat isn't a real TrackedStat");
+            Log("The stat isn't a real TrackedStat");
             return;
         }
         if (GameManager.Instance.PrimaryPlayer != null) {
             float characterstat = GameStatsManager.Instance.GetCharacterStatValue (stat.Value);
-            LoggedText.Add ("Character: " + characterstat);
+            Log("Character: " + characterstat);
             float sessionstat = GameStatsManager.Instance.GetSessionStatValue (stat.Value);
-            LoggedText.Add ("Session: " + sessionstat);
+            Log("Session: " + sessionstat);
         } else {
-            LoggedText.Add ("Character and Session stats are unavailable, please select a character first");
+            Log("Character and Session stats are unavailable, please select a character first");
         }
         float playerstat = GameStatsManager.Instance.GetPlayerStatValue (stat.Value);
-        LoggedText.Add ("This save file: " + playerstat);
+        Log("This save file: " + playerstat);
     }
 
     void StatSetSession(string[] args) {
@@ -644,12 +616,12 @@ public class ETGModConsole : IETGModMenu {
         if (!ArgCount (args, 2)) return;
         TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
         if (!stat.HasValue) {
-            LoggedText.Add ("The stat isn't a real TrackedStat");
+            Log("The stat isn't a real TrackedStat");
             return;
         }
         float value;
         if (!float.TryParse (args [1], out value)) {
-            LoggedText.Add ("The value isn't a proper number");
+            Log("The value isn't a proper number");
             return;
         }
         GameStatsManager.Instance.SetStat (stat.Value, value);
@@ -660,12 +632,12 @@ public class ETGModConsole : IETGModMenu {
         if (!ArgCount (args, 2)) return;
         TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
         if (!stat.HasValue) {
-            LoggedText.Add ("The stat isn't a real TrackedStat");
+            Log("The stat isn't a real TrackedStat");
             return;
         }
         float value;
         if (!float.TryParse (args [1], out value)) {
-            LoggedText.Add ("The value isn't a proper number");
+            Log("The value isn't a proper number");
             return;
         }
         PlayableCharacters currentCharacter = GameManager.Instance.PrimaryPlayer.characterIdentity;
@@ -677,12 +649,12 @@ public class ETGModConsole : IETGModMenu {
         if (!ArgCount (args, 2)) return;
         TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
         if (!stat.HasValue) {
-            LoggedText.Add ("The value isn't a proper number");
+            Log("The value isn't a proper number");
             return;
         }
         float value;
         if (!float.TryParse (args [1], out value)) {
-            LoggedText.Add ("The value isn't a proper number");
+            Log("The value isn't a proper number");
             return;
         }
         GameStatsManager.Instance.RegisterStatChange (stat.Value, value);
@@ -691,7 +663,7 @@ public class ETGModConsole : IETGModMenu {
     void StatList(string[] args) {
         if (!ArgCount (args, 0)) return;
         foreach (var value in Enum.GetValues(typeof(TrackedStats))) {
-            LoggedText.Add (value.ToString().ToLower());
+            Log(value.ToString().ToLower());
         }
     }
 }

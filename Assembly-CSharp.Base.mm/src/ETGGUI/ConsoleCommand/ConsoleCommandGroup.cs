@@ -39,7 +39,7 @@ public class ConsoleCommandGroup : ConsoleCommandUnit {
     }
 
     public ConsoleCommandGroup ()
-        : this((string[] args) => ETGModConsole.LoggedText.Add("Command group does not have an assigned action")) {
+        : this((string[] args) => ETGModConsole.Log("Command group does not have an assigned action")) {
     }
 
     public ConsoleCommandGroup AddUnit(string name, ConsoleCommand command) {

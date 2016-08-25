@@ -6,8 +6,11 @@ using System.Text;
 using ETGGUI.Hierarchy;
 using ETGGUI.Inspector;
 using UnityEngine;
+using SGUI;
 
 public class ETGModInspector : IETGModMenu {
+
+    public SGroup GUI { get; protected set; }
 
     public static Dictionary<Type, GenericComponentInspector> ComponentInspectorRegistry = new Dictionary<Type, GenericComponentInspector>() {
 
@@ -42,7 +45,7 @@ public class ETGModInspector : IETGModMenu {
 
     public void OnGUI() {
         ETGHierarchy.OnGUI();
-        WindowRect=GUI.Window(14, WindowRect, WindowFunction, "Inspector");
+        WindowRect=UnityEngine.GUI.Window(14, WindowRect, WindowFunction, "Inspector");
     }
 
     public void WindowFunction(int windowID) {
@@ -63,7 +66,7 @@ public class ETGModInspector : IETGModMenu {
         }
         GUILayout.EndScrollView();
 
-        GUI.DragWindow();
+        UnityEngine.GUI.DragWindow();
     }
 
     public void OnOpen() { }
