@@ -148,7 +148,7 @@ namespace SGUI {
                 elem.Size.y = Size.y;
             }
             elem.Position = new Vector2(_CurrentAutoLayoutColumn, 0f);
-            _CurrentAutoLayoutColumn += elem.Size.y + AutoLayoutPadding;
+            _CurrentAutoLayoutColumn += elem.Size.x + AutoLayoutPadding;
 
             GrowToFit(elem);
         }
