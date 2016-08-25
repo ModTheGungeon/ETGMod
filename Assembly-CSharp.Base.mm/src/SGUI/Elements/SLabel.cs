@@ -5,7 +5,7 @@ namespace SGUI {
 
         public string Text;
 
-        public TextAnchor Alignment = TextAnchor.MiddleCenter;
+        public TextAnchor Alignment = TextAnchor.MiddleLeft;
 
         public SLabel()
             : this("") { }

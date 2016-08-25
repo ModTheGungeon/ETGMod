@@ -7,6 +7,8 @@ namespace SGUI {
         public string Text;
         public string TextOnSubmit = "";
 
+        public bool OverrideTab;
+
         public Action<STextField, string> OnTextUpdate;
         public Action<STextField, bool, KeyCode> OnKey;
         public Action<STextField, string> OnSubmit;
@@ -16,6 +18,12 @@ namespace SGUI {
                 return true;
             }
         }
+
+        public int CursorIndex { get; protected set; }
+        public int SelectionIndex { get; protected set; }
+
+        protected int? _MoveCursorIndex;
+        protected int? _MoveSelectionIndex;
 
         public STextField()
             : this("") { }
@@ -42,6 +50,10 @@ namespace SGUI {
 
             Draw.TextField(this, Vector2.zero, Size, ref Text);
 
+            if (_MoveCursorIndex != null || _MoveSelectionIndex != null) {
+                Backend.MoveTextFieldCursor(this, ref _MoveCursorIndex, ref _MoveSelectionIndex);
+            }
+
             // Focusing should happen when the element has got a valid ID (after rendering the element) and after checking for it.
             if (_ScheduleFocus) {
                 _ScheduleFocus = false;
@@ -54,5 +66,16 @@ namespace SGUI {
             _ScheduleFocus = true;
         }
 
-    }
+        public void MoveCursor(int cursor, int? selection = null) {
+            _MoveCursorIndex = cursor;
+            _MoveSelectionIndex = selection;
+        }
+
+        public void SetCursorIndex(int secret, int cursor, int select) {
+            Backend.VerifySecret(secret);
+            CursorIndex = cursor;
+            SelectionIndex = select;
+        }
+
+   }
 }

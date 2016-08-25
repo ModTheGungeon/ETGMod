@@ -31,8 +31,6 @@ public class ETGModConsole : ETGModMenu {
     protected bool _CloseConsoleOnCommand = false;
     protected bool _CutInputFocusOnCommand = false;
 
-    protected string[] _CurrentAutocompletionData = null;
-
     protected static char[] _SplitArgsCharacters = {' '};
 
     protected static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
@@ -72,10 +70,9 @@ public class ETGModConsole : ETGModMenu {
                     },
                     Children = {
                         new SLabel("THIS CONSOLE IS <color=#ff0000ff>WORK IN PROGRESS</color>."),
-                        new SLabel("IT NO MORE DIRECTLY RELIES ON IMGUI, BUT USES SGUI."),
-                        new SLabel("THAT MEANS IT'S PRETTIER."),
-                        new SLabel("DAMN BROKEN CAPslock key. -- 0x0ade"),
-                        new SLabel("")
+                        new SLabel("It drops the Unity OnGUI / IMGUI system for SGUI."),
+                        new SLabel("Some code may still be missing in the SGUI port."),
+                        new SLabel()
                     }
                 },
                 new STextField {
@@ -85,8 +82,9 @@ public class ETGModConsole : ETGModMenu {
                         elem.Position.y = elem.Parent.Size.y - elem.Size.y;
                     },
                     OnTextUpdate = delegate(STextField elem, string prevText) {
-                        _CurrentAutocompletionData = null;
+                        HideAutocomplete();
                     },
+                    OverrideTab = true,
                     OnKey = delegate(STextField field, bool keyDown, KeyCode keyCode) {
                         if (!keyDown) {
                             return;
@@ -95,24 +93,14 @@ public class ETGModConsole : ETGModMenu {
                             ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
                             return;
                         }
+                        if (keyCode == KeyCode.Tab) {
+                            ShowAutocomplete();
+                            return;
+                        }
                     },
                     OnSubmit = delegate(STextField elem, string text) {
                         if (text.Length == 0) return;
-
-                        string[] input = SplitArgs(text.Trim());
-                        int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
-
-                        List<string> path = new List<string>();
-                        for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
-                            if (!string.IsNullOrEmpty(input[i])) path.Add(input[i]);
-                        }
-
-                        List<string> args = new List<string>();
-                        for (int i = commandindex; i < input.Length; i++) {
-                            if (!string.IsNullOrEmpty(input[i])) args.Add(input[i]);
-                        }
-                        RunCommand(path.ToArray(), args.ToArray());
-
+                        ParseCommand(text);
                         if (_CloseConsoleOnCommand) {
                             ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None;
                         }
@@ -200,9 +188,7 @@ public class ETGModConsole : ETGModMenu {
     }
 
     protected virtual void _Log(string text) {
-        GUI[0].Children.Add(new SLabel(text) {
-            Alignment = TextAnchor.UpperLeft
-        });
+        GUI[0].Children.Add(new SLabel(text));
     }
     public static void Log(string text) {
         Instance._Log(text);
@@ -212,92 +198,105 @@ public class ETGModConsole : ETGModMenu {
         return args.Split (_SplitArgsCharacters, StringSplitOptions.RemoveEmptyEntries);
     }
 
-    public override void OnGUI() {
-        /*
-        _AutocompletionBox = new Rect(16, Screen.height - 16 - 144, Screen.width - 32,                     120 );
+    public void ParseCommand(string text) {
+        string[] input = SplitArgs(text.Trim());
+        int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
 
-        if (_AutocompleteOnNextFrame) {
-            // HACK
-            // This is how you set the cursor position...
-            te.cursorIndex = te.text.Length;
-            te.selectIndex = te.text.Length;
-
-            _AutocompleteOnNextFrame = false;
+        List<string> path = new List<string>();
+        for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
+            if (!string.IsNullOrEmpty(input[i])) path.Add(input[i]);
         }
 
-        if (_CurrentAutocompletionData != null) {
-            GUI.Box(_AutocompletionBox, "Autocompletion");
-
-            GUILayout.BeginArea(_AutocompletionBox);
-            CorrectScrollPos = GUILayout.BeginScrollView(CorrectScrollPos);
-
-            for(int i = 0; i < _CurrentAutocompletionData.Length; i++) {
-                GUILayout.Label(_CurrentAutocompletionData[i]);
-            }
-
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
+        List<string> args = new List<string>();
+        for (int i = commandindex; i < input.Length; i++) {
+            if (!string.IsNullOrEmpty(input[i])) args.Add(input[i]);
         }
+        RunCommand(path.ToArray(), args.ToArray());
+    }
+
+    public void ShowAutocomplete() {
+        if (GUI.Children.Count >= 3) {
+            return;
+        }
+        STextField field = (STextField) GUI[1];
 
         // AUTO COMPLETIONATOR 3000
         // (by Zatherz)
         //
         // TODO: Make Tab autocomplete to the shared part of completions
         // TODO: AutocompletionRule interface and class per rule?
-        var autocompletionrequested = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Tab;
-        if (autocompletionrequested) {
-            // Create an input array by splitting it on spaces
-            string inputtext = te.text.Substring (0, te.cursorIndex);
-            string[] input = SplitArgs (inputtext);
-            string otherinput = string.Empty;
-            if (te.cursorIndex < te.text.Length) {
-                otherinput = te.text.Substring (te.cursorIndex + 1);
+        // Create an input array by splitting it on spaces
+        string inputtext = field.Text.Substring(0, field.CursorIndex);
+        string[] input = SplitArgs(inputtext);
+        if (input.Length == 0) {
+            return;
+        }
+        string otherinput = string.Empty;
+        if (field.CursorIndex < field.Text.Length) {
+            otherinput = field.Text.Substring(field.CursorIndex + 1);
+        }
+        // Get where the command appears in the path so that we know where the arguments start
+        int commandindex = Commands.GetFirstNonUnitIndexInPath(input);
+        List<string> pathlist = new List<string>();
+        for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
+            pathlist.Add(input[i]);
+        }
+
+        string[] path = pathlist.ToArray();
+
+        ConsoleCommandUnit unit = Commands.GetUnit(path);
+        // Get an array of available completions
+        int matchindex = input.Length - path.Length;
+        /*
+        HACK! blame Zatherz
+        matchindex will be off by +1 if the current keyword your cursor is on isn't empty
+        this will check if there are no spaces on the left on the cursor
+        and if so, decrease matchindex
+        if there *are* spaces on the left of the cursor, that means the current
+        "token" the cursor is on is an empty string, so that doesn't have any problems
+        Hopefully this is a good enough explanation, if not, ping @Zatherz on Discord
+        */
+
+        string matchkeyword = string.Empty;
+        if (!inputtext.EndsWithInvariant(" ")) {
+            matchindex--;
+            matchkeyword = input[input.Length - 1];
+        }
+
+        string[] completions = unit.Autocompletion.Match(matchindex, matchkeyword);
+
+        if (completions == null || completions.Length == 0) {
+            Debug.Log ("ETGModConsole: no completions available (match returned null)");
+        } else if (completions.Length == 1) {
+            if (path.Length > 0) {
+                field.Text = string.Join (" ", path) + " " + completions [0] + " " + otherinput;
+            } else {
+                field.Text = completions [0] + " " + otherinput;
             }
-            // Get where the command appears in the path so that we know where the arguments start
-            int commandindex = Commands.GetFirstNonUnitIndexInPath (input);
-            List<string> pathlist = new List<string> ();
-            for (int i = 0; i < input.Length - (input.Length - commandindex); i++) {
-                pathlist.Add (input [i]);
-            }
 
-            string[] path = pathlist.ToArray ();
-
-            ConsoleCommandUnit unit = Commands.GetUnit (path);
-            // Get an array of available completions
-            int matchindex = input.Length - path.Length;
-            /*
-            HACK! blame Zatherz
-            matchindex will be off by +1 if the current keyword your cursor is on isn't empty
-            this will check if there are no spaces on the left on the cursor
-            and if so, decrease matchindex
-            if there *are* spaces on the left of the cursor, that means the current
-            "token" the cursor is on is an empty string, so that doesn't have any problems
-            Hopefully this is a good enough explanation, if not, ping @Zatherz on Discord
-            *//*
-
-            string matchkeyword = string.Empty;
-            if (!inputtext.EndsWith (" ")) {
-                matchindex--;
-                matchkeyword = input[input.Length - 1];
-            }
-
-            string[] completions = unit.Autocompletion.Match (matchindex, matchkeyword);
-
-            if (completions == null) {
-                Debug.Log ("ETGModConsole: no completions available (match returned null)");
-            } else if (completions.Length == 1) {
-                if (path.Length > 0) {
-                    CurrentTextFieldText = string.Join (" ", path) + " " + completions [0] + " " + otherinput;
-                } else {
-                    CurrentTextFieldText = completions [0] + " " + otherinput;
+            field.MoveCursor(field.Text.Length);
+        } else if (completions.Length > 1) {
+            SGroup hints = new SGroup {
+                Parent = GUI,
+                AutoLayout = (SGroup g) => g.AutoLayoutRows,
+                ScrollDirection = SGroup.EDirection.Vertical,
+                AutoGrowDirection = SGroup.EDirection.Vertical,
+                OnUpdateStyle = delegate (SElement elem) {
+                    elem.Size = new Vector2(elem.Parent.Size.x, Mathf.Min(elem.Size.y, 160f));
+                    elem.Position = GUI[1].Position - new Vector2(0f, elem.Size.y + 4f);
                 }
+            };
 
-                _AutocompleteOnNextFrame = true;
-            } else if (completions.Length > 1) {
-                _CurrentAutocompletionData = completions;
+            for (int i = 0; i < completions.Length; i++) {
+                hints.Children.Add(new SLabel(completions[i]));
             }
         }
-    */
+    }
+    public void HideAutocomplete() {
+        if (GUI.Children.Count < 3) {
+            return;
+        }
+        GUI.Children.RemoveAt(2);
     }
 
     public override void OnOpen() {
@@ -390,6 +389,9 @@ public class ETGModConsole : ETGModMenu {
     public void SetBool(string[] args, ref bool value) {
         value = SetBool(args, value);
     }
+    public void SetBool(string[] args, ref bool value, bool fallbackValue) {
+        value = SetBool(args, fallbackValue);
+    }
     public bool SetBool(string[] args, bool fallbackValue) {
         if (args.Length!=1)
             return fallbackValue;
@@ -410,18 +412,12 @@ public class ETGModConsole : ETGModMenu {
             return;
         }
 
-        int id = -1;
-
-        try {
-            id = int.Parse(args[0]);
-        }
-        catch {
+        int id;
+        if (int.TryParse(args[0], out id)) {
+        } else if (AllItems.TryGetValue(args[0], out id)) {
             //Arg isn't an id, so it's probably an item name.
             // Are you Brent?
-            id = AllItems[args[0]];
-        }
-
-        if (id==-1) {
+        } else {
             Log("Invalid item ID/name!");
             return;
         }

@@ -84,6 +84,7 @@ namespace SGUI {
         /// <param name="bounds">Bounds.</param>
         /// <param name="text">Text.</param>
         void TextField(Rect bounds, ref string text);
+        void MoveTextFieldCursor(SElement elem, ref int? cursor, ref int? selection);
 
         bool Button(SElement elem, Vector2 position, Vector2 size, string text, Texture icon = null);
         bool Button(Rect bounds, string text, Texture icon = null);

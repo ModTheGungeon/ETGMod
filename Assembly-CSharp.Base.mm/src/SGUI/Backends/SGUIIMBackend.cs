@@ -591,14 +591,22 @@ namespace SGUI {
             KeyCode keyCode = e.keyCode;
             bool submit = keyDown && keyCode == KeyCode.Return;
 
+            STextField field = elem as STextField;
+
+            if (field != null && field.OverrideTab && keyEvent && (e.keyCode == KeyCode.Tab || e.character == '\t')) {
+                e.Use();
+            }
+
             RegisterNextComponentIn(elem);
             string prevText = text;
             TextField(new Rect(position, elem.Size), ref text);
 
             if (Repainting) {
                 elem.SetFocused(_Secret, IsFocused(CurrentComponentID));
-            } else if (elem is STextField && elem.IsFocused) {
-                STextField field = (STextField) elem;
+            } else if (field != null && elem.IsFocused) {
+                TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+
+                field.SetCursorIndex(_Secret, editor.cursorIndex, editor.selectIndex);
                 if (submit) text = field.TextOnSubmit ?? prevText;
 
                 if (prevText != text) field.OnTextUpdate?.Invoke(field, prevText);
@@ -667,6 +675,22 @@ namespace SGUI {
 
                 GUI.color = prevGUIColor;
             }
+        }
+        public void MoveTextFieldCursor(SElement elem, ref int? cursor, ref int? selection) {
+            if (!IsFocused(GetFirstComponentID(elem))) {
+                return;
+            }
+
+            TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+            if (elem is STextField) editor.text = ((STextField) elem).Text;
+
+            if (cursor != null)     editor.cursorIndex = cursor.Value;
+
+            if (selection != null)  editor.selectIndex = selection.Value;
+            else                    editor.selectIndex = cursor.Value;
+
+            cursor = null;
+            selection = null;
         }
 
 
