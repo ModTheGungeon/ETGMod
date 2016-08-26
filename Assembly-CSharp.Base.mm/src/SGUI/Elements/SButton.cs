@@ -32,7 +32,12 @@ namespace SGUI {
             if (Root == null) return;
 
             if (UpdateBounds) {
-                Size = Backend.MeasureText(Text) + new Vector2(16f, 2f);
+                if (Parent == null) {
+                    Size = Backend.MeasureText(Text);
+                } else {
+                    Size = Backend.MeasureText(Text, Parent.Size);
+                }
+                Size += new Vector2(16f, 2f);
                 if (Icon != null) {
                     Size = Size.WithX(Size.x + Size.y + 4f);
                 }
