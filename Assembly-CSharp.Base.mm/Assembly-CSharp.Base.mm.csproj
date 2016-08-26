@@ -100,17 +100,13 @@
     <Compile Include="src\MonoMod\Platform.cs" />
     <Compile Include="src\MonoMod\PlatformHelper.cs" />
     <Compile Include="src\Multiplayer\MultiplayerManager.cs" />
-    <Compile Include="src\Multiplayer\NetworkInput.cs" />
-    <Compile Include="src\Multiplayer\PacketHelper.cs" />
-    <Compile Include="src\Multiplayer\CustomRPC.cs" />
-    <Compile Include="src\Multiplayer\RPCSerializer.cs" />
-    <Compile Include="src\Multiplayer\SteamHelper.cs" />
+    <Compile Include="src\Multiplayer\Steam\PacketHelper.cs" />
+    <Compile Include="src\Multiplayer\RPC\CustomRPC.cs" />
+    <Compile Include="src\Multiplayer\RPC\RPCSerializer.cs" />
+    <Compile Include="src\Multiplayer\Steam\SteamHelper.cs" />
     <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
     <Compile Include="src\Patches\patch_Dungeon.cs" />
-    <Compile Include="src\Patches\patch_Foyer.cs" />
-    <Compile Include="src\Patches\patch_FoyerCharacterSelectFlag.cs" />
     <Compile Include="src\Patches\patch_HealthHaver.cs" />
-    <Compile Include="src\Patches\patch_PlayerController.cs" />
     <Compile Include="src\Patches\patch_tk2dBaseSprite.cs" />
     <Compile Include="src\Patches\patch_GameManager.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
@@ -301,12 +297,5 @@
   -->
   <ItemGroup>
     <Folder Include="Content\etgmod\gui\" />
-    <Folder Include="src\JSON\" />
-    <Folder Include="src\JSON\Rules\" />
-    <Folder Include="Content\sprites\" />
-    <Folder Include="src\SGUI\" />
-    <Folder Include="src\SGUI\Elements\" />
-    <Folder Include="src\SGUI\Backends\" />
-    <Folder Include="src\SGUI\DFEXT\" />
   </ItemGroup>
 </Project>
