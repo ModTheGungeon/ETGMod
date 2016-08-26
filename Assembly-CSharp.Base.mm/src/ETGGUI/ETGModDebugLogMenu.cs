@@ -29,7 +29,6 @@ public class ETGModDebugLogMenu : ETGModMenu {
         GUI = new SGroup {
             Visible = false,
             Border = 18f,
-            Size = new Vector2(/*don't grow horizontally*/ SGUIRoot.Main.Size.x, /*grow vertically (scroll)*/ 0),
             OnUpdateStyle = (SElement elem) => elem.Fill(),
             AutoLayout = (SGroup g) => g.AutoLayoutVertical,
             ScrollDirection = SGroup.EDirection.Vertical,

@@ -106,16 +106,6 @@ public static partial class ETGMod {
         MultiplayerManager.Create();
 
         Debug.Log("ETGMod " + BaseVersion);
-        Debug.Log("A");
-        Debug.LogWarning("B");
-        Debug.LogWarning("B");
-        Debug.Log("C");
-        Debug.LogError("D");
-        Debug.LogError("D");
-        Debug.LogError("D");
-        Debug.LogError("D");
-        Debug.Log("D");
-        Debug.Log("D");
         Assets.Hook();
         Assembly.GetCallingAssembly().MapAssets();
 

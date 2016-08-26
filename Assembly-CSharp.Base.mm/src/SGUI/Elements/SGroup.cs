@@ -15,6 +15,7 @@ namespace SGUI {
         public Vector2 ScrollMomentum;
         public float ScrollInitialMomentum = 16f;
         public float ScrollDecayFactor = 0.45f;
+        public Vector2 ScrollExtra = new Vector2(0f, -1f);
         public Vector2 InnerSize = new Vector2(128f, 128f);
 
         public Func<SGroup, Action<int, SElement>> AutoLayout;
@@ -51,6 +52,9 @@ namespace SGUI {
             }
             if (Size.y <= 0f) {
                 AutoGrowDirection |= EDirection.Vertical;
+            }
+            if (ScrollExtra.y < -0f) { // Yes, -0f is a thing.
+                ScrollExtra.y = Backend.LineHeight * -ScrollExtra.y;
             }
 
             if (AutoLayout != null) {
@@ -179,8 +183,8 @@ namespace SGUI {
         public void GrowToFit(SElement elem) {
             Vector2 max = elem.Position + elem.Size;
 
-            InnerSize.x = Mathf.Max(InnerSize.x, max.x);
-            InnerSize.y = Mathf.Max(InnerSize.y, max.y);
+            InnerSize.x = Mathf.Max(InnerSize.x, max.x + ScrollExtra.x);
+            InnerSize.y = Mathf.Max(InnerSize.y, max.y + ScrollExtra.y);
 
             if ((AutoGrowDirection & EDirection.Horizontal) == EDirection.Horizontal) {
                 Size.x = InnerSize.x;
