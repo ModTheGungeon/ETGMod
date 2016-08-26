@@ -37,6 +37,9 @@ public static partial class ETGMod {
     public static int IndexOfInvariant(this string s, string a) {
         return s.IndexOf(a, StringComparison.InvariantCulture);
     }
+    public static int LastIndexOfInvariant(this string s, string a) {
+        return s.LastIndexOf(a, StringComparison.InvariantCulture);
+    }
     public static bool StartsWithInvariant(this string s, string a) {
         return s.StartsWith(a, StringComparison.InvariantCulture);
     }

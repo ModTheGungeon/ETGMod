@@ -13,7 +13,7 @@ namespace SGUI {
         public EDirection ScrollDirection;
         public Vector2 ScrollPosition;
         public Vector2 ScrollMomentum;
-        public float ScrollInitialMomentum = 8f;
+        public float ScrollInitialMomentum = 16f;
         public float ScrollDecayFactor = 0.45f;
         public Vector2 InnerSize = new Vector2(128f, 128f);
 
@@ -60,17 +60,13 @@ namespace SGUI {
                 IsWindow = WindowTitle != null;
             }
 
+            base.UpdateStyle();
+
             if (_AutoLayout != null) {
-                // Apply auto layout to any child that has no layout settings.
                 for (int i = 0; i < Children.Count; i++) {
-                    SElement child = Children[i];
-                    if (child.OnUpdateStyle == null) {
-                        _AutoLayout(i, child);
-                    }
+                    _AutoLayout(i, Children[i]);
                 }
             }
-
-            base.UpdateStyle();
         }
         public override void UpdateChildrenStyles() {
             WindowTitleBar.Root = Root;
@@ -113,42 +109,40 @@ namespace SGUI {
         }
 
 
-        protected float _CurrentAutoLayoutRow;
-        public bool AutoLayoutRowsStretch = true;
-        public void AutoLayoutRows(int index, SElement elem) {
+        protected float _CurrentAutoLayoutVerticalY;
+        public bool AutoLayoutVerticalStretch = true;
+        public void AutoLayoutVertical(int index, SElement elem) {
             if (elem == null) {
                 return;
             }
             if (index == 0) {
-                _CurrentAutoLayoutRow = 0f;
+                _CurrentAutoLayoutVerticalY = 0f;
             }
 
-            if (AutoLayoutRowsStretch) {
-                elem.UpdateBounds = false;
+            if (AutoLayoutVerticalStretch) {
                 elem.Size.x = Size.x;
             }
-            elem.Position = new Vector2(0f, _CurrentAutoLayoutRow);
-            _CurrentAutoLayoutRow += elem.Size.y + AutoLayoutPadding;
+            elem.Position = new Vector2(0f, _CurrentAutoLayoutVerticalY);
+            _CurrentAutoLayoutVerticalY += elem.Size.y + AutoLayoutPadding;
 
             GrowToFit(elem);
         }
 
-        protected float _CurrentAutoLayoutColumn;
-        public bool AutoLayoutColumnsStretch = true;
-        public void AutoLayoutColumns(int index, SElement elem) {
+        protected float _CurrentAutoLayoutHorizontalX;
+        public bool AutoLayoutHorizontalStretch = true;
+        public void AutoLayoutHorizontal(int index, SElement elem) {
             if (elem == null) {
                 return;
             }
             if (index == 0) {
-                _CurrentAutoLayoutColumn = 0f;
+                _CurrentAutoLayoutHorizontalX = 0f;
             }
 
-            if (AutoLayoutRowsStretch) {
-                elem.UpdateBounds = false;
+            if (AutoLayoutVerticalStretch) {
                 elem.Size.y = Size.y;
             }
-            elem.Position = new Vector2(_CurrentAutoLayoutColumn, 0f);
-            _CurrentAutoLayoutColumn += elem.Size.x + AutoLayoutPadding;
+            elem.Position = new Vector2(_CurrentAutoLayoutHorizontalX, 0f);
+            _CurrentAutoLayoutHorizontalX += elem.Size.x + AutoLayoutPadding;
 
             GrowToFit(elem);
         }
