@@ -31,7 +31,7 @@ public class SteamHelper {
 
         for (int i = 0; i < ETGMod.LaunchArguments.Length; i++) {
             if (ETGMod.LaunchArguments[i] == "+connect_lobby") {
-                MultiplayerManager.State = MultiplayerManager.MultiplayerMenuState.PrivateLobby;
+                //MultiplayerManager.State = MultiplayerManager.MultiplayerMenuState.PrivateLobby;
                 JoinLobby(new CSteamID(ulong.Parse(ETGMod.LaunchArguments[i + 1])));
             }
         }
@@ -62,8 +62,8 @@ public class SteamHelper {
         SteamMatchmaking.LeaveLobby(CurrentLobby);
         IsInLobby = false;
         PacketHelper.GlobalPacketID = 0;
-        MultiplayerManager.AllText.Clear();
-        MultiplayerManager.IsPlayingMultiplayer = false;
+        /*MultiplayerManager.AllText.Clear();
+        MultiplayerManager.IsPlayingMultiplayer = false;*/
     }
 
     public static void CreateLobby(bool isPublic) {
@@ -85,11 +85,11 @@ public class SteamHelper {
     /// </summary>
     public static void OnLobbyJoinRequest(GameLobbyJoinRequested_t param) {
         Debug.Log("Accepted invite to lobby, joining.");
-        if (MultiplayerManager.IsOnMainMenu) {
+        /*if (MultiplayerManager.IsOnMainMenu) {
             JoinLobby(param.m_steamIDLobby);
             MultiplayerManager.State=MultiplayerManager.MultiplayerMenuState.PrivateLobby;
             MultiplayerManager.OpenGUI();
-        }
+        }*/
     }
 
     /// <summary>
@@ -107,14 +107,14 @@ public class SteamHelper {
         Debug.Log("Joined lobby");
         IsInLobby = true;
         CurrentLobby = new CSteamID(param.m_ulSteamIDLobby);
-        MultiplayerManager.IsPlayingMultiplayer = true;
+        //MultiplayerManager.IsPlayingMultiplayer = true;
     }
 
     public static void P2PConnectionReqest(P2PSessionRequest_t param) {
         Debug.Log(param.m_steamIDRemote + " is requesting a P2P connection, let's accept");
         SteamNetworking.AcceptP2PSessionWithUser(param.m_steamIDRemote);
         PacketHelper.SendRPCToPlayersInGame("ChatMessage", "Player joined game", true);
-        MultiplayerManager.IsPlayingMultiplayer = true;
+        //MultiplayerManager.IsPlayingMultiplayer = true;
     }
 
 }

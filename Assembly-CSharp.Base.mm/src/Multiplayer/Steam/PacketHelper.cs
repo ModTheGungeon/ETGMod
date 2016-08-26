@@ -130,7 +130,7 @@ namespace ETGMultiplayer {
 
         [CustomRPC("ChatMessage")]
         public static void ChatMessage(string s) {
-            MultiplayerManager.AllText.Add(s);
+            //MultiplayerManager.AllText.Add(s);
         }
 
         public static void RunReadyPackets() {

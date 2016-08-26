@@ -103,8 +103,6 @@ public static partial class ETGMod {
         GameUIRoot.Instance.Manager.ConsumeMouseEvents = false;
         SGUIRoot.Setup();
 
-        MultiplayerManager.Create();
-
         Debug.Log("ETGMod " + BaseVersion);
         Assets.Hook();
         Assembly.GetCallingAssembly().MapAssets();

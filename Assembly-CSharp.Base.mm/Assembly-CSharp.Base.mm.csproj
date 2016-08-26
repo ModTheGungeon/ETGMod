@@ -72,7 +72,6 @@
     <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Components\GenericComponentInspector.cs" />
     <Compile Include="src\ETGGUI\Inspector\Properties\VectorPropertyInspector.cs" />
-    <Compile Include="src\ETGGUI\RandomSelector.cs" />
     <Compile Include="src\ETGModRelinker.cs" />
     <Compile Include="src\ETGModule.cs" />
     <Compile Include="src\ETGGUI\ETGModConsole.cs" />
