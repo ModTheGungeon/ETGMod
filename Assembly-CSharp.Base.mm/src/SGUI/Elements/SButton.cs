@@ -7,6 +7,8 @@ namespace SGUI {
         public string Text;
         public Texture Icon;
 
+        public TextAnchor Alignment = TextAnchor.MiddleLeft;
+
         /// <summary>
         /// On button status event. Gets fired by the backend itself if it supports listening for this.
         /// </summary>
@@ -50,7 +52,7 @@ namespace SGUI {
         public override void Render() {
             // Do not render background - background should be handled by Draw.Button
 
-            if (IsClicked = Draw.Button(this, Vector2.zero, Size, Text, Icon)) {
+            if (IsClicked = Draw.Button(this, Vector2.zero, Size, Text, Alignment, Icon)) {
                 OnClick?.Invoke(this);
             }
 

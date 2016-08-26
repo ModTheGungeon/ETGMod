@@ -734,7 +734,7 @@ namespace SGUI {
 
 
         // IMGUI doesn't seem to have something similar to TextEditor for buttons... so SButton.OnChange stays untouched.
-        public bool Button(SElement elem, Vector2 position, Vector2 size, string text, Texture icon = null) {
+        public bool Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
             PreparePosition(elem, ref position);
 
             if (elem != null && Repainting) {
@@ -746,11 +746,12 @@ namespace SGUI {
             }
 
             RegisterNextComponentIn(elem);
-            return Button(new Rect(position, size), text, icon);
+            return Button(new Rect(position, size), text, alignment, icon);
         }
-        public bool Button(Rect bounds, string text, Texture icon = null) {
+        public bool Button(Rect bounds, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
             RegisterNextComponent();
             GUI.skin.button.fixedHeight = bounds.height;
+            GUI.skin.button.alignment = alignment;
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Button, bounds, text);
             GUI.Button(bounds, new GUIContent((icon == null ? "" : " ") + text, icon)); // Input handled elsewhere.
             return _ClickedButtons.Contains(CurrentComponentID);
@@ -912,6 +913,7 @@ namespace SGUI {
                 _TextGenerationSettings.generationExtents = Vector2.zero;
             }
 
+            _TextGenerator.Populate(text, _TextGenerationSettings);
             return new Vector2(
                 _TextGenerator.GetPreferredWidth(text, _TextGenerationSettings),
                 Font.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
