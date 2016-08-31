@@ -91,12 +91,15 @@ namespace SGUI {
         }
 
         public bool IsFocused { get; protected set; }
-        public void SetFocused(int secret, bool value) {
-            Backend.VerifySecret(secret);
-            IsFocused = value;
-        }
+
+        public bool IsHovered { get; protected set; } = true;
+        public bool WasHovered { get; protected set; } = true;
+        public EMouseStatus MouseStatus { get; protected set; } = EMouseStatus.Inside;
+        public EMouseStatus MouseStatusPrev { get; protected set; } = EMouseStatus.Inside;
 
         public Action<SElement> OnUpdateStyle;
+
+        public Action<SElement, EMouseStatus, Vector2> OnMouse;
 
         public SElement() {
             Children.ListChanged += HandleChange;
@@ -205,6 +208,33 @@ namespace SGUI {
         }
 
         public virtual void Focus() {
+        }
+
+        public virtual void MouseStatusChanged(EMouseStatus e, Vector2 pos) {
+            OnMouse?.Invoke(this, e, pos);
+        }
+
+        public virtual void SetFocused(int secret, bool value) {
+            Backend.VerifySecret(secret);
+            IsFocused = value;
+        }
+
+        public virtual void SetMouseStatus(int secret, EMouseStatus e, Vector2 pos) {
+            Backend.VerifySecret(secret);
+            if (MouseStatus != e) {
+                if (e != EMouseStatus.Inside && e != EMouseStatus.Outside) {
+                    MouseStatusChanged(e, pos);
+                } else {
+                    bool inside = e == EMouseStatus.Inside;
+                    if (IsHovered != inside) {
+                        MouseStatusChanged(e, pos);
+                    }
+                    WasHovered = IsHovered;
+                    IsHovered = inside;
+                }
+            }
+            MouseStatusPrev = MouseStatus;
+            MouseStatus = e;
         }
 
 	}

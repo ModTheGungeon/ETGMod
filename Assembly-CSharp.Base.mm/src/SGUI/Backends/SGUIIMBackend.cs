@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace SGUI {
@@ -23,8 +24,6 @@ namespace SGUI {
         private int _ComponentSemaphore;
 
         private readonly List<SElement> _Elements = new List<SElement>();
-
-        private readonly List<int> _ClickedButtons = new List<int>();
 
         // Required for UpdateWindow magic
         private readonly Stack<EClipScopeType> _ClipScopeTypes = new Stack<EClipScopeType>();
@@ -81,6 +80,7 @@ namespace SGUI {
         }
 
         public bool LastMouseEventConsumed { get; private set; }
+        private Vector2 _LastMousePosition = new Vector2(-1f, -1f);
 
         private System.Random _SecretPRNG = new System.Random();
         private int _CurrentSecret;
@@ -90,13 +90,11 @@ namespace SGUI {
             }
         }
         public bool IsValidSecret(long secret) {
-            bool valid = _CurrentSecret == secret;
-            int newSecret = _Secret;
-            return valid;
+            return _CurrentSecret == secret;
         }
         public void VerifySecret(long secret) {
             if (!IsValidSecret(secret)) {
-                throw new InvalidOperationException("Invalid secret!");
+                throw new InvalidOperationException("Don't leak secrets!");
             }
         }
 
@@ -160,16 +158,12 @@ namespace SGUI {
             _GlobalComponentSemaphore -= _ComponentSemaphore;
             _ComponentSemaphore = 0;
 
-            if (Repainting) {
-                _ClickedButtons.Clear();
-            }
-
             CurrentRoot = null;
         }
         public void OnGUI() {
             SGUIRoot root = CurrentRoot;
             if (_Reason.isMouse || _Reason.type == EventType.ScrollWheel) {
-                LastMouseEventConsumed = HandleMouseEvent() != -1;
+                LastMouseEventConsumed = HandleMouseEvent(Event.current) != -1;
                 return;
             }
 
@@ -181,19 +175,59 @@ namespace SGUI {
                 if (!child.Visible) continue;
                 child.Render();
             }
+
+            // After the normal (possibly) repaint run, check for any mouse movement.
+            if (Repainting) {
+                Vector2 mousePosition = Input.mousePosition;
+                mousePosition = new Vector2(
+                    mousePosition.x,
+                    root.Size.y - mousePosition.y - 1f
+                );
+                if (_LastMousePosition.x <= -1f && _LastMousePosition.y <= -1f) {
+                    _LastMousePosition = mousePosition;
+                } else {
+                    HandleMouseEvent(new Event(Event.current.displayIndex) {
+                        type = EventType.MouseMove,
+                        mousePosition = mousePosition,
+                        delta = mousePosition - _LastMousePosition
+                    });
+                    _LastMousePosition = mousePosition;
+                }
+            }
         }
 
-        public int HandleMouseEvent() {
+        public int HandleMouseEvent(Event e) {
             // Console.WriteLine();
-            // Console.WriteLine("SGUI-IM: Handling mouse event " + Event.current);
+            // Console.WriteLine("SGUI-IM: Handling mouse event " + e);
             SGroup lastWindowDragging = _WindowDragging;
 
-            int handled = HandleMouseEventIn(null);
+            EventType type = e.type;
+            EMouseStatus status = EMouseStatus.Outside;
+            switch (type) {
+                case EventType.MouseUp  : status = EMouseStatus.Up  ; break;
+                case EventType.MouseDown: status = EMouseStatus.Down; break;
+                case EventType.MouseDrag: status = EMouseStatus.Drag; break;
+            }
+            Vector2 pos = e.mousePosition;
+
+            int handled = HandleMouseEventIn(e, null);
 
             if (handled != -1) {
-                _RegisteredNextElement = false;
-                for (int i = 0; i < _OPs.Count; i++) {
-                    _RecreateOperation(i, handled);
+                if (type != EventType.MouseMove) {
+                    _RegisteredNextElement = false;
+                    for (int i = 0; i < _OPs.Count; i++) {
+                        _RecreateOperation(i, handled);
+                    }
+
+                    _ComponentElements[handled]?.SetMouseStatus(_Secret, status, pos);
+
+                } else {
+                    for (int i = 0; i < _Elements.Count; i++) {
+                        SElement elem = _Elements[i];
+                        if (elem == null) continue;
+                        // TODO replace GetFirstComponentID with possible future HasComponentID
+                        elem.SetMouseStatus(_Secret, GetFirstComponentID(elem) == handled ? EMouseStatus.Inside : EMouseStatus.Outside, pos);
+                    }
                 }
             }
 
@@ -207,37 +241,36 @@ namespace SGUI {
             // Console.WriteLine();
             return handled;
         }
-        public int HandleMouseEventIn(SElement elem) {
+        public int HandleMouseEventIn(Event e, SElement elem) {
             int handled;
             if (elem != null) {
                 if (!elem.Visible) return -1;
-                if (elem is SGroup) return HandleMouseEventInGroup((SGroup) elem);
+                if (elem is SGroup) return HandleMouseEventInGroup(e, (SGroup) elem);
 
-                if (!new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(Event.current.mousePosition)) {
+                if (!new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(e.mousePosition)) {
                     return -1;
                 }
             }
 
             IList<SElement> children = elem?.Children ?? CurrentRoot.Children;
             for (int i = children.Count - 1; 0 <= i; i--) {
-                if ((handled = HandleMouseEventIn(children[i])) != -1) return handled;
+                if ((handled = HandleMouseEventIn(e, children[i])) != -1) return handled;
             }
 
             if (elem == null) {
                 return -1;
             }
 
-            if (Event.current.type == EventType.ScrollWheel) {
+            if (e.type == EventType.ScrollWheel) {
                 return -1;
             }
 
-            return _ComponentElements.IndexOf(elem);
+            return GetFirstComponentID(elem);
         }
         private SGroup _WindowDragging;
-        public int HandleMouseEventInGroup(SGroup group) {
+        public int HandleMouseEventInGroup(Event e, SGroup group) {
             int handled;
-            int groupFirstComponent = _ComponentElements.IndexOf(group);
-            Event e = Event.current;
+            int groupFirstComponent = GetFirstComponentID(group);
             bool containsMouse = new Rect(
                 group.AbsoluteOffset.x + group.Position.x,
                 group.AbsoluteOffset.y + group.Position.y,
@@ -284,7 +317,7 @@ namespace SGUI {
 
             IList<SElement> children = group.Children;
             for (int i = children.Count - 1; 0 <= i; i--) {
-                if ((handled = HandleMouseEventIn(children[i])) != -1) return handled;
+                if ((handled = HandleMouseEventIn(e, children[i])) != -1) return handled;
             }
 
             e.Use(); // Window background would be click-through otherwise.
@@ -407,14 +440,6 @@ namespace SGUI {
                                     GUI.TextField(bounds, (string) data[0]);
                                 }
 
-                            } else {
-                                if (GUI.Button(bounds, (string) data[0])) {
-                                    _ClickedButtons.Add(CurrentComponentID);
-                                    (elem as SButton)?.SetStatus(_Secret, true);
-                                } else {
-                                    _ClickedButtons.Remove(CurrentComponentID);
-                                    (elem as SButton)?.SetStatus(_Secret, false);
-                                }
                             }
 
                             if (e.isMouse && bounds.Contains(e.mousePosition)) {
@@ -503,13 +528,6 @@ namespace SGUI {
             return GUI.GetNameOfFocusedControl() == id.ToString();
         }
 
-        public bool IsClicked(SElement elem) {
-            return IsClicked(GetFirstComponentID(elem));
-        }
-        public bool IsClicked(int id) {
-            return _ClickedButtons.Contains(id);
-        }
-
         public bool IsRelativeContext(SElement elem) {
             if (!Repainting) {
                 // Everything's absolute in event-handling mode.
@@ -589,13 +607,16 @@ namespace SGUI {
         }
 
 
-        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter) {
+        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+            Text_(elem, position, size, text, alignment, icon);
+        }
+        private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true) {
             if (text.Contains("\n")) {
                 string[] lines = text.Split('\n');
                 float y = 0f;
                 for (int i = 0; i < lines.Length; i++) {
                     string line = lines[i];
-                    Vector2 lineSize = MeasureText(line, size);
+                    Vector2 lineSize = MeasureText(ref line, size);
                     Text(elem, position + new Vector2(0f, y), lineSize, line, alignment);
                     y += lineSize.y;
                 }
@@ -605,11 +626,13 @@ namespace SGUI {
             PreparePosition(elem, ref position);
             Rect bounds = new Rect(position, size);
 
-            GUI.skin.label.normal.textColor = elem.Foreground;
+            if (elem != null) {
+                GUI.skin.label.normal.textColor = elem.Foreground;
+            }
             GUI.skin.label.alignment = alignment;
             RegisterNextComponentIn(elem);
-            RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, bounds, text);
-            GUI.Label(bounds, text);
+            RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, registerProperly ? bounds : NULLRECT, text);
+            GUI.Label(bounds, new GUIContent(text, icon));
         }
 
         public void TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
@@ -733,28 +756,21 @@ namespace SGUI {
         }
 
 
-        // IMGUI doesn't seem to have something similar to TextEditor for buttons... so SButton.OnChange stays untouched.
-        public bool Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+        public void Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
             PreparePosition(elem, ref position);
 
             if (elem != null && Repainting) {
-                GUI.skin.button.normal.textColor = elem.Foreground * 0.9f;
-                GUI.skin.button.active.textColor = elem.Foreground;
-                GUI.skin.button.hover.textColor = elem.Foreground;
-                GUI.skin.button.focused.textColor = elem.Foreground;
+                GUI.skin.label.normal.textColor = elem.Foreground * (elem.IsHovered ? 1f : 0.9f);
                 GUI.backgroundColor = elem.Background;
             }
 
             RegisterNextComponentIn(elem);
-            return Button(new Rect(position, size), text, alignment, icon);
+            Button(new Rect(position, size), text, alignment, icon);
         }
-        public bool Button(Rect bounds, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+        public void Button(Rect bounds, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
             RegisterNextComponent();
-            GUI.skin.button.fixedHeight = bounds.height;
-            GUI.skin.button.alignment = alignment;
-            RegisterOperation(EGUIOperation.Draw, EGUIComponent.Button, bounds, text);
-            GUI.Button(bounds, new GUIContent((icon == null ? "" : " ") + text, icon)); // Input handled elsewhere.
-            return _ClickedButtons.Contains(CurrentComponentID);
+            Rect(null, bounds.position, bounds.size, GUI.backgroundColor);
+            Text_(null, bounds.position, bounds.size, text, alignment, icon, false);
         }
 
 
@@ -897,6 +913,9 @@ namespace SGUI {
         }
 
         public Vector2 MeasureText(string text, Vector2? size = null) {
+            return MeasureText(ref text, size);
+        }
+        public Vector2 MeasureText(ref string text, Vector2? size = null) {
             _TextGenerationSettings.richText = true;
 
             _TextGenerationSettings.font = Font;
@@ -914,10 +933,38 @@ namespace SGUI {
             }
 
             _TextGenerator.Populate(text, _TextGenerationSettings);
-            return new Vector2(
+            Vector2 auto = new Vector2(
                 _TextGenerator.GetPreferredWidth(text, _TextGenerationSettings),
                 Font.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
             );
+            if (size == null || auto.x <= size.Value.x) {
+                return auto;
+            }
+
+            // TODO split by word (space), not by character
+            Vector2 bounds = size.Value;
+            float x = 0f;
+            float y = 0f;
+
+            StringBuilder rebuilt = new StringBuilder();
+            for (int i = 0; i < text.Length; i++) {
+                char c = text[i];
+                CharacterInfo ci;
+                if (!Font.GetCharacterInfo(c, out ci)) {
+                    continue;
+                }
+
+                x += ci.glyphWidth + ci.advance;
+                if (x > bounds.x) {
+                    rebuilt.AppendLine();
+                    x = 0f;
+                    y += LineHeight;
+                }
+                rebuilt.Append(c);
+            }
+
+            text = rebuilt.ToString();
+            return new Vector2(x, y);
         }
 
         public void Dispose() {
