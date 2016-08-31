@@ -564,13 +564,27 @@ namespace SGUI {
             PreparePosition(elem.Parent, ref position);
         }
 
+        public void Texture(SElement elem, Vector2 position, Vector2 size, Texture texture, Color? color = null) {
+            PreparePosition(elem, ref position);
+            Texture(position, size, texture, color);
+        }
+        public void Texture(Vector2 position, Vector2 size, Texture texture, Color? color = null) {
+            if (!Repainting) return;
+            Rect bounds = new Rect(position, size);
+            Color prevGUIColor = GUI.color;
+            GUI.color = color ?? Color.white;
+            RegisterOperation(EGUIOperation.Draw, EGUIComponent.Rect, bounds);
+            GUI.DrawTexture(bounds, texture, ScaleMode.StretchToFill);
+            GUI.color = prevGUIColor;
+        }
 
         public void Rect(SElement elem, Vector2 position, Vector2 size, Color color) {
             PreparePosition(elem, ref position);
-            Rect(new Rect(position, size), color);
+            Rect(position, size, color);
         }
-        public void Rect(Rect bounds, Color color) {
+        public void Rect(Vector2 position, Vector2 size, Color color) {
             if (!Repainting) return;
+            Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
             GUI.color = color;
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Rect, bounds);
@@ -765,23 +779,20 @@ namespace SGUI {
             }
 
             RegisterNextComponentIn(elem);
-            Button(new Rect(position, size), text, (elem as SButton)?.Border, alignment, icon);
+            Button(position, size, text, (elem as SButton)?.Border, alignment, icon);
         }
-        public void Button(Rect bounds, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
-            border = border ?? new Vector2(2f, 2f);
+        public void Button(Vector2 position, Vector2 size, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+            border = new Vector2(2f, 2f);
             Vector2 border_ = border.Value;
+            // FIXME Fix undebuggable crash.
+            border_.x = 0f;
             RegisterNextComponent();
-            Rect(null, bounds.position, bounds.size, GUI.backgroundColor);
+            Rect(null, position, size, GUI.backgroundColor);
             Text_(
                 null,
-                new Vector2(
-                    bounds.x + border_.x,
-                    bounds.y + border_.y
-                ),
-                new Vector2(
-                    bounds.width - border_.x * 2f,
-                    bounds.height - border_.y * 2f
-                ), text, alignment, icon, false);
+                position + border_,
+                size - border_ * 2f,
+                text, alignment, icon, false);
         }
 
 
@@ -852,11 +863,13 @@ namespace SGUI {
                 return;
             }
 
-            Rect(new Rect(
-                0f, group.WindowTitleBar.Size.y,
-                group.Size.x + group.Border * 2f,
-                group.Size.y + group.Border * 2f
-            ), group.Background);
+            Rect(
+                new Vector2(0f, group.WindowTitleBar.Size.y),
+                new Vector2(
+                    group.Size.x + group.Border * 2f,
+                    group.Size.y + group.Border * 2f
+                ), group.Background
+            );
 
             Rect bounds = new Rect(
                 group.Border,

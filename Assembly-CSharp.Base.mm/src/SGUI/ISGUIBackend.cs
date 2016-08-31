@@ -50,8 +50,11 @@ namespace SGUI {
         bool IsFocused(SElement elem);
         bool IsFocused(int id);
 
+        void Texture(SElement elem, Vector2 position, Vector2 size, Texture texture, Color? color = null);
+        void Texture(Vector2 position, Vector2 size, Texture texture, Color? color = null);
+
         void Rect(SElement elem, Vector2 position, Vector2 size, Color color);
-        void Rect(Rect bounds, Color color);
+        void Rect(Vector2 position, Vector2 size, Color color);
 
         void StartClip(SElement elem);
         void StartClip(SElement elem, Rect bounds);
@@ -86,7 +89,7 @@ namespace SGUI {
         void MoveTextFieldCursor(SElement elem, ref int? cursor, ref int? selection);
 
         void Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
-        void Button(Rect bounds, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
+        void Button(Vector2 position, Vector2 size, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
 
         void StartGroup(SGroup group);
         void EndGroup(SGroup group);

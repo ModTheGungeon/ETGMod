@@ -158,6 +158,8 @@
     <Compile Include="src\SGUI\Elements\SWindowTitleBar.cs" />
     <Compile Include="src\SGUI\DFEXT\SGUIDFInput.cs" />
     <Compile Include="src\SGUI\EMouseStatus.cs" />
+    <Compile Include="src\SGUI\Elements\SImage.cs" />
+    <Compile Include="src\SGUI\Elements\SRect.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
