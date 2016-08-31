@@ -9,7 +9,7 @@ namespace SGUI {
 
         public TextAnchor Alignment = TextAnchor.MiddleLeft;
 
-        public Vector2 Border = new Vector2(4f, 4f);
+        public Vector2 Border = new Vector2(2f, 2f);
 
         public Action<SButton> OnClick;
 
@@ -44,6 +44,7 @@ namespace SGUI {
                 if (Icon != null) {
                     Size = Size.WithX(Size.x + Size.y + 4f);
                 }
+                Size += Border * 2f;
             }
 
             base.UpdateStyle();

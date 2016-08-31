@@ -765,12 +765,23 @@ namespace SGUI {
             }
 
             RegisterNextComponentIn(elem);
-            Button(new Rect(position, size), text, alignment, icon);
+            Button(new Rect(position, size), text, (elem as SButton)?.Border, alignment, icon);
         }
-        public void Button(Rect bounds, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+        public void Button(Rect bounds, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+            border = border ?? new Vector2(2f, 2f);
+            Vector2 border_ = border.Value;
             RegisterNextComponent();
             Rect(null, bounds.position, bounds.size, GUI.backgroundColor);
-            Text_(null, bounds.position, bounds.size, text, alignment, icon, false);
+            Text_(
+                null,
+                new Vector2(
+                    bounds.x + border_.x,
+                    bounds.y + border_.y
+                ),
+                new Vector2(
+                    bounds.width - border_.x * 2f,
+                    bounds.height - border_.y * 2f
+                ), text, alignment, icon, false);
         }
 
 
@@ -954,7 +965,7 @@ namespace SGUI {
                     continue;
                 }
 
-                x += ci.glyphWidth + ci.advance;
+                x += ci.advance;
                 if (x > bounds.x) {
                     rebuilt.AppendLine();
                     x = 0f;

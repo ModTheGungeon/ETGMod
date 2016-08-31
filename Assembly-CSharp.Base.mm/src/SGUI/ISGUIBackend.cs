@@ -86,7 +86,7 @@ namespace SGUI {
         void MoveTextFieldCursor(SElement elem, ref int? cursor, ref int? selection);
 
         void Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
-        void Button(Rect bounds, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
+        void Button(Rect bounds, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
 
         void StartGroup(SGroup group);
         void EndGroup(SGroup group);
