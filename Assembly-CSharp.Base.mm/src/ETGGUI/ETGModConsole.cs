@@ -76,9 +76,9 @@ public class ETGModConsole : ETGModMenu {
                 },
                 new STextField {
                     OnUpdateStyle = delegate (SElement elem) {
-                        elem.Size.x = elem.Parent.Size.x;
-                        elem.Position.x = elem.Centered.x;
-                        elem.Position.y = elem.Parent.Size.y - elem.Size.y;
+                        elem.Size.x = elem.Parent.InnerSize.x;
+                        elem.Position.x = 0f;
+                        elem.Position.y = elem.Parent.InnerSize.y - elem.Size.y;
                     },
                     OnTextUpdate = delegate(STextField elem, string prevText) {
                         HideAutocomplete();
@@ -278,7 +278,7 @@ public class ETGModConsole : ETGModMenu {
                 ScrollDirection = SGroup.EDirection.Vertical,
                 AutoGrowDirection = SGroup.EDirection.Vertical,
                 OnUpdateStyle = delegate (SElement elem) {
-                    elem.Size = new Vector2(elem.Parent.Size.x, Mathf.Min(elem.Size.y, 160f));
+                    elem.Size = new Vector2(elem.Parent.InnerSize.x, Mathf.Min(elem.Size.y, 160f));
                     elem.Position = GUI[1].Position - new Vector2(0f, elem.Size.y + 4f);
                 }
             };

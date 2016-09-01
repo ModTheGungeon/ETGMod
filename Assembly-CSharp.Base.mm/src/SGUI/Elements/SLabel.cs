@@ -22,7 +22,7 @@ namespace SGUI {
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.Size);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize);
                 }
             }
 

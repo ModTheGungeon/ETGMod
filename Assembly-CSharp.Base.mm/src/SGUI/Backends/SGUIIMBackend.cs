@@ -559,13 +559,14 @@ namespace SGUI {
             if (IsRelativeContext(elem)) {
                 return;
             }
-            position += elem.Position;
+            position += elem.InnerOrigin;
 
             PreparePosition(elem.Parent, ref position);
         }
 
         public void Texture(SElement elem, Vector2 position, Vector2 size, Texture texture, Color? color = null) {
             PreparePosition(elem, ref position);
+            RegisterNextComponentIn(elem);
             Texture(position, size, texture, color);
         }
         public void Texture(Vector2 position, Vector2 size, Texture texture, Color? color = null) {
@@ -573,6 +574,7 @@ namespace SGUI {
             Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
             GUI.color = color ?? Color.white;
+            RegisterNextComponent();
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Rect, bounds);
             GUI.DrawTexture(bounds, texture, ScaleMode.StretchToFill);
             GUI.color = prevGUIColor;
@@ -580,6 +582,7 @@ namespace SGUI {
 
         public void Rect(SElement elem, Vector2 position, Vector2 size, Color color) {
             PreparePosition(elem, ref position);
+            RegisterNextComponentIn(elem);
             Rect(position, size, color);
         }
         public void Rect(Vector2 position, Vector2 size, Color color) {
@@ -587,6 +590,7 @@ namespace SGUI {
             Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
             GUI.color = color;
+            RegisterNextComponent();
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Rect, bounds);
             GUI.DrawTexture(bounds, SGUIRoot.White, ScaleMode.StretchToFill, color.a < 1f);
             GUI.color = prevGUIColor;
@@ -797,9 +801,9 @@ namespace SGUI {
 
 
         public void StartGroup(SGroup group) {
-            Vector2 position = group.Position;
+            Vector2 position = group.InnerOrigin;
             PreparePosition(group, ref position);
-            Rect bounds = new Rect(position, group.Size);
+            Rect bounds = new Rect(position, group.InnerSize);
 
             GUI.backgroundColor = _Transparent;
             RegisterNextComponentIn(group);
@@ -809,7 +813,7 @@ namespace SGUI {
                 _ClipScopeTypes.Push(EClipScopeType.Group);
 
             } else {
-                Rect viewBounds = new Rect(Vector2.zero, group.InnerSize);
+                Rect viewBounds = new Rect(Vector2.zero, group.ContentSize);
                 RegisterOperation(EGUIOperation.Start, EGUIComponent.Scroll, bounds, group.ScrollPosition, viewBounds);
                 group.ScrollPosition = GUI.BeginScrollView(
                     bounds, group.ScrollPosition, viewBounds,
@@ -825,6 +829,7 @@ namespace SGUI {
             if (group.ScrollDirection != SGroup.EDirection.None) {
                 RegisterOperation(EGUIOperation.End, EGUIComponent.Scroll, NULLRECT);
                 GUI.EndScrollView();
+                _ScrollBar(group);
             } else {
                 RegisterOperation(EGUIOperation.End, EGUIComponent.Group, NULLRECT);
                 GUI.EndGroup();
@@ -888,7 +893,7 @@ namespace SGUI {
                 );
                 _ClipScopeTypes.Push(EClipScopeType.Clip);
             } else {
-                Rect viewBounds = new Rect(Vector2.zero, group.InnerSize);
+                Rect viewBounds = new Rect(Vector2.zero, group.ContentSize);
                 RegisterOperation(EGUIOperation.Start, EGUIComponent.Scroll, bounds, group.ScrollPosition, viewBounds);
                 group.ScrollPosition = GUI.BeginScrollView(
                     bounds, group.ScrollPosition, viewBounds,
@@ -908,6 +913,7 @@ namespace SGUI {
             if (group.ScrollDirection != SGroup.EDirection.None) {
                 RegisterOperation(EGUIOperation.End, EGUIComponent.Clip, NULLRECT);
                 GUI.EndScrollView();
+                _ScrollBar(group);
             } else {
                 RegisterOperation(EGUIOperation.End, EGUIComponent.Clip, NULLRECT);
                 GUI.EndClip();
@@ -934,6 +940,33 @@ namespace SGUI {
             }
 
             // TODO Window header buttons.
+        }
+
+        private void _ScrollBar(SGroup group) {
+            Rect bounds = !group.IsWindow ? new Rect(group.InnerOrigin, group.Size) : new Rect(
+                group.Border,
+                group.WindowTitleBar.Size.y + group.Border,
+                group.Size.x, group.Size.y
+            );
+
+            if (bounds.height <= group.ContentSize.y) {
+                float width = 2f; // TODO Grow on mouse-over.
+                Vector2 position = new Vector2(
+                    bounds.width - width,
+                    bounds.y + bounds.height * group.ScrollPosition.y / group.ContentSize.y
+                );
+                Vector2 size = new Vector2(
+                    width,
+                    Mathf.Min(bounds.height, bounds.height * bounds.height / group.ContentSize.y + position.y) - position.y
+                );
+
+                Rect(group, position, size, group.Foreground * 0.8f);
+
+                // TODO Mouse input.
+            }
+
+            // TODO Horizontal scroll.
+
         }
 
         public Vector2 MeasureText(string text, Vector2? size = null) {
@@ -979,7 +1012,7 @@ namespace SGUI {
                 }
 
                 x += ci.advance;
-                if (x > bounds.x) {
+                if (x > bounds.x || c == '\n') {
                     rebuilt.AppendLine();
                     x = 0f;
                     y += LineHeight;
