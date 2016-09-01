@@ -7,7 +7,7 @@ using System.Threading;
 using System.Reflection;
 
 namespace ETGMultiplayer {
-    public static class PacketHelper {
+    public static class MPDataHelper {
 
         public static Dictionary<string, MethodInfo> allRPCs = new Dictionary<string, MethodInfo>();
         public static List<CustomPacket> PacketsReady = new List<CustomPacket>();
@@ -15,50 +15,53 @@ namespace ETGMultiplayer {
 
         public static ulong GlobalPacketID;
 
-        public static void SendPacketToPlayersInGame(string RPCName, byte[] data, bool isTCP = false) {
-            if (!SteamManager.Initialized || SteamHelper.PlayersInLobbyWithoutMe.Count == 0) return;
+        public static void SendPacketToPlayersInGame(string RPCName, byte[] data, bool isTCP = false, bool ignoreID = false) {
+            if (!SteamManager.Initialized || LobbyHelper.otherPlayers.Count == 0) return;
 
-            foreach (CSteamID pID in SteamHelper.PlayersInLobbyWithoutMe) {
+            foreach (CSteamID pID in LobbyHelper.otherPlayers.Values) {
                 byte[] stringBytes = Encoding.ASCII.GetBytes(RPCName);
-                byte[] allData = new byte[stringBytes.Length + 1 + 8 + data.Length];
+                byte[] allData = new byte[stringBytes.Length + 3 + 10 + data.Length];
                 if (allData.Length >= 1200) {
                     Debug.LogError("Packet's over max size!");
                 }
 
                 BitConverter.GetBytes(GlobalPacketID).CopyTo(allData, 0);
+                BitConverter.GetBytes((UInt16)( ignoreID ? 0 : 1 )).CopyTo(allData,8);
 
-                stringBytes.CopyTo(allData, 8);
-                allData[stringBytes.Length + 8] = 0;
+                stringBytes.CopyTo(allData, 10);
+                allData[stringBytes.Length + 10] = 0;
 
-                data.CopyTo(allData, stringBytes.Length + 9);
+                data.CopyTo(allData, stringBytes.Length + 11);
 
                 SteamNetworking.SendP2PPacket(pID, allData, (uint) allData.Length, isTCP ? EP2PSend.k_EP2PSendReliable : EP2PSend.k_EP2PSendUnreliable);
             }
 
         }
 
-        public static void SendPacketToPlayer(CSteamID player, string RPCName, byte[] data, bool isTCP = false) {
-            if (!SteamManager.Initialized || SteamHelper.PlayersInLobbyWithoutMe.Count == 0) return;
+        public static void SendPacketToPlayer(CSteamID player, string RPCName, byte[] data, bool isTCP = false, bool ignoreID = false) {
+            if (!SteamManager.Initialized || LobbyHelper.otherPlayers.Count == 0) return;
 
             byte[] stringBytes = Encoding.ASCII.GetBytes(RPCName);
-            byte[] allData = new byte[stringBytes.Length + 1 + 8 + data.Length];
+            byte[] allData = new byte[stringBytes.Length + 3 + 10 + data.Length];
             if (allData.Length>=1200) {
                 Debug.LogError("Packet's over max size!");
             }
 
             BitConverter.GetBytes(GlobalPacketID).CopyTo(allData, 0);
+            BitConverter.GetBytes((UInt16)( ignoreID ? 0 : 1 )).CopyTo(allData, 8);
+            ;
 
-            stringBytes.CopyTo(allData, 8);
-            allData[stringBytes.Length + 8] = 0;
+            stringBytes.CopyTo(allData, 10);
+            allData[stringBytes.Length + 10] = 0;
 
-            data.CopyTo(allData, stringBytes.Length + 9);
+            data.CopyTo(allData, stringBytes.Length + 11);
 
             SteamNetworking.SendP2PPacket(player, allData, (uint) allData.Length, isTCP ? EP2PSend.k_EP2PSendReliable : EP2PSend.k_EP2PSendUnreliable);
 
         }
 
-        public static void SendRPCToPlayersInGame(string rpcName, bool isTCP = false, params object[] args) {
-            SendPacketToPlayersInGame(rpcName,RPCSerializer.GetCompleteSerializedData(args),isTCP);
+        public static void SendRPCToPlayersInGame(string rpcName, bool isTCP = false, bool ignoreID = false, params object[] args) {
+            SendPacketToPlayersInGame(rpcName,RPCSerializer.GetCompleteSerializedData(args), isTCP, ignoreID);
         }
 
         public static void SendRPCToPlayersInGame(string rpcName, params object[] args) {
@@ -100,7 +103,7 @@ namespace ETGMultiplayer {
                     CustomPacket newPacket = ParseCustomPacket(data);
 
                     if (newPacket != null) {
-                        if (newPacket.PACKETID>=GlobalPacketID) {
+                        if (newPacket.PACKETID>=GlobalPacketID && !newPacket.ignorePacketID) {
                             PacketsReady.Add(newPacket);
                             GlobalPacketID=newPacket.PACKETID + 1;
                         } else {
@@ -113,18 +116,19 @@ namespace ETGMultiplayer {
 
         public static CustomPacket ParseCustomPacket(byte[] data) {
             ulong packetID = BitConverter.ToUInt64(data, 0);
+            bool ignoreID = BitConverter.ToUInt16(data, 8)==0 ? false : true;
 
             int stringSize = 0;
-            for (; stringSize + 8 < data.Length && data[stringSize + 8] != 0; stringSize++) { }
+            for (; stringSize + 8 < data.Length && data[stringSize + 10] != 0; stringSize++) { }
 
-            string RPCName = Encoding.ASCII.GetString(data, 8, stringSize);
+            string RPCName = Encoding.ASCII.GetString(data, 10, stringSize);
 
-            byte[] clippedData = new byte[data.Length - 9 - stringSize];
+            byte[] clippedData = new byte[data.Length - 11 - stringSize];
 
             for (int i = 0; i < clippedData.Length; i++)
                 clippedData[i] = data[i + 9 + stringSize];
 
-            return new CustomPacket(packetID, RPCName, RPCSerializer.GetCompleteDeserializedData(clippedData));
+            return new CustomPacket(packetID, RPCName, ignoreID, RPCSerializer.GetCompleteDeserializedData(clippedData));
         }
 
 
@@ -151,11 +155,13 @@ namespace ETGMultiplayer {
         public ulong PACKETID;
         public string RPCId;
         public object[] data;
+        public bool ignorePacketID=false;
 
-        public CustomPacket(ulong PACKETID, string RPCId, object[] data) {
+        public CustomPacket(ulong PACKETID, string RPCId, bool ignorePacketID,object[] data) {
             this.PACKETID = PACKETID;
             this.RPCId = RPCId;
             this.data = data;
+            this.ignorePacketID=ignorePacketID;
         }
     }
 }

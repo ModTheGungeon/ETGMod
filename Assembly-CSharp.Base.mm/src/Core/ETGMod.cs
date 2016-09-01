@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using SGUI;
 using ETGGUI;
+using ETGMultiplayer;
 
 /// <summary>
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
@@ -98,6 +99,7 @@ public static partial class ETGMod {
         Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
         ETGModGUI.Create();
+        MultiplayerManager.Create();
 
         SGUIIMBackend.GetFont = (SGUIIMBackend backend) => FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
         GameUIRoot.Instance.Manager.ConsumeMouseEvents = false;
