@@ -28,7 +28,7 @@ public class ETGModDebugLogMenu : ETGModMenu {
     public override void Start() {
         GUI = new SGroup {
             Visible = false,
-            Border = 18f,
+            Border = 20f,
             OnUpdateStyle = (SElement elem) => elem.Fill(),
             AutoLayout = (SGroup g) => g.AutoLayoutVertical,
             ScrollDirection = SGroup.EDirection.Vertical,
@@ -137,6 +137,7 @@ public class ETGModDebugLogMenu : ETGModMenu {
 
             GUIMessage = new SButton(LogMessageFormatted) {
                 Parent = Instance.GUI,
+                Border = Vector2.zero,
                 Background = new Color(0, 0, 0, 0),
                 Foreground = color,
                 OnClick = delegate (SButton button) {

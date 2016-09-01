@@ -9,11 +9,12 @@ namespace SGUI {
 
         public TextAnchor Alignment = TextAnchor.MiddleLeft;
 
-        /// <summary>
-        /// On button status event. Gets fired by the backend itself if it supports listening for this.
-        /// </summary>
-        public Action<SButton, bool> OnChange;
+        public Vector2 Border = new Vector2(2f, 2f);
+
         public Action<SButton> OnClick;
+
+        public bool StatusPrev { get; protected set; }
+        public bool Status { get; protected set; }
 
         public override bool IsInteractive {
             get {
@@ -35,14 +36,15 @@ namespace SGUI {
 
             if (UpdateBounds) {
                 if (Parent == null) {
-                    Size = Backend.MeasureText(Text);
+                    Size = Backend.MeasureText(ref Text);
                 } else {
-                    Size = Backend.MeasureText(Text, Parent.Size);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize);
                 }
                 Size += new Vector2(16f, 2f);
                 if (Icon != null) {
                     Size = Size.WithX(Size.x + Size.y + 4f);
                 }
+                Size += Border * 2f;
             }
 
             base.UpdateStyle();
@@ -52,21 +54,15 @@ namespace SGUI {
         public override void Render() {
             // Do not render background - background should be handled by Draw.Button
 
-            if (IsClicked = Draw.Button(this, Vector2.zero, Size, Text, Alignment, Icon)) {
-                OnClick?.Invoke(this);
-            }
-
-            if (_StatusChanged) {
-                OnChange?.Invoke(this, _Status);
-            }
+            Draw.Button(this, Vector2.zero, Size, Text, Alignment, Icon);
         }
 
-        protected bool _StatusChanged;
-        protected bool _Status;
-        public virtual void SetStatus(int secret, bool status) {
-            Backend.VerifySecret(secret);
-            _StatusChanged = _Status != status;
-            _Status = status;
+        public override void MouseStatusChanged(EMouseStatus e, Vector2 pos) {
+            base.MouseStatusChanged(e, pos);
+
+            if (e == EMouseStatus.Down) {
+                OnClick?.Invoke(this);
+            }
         }
 
     }

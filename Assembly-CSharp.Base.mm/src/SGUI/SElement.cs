@@ -41,6 +41,17 @@ namespace SGUI {
         public Vector2 Position = new Vector2(0f, 0f);
         public Vector2 Size = new Vector2(32f, 32f);
 
+        public virtual Vector2 InnerOrigin {
+            get {
+                return Position;
+            }
+        }
+        public virtual Vector2 InnerSize {
+            get {
+                return Size;
+            }
+        }
+
         public bool UpdateBounds = true;
         public bool Enabled = true;
         public bool Visible = true;
@@ -50,17 +61,17 @@ namespace SGUI {
                 float x = 0f;
                 float y = 0f;
                 for (SElement parent = Parent; parent != null; parent = parent.Parent) {
-                    x += parent.Position.x;
-                    y += parent.Position.y;
+                    x += parent.InnerOrigin.x;
+                    y += parent.InnerOrigin.y;
                     SGroup group = parent as SGroup;
                     if (group != null) {
-                        x += group.Border;
-                        y += group.Border;
                         if (group.ScrollDirection != SGroup.EDirection.None) {
                             x -= group.ScrollPosition.x;
                             y -= group.ScrollPosition.y;
                         }
                         if (group.IsWindow) {
+                            x += group.Border;
+                            y += group.Border;
                             y += group.WindowTitleBar.Size.y;
                         }
                     }
@@ -73,7 +84,7 @@ namespace SGUI {
                 if (Parent == null) {
                     return Root.Size / 2f - Size / 2f;
                 }
-                return Parent.Size / 2f - Size / 2f;
+                return Parent.InnerSize / 2f - Size / 2f;
             }
         }
 
@@ -91,12 +102,15 @@ namespace SGUI {
         }
 
         public bool IsFocused { get; protected set; }
-        public void SetFocused(int secret, bool value) {
-            Backend.VerifySecret(secret);
-            IsFocused = value;
-        }
+
+        public bool IsHovered { get; protected set; } = true;
+        public bool WasHovered { get; protected set; } = true;
+        public EMouseStatus MouseStatus { get; protected set; } = EMouseStatus.Inside;
+        public EMouseStatus MouseStatusPrev { get; protected set; } = EMouseStatus.Inside;
 
         public Action<SElement> OnUpdateStyle;
+
+        public Action<SElement, EMouseStatus, Vector2> OnMouse;
 
         public SElement() {
             Children.ListChanged += HandleChange;
@@ -136,11 +150,7 @@ namespace SGUI {
         }
         public void Fill(float padding = 16f) {
             Position = new Vector2(padding, padding);
-            if (Parent != null) {
-                Size = Parent.Size - Position * 2f;
-            } else {
-                Size = Root.Size - Position * 2f;
-            }
+            Size = (Parent?.Size ?? Root.Size) - Position * 2f;
         }
 
         public virtual void UpdateStyle() {
@@ -205,6 +215,33 @@ namespace SGUI {
         }
 
         public virtual void Focus() {
+        }
+
+        public virtual void MouseStatusChanged(EMouseStatus e, Vector2 pos) {
+            OnMouse?.Invoke(this, e, pos);
+        }
+
+        public virtual void SetFocused(int secret, bool value) {
+            Backend.VerifySecret(secret);
+            IsFocused = value;
+        }
+
+        public virtual void SetMouseStatus(int secret, EMouseStatus e, Vector2 pos) {
+            Backend.VerifySecret(secret);
+            if (MouseStatus != e) {
+                if (e != EMouseStatus.Inside && e != EMouseStatus.Outside) {
+                    MouseStatusChanged(e, pos);
+                } else {
+                    bool inside = e == EMouseStatus.Inside;
+                    if (IsHovered != inside) {
+                        MouseStatusChanged(e, pos);
+                    }
+                    WasHovered = IsHovered;
+                    IsHovered = inside;
+                }
+            }
+            MouseStatusPrev = MouseStatus;
+            MouseStatus = e;
         }
 
 	}

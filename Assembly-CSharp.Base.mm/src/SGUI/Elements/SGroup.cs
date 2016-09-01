@@ -15,8 +15,8 @@ namespace SGUI {
         public Vector2 ScrollMomentum;
         public float ScrollInitialMomentum = 16f;
         public float ScrollDecayFactor = 0.45f;
-        public Vector2 ScrollExtra = new Vector2(0f, -1f);
-        public Vector2 InnerSize = new Vector2(128f, 128f);
+        public Vector2 GrowExtra = new Vector2(0f, -2f);
+        public Vector2 ContentSize = new Vector2(128f, 128f);
 
         public Func<SGroup, Action<int, SElement>> AutoLayout;
         public float AutoLayoutPadding = 2f;
@@ -24,6 +24,23 @@ namespace SGUI {
         public EDirection AutoGrowDirection = EDirection.None;
 
         protected Action<int, SElement> _AutoLayout;
+
+        public override Vector2 InnerOrigin {
+            get {
+                return IsWindow ? Position : new Vector2(
+                    Position.x + Border,
+                    Position.y + Border
+                );
+            }
+        }
+        public override Vector2 InnerSize {
+            get {
+                return IsWindow ? Size : new Vector2(
+                    Size.x - Border * 2f,
+                    Size.y - Border * 2f
+                );
+            }
+        }
 
         public SGroup() {
             WindowTitleBar = new SWindowTitleBar {
@@ -53,8 +70,8 @@ namespace SGUI {
             if (Size.y <= 0f) {
                 AutoGrowDirection |= EDirection.Vertical;
             }
-            if (ScrollExtra.y < -0f) { // Yes, -0f is a thing.
-                ScrollExtra.y = Backend.LineHeight * -ScrollExtra.y;
+            if (GrowExtra.y <= -0f) { // Yes, -0f is a thing.
+                GrowExtra.y = Backend.LineHeight * -GrowExtra.y;
             }
 
             if (AutoLayout != null) {
@@ -80,14 +97,19 @@ namespace SGUI {
             base.UpdateChildrenStyles();
         }
 
+        public override void Update() {
+            base.Update();
+        }
+
         public override void RenderBackground() {
-            Draw.Rect(this, ScrollPosition, new Vector2(Size.x + Border * 2f, Size.y + Border * 2f), Background);
+            // SGroup is a relative context, so Position is required.
+            Draw.Rect(this, Position, Size, Background);
         }
         public override void Render() {
             if (ScrollDirection != EDirection.None) {
                 ScrollPosition = new Vector2(
-                    Mathf.Clamp(ScrollPosition.x + ScrollMomentum.x, 0f, InnerSize.x - Size.x),
-                    Mathf.Clamp(ScrollPosition.y + ScrollMomentum.y, 0f, InnerSize.y - Size.y + (IsWindow ? WindowTitleBar.Size.y : 0f))
+                    Mathf.Clamp(ScrollPosition.x + ScrollMomentum.x, 0f, ContentSize.x - Size.x),
+                    Mathf.Clamp(ScrollPosition.y + ScrollMomentum.y, 0f, ContentSize.y - Size.y + (IsWindow ? WindowTitleBar.Size.y : 0f))
                 );
                 ScrollMomentum *= ScrollDecayFactor;
             } else {
@@ -99,8 +121,8 @@ namespace SGUI {
 
             } else {
                 WindowID = -1;
-                Draw.StartGroup(this);
                 RenderBackground();
+                Draw.StartGroup(this);
                 RenderChildren();
                 Draw.EndGroup(this);
             }
@@ -162,7 +184,7 @@ namespace SGUI {
                 Background = Background.WithAlpha(0f);
 
                 if ((AutoGrowDirection & EDirection.Horizontal) == EDirection.Horizontal) {
-                    Size.x = Parent.Size.x;
+                    Size.x = Parent.InnerSize.x;
                 }
 
                 elem.Position = Vector2.zero;
@@ -183,14 +205,14 @@ namespace SGUI {
         public void GrowToFit(SElement elem) {
             Vector2 max = elem.Position + elem.Size;
 
-            InnerSize.x = Mathf.Max(InnerSize.x, max.x + ScrollExtra.x);
-            InnerSize.y = Mathf.Max(InnerSize.y, max.y + ScrollExtra.y);
+            ContentSize.x = Mathf.Max(ContentSize.x, max.x + GrowExtra.x);
+            ContentSize.y = Mathf.Max(ContentSize.y, max.y + GrowExtra.y);
 
             if ((AutoGrowDirection & EDirection.Horizontal) == EDirection.Horizontal) {
-                Size.x = InnerSize.x;
+                Size.x = ContentSize.x;
             }
             if ((AutoGrowDirection & EDirection.Vertical) == EDirection.Vertical) {
-                Size.y = InnerSize.y;
+                Size.y = ContentSize.y;
             }
         }
 

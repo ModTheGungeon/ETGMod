@@ -20,9 +20,9 @@ namespace SGUI {
 
             if (UpdateBounds) {
                 if (Parent == null) {
-                    Size = Backend.MeasureText(Text);
+                    Size = Backend.MeasureText(ref Text);
                 } else {
-                    Size = Backend.MeasureText(Text, Parent.Size);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize);
                 }
             }
 
