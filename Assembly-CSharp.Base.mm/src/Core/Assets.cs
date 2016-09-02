@@ -102,6 +102,7 @@ public static partial class ETGMod {
             files = Directory.GetDirectories(dir);
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
+                Console.WriteLine("Found resource " + file.Substring(root.Length + 1) + " in " + dir + ".");
                 AddMapping(file.Substring(root.Length + 1), new AssetMetadata(file) {
                     AssetType = t_AssetDirectory
                 });

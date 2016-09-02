@@ -28,7 +28,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, "b8"); // no tag
+        new Profile(0, "b9"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -302,6 +302,7 @@ public static partial class ETGMod {
                         }
                     }
                 } else {
+                    Console.WriteLine("Found resource " + entryName + " in " + archive + ".");
                     Assets.AddMapping(entryName, new AssetMetadata(archive, entryName) {
                         AssetType = entry.IsDirectory ? Assets.t_AssetDirectory : null
                     });

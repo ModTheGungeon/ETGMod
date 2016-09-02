@@ -193,6 +193,7 @@ public class ETGModConsole : ETGModMenu {
 
     protected virtual void _Log(string text) {
         GUI[0].Children.Add(new SLabel(text));
+        ((SGroup) GUI[0]).ScrollPosition.y = float.MaxValue;
     }
     public static void Log(string text) {
         Instance._Log(text);

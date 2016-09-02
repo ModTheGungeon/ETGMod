@@ -214,6 +214,10 @@ namespace SGUI {
             Backend.Dispose(this);
         }
 
+        public virtual void Detatch() {
+            (Parent?.Children ?? Root.Children).Remove(this);
+        }
+
         public virtual void Focus() {
         }
 

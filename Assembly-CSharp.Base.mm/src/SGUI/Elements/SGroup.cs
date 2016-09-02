@@ -97,10 +97,6 @@ namespace SGUI {
             base.UpdateChildrenStyles();
         }
 
-        public override void Update() {
-            base.Update();
-        }
-
         public override void RenderBackground() {
             // SGroup is a relative context, so Position is required.
             Draw.Rect(this, Position, Size, Background);
