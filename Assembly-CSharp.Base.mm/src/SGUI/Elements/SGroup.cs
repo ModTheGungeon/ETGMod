@@ -138,7 +138,7 @@ namespace SGUI {
         protected float _CurrentAutoLayoutVerticalY;
         public bool AutoLayoutVerticalStretch = true;
         public void AutoLayoutVertical(int index, SElement elem) {
-            if (elem == null) {
+            if (elem == null || !elem.Visible) {
                 return;
             }
             if (index == 0) {
@@ -157,7 +157,7 @@ namespace SGUI {
         protected float _CurrentAutoLayoutHorizontalX;
         public bool AutoLayoutHorizontalStretch = true;
         public void AutoLayoutHorizontal(int index, SElement elem) {
-            if (elem == null) {
+            if (elem == null || !elem.Visible) {
                 return;
             }
             if (index == 0) {

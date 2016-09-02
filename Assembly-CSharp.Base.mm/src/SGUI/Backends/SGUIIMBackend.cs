@@ -250,6 +250,9 @@ namespace SGUI {
                 if (!new Rect(elem.AbsoluteOffset + elem.Position, elem.Size).Contains(e.mousePosition)) {
                     return -1;
                 }
+                if (!elem.Enabled) {
+                    return GetFirstComponentID(elem);
+                }
             }
 
             IList<SElement> children = elem?.Children ?? CurrentRoot.Children;
@@ -382,6 +385,11 @@ namespace SGUI {
 
                 if (compID < handledComponentID) {
                     // Console.WriteLine("SGUI-IM: Current component before handled component (" + handledComponentID + ") - recreating operation @ NULLRECT");
+                    bounds = NULLRECT;
+                }
+
+                if (elem == null || !elem.Visible || !elem.Enabled) {
+                    // Console.WriteLine("SGUI-IM: Current component element not interactable - recreating operation @ NULLRECT");
                     bounds = NULLRECT;
                 }
             }
