@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Dungeonator {
     internal class patch_Dungeon : Dungeon {
-
+        
         private extern IEnumerator orig_Start();
         private IEnumerator Start() {
             IEnumerator start = orig_Start();

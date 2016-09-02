@@ -72,7 +72,9 @@ public class ETGModDebugLogMenu : ETGModMenu {
 
     public static void Logger(string text, LogType type) { Logger(text, null, type); }
     public static void Logger(string text, string stackTrace, LogType type) {
-        stackTrace = GetStackTrace(); // Passed stack trace is empty..?!
+        if (string.IsNullOrEmpty(stackTrace)) {
+            stackTrace = GetStackTrace();
+        }
         LoggedText entry;
 
         if (_AllLoggedText.Count != 0) {

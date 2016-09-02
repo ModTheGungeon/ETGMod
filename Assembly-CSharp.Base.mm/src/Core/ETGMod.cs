@@ -28,7 +28,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, "b7"); // no tag
+        new Profile(0, "b8"); // no tag
         #endif
 
     public static string BaseUIVersion {

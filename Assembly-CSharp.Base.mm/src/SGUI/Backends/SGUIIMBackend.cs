@@ -794,10 +794,9 @@ namespace SGUI {
             Button(position, size, text, (elem as SButton)?.Border, alignment, icon);
         }
         public void Button(Vector2 position, Vector2 size, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
-            border = new Vector2(2f, 2f);
-            Vector2 border_ = border.Value;
+            Vector2 border_ = border ?? new Vector2(2f, 2f);
             // FIXME Fix undebuggable crash.
-            border_.x = 0f;
+            border_ = Vector2.zero;
             RegisterNextComponent();
             Rect(null, position, size, GUI.backgroundColor);
             Text_(
