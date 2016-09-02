@@ -29,7 +29,7 @@ public class CustomRPC : Attribute{
                     object attribute = attributes[ai];
 
                     if (t_CustomRPC.IsAssignableFrom(attribute.GetType())) {
-                        PacketHelper.allRPCs.Add(((CustomRPC) attribute).Name, method);
+                        MPDataHelper.allRPCs.Add(((CustomRPC) attribute).Name, method);
                     }
                 }
             }
