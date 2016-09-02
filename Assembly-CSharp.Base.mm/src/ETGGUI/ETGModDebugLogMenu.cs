@@ -31,6 +31,7 @@ public class ETGModDebugLogMenu : ETGModMenu {
             Border = 20f,
             OnUpdateStyle = (SElement elem) => elem.Fill(),
             AutoLayout = (SGroup g) => g.AutoLayoutVertical,
+            AutoLayoutVerticalStretch = false,
             ScrollDirection = SGroup.EDirection.Vertical,
             Children = {
                 new SLabel("THIS LOG IS <color=#ff0000ff>WORK IN PROGRESS</color>."),

@@ -17,7 +17,6 @@ namespace SGUI {
         }
 
         public override void Render() {
-            RenderBackground();
             Draw.Rect(this, Vector2.zero, Size, Foreground);
         }
 

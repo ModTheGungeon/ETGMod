@@ -97,15 +97,15 @@ public static partial class ETGMod {
 
         Application.logMessageReceived += ETGModDebugLogMenu.Logger;
 
-        ETGModGUI.Create();
-
         SGUIIMBackend.GetFont = (SGUIIMBackend backend) => FontConverter.GetFontFromdfFont((dfFont) patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2);
         GameUIRoot.Instance.Manager.ConsumeMouseEvents = false;
         SGUIRoot.Setup();
 
-        Debug.Log("ETGMod " + BaseVersion);
+        Debug.Log("ETGMod " + BaseUIVersion);
         Assets.Hook();
         Assembly.GetCallingAssembly().MapAssets();
+
+        ETGModGUI.Create();
 
         _ScanBackends();
         _LoadMods();
@@ -140,7 +140,7 @@ public static partial class ETGMod {
         // Needs to happen late as mods can add their own guns.
         StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
     }
-    
+
     private static void _ScanBackends() {
         Debug.Log("Scanning Assembly-CSharp.dll for backends...");
         Assembly asm = Assembly.GetAssembly(typeof(ETGMod));

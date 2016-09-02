@@ -9,6 +9,8 @@ using SGUI;
 
 public class ETGModConsole : ETGModMenu {
 
+    public const int REVISION = 2;
+
     public static ETGModConsole Instance { get; protected set; }
     public ETGModConsole() {
         Instance = this;
@@ -62,15 +64,18 @@ public class ETGModConsole : ETGModMenu {
                 new SGroup {
                     Background = new Color(0f, 0f, 0f, 0f),
                     AutoLayout = (SGroup g) => g.AutoLayoutVertical,
+                    AutoLayoutVerticalStretch = false,
                     ScrollDirection = SGroup.EDirection.Vertical,
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Fill();
                         elem.Size -= new Vector2(0f, elem.Backend.LineHeight - 4f); // Command line input space
                     },
                     Children = {
+                        
+                        new SLabel("ETGMod <color=#ffffffff>" + ETGMod.BaseUIVersion + "</color>") { Foreground = Color.gray },
+                        new SLabel("Console backend <color=#ffffffff>R" + REVISION + "</color>") { Foreground = Color.gray },
                         new SLabel("THIS CONSOLE IS <color=#ff0000ff>WORK IN PROGRESS</color>."),
-                        new SLabel("It drops the Unity OnGUI / IMGUI system for SGUI."),
-                        new SLabel("Some code may still be missing in the SGUI port."),
+                        new SLabel("Use <color=#ffffffff>help</color> to find out how to use the console.") { Foreground = Color.gray },
                         new SLabel()
                     }
                 },
@@ -276,9 +281,8 @@ public class ETGModConsole : ETGModMenu {
                 Parent = GUI,
                 AutoLayout = (SGroup g) => g.AutoLayoutVertical,
                 ScrollDirection = SGroup.EDirection.Vertical,
-                AutoGrowDirection = SGroup.EDirection.Vertical,
                 OnUpdateStyle = delegate (SElement elem) {
-                    elem.Size = new Vector2(elem.Parent.InnerSize.x, Mathf.Min(elem.Size.y, 160f));
+                    elem.Size = new Vector2(elem.Parent.InnerSize.x, Mathf.Min(((SGroup) elem).ContentSize.y, 160f));
                     elem.Position = GUI[1].Position - new Vector2(0f, elem.Size.y + 4f);
                 }
             };

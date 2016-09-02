@@ -26,7 +26,6 @@ namespace SGUI {
         }
 
         public override void Render() {
-            RenderBackground();
             Draw.Texture(this, Vector2.zero, Size, Texture, Foreground);
         }
 

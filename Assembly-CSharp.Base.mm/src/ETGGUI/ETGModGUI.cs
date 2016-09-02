@@ -88,12 +88,12 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public static void Start() {
+        TestTexture = Resources.Load<Texture2D>("test/texture");
+
         LoggerMenu.Start();
         LoaderMenu.Start();
         ConsoleMenu.Start();
         InspectorMenu.Start();
-
-        TestTexture = Resources.Load<Texture2D>("test/texture");
     }
 
     public void Update() {

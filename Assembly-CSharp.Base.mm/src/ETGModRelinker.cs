@@ -144,7 +144,12 @@ internal static class ETGModRelinker {
                         relink.Parameters.Add(param);
                     }
                     foreach (GenericParameter param in old.GenericParameters) {
-                        relink.GenericParameters.Add(param.Relinked(method));
+                        relink.GenericParameters.Add(new GenericParameter(param.Name, type) {
+                            Attributes = type.GenericParameters[i].Attributes,
+                            // MetadataToken = type.GenericParameters[i].MetadataToken
+                        });
+
+                        // FIXME Constraints
                     }
                     relink.CallingConvention = old.CallingConvention;
                     relink.ExplicitThis = old.ExplicitThis;
