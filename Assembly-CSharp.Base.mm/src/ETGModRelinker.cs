@@ -8,12 +8,12 @@ using Mono.Cecil;
 using System.Security.Cryptography;
 using Mono.Cecil.Cil;
 
-internal static class ETGModRelinker {
+public static class ETGModRelinker {
 
-    internal static ModuleDefinition ETGModule;
-    internal static string ETGChecksum;
+    public static ModuleDefinition ETGModule;
+    public static string ETGChecksum;
 
-    internal static Assembly GetRelinkedAssembly(this ETGModuleMetadata metadata, Stream stream) {
+    public static Assembly GetRelinkedAssembly(this ETGModuleMetadata metadata, Stream stream) {
         if (ETGModule == null) {
             ETGModule = ModuleDefinition.ReadModule(Assembly.GetAssembly(typeof(ETGModRelinker)).Location, new ReaderParameters(ReadingMode.Immediate));
         }
@@ -79,14 +79,14 @@ internal static class ETGModRelinker {
         return Assembly.LoadFrom(cachedPath);
     }
 
-    internal static void RelinkType(TypeDefinition type) {
+    public static void RelinkType(TypeDefinition type) {
         foreach (TypeDefinition nested in type.NestedTypes) {
             RelinkType(nested);
         }
 
-        type.BaseType = type.BaseType.Relinked(type);
+        type.BaseType = type.BaseType.RelinkedReference(type);
         for (int i = 0; i < type.Interfaces.Count; i++) {
-            InterfaceImplementation interf = new InterfaceImplementation(type.Interfaces[i].InterfaceType.Relinked(type));
+            InterfaceImplementation interf = new InterfaceImplementation(type.Interfaces[i].InterfaceType.RelinkedReference(type));
             for (int cai = 0; cai < type.Interfaces[i].CustomAttributes.Count; cai++) {
                 CustomAttribute oca = type.Interfaces[i].CustomAttributes[cai];
                 // TODO relink that method
@@ -94,8 +94,8 @@ internal static class ETGModRelinker {
                 for (int caii = 0; caii < oca.ConstructorArguments.Count; caii++) {
                     //TODO do more with the attributes
                     CustomAttributeArgument ocaa = oca.ConstructorArguments[caii];
-                    ca.ConstructorArguments.Add(new CustomAttributeArgument(ocaa.Type.Relinked(type),
-                        ocaa.Value is TypeReference ? ocaa.Type.Relinked(type) :
+                    ca.ConstructorArguments.Add(new CustomAttributeArgument(ocaa.Type.RelinkedReference(type),
+                        ocaa.Value is TypeReference ? ocaa.Type.RelinkedReference(type) :
                         ocaa.Value
                     ));
                 }
@@ -105,31 +105,31 @@ internal static class ETGModRelinker {
         }
         
         foreach (FieldDefinition field in type.Fields) {
-            field.FieldType = field.FieldType.Relinked(type);
+            field.FieldType = field.FieldType.RelinkedReference(type);
         }
 
         foreach (PropertyDefinition property in type.Properties) {
-            property.PropertyType = property.PropertyType.Relinked(type);
+            property.PropertyType = property.PropertyType.RelinkedReference(type);
 
             if (property.GetMethod != null) {
-                property.GetMethod.ReturnType = property.GetMethod.ReturnType.Relinked(type);
+                property.GetMethod.ReturnType = property.GetMethod.ReturnType.RelinkedReference(type);
                 for (int i = 0; i < property.GetMethod.Parameters.Count; i++) {
-                    property.GetMethod.Parameters[i].ParameterType = property.GetMethod.Parameters[i].ParameterType.Relinked(type);
+                    property.GetMethod.Parameters[i].ParameterType = property.GetMethod.Parameters[i].ParameterType.RelinkedReference(type);
                 }
             }
 
             if (property.SetMethod != null) {
-                property.SetMethod.ReturnType = property.GetMethod.ReturnType.Relinked(type);
+                property.SetMethod.ReturnType = property.GetMethod.ReturnType.RelinkedReference(type);
                 for (int i = 0; i < property.SetMethod.Parameters.Count; i++) {
-                    property.SetMethod.Parameters[i].ParameterType = property.SetMethod.Parameters[i].ParameterType.Relinked(type);
+                    property.SetMethod.Parameters[i].ParameterType = property.SetMethod.Parameters[i].ParameterType.RelinkedReference(type);
                 }
             }
         }
 
         foreach (MethodDefinition method in type.Methods) {
-            method.ReturnType = method.ReturnType.Relinked(method);
+            method.ReturnType = method.ReturnType.RelinkedReference(method);
             for (int i = 0; i < method.Parameters.Count; i++) {
-                method.Parameters[i].ParameterType = method.Parameters[i].ParameterType.Relinked(method);
+                method.Parameters[i].ParameterType = method.Parameters[i].ParameterType.RelinkedReference(method);
             }
 
             for (int i = 0; method.HasBody && i < method.Body.Instructions.Count; i++) {
@@ -137,45 +137,29 @@ internal static class ETGModRelinker {
                 object operand = instruction.Operand;
 
                 if (operand is MethodReference) {
-                    MethodReference old = (MethodReference) operand;
-                    MethodReference relink = new MethodReference(old.Name, old.ReturnType.Relinked(method), old.DeclaringType.Relinked(method));
-                    foreach (ParameterDefinition param in old.Parameters) {
-                        param.ParameterType = param.ParameterType.Relinked(method);
-                        relink.Parameters.Add(param);
-                    }
-                    foreach (GenericParameter param in old.GenericParameters) {
-                        relink.GenericParameters.Add(new GenericParameter(param.Name, type) {
-                            Attributes = type.GenericParameters[i].Attributes,
-                            // MetadataToken = type.GenericParameters[i].MetadataToken
-                        });
-
-                        // FIXME Constraints
-                    }
-                    relink.CallingConvention = old.CallingConvention;
-                    relink.ExplicitThis = old.ExplicitThis;
-                    relink.HasThis = old.HasThis;
-                    operand = type.Module.ImportReference(relink);
+                    operand = ((MethodReference) operand).RelinkedReference(method);
 
                 } else if (operand is FieldReference) {
                     FieldReference old = (FieldReference) operand;
-                    FieldReference relink = new FieldReference(old.Name, old.FieldType.Relinked(method), old.DeclaringType.Relinked(method));
+                    FieldReference relink = new FieldReference(old.Name, old.FieldType.RelinkedReference(method), old.DeclaringType.RelinkedReference(method));
                     operand = type.Module.ImportReference(relink);
+
                 } else if (operand is TypeReference) {
-                    operand = ((TypeReference) operand).Relinked(method);
+                    operand = ((TypeReference) operand).RelinkedReference(method);
                 }
 
                 instruction.Operand = operand;
             }
 
             for (int i = 0; method.HasBody && i < method.Body.Variables.Count; i++) {
-                method.Body.Variables[i].VariableType = method.Body.Variables[i].VariableType.Relinked(method);
+                method.Body.Variables[i].VariableType = method.Body.Variables[i].VariableType.RelinkedReference(method);
             }
         }
 
 
     }
 
-    public static T Relinked<T>(this T type, MemberReference context) where T : TypeReference {
+    public static T RelinkedReference<T>(this T type, MemberReference context) where T : TypeReference {
         if (type == null) {
             return null;
         }
@@ -183,11 +167,99 @@ internal static class ETGModRelinker {
             return type;
         }
 
+        if (type.IsGenericParameter) {
+            if (context == null) {
+                return null;
+            }
+
+            if (context is MethodReference) {
+                MethodReference r = ((MethodReference) context).GetElementMethod();
+                for (int gi = 0; gi < r.GenericParameters.Count; gi++) {
+                    GenericParameter genericParam = r.GenericParameters[gi];
+                    if (genericParam.FullName == type.FullName) {
+                        //TODO variables hate MonoMod, maybe they hate the new relinker too, import otherwise
+                        return genericParam as T;
+                    }
+                }
+                if (type.Name.StartsWithInvariant("!!")) {
+                    int i;
+                    if (int.TryParse(type.Name.Substring(2), out i)) {
+                        return r.GenericParameters[i] as T;
+                    }
+                    throw new InvalidOperationException("Failed parsing \"" + type.Name + "\" (method) for " + context.Name + " while relinking said type!");
+                }
+            }
+            if (context is TypeReference) {
+                TypeReference r = ((TypeReference) context).GetElementType();
+                for (int gi = 0; gi < r.GenericParameters.Count; gi++) {
+                    GenericParameter genericParam = r.GenericParameters[gi];
+                    if (genericParam.FullName == type.FullName) {
+                        //TODO variables hate me, import otherwise
+                        return genericParam as T;
+                    }
+                }
+                if (type.Name.StartsWithInvariant("!!")) {
+                    return type.RelinkedReference(context.DeclaringType);
+                } else if (type.Name.StartsWithInvariant("!")) {
+                    int i;
+                    if (int.TryParse(type.Name.Substring(1), out i)) {
+                        return r.GenericParameters[i] as T;
+                    } else {
+                        new InvalidOperationException("Failed parsing \"" + type.Name + "\" (type) for " + context.Name + " while relinking said type!");
+                    }
+                }
+            }
+            if (context.DeclaringType != null) {
+                return type.RelinkedReference(context.DeclaringType);
+            }
+            return type;
+        }
+
         // TODO Generic types? Array types? My blood when I summoned Brent? --0x0ade
         TypeReference relink = new TypeReference(type.Namespace, type.Name, ETGModule, ETGModule, type.IsValueType);
-        relink.DeclaringType = type.DeclaringType.Relinked(context);
+        relink.DeclaringType = type.DeclaringType.RelinkedReference(context);
 
-        return context.Module.ImportReference(relink) as T;
+        return (T) context.Module.ImportReference(relink);
+    }
+
+    public static MethodReference RelinkedReference(this MethodReference method, MemberReference context) {
+        if (method.IsGenericInstance) {
+            GenericInstanceMethod methodg = ((GenericInstanceMethod) method);
+            GenericInstanceMethod relinkg = new GenericInstanceMethod(methodg.ElementMethod.RelinkedReference(context));
+
+            foreach (TypeReference arg in methodg.GenericArguments) {
+                relinkg.GenericArguments.Add(arg.RelinkedReference(context) ?? arg.RelinkedReference(relinkg));
+            }
+
+            return relinkg;
+        }
+
+        MethodReference relink = new MethodReference(method.Name, method.ReturnType, method.DeclaringType.RelinkedReference(context));
+        relink.ReturnType = method.ReturnType?.RelinkedReference(relink);
+
+        relink.CallingConvention = method.CallingConvention;
+        relink.ExplicitThis = method.ExplicitThis;
+        relink.HasThis = method.HasThis;
+
+        foreach (ParameterDefinition param in method.Parameters) {
+            param.ParameterType = param.ParameterType.RelinkedReference(context);
+            relink.Parameters.Add(param);
+        }
+
+        foreach (GenericParameter param in method.GenericParameters) {
+            GenericParameter paramN = new GenericParameter(param.Name, param.Owner) {
+                Attributes = param.Attributes,
+                // MetadataToken = param.MetadataToken
+            };
+
+            foreach (TypeReference constraint in param.Constraints) {
+                paramN.Constraints.Add(constraint.RelinkedReference(context));
+            }
+
+            relink.GenericParameters.Add(paramN);
+        }
+
+        return method.Module.ImportReference(relink);
     }
 
     public static string ToHexadecimalString(this byte[] data) {

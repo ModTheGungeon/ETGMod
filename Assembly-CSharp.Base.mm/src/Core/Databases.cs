@@ -36,6 +36,12 @@ public sealed class ItemDB {
         }
     }
 
+    public PickupObject this[string name] {
+        get {
+            return PickupObjectDatabase.Instance.InternalGetByName(name);
+        }
+    }
+
     public int Count {
         get {
             return PickupObjectDatabase.Instance.Objects.Count;
@@ -123,7 +129,7 @@ public sealed class ItemDB {
     private Gun _GunGivenPrototype;
     public Gun NewGun(string gunName, string gunNameShort = null) {
         if (_GunGivenPrototype == null) {
-            _GunGivenPrototype = (Gun) PickupObjectDatabase.GetByName("Pea_Shooter");
+            _GunGivenPrototype = (Gun) ETGMod.Databases.Items["Pea_Shooter"];
         }
 
         return NewGun(gunName, _GunGivenPrototype, gunNameShort);
@@ -294,7 +300,7 @@ public static class ItemDBExt {
     }
 
     public static Projectile AddProjectileFrom(this Gun gun, string other) {
-        return gun.AddProjectileFrom((Gun) PickupObjectDatabase.GetByName(other));
+        return gun.AddProjectileFrom((Gun) ETGMod.Databases.Items[other]);
     }
     public static Projectile AddProjectileFrom(this Gun gun, Gun other) {
         if (other.DefaultModule.projectiles.Count == 0) {
@@ -308,7 +314,7 @@ public static class ItemDBExt {
     }
 
     public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other) {
-        return gun.AddProjectileModuleFrom((Gun) PickupObjectDatabase.GetByName(other));
+        return gun.AddProjectileModuleFrom((Gun) ETGMod.Databases.Items[other]);
     }
     public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other) {
         return gun.AddProjectileModule(UnityEngine.Object.Instantiate(other.gameObject).GetComponent<Gun>().DefaultModule);
