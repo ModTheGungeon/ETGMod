@@ -14,6 +14,7 @@ public static partial class ETGMod {
     // Extension methods
 
     public static void BecomeBlackPhantom(this global::AIActor actor) {
+        if (actor.IsBlackPhantom) return;
         ((patch_AIActor) actor).INTERNAL_BecomeBlackPhantom();
     }
 
