@@ -5,7 +5,7 @@ internal class patch_PlayerConsumables : PlayerConsumables {
     
     public extern bool orig_get_InfiniteKeys();
     public bool get_InfiniteKeys() {
-        return ETGMod.Player.InfiniteKeys != null ? ETGMod.Player.InfiniteKeys.Value : orig_get_InfiniteKeys();
+        return ETGMod.Player.InfiniteKeys ?? orig_get_InfiniteKeys();
     }
 
 }
