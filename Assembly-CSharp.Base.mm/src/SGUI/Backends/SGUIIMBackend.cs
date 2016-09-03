@@ -67,15 +67,16 @@ namespace SGUI {
         public float LineHeight { get; set; }
 
         private Font _Font;
-        public Font Font {
+        public object Font {
             get {
                 return _Font;
             }
             set {
-                if (_Font != value) {
-                    LineHeight = value.dynamic ? value.lineHeight * 2f : (value.characterInfo[0].glyphHeight + 4f);
+                Font valueFont = (Font) value;
+                if (_Font != valueFont) {
+                    LineHeight = valueFont.dynamic ? valueFont.lineHeight * 2f : (valueFont.characterInfo[0].glyphHeight + 4f);
                 }
-                _Font = value;
+                _Font = valueFont;
             }
         }
 
@@ -637,12 +638,14 @@ namespace SGUI {
             Text_(elem, position, size, text, alignment, icon);
         }
         private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true) {
+            GUI.skin.font = (Font) elem?.Font ?? _Font;
+
             if (text.Contains("\n")) {
                 string[] lines = text.Split('\n');
                 float y = 0f;
                 for (int i = 0; i < lines.Length; i++) {
                     string line = lines[i];
-                    Vector2 lineSize = MeasureText(ref line, size);
+                    Vector2 lineSize = MeasureText(ref line, size, font: elem?.Font);
                     Text(elem, position + new Vector2(0f, y), lineSize, line, alignment);
                     y += lineSize.y;
                 }
@@ -662,6 +665,7 @@ namespace SGUI {
         }
 
         public void TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
+            GUI.skin.font = (Font) elem?.Font ?? _Font;
             PreparePosition(elem, ref position);
 
             if (elem != null && Repainting) {
@@ -707,7 +711,7 @@ namespace SGUI {
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.TextField, bounds, text);
             text = GUI.TextField(bounds, text);
 
-            if (!Font.dynamic && IsFocused(CurrentComponentID) && Repainting) {
+            if (!GUI.skin.font.dynamic && IsFocused(CurrentComponentID) && Repainting) {
                 TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 #pragma warning disable CS0618
                 // TextEditor.content is obsolete, yet it must be accessed.
@@ -783,6 +787,7 @@ namespace SGUI {
 
 
         public void Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
+            GUI.skin.font = (Font) elem?.Font ?? _Font;
             PreparePosition(elem, ref position);
 
             if (elem != null && Repainting) {
@@ -942,7 +947,7 @@ namespace SGUI {
             Rect(bar, Vector2.zero, bar.Size, group.Background);
 
             if (!string.IsNullOrEmpty(title)) {
-                Vector2 titleSize = MeasureText(title);
+                Vector2 titleSize = MeasureText(title, font: Font);
                 Text(bar, new Vector2(group.Border, 0f), titleSize, title);
             }
 
@@ -976,14 +981,16 @@ namespace SGUI {
 
         }
 
-        public Vector2 MeasureText(string text, Vector2? size = null) {
-            return MeasureText(ref text, size);
+        public Vector2 MeasureText(string text, Vector2? size = null, object font = null) {
+            return MeasureText(ref text, size, font);
         }
-        public Vector2 MeasureText(ref string text, Vector2? size = null) {
+        public Vector2 MeasureText(ref string text, Vector2? size = null, object font = null) {
+            GUI.skin.font = (Font) font ?? _Font;
+
             _TextGenerationSettings.richText = true;
 
-            _TextGenerationSettings.font = Font;
-            _TextGenerationSettings.fontSize = Font.fontSize;
+            _TextGenerationSettings.font = GUI.skin.font;
+            _TextGenerationSettings.fontSize = GUI.skin.font.fontSize;
             _TextGenerationSettings.lineSpacing = LineHeight;
 
             if (size != null) {
@@ -999,7 +1006,7 @@ namespace SGUI {
             _TextGenerator.Populate(text, _TextGenerationSettings);
             Vector2 auto = new Vector2(
                 _TextGenerator.GetPreferredWidth(text, _TextGenerationSettings),
-                Font.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
+                GUI.skin.font.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
             );
             if (size == null || auto.x <= size.Value.x) {
                 return auto;
@@ -1014,15 +1021,22 @@ namespace SGUI {
             for (int i = 0; i < text.Length; i++) {
                 char c = text[i];
                 CharacterInfo ci;
-                if (!Font.GetCharacterInfo(c, out ci)) {
-                    continue;
+                bool ciGot = true;
+                if (!GUI.skin.font.GetCharacterInfo(c, out ci)) {
+                    ciGot = false;
+                    if (c != '\n') {
+                        continue;
+                    }
                 }
 
-                x += ci.advance;
+                if (ciGot) x += ci.advance;
                 if (x > bounds.x || c == '\n') {
                     rebuilt.AppendLine();
                     x = 0f;
                     y += LineHeight;
+                }
+                if (c == '\n') {
+                    continue;
                 }
                 rebuilt.Append(c);
             }

@@ -36,9 +36,9 @@ namespace SGUI {
 
             if (UpdateBounds) {
                 if (Parent == null) {
-                    Size = Backend.MeasureText(ref Text);
+                    Size = Backend.MeasureText(ref Text, font: Font);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.InnerSize);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize, font: Font);
                 }
                 Size += new Vector2(16f, 2f);
                 if (Icon != null) {

@@ -90,6 +90,7 @@ namespace SGUI {
 
         public virtual Color Foreground { get; set; }
         public virtual Color Background { get; set; }
+        public object Font;
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="T:SGUI.SElement"/> is interactive.

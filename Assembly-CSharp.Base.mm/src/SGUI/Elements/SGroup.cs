@@ -185,7 +185,7 @@ namespace SGUI {
 
                 elem.Position = Vector2.zero;
                 if (AutoLayoutLabelWidth <= 0f) {
-                    elem.Size = Backend.MeasureText(((SLabel) elem).Text);
+                    elem.Size = Backend.MeasureText(((SLabel) elem).Text, font: elem.Font);
                 } else {
                     elem.Size = new Vector2(AutoLayoutLabelWidth, Backend.LineHeight);
                 }
