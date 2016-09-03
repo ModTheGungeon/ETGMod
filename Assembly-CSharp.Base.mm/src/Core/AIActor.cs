@@ -11,4 +11,10 @@ public static partial class ETGMod {
         public static Action<global::AIActor> OnBlackPhantomnessCheck;
     }
 
+    // Extension methods
+
+    public static void BecomeBlackPhantom(this global::AIActor actor) {
+        ((patch_AIActor) actor).INTERNAL_BecomeBlackPhantom();
+    }
+
 }

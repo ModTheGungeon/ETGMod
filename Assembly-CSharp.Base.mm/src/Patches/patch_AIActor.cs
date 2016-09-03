@@ -1,8 +1,10 @@
 ﻿#pragma warning disable 0626
 #pragma warning disable 0649
 
+using MonoMod;
+
 internal class patch_AIActor : AIActor {
-    
+
     public extern void orig_Start();
     public new void Start() {
         ETGMod.AIActor.OnPreStart?.Invoke(this);
@@ -14,6 +16,12 @@ internal class patch_AIActor : AIActor {
     private void CheckForBlackPhantomness() {
         ETGMod.AIActor.OnBlackPhantomnessCheck?.Invoke(this);
         orig_CheckForBlackPhantomness();
+    }
+
+    [MonoModIgnore]
+    private extern void BecomeBlackPhantom();
+    internal void INTERNAL_BecomeBlackPhantom() {
+        BecomeBlackPhantom();
     }
 
 }
