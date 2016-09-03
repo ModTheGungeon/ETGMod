@@ -159,13 +159,15 @@ public static class ETGModRelinker {
 
     }
 
-    public static T RelinkedReference<T>(this T type, MemberReference context) where T : TypeReference {
+    public static TypeReference RelinkedReference(this TypeReference type, MemberReference context) {
         if (type == null) {
             return null;
         }
         if (!type.Scope.Name.EndsWithInvariant(".mm")) {
             return type;
         }
+
+        TypeReference elemType = (type as TypeSpecification)?.ElementType?.RelinkedReference(context);
 
         if (type.IsGenericParameter) {
             if (context == null) {
@@ -178,13 +180,13 @@ public static class ETGModRelinker {
                     GenericParameter genericParam = r.GenericParameters[gi];
                     if (genericParam.FullName == type.FullName) {
                         //TODO variables hate MonoMod, maybe they hate the new relinker too, import otherwise
-                        return genericParam as T;
+                        return genericParam;
                     }
                 }
                 if (type.Name.StartsWithInvariant("!!")) {
                     int i;
                     if (int.TryParse(type.Name.Substring(2), out i)) {
-                        return r.GenericParameters[i] as T;
+                        return r.GenericParameters[i];
                     }
                     throw new InvalidOperationException("Failed parsing \"" + type.Name + "\" (method) for " + context.Name + " while relinking said type!");
                 }
@@ -195,7 +197,7 @@ public static class ETGModRelinker {
                     GenericParameter genericParam = r.GenericParameters[gi];
                     if (genericParam.FullName == type.FullName) {
                         //TODO variables hate me, import otherwise
-                        return genericParam as T;
+                        return genericParam;
                     }
                 }
                 if (type.Name.StartsWithInvariant("!!")) {
@@ -203,7 +205,7 @@ public static class ETGModRelinker {
                 } else if (type.Name.StartsWithInvariant("!")) {
                     int i;
                     if (int.TryParse(type.Name.Substring(1), out i)) {
-                        return r.GenericParameters[i] as T;
+                        return r.GenericParameters[i];
                     } else {
                         new InvalidOperationException("Failed parsing \"" + type.Name + "\" (type) for " + context.Name + " while relinking said type!");
                     }
@@ -215,11 +217,27 @@ public static class ETGModRelinker {
             return type;
         }
 
-        // TODO Generic types? Array types? My blood when I summoned Brent? --0x0ade
+        if (type.IsByReference) {
+            return new ByReferenceType(elemType);
+        }
+
+        if (type.IsArray) {
+            return new ArrayType(elemType, ((ArrayType) type).Dimensions.Count);
+        }
+
+        if (type.IsGenericInstance) {
+            GenericInstanceType typeg = (GenericInstanceType) type;
+            GenericInstanceType relinkg = new GenericInstanceType(elemType);
+            foreach (TypeReference arg in typeg.GenericArguments) {
+                relinkg.GenericArguments.Add(arg.RelinkedReference(context));
+            }
+            return typeg;
+        }
+
         TypeReference relink = new TypeReference(type.Namespace, type.Name, ETGModule, ETGModule, type.IsValueType);
         relink.DeclaringType = type.DeclaringType.RelinkedReference(context);
 
-        return (T) context.Module.ImportReference(relink);
+        return context.Module.ImportReference(relink);
     }
 
     public static MethodReference RelinkedReference(this MethodReference method, MemberReference context) {
