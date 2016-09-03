@@ -439,7 +439,7 @@ namespace SGUI {
                                         editor.cursorIndex = index;
                                         editor.selectIndex = index;
                                     } else if (type == EventType.MouseDrag) {
-                                        editor.selectIndex = index;
+                                        editor.cursorIndex = index;
                                     }
 
                                     editor.UpdateScrollOffsetIfNeeded();
@@ -985,12 +985,12 @@ namespace SGUI {
             return MeasureText(ref text, size, font);
         }
         public Vector2 MeasureText(ref string text, Vector2? size = null, object font = null) {
-            GUI.skin.font = (Font) font ?? _Font;
+            Font font_ = (Font) font ?? _Font;
 
             _TextGenerationSettings.richText = true;
 
-            _TextGenerationSettings.font = GUI.skin.font;
-            _TextGenerationSettings.fontSize = GUI.skin.font.fontSize;
+            _TextGenerationSettings.font = font_;
+            _TextGenerationSettings.fontSize = font_.fontSize;
             _TextGenerationSettings.lineSpacing = LineHeight;
 
             if (size != null) {
@@ -1006,7 +1006,7 @@ namespace SGUI {
             _TextGenerator.Populate(text, _TextGenerationSettings);
             Vector2 auto = new Vector2(
                 _TextGenerator.GetPreferredWidth(text, _TextGenerationSettings),
-                GUI.skin.font.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
+                font_.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
             );
             if (size == null || auto.x <= size.Value.x) {
                 return auto;
@@ -1022,7 +1022,7 @@ namespace SGUI {
                 char c = text[i];
                 CharacterInfo ci;
                 bool ciGot = true;
-                if (!GUI.skin.font.GetCharacterInfo(c, out ci)) {
+                if (!font_.GetCharacterInfo(c, out ci)) {
                     ciGot = false;
                     if (c != '\n') {
                         continue;
