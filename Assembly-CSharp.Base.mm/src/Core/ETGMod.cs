@@ -481,13 +481,7 @@ public static partial class ETGMod {
         return false;
     }
 
-    /// <summary>
-    /// Invokes all delegates in the invocation list, passing on the result to the next.
-    /// </summary>
-    /// <typeparam name="T">Type of the result.</typeparam>
-    /// <param name="md">The multicast delegate.</param>
-    /// <param name="val">The initial value.</param>
-    /// <returns>The result of all delegates, or the initial value if md == null.</returns>
+    [Obsolete("Use RunHook instead!")]
     public static T RunHooks<T>(this MulticastDelegate md, T val) {
         if (md == null) {
             return val;
@@ -501,6 +495,31 @@ public static partial class ETGMod {
         }
 
         return (T) args[0];
+    }
+
+    /// <summary>
+    /// Invokes all delegates in the invocation list, passing on the result to the next.
+    /// </summary>
+    /// <typeparam name="T">Type of the result.</typeparam>
+    /// <param name="md">The multicast delegate.</param>
+    /// <param name="val">The initial value.</param>
+    /// <param name="args">Any other arguments that may be passed.</param>
+    /// <returns>The result of all delegates, or the initial value if md == null.</returns>
+    public static T RunHook<T>(this MulticastDelegate md, T val, params object[] args) {
+        if (md == null) {
+            return val;
+        }
+
+        object[] args_ = new object[args.Length + 1];
+        args_[0] = val;
+        Array.Copy(args, 0, args_, 1, args_.Length);
+
+        Delegate[] ds = md.GetInvocationList();
+        for (int i = 0; i < ds.Length; i++) {
+            args_[0] = ds[i].DynamicInvoke(args_);
+        }
+
+        return (T) args_[0];
     }
         
     /// <summary>
