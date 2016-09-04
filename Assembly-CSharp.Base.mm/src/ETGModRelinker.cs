@@ -8,10 +8,13 @@ using Mono.Cecil;
 using System.Security.Cryptography;
 using Mono.Cecil.Cil;
 
+public delegate TypeReference DGetRelinkedTypeReference(TypeReference type, MemberReference context);
 public static class ETGModRelinker {
 
     public static ModuleDefinition ETGModule;
     public static string ETGChecksum;
+
+    public static DGetRelinkedTypeReference GetRelinkedTypeReference = GetTypeInETGModule;
 
     public static Assembly GetRelinkedAssembly(this ETGModuleMetadata metadata, Stream stream) {
         if (ETGModule == null) {
@@ -78,6 +81,18 @@ public static class ETGModRelinker {
 
         return Assembly.LoadFrom(cachedPath);
     }
+
+    public static TypeReference GetTypeInETGModule(TypeReference type, MemberReference context) {
+        if (!type.Scope.Name.EndsWithInvariant(".mm")) {
+            return type;
+        }
+
+        TypeReference relink = new TypeReference(type.Namespace, type.Name, ETGModule, ETGModule, type.IsValueType);
+        relink.DeclaringType = type.DeclaringType.RelinkedReference(context);
+
+        return context?.Module.ImportReference(relink) ?? relink;
+    }
+
 
     public static void RelinkType(TypeDefinition type) {
         foreach (TypeDefinition nested in type.NestedTypes) {
@@ -163,29 +178,29 @@ public static class ETGModRelinker {
         if (type == null) {
             return null;
         }
-        if (!type.Scope.Name.EndsWithInvariant(".mm")) {
-            return type;
-        }
 
         TypeReference elemType = (type as TypeSpecification)?.ElementType?.RelinkedReference(context);
 
         if (type.IsGenericParameter) {
+            // TODO redo the shit below
+            return type;
+        }
+        /*if (type.IsGenericParameter) {
             if (context == null) {
                 return null;
             }
 
             if (context is MethodReference) {
                 MethodReference r = ((MethodReference) context).GetElementMethod();
-                for (int gi = 0; gi < r.GenericParameters.Count; gi++) {
-                    GenericParameter genericParam = r.GenericParameters[gi];
-                    if (genericParam.FullName == type.FullName) {
+                foreach (GenericParameter param in r.GenericParameters) {
+                    if (param.FullName == type.FullName) {
                         //TODO variables hate MonoMod, maybe they hate the new relinker too, import otherwise
-                        return genericParam;
+                        return param;
                     }
                 }
                 if (type.Name.StartsWithInvariant("!!")) {
                     int i;
-                    if (int.TryParse(type.Name.Substring(2), out i)) {
+                    if (int.TryParse(type.Name.Substring(2), out i) && i < r.GenericParameters.Count) {
                         return r.GenericParameters[i];
                     }
                     throw new InvalidOperationException("Failed parsing \"" + type.Name + "\" (method) for " + context.Name + " while relinking said type!");
@@ -193,29 +208,28 @@ public static class ETGModRelinker {
             }
             if (context is TypeReference) {
                 TypeReference r = ((TypeReference) context).GetElementType();
-                for (int gi = 0; gi < r.GenericParameters.Count; gi++) {
-                    GenericParameter genericParam = r.GenericParameters[gi];
-                    if (genericParam.FullName == type.FullName) {
-                        //TODO variables hate me, import otherwise
-                        return genericParam;
+                foreach (GenericParameter param in r.GenericParameters) {
+                    if (param.FullName == type.FullName) {
+                        //TODO variables hate MonoMod, maybe they hate the new relinker too, import otherwise
+                        return param;
                     }
                 }
                 if (type.Name.StartsWithInvariant("!!")) {
                     return type.RelinkedReference(context.DeclaringType);
-                } else if (type.Name.StartsWithInvariant("!")) {
+                }
+                if (type.Name.StartsWithInvariant("!")) {
                     int i;
-                    if (int.TryParse(type.Name.Substring(1), out i)) {
+                    if (int.TryParse(type.Name.Substring(1), out i) && i < r.GenericParameters.Count) {
                         return r.GenericParameters[i];
-                    } else {
-                        new InvalidOperationException("Failed parsing \"" + type.Name + "\" (type) for " + context.Name + " while relinking said type!");
                     }
+                    new InvalidOperationException("Failed parsing \"" + type.Name + "\" (type) for " + context.Name + " while relinking said type!");
                 }
             }
             if (context.DeclaringType != null) {
                 return type.RelinkedReference(context.DeclaringType);
             }
             return type;
-        }
+        }*/
 
         if (type.IsByReference) {
             return new ByReferenceType(elemType);
@@ -231,13 +245,10 @@ public static class ETGModRelinker {
             foreach (TypeReference arg in typeg.GenericArguments) {
                 relinkg.GenericArguments.Add(arg.RelinkedReference(context));
             }
-            return typeg;
+            return relinkg;
         }
 
-        TypeReference relink = new TypeReference(type.Namespace, type.Name, ETGModule, ETGModule, type.IsValueType);
-        relink.DeclaringType = type.DeclaringType.RelinkedReference(context);
-
-        return context.Module.ImportReference(relink);
+        return GetRelinkedTypeReference(type, context);
     }
 
     public static MethodReference RelinkedReference(this MethodReference method, MemberReference context) {
