@@ -14,7 +14,7 @@ using ETGMultiplayer;
 /// Main ETGMod class. Most of the "Mod the Gungeon" logic flows through here.
 /// </summary>
 public static partial class ETGMod {
-
+    
     public readonly static Version BaseVersion = new Version(0, 2, 0);
     // The following line will be replaced by Travis.
     public readonly static int BaseTravisBuild = 0;
@@ -512,7 +512,7 @@ public static partial class ETGMod {
 
         object[] args_ = new object[args.Length + 1];
         args_[0] = val;
-        Array.Copy(args, 0, args_, 1, args_.Length);
+        Array.Copy(args, 0, args_, 1, args.Length);
 
         Delegate[] ds = md.GetInvocationList();
         for (int i = 0; i < ds.Length; i++) {
