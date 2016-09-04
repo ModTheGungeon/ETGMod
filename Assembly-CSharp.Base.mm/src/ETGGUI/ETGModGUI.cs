@@ -152,10 +152,13 @@ public class ETGModGUI : MonoBehaviour {
     }
 
     public static void UpdatePlayerState() {
-        if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer!=null) {
+        if (GameManager.Instance?.PrimaryPlayer != null) {
             bool set = CurrentMenu == MenuOpened.None;
             GameManager.Instance.PrimaryPlayer.enabled = set;
-            Camera.main.GetComponent<CameraController>().enabled = set;
+            CameraController cam = Camera.main?.GetComponent<CameraController>();
+            if (cam != null) {
+                cam.enabled = set;
+            }
         }
     }
 

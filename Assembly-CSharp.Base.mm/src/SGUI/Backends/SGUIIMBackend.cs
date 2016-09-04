@@ -955,7 +955,7 @@ namespace SGUI {
         }
 
         private void _ScrollBar(SGroup group) {
-            Rect bounds = !group.IsWindow ? new Rect(group.InnerOrigin, group.Size) : new Rect(
+            Rect bounds = !group.IsWindow ? new Rect(group.InnerOrigin, group.InnerSize) : new Rect(
                 group.Border,
                 group.WindowTitleBar.Size.y + group.Border,
                 group.Size.x, group.Size.y
@@ -964,12 +964,12 @@ namespace SGUI {
             if (bounds.height <= group.ContentSize.y) {
                 float width = 2f; // TODO Grow on mouse-over.
                 Vector2 position = new Vector2(
-                    bounds.width - width,
+                    bounds.x + bounds.width - width,
                     bounds.y + bounds.height * group.ScrollPosition.y / group.ContentSize.y
                 );
                 Vector2 size = new Vector2(
                     width,
-                    Mathf.Min(bounds.height, bounds.height * bounds.height / group.ContentSize.y + position.y) - position.y
+                    Mathf.Max(0f, Mathf.Min(bounds.height, bounds.height * bounds.height / group.ContentSize.y + position.y) - position.y)
                 );
 
                 Rect(group, position, size, group.Foreground * 0.8f);
