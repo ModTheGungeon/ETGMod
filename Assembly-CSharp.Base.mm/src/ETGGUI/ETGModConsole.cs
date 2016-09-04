@@ -71,12 +71,17 @@ public class ETGModConsole : ETGModMenu {
                         elem.Size -= new Vector2(0f, elem.Backend.LineHeight - 4f); // Command line input space
                     },
                     Children = {
-                        
                         new SLabel("ETGMod <color=#ffffffff>" + ETGMod.BaseUIVersion + "</color>") { Foreground = Color.gray },
                         new SLabel("Console backend <color=#ffffffff>R" + REVISION + "</color>") { Foreground = Color.gray },
                         new SLabel("THIS CONSOLE IS <color=#ff0000ff>WORK IN PROGRESS</color>."),
                         new SLabel("Use <color=#ffffffff>help</color> to find out how to use the console.") { Foreground = Color.gray },
-                        new SLabel()
+                        new SLabel(),
+                        new SLabel("Wee this text gets randomized in order!") {
+                            With = {
+                                new SRandomLabelModifier()
+                            }
+                        },
+                        new SLabel(),
                     }
                 },
                 new STextField {
@@ -184,7 +189,9 @@ public class ETGModConsole : ETGModMenu {
                 .AddUnit  ("enable_damage_indicators", (args) => SetBool (args, ref ETGModGUI.UseDamageIndicators))
                 .AddUnit  ("match_contains", (args) => SetBool (args, ref AutocompletionSettings.MatchContains))
                 .AddUnit  ("enable_achievements", (args) => SetBool (args, ref ETGMod.Platform.EnableAchievements))
-                .AddUnit  ("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled));
+                .AddUnit  ("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled))
+                .AddUnit  ("player", (args) => ETGMod.Player.PlayerReplacement = args.Length == 1 ? args[0] : null)
+                .AddUnit  ("player_coop", (args) => ETGMod.Player.CoopReplacement = args.Length == 1 ? args[0] : null);
     }
 
     public override void Update() {

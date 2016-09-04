@@ -145,7 +145,9 @@ public static partial class ETGMod {
 
         public static UnityEngine.Object Load(string path, Type type) {
             if (path == "PlayerCoopCultist" && Player.CoopReplacement != null) {
-                return Resources.Load(Player.CoopReplacement, type) as GameObject;
+                path = Player.CoopReplacement;
+            } else if (path.StartsWithInvariant("Player") && Player.PlayerReplacement != null) {
+                path = Player.PlayerReplacement;
             }
 
             if (path.StartsWithInvariant("ITEMDB:")) {

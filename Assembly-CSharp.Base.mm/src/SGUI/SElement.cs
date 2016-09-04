@@ -1,5 +1,6 @@
 ﻿#pragma warning disable RECS0018
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 
@@ -35,6 +36,17 @@ namespace SGUI {
             }
             set {
                 Children[id] = value;
+            }
+        }
+
+        public readonly List<SModifier> Modifiers = new List<SModifier>();
+        // Alias for when creating an SElement
+        public List<SModifier> With {
+            get {
+                return Modifiers;
+            }
+            set {
+                Modifiers.AddRange(value);
             }
         }
 
@@ -173,8 +185,12 @@ namespace SGUI {
                 Background = SGUIRoot.Main.Background.WithAlpha(Background.a);
             }
 
+            Modifiers.ForEach(_ModifierUpdateStyle);
             OnUpdateStyle?.Invoke(this);
             UpdateChildrenStyles();
+        }
+        protected void _ModifierUpdateStyle(SModifier modifier) {
+            modifier.UpdateStyle(this);
         }
         public virtual void UpdateChildrenStyles() {
             for (int i = 0; i < Children.Count; i++) {
@@ -186,7 +202,11 @@ namespace SGUI {
         }
 
         public virtual void Update() {
+            Modifiers.ForEach(_ModifierUpdate);
             UpdateChildren();
+        }
+        protected void _ModifierUpdate(SModifier modifier) {
+            modifier.Update(this);
         }
         public void UpdateChildren() {
             for (int i = 0; i < Children.Count; i++) {
