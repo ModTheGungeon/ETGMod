@@ -235,7 +235,11 @@ namespace SGUI {
             Backend.Dispose(this);
         }
 
-        public virtual void Detatch() {
+        [Obsolete("Typo. Use Remove instead. Kept to keep mods relying on old API intact.")]
+        public void Detatch() {
+            Remove();
+        }
+        public virtual void Remove() {
             (Parent?.Children ?? Root.Children).Remove(this);
         }
 
