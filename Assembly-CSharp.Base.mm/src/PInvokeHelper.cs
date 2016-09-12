@@ -39,7 +39,7 @@ public static class PInvokeHelper {
                 IntPtr e = IntPtr.Zero;
                 _Unity = dlopen(null, RTLD_NOW);
                 if ((e = dlerror()) != IntPtr.Zero) {
-                    Debug.Log("MonoDebug can't access the main assembly!");
+                    Debug.Log("PInvokeHelper can't access the main assembly!");
                     Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                     return NULL;
                 }
@@ -64,13 +64,15 @@ public static class PInvokeHelper {
 
             if (Environment.OSVersion.Platform == PlatformID.Unix) {
                 IntPtr e = IntPtr.Zero;
-                if (IntPtr.Size == 8) {
+                if (PlatformHelper.Is(Platform.MacOS)) {
+                    _Mono = dlopen("./EtG_OSX.app/Contents/Frameworks/MonoEmbedRuntime/osx/libmono.0.dylib", RTLD_NOW);
+                } else if (IntPtr.Size == 8) {
                     _Mono = dlopen("./EtG_Data/Mono/x86_64/libmono.so", RTLD_NOW);
                 } else {
                     _Mono = dlopen("./EtG_Data/Mono/x86/libmono.so", RTLD_NOW);
                 }
                 if ((e = dlerror()) != IntPtr.Zero) {
-                    Debug.Log("MonoDebug can't access libmono.so!");
+                    Debug.Log("PInvokeHelper can't access libmono.so!");
                     Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                     return NULL;
                 }
@@ -93,9 +95,9 @@ public static class PInvokeHelper {
             }
 
             IntPtr e = IntPtr.Zero;
-            _PThread = dlopen("libpthread.so.0", RTLD_NOW);
+            _PThread = dlopen(PlatformHelper.Is(Platform.MacOS) ? "libpthread.dylib" : "libpthread.so.0", RTLD_NOW);
             if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access libpthread.so!");
+                Debug.Log("PInvokeHelper can't access libpthread.so!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return NULL;
             }
@@ -117,7 +119,7 @@ public static class PInvokeHelper {
 
             s = dlsym(lib, name);
             if ((e = dlerror()) != IntPtr.Zero) {
-                Debug.Log("MonoDebug can't access " + name + "!");
+                Debug.Log("PInvokeHelper can't access " + name + "!");
                 Debug.Log("dlerror: " + Marshal.PtrToStringAnsi(e));
                 return NULL;
             }
@@ -160,11 +162,11 @@ public static class PInvokeHelper {
         get {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
                 return GetCurrentThreadId();
+            }
 
-            } else if (Environment.OSVersion.Platform == PlatformID.Unix) {
+            if (Environment.OSVersion.Platform == PlatformID.Unix) {
                 if ((pthread_self = pthread_self ?? PThread.GetDelegate<d_pthread_self>()) == null) return 0;
                 return pthread_self();
-
             }
 
             return 0;

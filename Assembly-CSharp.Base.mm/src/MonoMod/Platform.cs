@@ -1,7 +1,9 @@
-﻿/// <summary>
+﻿using System;
+/// <summary>
 /// Generic platform enum.
 /// </summary>
-public enum Platform : int {
+[Flags]
+public enum Platform {
     None = 0,
 
     // Underlying platform categories

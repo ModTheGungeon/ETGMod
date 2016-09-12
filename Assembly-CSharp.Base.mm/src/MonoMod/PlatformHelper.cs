@@ -4,9 +4,11 @@ using System.Reflection;
 
 public static class PlatformHelper {
 
+    public readonly static Platform Current;
+
     static PlatformHelper() {
         //for mono, get from
-        //static extern Platf<ormID Platform
+        //static extern PlatformID Platform
         PropertyInfo property_platform = typeof(Environment).GetProperty("Platform", BindingFlags.NonPublic | BindingFlags.Static);
         string platID;
         if (property_platform != null) {
@@ -35,6 +37,8 @@ public static class PlatformHelper {
         Current |= (IntPtr.Size == 4 ? Platform.X86 : Platform.X64);
     }
 
-    public static Platform Current { get; private set; }
+    public static bool Is(Platform plat) {
+        return (Current & plat) == plat;
+    }
 
 }
