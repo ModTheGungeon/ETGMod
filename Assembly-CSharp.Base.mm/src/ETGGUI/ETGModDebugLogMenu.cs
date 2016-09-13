@@ -16,6 +16,7 @@ public class ETGModDebugLogMenu : ETGModMenu {
     /// All debug logged text lines. Feel free to add your lines here!
     /// </summary>
     protected static List<LoggedText> _AllLoggedText = new List<LoggedText>();
+    protected static int _LoggedTextAddIndex = 0;
 
     public static Dictionary<LogType, Color> Colors = new Dictionary<LogType, Color>() {
         { LogType.Log,       new Color(1f, 1f, 1f, 0.8f) },
@@ -39,10 +40,12 @@ public class ETGModDebugLogMenu : ETGModMenu {
                 new SLabel("Some code may still be missing in the SGUI port."),
             }
         };
+    }
 
-        // Add everything that wasn't added yet.
-        for (int i = 0; i < _AllLoggedText.Count; i++) {
-            _AllLoggedText[i].Start();
+    public override void Update() {
+        if (_LoggedTextAddIndex < _AllLoggedText.Count) {
+            _AllLoggedText[_LoggedTextAddIndex].Start();
+            ++_LoggedTextAddIndex;
         }
     }
 
@@ -88,7 +91,6 @@ public class ETGModDebugLogMenu : ETGModMenu {
         }
 
         entry = new LoggedText(text, stackTrace, type);
-        entry.Start();
         _AllLoggedText.Add(entry);
     }
 

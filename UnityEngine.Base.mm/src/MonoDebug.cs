@@ -150,13 +150,17 @@ public static class MonoDebug {
         if (Application.isEditor || Type.GetType("Mono.Runtime") == null) {
             return false;
         }
+
+
         // Possible: none, server=y, defer=y
         agent = agent ?? "transport=dt_socket,address=127.0.0.1:10000";
         Debug.Log("Telling Mono to listen to following debugger agent: " + agent);
 
+
         // Prepare the functions.
         mono_jit_parse_options = mono_jit_parse_options ?? PInvokeHelper.Mono.GetDelegate<d_mono_jit_parse_options>();
         mono_jit_parse_options(1, new string[] { "--debugger-agent=" + agent });
+
 
         Debug.Log("Done!");
         return true;
@@ -178,12 +182,14 @@ public static class MonoDebug {
         }
         Debug.Log("Kick-starting Mono's debugger agent.");
 
+
         // Prepare everything else required: Assembly, domain, ...
         Assembly asmThisManaged = Assembly.GetCallingAssembly();
         IntPtr asmThis = (IntPtr) f_mono_assembly.GetValue(asmThisManaged);
 
         AppDomain domainManaged = AppDomain.CurrentDomain; // Unity Child Domain; Any other app domains?
         IntPtr domain = (IntPtr) f_mono_app_domain.GetValue(domainManaged);
+
 
         // Prepare the functions.
         Debug.Log("mono_debugger_agent_init and the other functions are not public. Creating delegates from pointer.");
@@ -213,6 +219,7 @@ public static class MonoDebug {
             }
             assembly_load(NULL, asm, 0);
         }
+
 
         Debug.Log("thread_startup " + PInvokeHelper.CurrentThreadId);
         thread_startup(NULL, PInvokeHelper.CurrentThreadId);
