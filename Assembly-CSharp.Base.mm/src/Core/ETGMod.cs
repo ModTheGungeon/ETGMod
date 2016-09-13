@@ -47,7 +47,8 @@ public static partial class ETGMod {
 
             return v;
         }
-    }
+    }
+
     public static string GameFolder;
     public static string ModsDirectory;
     public static string ModsListFile;
@@ -66,9 +67,7 @@ public static partial class ETGMod {
 
     public static string[] LaunchArguments;
 
-    private delegate string[] d_mono_runtime_get_main_args();
-    [DllImport("mono")]
-    private static extern string[] mono_runtime_get_main_args(); //ret MonoArray*
+    private delegate string[] d_mono_runtime_get_main_args(); //ret MonoArray*
 
     public static Func<IEnumerator, Coroutine> StartCoroutine;
 
@@ -84,10 +83,12 @@ public static partial class ETGMod {
         }
         _Init = true;
 
-        if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
-            LaunchArguments = mono_runtime_get_main_args();
-        } else {
-            LaunchArguments = PInvokeHelper.Mono.GetDelegate<d_mono_runtime_get_main_args>()();
+        LaunchArguments = PInvokeHelper.Mono.GetDelegate<d_mono_runtime_get_main_args>()();
+        for (int i = 1; i < LaunchArguments.Length; i++) {
+            string arg = LaunchArguments[i];
+            if (arg == "--no-steam" || arg == "-ns") {
+                Platform.DisableSteam = true;
+            }
         }
 
         GameFolder = Directory.GetParent(LaunchArguments[0]).FullName;

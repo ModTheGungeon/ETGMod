@@ -18,16 +18,16 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;UNITYENGINE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType></DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;UNITYENGINE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -53,6 +53,17 @@
     <Compile Include="src\patch_Resources.cs" />
     <Compile Include="src\patch_TextAsset.cs" />
     <Compile Include="src\ETGModInstallerRenames.cs" />
+    <Compile Include="..\Assembly-CSharp.Base.mm\src\PInvokeHelper.cs">
+      <Link>src\PInvokeHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Assembly-CSharp.Base.mm\src\MonoMod\Platform.cs">
+      <Link>src\MonoMod\Platform.cs</Link>
+    </Compile>
+    <Compile Include="..\Assembly-CSharp.Base.mm\src\MonoMod\PlatformHelper.cs">
+      <Link>src\MonoMod\PlatformHelper.cs</Link>
+    </Compile>
+    <Compile Include="src\MonoDebug.cs" />
+    <Compile Include="src\patch_ClassLibraryInitializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

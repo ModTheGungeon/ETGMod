@@ -4,9 +4,14 @@ using System;
 using UnityEngine;
 using System.Reflection.Emit;
 
-public static class PInvokeHelper {
-    
-    private static IntPtr NULL = IntPtr.Zero;
+#if UNITYENGINE
+internal
+#else
+public
+#endif
+    static class PInvokeHelper {
+
+    private readonly static IntPtr NULL = IntPtr.Zero;
 
     // Windows
     [DllImport("kernel32")]

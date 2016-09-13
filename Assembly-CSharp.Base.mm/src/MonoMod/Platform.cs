@@ -3,7 +3,12 @@
 /// Generic platform enum.
 /// </summary>
 [Flags]
-public enum Platform {
+#if UNITYENGINE
+internal
+#else
+public
+#endif
+    enum Platform {
     None = 0,
 
     // Underlying platform categories

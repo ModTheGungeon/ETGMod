@@ -2,7 +2,12 @@
 using System.IO;
 using System.Reflection;
 
-public static class PlatformHelper {
+#if UNITYENGINE
+internal
+#else
+public
+#endif
+    static class PlatformHelper {
 
     public readonly static Platform Current;
 
