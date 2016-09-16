@@ -53,20 +53,25 @@ public sealed class ItemDB {
     public Dictionary<string, List<WeightedGameObject>> ModLootPerFloor = new Dictionary<string, List<WeightedGameObject>>();
 
     /// <summary>
-    /// Sprite collection used by the guns.
+    /// Sprite collection used by guns.
     /// </summary>
     public tk2dSpriteCollectionData WeaponCollection;
     /// <summary>
-    /// Sprite collection used by the items.
+    /// Sprite collection used by some other guns.
+    /// </summary>
+    public tk2dSpriteCollectionData WeaponCollection02;
+    /// <summary>
+    /// Sprite collection used by projectiles.
+    /// </summary>
+    public tk2dSpriteCollectionData ProjectileCollection;
+    /// <summary>
+    /// Sprite collection used by items.
     /// </summary>
     public tk2dSpriteCollectionData ItemCollection;
 
-    public int Add(Gun value, bool updateSpriteCollections = false, bool updateAnimations = false, string floor = "ANY") {
-        int id = Add(value, updateSpriteCollections, floor);
-        if (updateAnimations) {
-            value.UpdateAnimations();
-            value.GetSprite().SetSprite(WeaponCollection, value.DefaultSpriteID = WeaponCollection.GetSpriteIdByName(value.encounterTrackable.journalData.AmmonomiconSprite));
-        }
+    public int Add(Gun value, tk2dSpriteCollectionData collection = null, string floor = "ANY") {
+        collection = collection ?? WeaponCollection;
+        int id = Add(value, false, floor);
         return id;
     }
     public int Add(PickupObject value, bool updateSpriteCollections = false, string floor = "ANY") {
@@ -104,10 +109,10 @@ public sealed class ItemDB {
             AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
             if (value is Gun) {
                 WeaponCollection.Handle();
+                WeaponCollection02.Handle();
             } else {
                 ItemCollection.Handle();
             }
-            ETGMod.Assets.Packer.Apply();
         }
         return id;
     }
@@ -130,6 +135,7 @@ public sealed class ItemDB {
     public Gun NewGun(string gunName, string gunNameShort = null) {
         if (_GunGivenPrototype == null) {
             _GunGivenPrototype = (Gun) ETGMod.Databases.Items["Pea_Shooter"];
+            ProjectileCollection = _GunGivenPrototype.DefaultModule.projectiles[0].GetComponentInChildren<tk2dBaseSprite>().Collection;
         }
 
         return NewGun(gunName, _GunGivenPrototype, gunNameShort);
@@ -213,34 +219,37 @@ public static class ItemDBExt {
         ETGMod.Databases.Items.SetText(item.encounterTrackable.journalData.AmmonomiconFullEntry, text);
     }
 
-    public static void UpdateAnimations(this Gun gun) {
-        gun.idleAnimation               = gun.UpdateAnimation("idle");
-        gun.introAnimation              = gun.UpdateAnimation("intro", true);
-        gun.emptyAnimation              = gun.UpdateAnimation("empty");
-        gun.shootAnimation              = gun.UpdateAnimation("fire", true);
-        gun.reloadAnimation             = gun.UpdateAnimation("reload", true);
-        gun.chargeAnimation             = gun.UpdateAnimation("charge");
-        gun.outOfAmmoAnimation          = gun.UpdateAnimation("out_of_ammo");
-        gun.dischargeAnimation          = gun.UpdateAnimation("discharge");
-        gun.finalShootAnimation         = gun.UpdateAnimation("final_fire", true);
-        gun.emptyReloadAnimation        = gun.UpdateAnimation("empty_reload", true);
-        gun.criticalFireAnimation       = gun.UpdateAnimation("critical_fire", true);
-        gun.enemyPreFireAnimation       = gun.UpdateAnimation("enemy_pre_fire");
-        gun.alternateShootAnimation     = gun.UpdateAnimation("alternate_shoot", true);
-        gun.alternateReloadAnimation    = gun.UpdateAnimation("alternate_reload", true);
+    public static void UpdateAnimations(this Gun gun, tk2dSpriteCollectionData collection = null) {
+        collection = collection ?? ETGMod.Databases.Items.WeaponCollection;
+
+        gun.idleAnimation               = gun.UpdateAnimation("idle",               collection      );
+        gun.introAnimation              = gun.UpdateAnimation("intro",              collection, true);
+        gun.emptyAnimation              = gun.UpdateAnimation("empty",              collection      );
+        gun.shootAnimation              = gun.UpdateAnimation("fire",               collection, true);
+        gun.reloadAnimation             = gun.UpdateAnimation("reload",             collection, true);
+        gun.chargeAnimation             = gun.UpdateAnimation("charge",             collection      );
+        gun.outOfAmmoAnimation          = gun.UpdateAnimation("out_of_ammo",        collection      );
+        gun.dischargeAnimation          = gun.UpdateAnimation("discharge",          collection      );
+        gun.finalShootAnimation         = gun.UpdateAnimation("final_fire",         collection, true);
+        gun.emptyReloadAnimation        = gun.UpdateAnimation("empty_reload",       collection, true);
+        gun.criticalFireAnimation       = gun.UpdateAnimation("critical_fire",      collection, true);
+        gun.enemyPreFireAnimation       = gun.UpdateAnimation("enemy_pre_fire",     collection      );
+        gun.alternateShootAnimation     = gun.UpdateAnimation("alternate_shoot",    collection, true);
+        gun.alternateReloadAnimation    = gun.UpdateAnimation("alternate_reload",   collection, true);
     }
-    public static string UpdateAnimation(this Gun gun, string name, bool returnToIdle = false) {
+    public static string UpdateAnimation(this Gun gun, string name, tk2dSpriteCollectionData collection = null, bool returnToIdle = false) {
+        collection = collection ?? ETGMod.Databases.Items.WeaponCollection;
+
         string clipName = gun.name + "_" + name;
         string prefix = clipName + "_";
         int prefixLength = prefix.Length;
 
         List<tk2dSpriteAnimationFrame> frames = new List<tk2dSpriteAnimationFrame>();
-        tk2dSpriteCollectionData sprites = ETGMod.Databases.Items.WeaponCollection;
-        for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
-            tk2dSpriteDefinition sprite = sprites.spriteDefinitions[i];
+        for (int i = 0; i < collection.spriteDefinitions.Length; i++) {
+            tk2dSpriteDefinition sprite = collection.spriteDefinitions[i];
             if (sprite.Valid && sprite.name.StartsWithInvariant(prefix)) {
                 frames.Add(new tk2dSpriteAnimationFrame() {
-                    spriteCollection = sprites,
+                    spriteCollection = collection,
                     spriteId = i
                 });
             }
@@ -263,8 +272,8 @@ public static class ItemDBExt {
         }
 
         frames.Sort((x, y) =>
-            int.Parse(sprites.spriteDefinitions[x.spriteId].name.Substring(prefixLength)) -
-            int.Parse(sprites.spriteDefinitions[y.spriteId].name.Substring(prefixLength))
+            int.Parse(collection.spriteDefinitions[x.spriteId].name.Substring(prefixLength)) -
+            int.Parse(collection.spriteDefinitions[y.spriteId].name.Substring(prefixLength))
            );
         clip.frames = frames.ToArray();
 
@@ -324,17 +333,17 @@ public static class ItemDBExt {
         return projectile;
     }
 
-    public static void SetupSprite(this Gun gun, string defaultSprite = null, int fps = 0) {
+    public static void SetupSprite(this Gun gun, tk2dSpriteCollectionData collection = null, string defaultSprite = null, int fps = 0) {
         AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
-        ETGMod.Databases.Items.WeaponCollection.Handle();
+        collection = collection ?? ETGMod.Databases.Items.WeaponCollection;
+        collection.Handle();
 
         if (defaultSprite != null) {
             gun.encounterTrackable.journalData.AmmonomiconSprite = defaultSprite;
         }
 
-        gun.UpdateAnimations();
-        gun.GetSprite().SetSprite(ETGMod.Databases.Items.WeaponCollection, ETGMod.Databases.Items.WeaponCollection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
-        gun.DefaultSpriteID = gun.GetSprite().spriteId;
+        gun.UpdateAnimations(collection);
+        gun.GetSprite().SetSprite(collection, gun.DefaultSpriteID = collection.GetSpriteIdByName(gun.encounterTrackable.journalData.AmmonomiconSprite));
 
         if (fps != 0) {
             gun.SetAnimationFPS(fps);

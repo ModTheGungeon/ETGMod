@@ -28,7 +28,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, "b11"); // no tag
+        new Profile(0, "b12"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -126,6 +126,9 @@ public static partial class ETGMod {
             if (sprite.Collection.spriteCollectionName == "WeaponCollection") {
                 Databases.Items.WeaponCollection = sprite.Collection;
             }
+            if (sprite.Collection.spriteCollectionName == "WeaponCollection02") {
+                Databases.Items.WeaponCollection02 = sprite.Collection;
+            }
         }
 
         CallInEachModule("Init");
@@ -135,6 +138,7 @@ public static partial class ETGMod {
         ETGModGUI.Start();
 
         TestGunController.Add();
+        BalloonGunController.Add();
 
         dfInputManager manager = GameUIRoot.Instance.Manager.GetComponent<dfInputManager>();
         manager.Adapter = new SGUIDFInput(manager.Adapter);

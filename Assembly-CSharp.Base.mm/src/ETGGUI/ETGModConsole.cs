@@ -160,7 +160,14 @@ public class ETGModConsole : ETGModMenu {
 
         Commands.GetGroup ("test")
                 .AddGroup ("spawn", SpawnGUID)
-                .AddGroup ("resources");
+                .AddGroup ("resources")
+                .AddUnit  ("skiplevel", delegate(string[] args) {
+                    Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
+                    GameManager.Instance.DelayedLoadNextLevel(0.5f);
+                }).AddUnit("charselect", delegate (string[] args) {
+                    Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
+                    GameManager.Instance.DelayedLoadCharacterSelect(0.5f);
+                });
 
         //// TEST.RESOURCES NAMESPACE
         Commands.GetGroup ("test").GetGroup ("resources")
@@ -168,7 +175,8 @@ public class ETGModConsole : ETGModMenu {
 
         //// TEST.SPAWN NAMESPACE
         Commands.GetGroup ("test").GetGroup ("spawn")
-                .AddUnit  ("chest", SpawnChest);
+                .AddUnit  ("chest", SpawnChest)
+                .AddUnit  ("all",   SpawnAll);
 
         // DUMP NAMESPACE
         Commands.AddUnit  ("dump", new ConsoleCommandGroup());
@@ -555,6 +563,38 @@ public class ETGModConsole : ETGModMenu {
             }
         }
         chest.overrideMimicChance = origMimicChance;
+    }
+
+    void SpawnAll(string[] args) {
+        if (!ArgCount(args, 0)) return;
+        foreach (EnemyDatabaseEntry enemy in EnemyDatabase.Instance.Entries) {
+            AIActor enemyPrefab = enemy?.GetPrefab<AIActor>();
+            if (enemyPrefab == null) continue;
+            IntVector2? targetCenter = GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2(VectorConversions.Floor);
+            Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {
+                for (int j = 0; j < enemyPrefab.Clearance.x; j++) {
+                    for (int k = 0; k < enemyPrefab.Clearance.y; k++) {
+                        if (GameManager.Instance.Dungeon.data.isTopWall(c.x + j, c.y + k)) {
+                            return false;
+                        }
+                        if (targetCenter.HasValue) {
+                            if (IntVector2.Distance(targetCenter.Value, c.x + j, c.y + k) < 4) {
+                                return false;
+                            }
+                            if (IntVector2.Distance(targetCenter.Value, c.x + j, c.y + k) > 20) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            };
+            IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell(enemyPrefab.Clearance, enemyPrefab.PathableTiles, false, cellValidator);
+            if (randomAvailableCell.HasValue) {
+                AIActor aIActor = AIActor.Spawn(enemyPrefab, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
+                aIActor.HandleReinforcementFallIntoRoom(0);
+            }
+        }
     }
 
     void ResourcesLoad(string[] args) {

@@ -173,4 +173,11 @@ public static partial class ETGMod {
         return child;
     }
 
+    public static tk2dBaseSprite GetAnySprite(this BraveBehaviour b) {
+        return 
+            b.GetComponent<tk2dBaseSprite>() ??
+            b.transform.GetComponentInChildren<tk2dBaseSprite>() ??
+            b.transform.GetComponentInParent<tk2dBaseSprite>();
+    }
+
 }

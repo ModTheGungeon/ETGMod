@@ -40,8 +40,14 @@ public static partial class ETGMod {
             }
 
             public static void DumpSpriteCollection(tk2dSpriteCollectionData sprites) {
-                string path = "sprites/" + sprites.spriteCollectionName;
+                string path = "DUMPsprites/" + sprites.spriteCollectionName;
                 string diskPath = null;
+
+                diskPath = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
+                if (File.Exists(diskPath)) {
+                    return;
+                }
+
                 Texture2D texRWOrig = null;
                 Texture2D texRW = null;
                 Color[] texRWData = null;
@@ -71,25 +77,10 @@ public static partial class ETGMod {
                         texRWOrig = texOrig;
                         texRW = texOrig.GetRW();
                         texRWData = texRW.GetPixels();
+                        diskPath = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
 
-                        Color[] fuck = texRWData;
-                        Color hard = new Color(0f, 0f, 0f, 0f);
-                        bool shit = true;
-                        for (int me = 0; me < fuck.Length; me += 8) {
-                            if (fuck[me] != hard) {
-                                shit = false;
-                                break;
-                            }
-                        }
-                        if (shit) {
-                            return;
-                        }
-
-                        diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
-                        if (!File.Exists(diskPath)) {
-                            Directory.GetParent(diskPath).Create();
-                            File.WriteAllBytes(diskPath, texRW.EncodeToPNG());
-                        }
+                        Directory.GetParent(diskPath).Create();
+                        File.WriteAllBytes(diskPath, texRW.EncodeToPNG());
                     }
 
                     Texture2D texRegion;
@@ -166,7 +157,7 @@ public static partial class ETGMod {
 
                     }
 
-                    diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + pathFull).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
+                    diskPath = Path.Combine(ResourcesDirectory, pathFull.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
                     if (!File.Exists(diskPath)) {
                         Directory.GetParent(diskPath).Create();
                         File.WriteAllBytes(diskPath, texRegion.EncodeToPNG());
@@ -176,12 +167,13 @@ public static partial class ETGMod {
             }
 
             public static void DumpSpriteCollectionMetadata(tk2dSpriteCollectionData sprites) {
-                string path = "sprites/" + sprites.spriteCollectionName;
-                string diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".json");
-                if (!File.Exists(diskPath)) {
-                    Directory.GetParent(diskPath).Create();
-                    JSONHelper.WriteJSON(AssetSpriteData.FromTK2D(sprites), diskPath);
+                string path = "DUMPsprites/" + sprites.spriteCollectionName;
+                string diskPath = Path.Combine(ResourcesDirectory, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".json");
+                if (File.Exists(diskPath)) {
+                    return;
                 }
+                Directory.GetParent(diskPath).Create();
+                JSONHelper.WriteJSON(AssetSpriteData.FromTK2D(sprites), diskPath);
                 for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
                     tk2dSpriteDefinition frame = sprites.spriteDefinitions[i];
                     Texture2D texOrig = (Texture2D) frame.material.mainTexture;
@@ -189,7 +181,7 @@ public static partial class ETGMod {
                         continue;
                     }
                     string pathFull = path + "/" + frame.name;
-                    diskPath = Path.Combine(ResourcesDirectory, ("DUMP" + pathFull).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".json");
+                    diskPath = Path.Combine(ResourcesDirectory, pathFull.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".json");
                     if (!File.Exists(diskPath)) {
                         Directory.GetParent(diskPath).Create();
                         JSONHelper.WriteJSON(AssetSpriteData.FromTK2D(sprites, frame, true), diskPath);

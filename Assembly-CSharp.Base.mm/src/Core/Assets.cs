@@ -42,6 +42,7 @@ public static partial class ETGMod {
 
         public static bool DumpSprites = false;
         public static bool DumpSpritesMetadata = false;
+        public static int FramesToHandleAllObjectsIn = 16;
         public static int FramesToHandleAllSpritesIn = 16;
         private readonly static Vector2[] _DefaultUVs = {
             new Vector2(0f, 0f),
@@ -212,7 +213,7 @@ public static partial class ETGMod {
                         data.materials = new Material[] { data.material };
                         data.buildKey = UnityEngine.Random.Range(0, int.MaxValue);
 
-                        data.Handle(true);
+                        data.Handle();
 
                         data.textures = new Texture2D[data.spriteDefinitions.Length];
                         for (int i = 0; i < data.spriteDefinitions.Length; i++) {
@@ -238,12 +239,11 @@ public static partial class ETGMod {
             UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix, type);
             if (orig is GameObject) {
                 HandleGameObject((GameObject) orig);
-                Packer.Apply();
             }
             return orig;
         }
 
-        public static void HandleSprites(tk2dSpriteCollectionData sprites, bool replace = false) {
+        public static void HandleSprites(tk2dSpriteCollectionData sprites) {
             if (sprites == null) {
                 return;
             }
@@ -252,8 +252,9 @@ public static partial class ETGMod {
             Texture2D replacement;
             AssetMetadata metadata;
 
-            string atlasName = sprites.materials[0].mainTexture == null ? null : sprites.materials[0].mainTexture.name;
-            if (sprites.materials[0].mainTexture != null && (atlasName == null || atlasName.Length == 0 || atlasName[0] != '~')) {
+            Texture mainTexture = sprites.materials?.Length != 0 ? sprites.materials[0]?.mainTexture : null;
+            string atlasName = mainTexture?.name;
+            if (mainTexture != null && (atlasName == null || atlasName.Length == 0 || atlasName[0] != '~')) {
                      if (TextureMap.TryGetValue(path, out replacement)) { }
                 else if (TryGetMapped          (path, out metadata))    { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
                 else {
@@ -265,6 +266,7 @@ public static partial class ETGMod {
                         if (sprites.spriteCollectionName.Contains(spriteName)) {
                             string copyPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
                             if (mapping.Value.Container == AssetMetadata.ContainerType.Filesystem && !File.Exists(copyPath)) {
+                                Directory.GetParent(copyPath).Create();
                                 File.Copy(mapping.Value.File, copyPath);
                             }
                             TextureMap[path] = replacement = Resources.Load<Texture2D>(resourcePath);
@@ -277,6 +279,7 @@ public static partial class ETGMod {
                     // Full atlas texture replacement.
                     replacement.name = '~' + atlasName;
                     for (int i = 0; i < sprites.materials.Length; i++) {
+                        if (sprites.materials[i]?.mainTexture == null) continue;
                         sprites.materials[i].mainTexture = replacement;
                     }
                 }
@@ -377,27 +380,99 @@ public static partial class ETGMod {
             }
 
             if (sprites.hasPlatformData) {
-                sprites.inst.Handle(replace);
+                sprites.inst.Handle();
             }
         }
 
-        public static void HandleGameObject(GameObject go) {
-            go.GetComponent<tk2dBaseSprite>()?.Collection.Handle();
+        public static void HandleDfAtlas(dfAtlas atlas) {
+            if (atlas == null) {
+                return;
+            }
+            string path = "sprites/DFGUI/" + atlas.name;
+
+            Texture2D replacement;
+            AssetMetadata metadata;
+
+            Texture mainTexture = atlas.Material.mainTexture;
+            string atlasName = mainTexture?.name;
+            if (mainTexture != null && (atlasName == null || atlasName.Length == 0 || atlasName[0] != '~')) {
+                     if (TextureMap.TryGetValue(path, out replacement)) { }
+                else if (TryGetMapped(path, out metadata)) { TextureMap[path] = replacement = Resources.Load<Texture2D>(path); }
+                else {
+                    foreach (KeyValuePair<string, AssetMetadata> mapping in Map) {
+                        if (!mapping.Value.HasData) continue;
+                        string resourcePath = mapping.Key;
+                        if (!resourcePath.StartsWithInvariant("sprites/DFGUI/@")) continue;
+                        string spriteName = resourcePath.Substring(9);
+                        if (atlas.name.Contains(spriteName)) {
+                            string copyPath = Path.Combine(ResourcesDirectory, ("DUMP" + path).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + ".png");
+                            if (mapping.Value.Container == AssetMetadata.ContainerType.Filesystem && !File.Exists(copyPath)) {
+                                Directory.GetParent(copyPath).Create();
+                                File.Copy(mapping.Value.File, copyPath);
+                            }
+                            TextureMap[path] = replacement = Resources.Load<Texture2D>(resourcePath);
+                            break;
+                        }
+                    }
+                }
+
+                if (replacement != null) {
+                    // Full atlas texture replacement.
+                    replacement.name = '~' + atlasName;
+                    atlas.Material.mainTexture = replacement;
+                }
+            }
+
+            /*
+            if (DumpSprites) {
+                Dump.DumpSpriteCollection(sprites);
+            }
+            if (DumpSpritesMetadata) {
+                Dump.DumpSpriteCollectionMetadata(sprites);
+            }
+            */
+
+            // TODO items in dfAtlas!
+
+            if (atlas.Replacement != null) HandleDfAtlas(atlas.Replacement);
+
+        }
+
+        public static void HandleGameObject(GameObject go, bool recursive = true) {
+            if (go == null) return;
+
+
+
+            if (!recursive) return;
+            int children = go.transform.childCount;
+            for (int i = 0; i < children; i++) {
+                HandleGameObject(go.transform.GetChild(i).gameObject, true);
+            }
         }
 
         public static void HandleAll() {
+            StartCoroutine(HandleAllObjects());
             StartCoroutine(HandleAllSprites());
         }
-        private static IEnumerator HandleAllSprites() {
-            tk2dBaseSprite[] sprites = UnityEngine.Object.FindObjectsOfType<tk2dBaseSprite>();
-            int handleUntilYield = sprites.Length / FramesToHandleAllSpritesIn;
+        private static IEnumerator HandleAllObjects() {
+            Transform[] transforms = UnityEngine.Object.FindObjectsOfType<Transform>();
+            int handleUntilYield = transforms.Length / FramesToHandleAllObjectsIn;
             int handleUntilYieldM1 = handleUntilYield - 1;
-            for (int i = 0; i < sprites.Length; i++) {
-                sprites[i].Handle();
+            for (int i = 0; i < transforms.Length; i++) {
+                try {
+                    HandleGameObject(transforms[i]?.gameObject, false);
+                } catch (NullReferenceException) { /* Unity shit itself internally. */ }
                 if (i % handleUntilYield == handleUntilYieldM1) yield return null;
             }
-            Packer.Apply();
-            yield return null;
+        }
+        private static IEnumerator HandleAllSprites() {
+            tk2dSpriteCollectionData[] atlases = Resources.FindObjectsOfTypeAll<tk2dSpriteCollectionData>();
+            int handleUntilYield = atlases.Length / FramesToHandleAllSpritesIn;
+            int handleUntilYieldM1 = handleUntilYield - 1;
+            for (int i = 0; i < atlases.Length; i++) {
+                HandleSprites(atlases[i]);
+                if (i % handleUntilYield == handleUntilYieldM1) yield return null;
+            }
         }
 
         public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
@@ -421,8 +496,19 @@ public static partial class ETGMod {
         Assets.HandleSprites(sprite.Collection);
     }
 
-    public static void Handle(this tk2dSpriteCollectionData sprites, bool replace = false) {
-        Assets.HandleSprites(sprites, replace);
+    public static void Handle(this tk2dSpriteCollectionData sprites) {
+        Assets.HandleSprites(sprites);
+    }
+    [Obsolete("ASH development leftover.")]
+    public static void HandleAuto(this tk2dBaseSprite sprite) {
+        _HandleAuto(sprite.Handle);
+    }
+
+    public static void Handle(this dfAtlas atlas) {
+        Assets.HandleDfAtlas(atlas);
+    }
+    public static void HandleAuto(this dfAtlas atlas) {
+        _HandleAuto(atlas.Handle);
     }
 
     public static void MapAssets(this Assembly asm) {
@@ -431,6 +517,21 @@ public static partial class ETGMod {
 
     public static void ReplaceTexture(this tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
         Assets.ReplaceTexture(frame, replacement, pack);
+    }
+
+
+
+    private static void _HandleAuto(Action a) {
+        if (ETGModGUI.TestTexture == null && false) {
+            StartCoroutine(_HandleAutoCoroutine(a));
+            return;
+        }
+        a();
+    }
+    private static IEnumerator _HandleAutoCoroutine(Action a) {
+        yield return new WaitUntil(() => ETGModGUI.TestTexture != null);
+
+        a();
     }
 
 }

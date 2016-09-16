@@ -144,7 +144,6 @@
     <Compile Include="src\Core\Assets.Dump.cs" />
     <Compile Include="src\Core\Assets.Data.cs" />
     <Compile Include="src\Core\RuntimeAtlas.cs" />
-    <Compile Include="src\Core\GunControllers.cs" />
     <Compile Include="src\Core\GunBehaviour.cs" />
     <Compile Include="src\Core\Platform.cs" />
     <Compile Include="src\Patches\patch_PlatformInterface.cs" />
@@ -174,6 +173,9 @@
     <Compile Include="src\Patches\patch_SteamManager.cs" />
     <Compile Include="src\Core\Time.cs" />
     <Compile Include="src\Patches\patch_BraveTime.cs" />
+    <Compile Include="src\Patches\patch_dfSprite.cs" />
+    <Compile Include="src\Guns\TestGunController.cs" />
+    <Compile Include="src\Guns\BalloonGunController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -314,5 +316,6 @@
   <ItemGroup>
     <Folder Include="Content\etgmod\gui\" />
     <Folder Include="src\SGUI\ExampleModifiers\" />
+    <Folder Include="src\Guns\" />
   </ItemGroup>
 </Project>
