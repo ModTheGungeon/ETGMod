@@ -65,6 +65,7 @@
     <Compile Include="src\MonoDebug.cs" />
     <Compile Include="src\patch_ClassLibraryInitializer.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />
+    <Compile Include="src\patch_GameObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

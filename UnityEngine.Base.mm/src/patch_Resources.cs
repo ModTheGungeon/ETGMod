@@ -12,7 +12,7 @@ namespace UnityEngine {
             if (path.EndsWith(ETGModUnityEngineHooks.SkipSuffix)) {
                 return Ooad(path.Substring(0, path.Length - ETGModUnityEngineHooks.SkipSuffix.Length), type);
             }
-            return ETGModUnityEngineHooks.Load(path, type) ?? Ooad(path, type);
+            return ETGModUnityEngineHooks.Load?.Invoke(path, type) ?? Ooad(path, type);
         }
 
         [MonoModOriginal] public static extern ResourceRequest OoadAsync(string path, System.Type type);
@@ -21,7 +21,7 @@ namespace UnityEngine {
             if (path.EndsWith(ETGModUnityEngineHooks.SkipSuffix)) {
                 return LoadAsync(path.Substring(0, path.Length - ETGModUnityEngineHooks.SkipSuffix.Length), type);
             }
-            return ETGModUnityEngineHooks.LoadAsync(path, type) ?? OoadAsync(path, type);
+            return ETGModUnityEngineHooks.LoadAsync?.Invoke(path, type) ?? OoadAsync(path, type);
         }
 
         [MonoModOriginal] public static extern Object[] OoadAll(string path, System.Type systemTypeInstance);
@@ -30,7 +30,7 @@ namespace UnityEngine {
             if (path.EndsWith(ETGModUnityEngineHooks.SkipSuffix)) {
                 return OoadAll(path.Substring(0, path.Length - ETGModUnityEngineHooks.SkipSuffix.Length), type);
             }
-            return ETGModUnityEngineHooks.LoadAll(path, type) ?? OoadAll(path, type);
+            return ETGModUnityEngineHooks.LoadAll?.Invoke(path, type) ?? OoadAll(path, type);
         }
 
         [MonoModOriginal] public static extern Object OetBuiltinResource(System.Type type, string path);

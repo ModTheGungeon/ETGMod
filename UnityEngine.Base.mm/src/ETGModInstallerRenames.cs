@@ -7,12 +7,12 @@ namespace UnityEngine {
     internal static class ETGModInstallerRenames {
 
         private static string[] items = {
-            "UnityEngine.Resources:Load",
-            "UnityEngine.Resources:LoadAsync",
-            "UnityEngine.Resources:LoadAll",
-            "UnityEngine.Resources:GetBuiltinResource",
-            "UnityEngine.Resources:UnloadAsset",
-            "UnityEngine.Resources:UnloadUnusedAssets"
+            "UnityEngine.Resources:Load", "Ooad",
+            "UnityEngine.Resources:LoadAsync", "OoadAsync",
+            "UnityEngine.Resources:LoadAll", "OoadAll",
+            "UnityEngine.Resources:GetBuiltinResource", "OetBuiltinResource",
+            "UnityEngine.Resources:UnloadAsset", "OnloadAsset",
+            "UnityEngine.Resources:UnloadUnusedAssets", "OnloadUnusedAssets",
 
         };
 

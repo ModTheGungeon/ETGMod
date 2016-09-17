@@ -44,6 +44,31 @@ public static partial class ETGMod {
         public static void HookUnity() {
             ETGModUnityEngineHooks.Construct = HandleObjectAutoConstruct;
             ETGModUnityEngineHooks.Instantiate = HandleObjectAutoInstantiate;
+            ETGModUnityEngineHooks.AddComponent = HandleObjectAutoAddComponent;
+        }
+
+        public static void AddHook<T>(ComponentHook hook) where T : Component {
+            AddHook(typeof(T), hook);
+        }
+        public static void AddHook(Type type, ComponentHook hook) {
+            ComponentHook all;
+            if (Hooks.TryGetValue(type, out all)) {
+                all += hook;
+            } else {
+                all = hook;
+            }
+            Hooks[type] = hook;
+        }
+
+        public static ComponentHook GetHooks<T>() where T : Component {
+            return GetHooks(typeof(T));
+        }
+        public static ComponentHook GetHooks(Type type) {
+            ComponentHook all;
+            if (Hooks.TryGetValue(type, out all)) {
+                return all;
+            }
+            return null;
         }
 
         public static void HandleGameObject(GameObject go, bool recursive = true) {
@@ -51,13 +76,7 @@ public static partial class ETGMod {
 
             Component[] components = go.GetComponents<Component>();
             for (int i = 0; i < components.Length; i++) {
-                Component component = components[i];
-                Type type = component.GetType();
-                ComponentHook hook;
-                if (!Hooks.TryGetValue(type, out hook)) {
-                    continue;
-                }
-                hook(component);
+                HandleComponent(components[i]);
             }
 
             if (!recursive) return;
@@ -67,11 +86,21 @@ public static partial class ETGMod {
             }
         }
 
+        public static void HandleComponent(Component c) {
+            GetHooks(c.GetType())?.Invoke(c);
+        }
+
         public static void HandleObject(UnityEngine.Object o) {
             if (o == null) return;
 
             if (o is GameObject) {
                 HandleGameObject((GameObject) o, true);
+                return;
+            }
+
+            if (o is Component) {
+                HandleComponent((Component) o);
+                return;
             }
         }
 
@@ -113,6 +142,10 @@ public static partial class ETGMod {
     public static UnityEngine.Object HandleObjectAutoInstantiate(this UnityEngine.Object obj) {
         _HandleAuto(obj.HandleObject);
         return obj;
+    }
+    public static Component HandleObjectAutoAddComponent(this Component c) {
+        _HandleAuto(c.HandleObject);
+        return c;
     }
 
     private static void _HandleAuto(Action a) {
