@@ -356,17 +356,17 @@ public static class ItemDBExt {
         return projectile;
     }
 
-    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other, bool cloned = true) {
-        return gun.AddProjectileModuleFrom((Gun) ETGMod.Databases.Items[other], cloned);
+    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other, bool cloned = true, bool clonedProjectiles = true) {
+        return gun.AddProjectileModuleFrom((Gun) ETGMod.Databases.Items[other], cloned, clonedProjectiles);
     }
-    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other, bool cloned = true) {
+    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other, bool cloned = true, bool clonedProjectiles = true) {
         ProjectileModule module = other.DefaultModule;
         if (!cloned) return gun.AddProjectileModule(module);
 
         ProjectileModule clone = ProjectileModule.CreateClone(module, false);
         clone.projectiles = new List<Projectile>(module.projectiles.Capacity);
         for (int i = 0; i < module.projectiles.Count; i++) {
-            clone.projectiles.Add(module.projectiles[i].ClonedPrefab());
+            clone.projectiles.Add(!clonedProjectiles ? module.projectiles[i] : module.projectiles[i].ClonedPrefab());
         }
         return gun.AddProjectileModule(clone);
     }

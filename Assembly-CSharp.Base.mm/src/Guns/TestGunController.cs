@@ -12,7 +12,7 @@ public class TestGunController : GunBehaviour {
         gun.SetupSprite(defaultSprite: "gshbd_fire_002", fps: 10);
         gun.SetAnimationFPS(gun.shootAnimation, 40);
 
-        gun.AddProjectileModuleFrom("AK-47", cloned: false);
+        gun.AddProjectileModuleFrom("AK-47", clonedProjectiles: false);
 
         gun.DefaultModule.ammoCost = 1;
         gun.DefaultModule.shootStyle = ProjectileModule.ShootStyle.SemiAutomatic;
