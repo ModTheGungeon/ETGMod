@@ -7,7 +7,7 @@ using UnityEngine;
 internal abstract class patch_tk2dBaseSprite : tk2dBaseSprite {
 
     public void Start() {
-        this.HandleAuto();
+        // this.HandleAuto();
     }
 
 }

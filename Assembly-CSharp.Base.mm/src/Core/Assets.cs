@@ -42,8 +42,7 @@ public static partial class ETGMod {
 
         public static bool DumpSprites = false;
         public static bool DumpSpritesMetadata = false;
-        public static int FramesToHandleAllObjectsIn = 16;
-        public static int FramesToHandleAllSpritesIn = 16;
+
         private readonly static Vector2[] _DefaultUVs = {
             new Vector2(0f, 0f),
             new Vector2(1f, 0f),
@@ -125,7 +124,7 @@ public static partial class ETGMod {
             }
         }
 
-        public static void Hook() {
+        public static void HookUnity() {
             if (!Directory.Exists(ResourcesDirectory)) {
                 Debug.Log("Resources directory not existing, creating...");
                 Directory.CreateDirectory(ResourcesDirectory);
@@ -238,7 +237,7 @@ public static partial class ETGMod {
             
             UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix, type);
             if (orig is GameObject) {
-                HandleGameObject((GameObject) orig);
+                Objects.HandleGameObject((GameObject) orig);
             }
             return orig;
         }
@@ -438,43 +437,6 @@ public static partial class ETGMod {
 
         }
 
-        public static void HandleGameObject(GameObject go, bool recursive = true) {
-            if (go == null) return;
-
-
-
-            if (!recursive) return;
-            int children = go.transform.childCount;
-            for (int i = 0; i < children; i++) {
-                HandleGameObject(go.transform.GetChild(i).gameObject, true);
-            }
-        }
-
-        public static void HandleAll() {
-            StartCoroutine(HandleAllObjects());
-            StartCoroutine(HandleAllSprites());
-        }
-        private static IEnumerator HandleAllObjects() {
-            Transform[] transforms = UnityEngine.Object.FindObjectsOfType<Transform>();
-            int handleUntilYield = transforms.Length / FramesToHandleAllObjectsIn;
-            int handleUntilYieldM1 = handleUntilYield - 1;
-            for (int i = 0; i < transforms.Length; i++) {
-                try {
-                    HandleGameObject(transforms[i]?.gameObject, false);
-                } catch (NullReferenceException) { /* Unity shit itself internally. */ }
-                if (i % handleUntilYield == handleUntilYieldM1) yield return null;
-            }
-        }
-        private static IEnumerator HandleAllSprites() {
-            tk2dSpriteCollectionData[] atlases = Resources.FindObjectsOfTypeAll<tk2dSpriteCollectionData>();
-            int handleUntilYield = atlases.Length / FramesToHandleAllSpritesIn;
-            int handleUntilYieldM1 = handleUntilYield - 1;
-            for (int i = 0; i < atlases.Length; i++) {
-                HandleSprites(atlases[i]);
-                if (i % handleUntilYield == handleUntilYieldM1) yield return null;
-            }
-        }
-
         public static void ReplaceTexture(tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
             frame.flipped = tk2dSpriteDefinition.FlipMode.None;
             frame.materialInst = new Material(frame.material);
@@ -495,12 +457,12 @@ public static partial class ETGMod {
     public static void Handle(this tk2dBaseSprite sprite) {
         Assets.HandleSprites(sprite.Collection);
     }
+    public static void HandleAuto(this tk2dBaseSprite sprite) {
+        _HandleAuto(sprite.Handle);
+    }
 
     public static void Handle(this tk2dSpriteCollectionData sprites) {
         Assets.HandleSprites(sprites);
-    }
-    public static void HandleAuto(this tk2dBaseSprite sprite) {
-        _HandleAuto(sprite.Handle);
     }
 
     public static void Handle(this dfAtlas atlas) {
@@ -516,21 +478,6 @@ public static partial class ETGMod {
 
     public static void ReplaceTexture(this tk2dSpriteDefinition frame, Texture2D replacement, bool pack = true) {
         Assets.ReplaceTexture(frame, replacement, pack);
-    }
-
-
-
-    private static void _HandleAuto(Action a) {
-        if (ETGModGUI.TestTexture == null && false) {
-            StartCoroutine(_HandleAutoCoroutine(a));
-            return;
-        }
-        a();
-    }
-    private static IEnumerator _HandleAutoCoroutine(Action a) {
-        yield return new WaitUntil(() => ETGModGUI.TestTexture != null);
-
-        a();
     }
 
 }

@@ -1,8 +1,15 @@
 ﻿#pragma warning disable 0626
 #pragma warning disable 0649
 
+using MonoMod;
+
 namespace UnityEngine {
     internal class patch_Object {
+
+        [MonoModConstructor]
+        public patch_Object() {
+            ETGModUnityEngineHooks.Construct?.Invoke(this as object as Object);
+        }
 
         public static extern Object orig_Instantiate(Object original, Vector3 position, Quaternion rotation);
         public static Object Instantiate(Object original, Vector3 position, Quaternion rotation) {

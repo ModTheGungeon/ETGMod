@@ -17,7 +17,7 @@ namespace Dungeonator {
             }
 
             if (ETGMod.Initialized) {
-                ETGMod.Assets.HandleAll();
+                ETGMod.Objects.HandleAll();
                 ETGMod.Databases.Items.DungeonStart();
             }
 

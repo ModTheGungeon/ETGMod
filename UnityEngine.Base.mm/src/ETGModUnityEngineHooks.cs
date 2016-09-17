@@ -16,5 +16,7 @@ namespace UnityEngine {
 
         public static Func<Object, Object> Instantiate = (Object obj) => obj;
 
+        public static Action<Object> Construct;
+
     }
 }

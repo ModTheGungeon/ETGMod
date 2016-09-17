@@ -104,7 +104,8 @@ public static partial class ETGMod {
         SGUIRoot.Setup();
 
         Debug.Log("ETGMod " + BaseUIVersion);
-        Assets.Hook();
+        Assets.HookUnity();
+        Objects.HookUnity();
         Assembly.GetCallingAssembly().MapAssets();
 
         ETGModGUI.Create();

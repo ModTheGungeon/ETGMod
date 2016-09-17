@@ -176,6 +176,7 @@
     <Compile Include="src\Patches\patch_dfSprite.cs" />
     <Compile Include="src\Guns\TestGunController.cs" />
     <Compile Include="src\Guns\BalloonGunController.cs" />
+    <Compile Include="src\Core\Objects.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">

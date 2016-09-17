@@ -9,7 +9,7 @@ internal class patch_dfSprite : dfSprite {
     public override void Start() {
         base.Start();
 
-        Atlas.HandleAuto();
+        // Atlas.HandleAuto();
     }
 
 }
