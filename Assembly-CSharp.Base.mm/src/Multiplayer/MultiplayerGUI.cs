@@ -11,10 +11,12 @@ namespace ETGMultiplayer {
 
         public static MultiplayerGUI Instance;
 
+        /*
         SGroup MainGUI;
 
         SGroup LobbyGUI;
         SGroup InGameGUI;
+        */
 
         public void Awake() {
             Instance=this;

@@ -71,6 +71,11 @@ public sealed class ItemDB {
 
     public int Add(Gun value, tk2dSpriteCollectionData collection = null, string floor = "ANY") {
         collection = collection ?? WeaponCollection;
+
+        if (value.gameObject.GetComponent<GunBehaviour>() == null) {
+            value.gameObject.AddComponent<GunBehaviour>();
+        }
+
         int id = Add(value, false, floor);
         return id;
     }
@@ -179,6 +184,9 @@ public sealed class ItemDB {
     */
 
     public void SetupItem(PickupObject item, string name) {
+        if (item.encounterTrackable == null) item.encounterTrackable = item.gameObject.AddComponent<EncounterTrackable>();
+        if (item.encounterTrackable.journalData == null) item.encounterTrackable.journalData = new JournalEntry();
+
         item.encounterTrackable.EncounterGuid = item.name;
 
         item.encounterTrackable.prerequisites = new DungeonPrerequisite[0];
@@ -308,25 +316,59 @@ public static class ItemDBExt {
         clip.fps = fps;
     }
 
-    public static Projectile AddProjectileFrom(this Gun gun, string other) {
-        return gun.AddProjectileFrom((Gun) ETGMod.Databases.Items[other]);
+    public static Projectile ClonedPrefab(this Projectile orig) {
+        if (orig == null) return null;
+
+        orig.gameObject.SetActive(false);
+        Projectile clone = UnityEngine.Object.Instantiate(orig.gameObject).GetComponent<Projectile>();
+        orig.gameObject.SetActive(true);
+
+        clone.name = orig.name;
+        UnityEngine.Object.DontDestroyOnLoad(clone.gameObject);
+
+        return clone;
     }
-    public static Projectile AddProjectileFrom(this Gun gun, Gun other) {
-        if (other.DefaultModule.projectiles.Count == 0) {
-            return null;
+    public static Projectile EnabledClonedPrefab(this Projectile projectile) {
+        if (projectile == null) return null;
+
+        if (!projectile.gameObject.activeSelf) {
+            string name = projectile.name;
+            // TODO The clone of the clone fixes the projectile "breaking", but may cause performance issues.
+            projectile = (Projectile) UnityEngine.Object.Instantiate(projectile, projectile.transform.parent);
+            projectile.name = name;
+            projectile.gameObject.SetActive(true);
         }
-        return gun.AddProjectile(UnityEngine.Object.Instantiate(other.gameObject).GetComponent<Gun>().DefaultModule.projectiles[0]);
+
+        return projectile;
+    }
+
+    public static Projectile AddProjectileFrom(this Gun gun, string other, bool cloned = true) {
+        return gun.AddProjectileFrom((Gun) ETGMod.Databases.Items[other], cloned);
+    }
+    public static Projectile AddProjectileFrom(this Gun gun, Gun other, bool cloned = true) {
+        if (other.DefaultModule.projectiles.Count == 0) return null;
+        Projectile p = other.DefaultModule.projectiles[0];
+        if (p == null) return null;
+        return gun.AddProjectile(!cloned ? p : p.ClonedPrefab());
     }
     public static Projectile AddProjectile(this Gun gun, Projectile projectile) {
         gun.DefaultModule.projectiles.Add(projectile);
         return projectile;
     }
 
-    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other) {
-        return gun.AddProjectileModuleFrom((Gun) ETGMod.Databases.Items[other]);
+    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, string other, bool cloned = true) {
+        return gun.AddProjectileModuleFrom((Gun) ETGMod.Databases.Items[other], cloned);
     }
-    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other) {
-        return gun.AddProjectileModule(UnityEngine.Object.Instantiate(other.gameObject).GetComponent<Gun>().DefaultModule);
+    public static ProjectileModule AddProjectileModuleFrom(this Gun gun, Gun other, bool cloned = true) {
+        ProjectileModule module = other.DefaultModule;
+        if (!cloned) return gun.AddProjectileModule(module);
+
+        ProjectileModule clone = ProjectileModule.CreateClone(module, false);
+        clone.projectiles = new List<Projectile>(module.projectiles.Capacity);
+        for (int i = 0; i < module.projectiles.Count; i++) {
+            clone.projectiles.Add(module.projectiles[i].ClonedPrefab());
+        }
+        return gun.AddProjectileModule(clone);
     }
     public static ProjectileModule AddProjectileModule(this Gun gun, ProjectileModule projectile) {
         gun.Volley.projectiles.Add(projectile);

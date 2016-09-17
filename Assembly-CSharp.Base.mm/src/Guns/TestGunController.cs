@@ -12,7 +12,7 @@ public class TestGunController : GunBehaviour {
         gun.SetupSprite(defaultSprite: "gshbd_fire_002", fps: 10);
         gun.SetAnimationFPS(gun.shootAnimation, 40);
 
-        gun.AddProjectileModuleFrom("AK-47");
+        gun.AddProjectileModuleFrom("AK-47", cloned: false);
 
         gun.DefaultModule.ammoCost = 1;
         gun.DefaultModule.shootStyle = ProjectileModule.ShootStyle.SemiAutomatic;
@@ -25,7 +25,7 @@ public class TestGunController : GunBehaviour {
             Gun other = ETGMod.Databases.Items[i] as Gun;
             if (other == null) continue;
             if (other.DefaultModule.shootStyle == ProjectileModule.ShootStyle.Beam) continue;
-            gun.AddProjectileFrom(other);
+            gun.AddProjectileFrom(other, cloned: false);
         }
 
         gun.quality = PickupObject.ItemQuality.S;

@@ -10,7 +10,7 @@ namespace ETGMultiplayer {
 
         public static Dictionary<string, CSteamID> otherPlayers = new Dictionary<string, CSteamID>();
 
-        public static CSteamID currentLobby;
+        // public static CSteamID currentLobby;
 
         public static bool isInLobby = false;
 

@@ -499,7 +499,6 @@ public static partial class ETGMod {
     public static void Handle(this tk2dSpriteCollectionData sprites) {
         Assets.HandleSprites(sprites);
     }
-    [Obsolete("ASH development leftover.")]
     public static void HandleAuto(this tk2dBaseSprite sprite) {
         _HandleAuto(sprite.Handle);
     }

@@ -42,7 +42,7 @@ public class GunBehaviour : MonoBehaviour {
     }
 
     public virtual Projectile OnPreFireProjectileModifier(Gun gun, Projectile projectile) {
-        return projectile;
+        return projectile.EnabledClonedPrefab();
     }
 
 }
