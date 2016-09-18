@@ -99,11 +99,9 @@ public class ETGModGUI : MonoBehaviour {
     public void Update() {
         if (Input.GetKeyDown(KeyCode.F1)) {
             if (CurrentMenu == MenuOpened.Loader) {
-                CurrentMenuInstance.OnClose();
                 CurrentMenu = MenuOpened.None;
             } else {
                 CurrentMenu = MenuOpened.Loader;
-                CurrentMenuInstance.OnOpen ();
             }
 
             UpdateTimeScale ();
@@ -128,11 +126,9 @@ public class ETGModGUI : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.F4)) {
             if (CurrentMenu == MenuOpened.Inspector) {
-                CurrentMenuInstance.OnClose();
                 CurrentMenu = MenuOpened.None;
             } else {
                 CurrentMenu = MenuOpened.Inspector;
-                CurrentMenuInstance.OnOpen ();
             }
         }
 

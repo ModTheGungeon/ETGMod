@@ -4,6 +4,7 @@ namespace SGUI {
     public class SLabel : SElement {
 
         public string Text;
+        public Texture Icon;
 
         public TextAnchor Alignment = TextAnchor.MiddleLeft;
 
@@ -24,6 +25,9 @@ namespace SGUI {
                 } else {
                     Size = Backend.MeasureText(ref Text, Parent.InnerSize);
                 }
+                if (Icon != null) {
+                    Size = Size.WithX(Size.x + Size.y + 4f);
+                }
             }
 
             base.UpdateStyle();
@@ -31,7 +35,7 @@ namespace SGUI {
 
         public override void Render() {
             RenderBackground();
-            Draw.Text(this, Vector2.zero, Size, Text, Alignment);
+            Draw.Text(this, Vector2.zero, Size, Text, Alignment, Icon);
         }
 
     }

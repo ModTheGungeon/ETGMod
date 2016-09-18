@@ -55,6 +55,9 @@
     <Reference Include="PEG">
       <HintPath>..\libs\PEG.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,7 +111,6 @@
     <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
     <Compile Include="src\Patches\patch_Dungeon.cs" />
     <Compile Include="src\Patches\patch_HealthHaver.cs" />
-    <Compile Include="src\Patches\patch_tk2dBaseSprite.cs" />
     <Compile Include="src\Patches\patch_GameManager.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\ReflectionHelper.cs" />
@@ -173,10 +175,11 @@
     <Compile Include="src\Patches\patch_SteamManager.cs" />
     <Compile Include="src\Core\Time.cs" />
     <Compile Include="src\Patches\patch_BraveTime.cs" />
-    <Compile Include="src\Patches\patch_dfSprite.cs" />
     <Compile Include="src\Guns\TestGunController.cs" />
     <Compile Include="src\Guns\BalloonGunController.cs" />
     <Compile Include="src\Core\Objects.cs" />
+    <Compile Include="src\ETGGUI\Repo\ModRepo.cs" />
+    <Compile Include="src\ETGGUI\Repo\RemoteMod.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -305,6 +308,18 @@
     <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_003.png">
       <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_003.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Content\etgmod\gui\icon_api.png">
+      <LogicalName>Content/etgmod/gui/icon_api.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\etgmod\gui\icon_dir.png">
+      <LogicalName>Content/etgmod/gui/icon_dir.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\etgmod\gui\icon_mod.png">
+      <LogicalName>Content/etgmod/gui/icon_mod.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\etgmod\gui\icon_zip.png">
+      <LogicalName>Content/etgmod/gui/icon_zip.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -318,5 +333,6 @@
     <Folder Include="Content\etgmod\gui\" />
     <Folder Include="src\SGUI\ExampleModifiers\" />
     <Folder Include="src\Guns\" />
+    <Folder Include="src\ETGGUI\Repo\" />
   </ItemGroup>
 </Project>

@@ -115,6 +115,7 @@ public sealed class ItemDB {
             if (value is Gun) {
                 WeaponCollection.Handle();
                 WeaponCollection02.Handle();
+                ProjectileCollection.Handle();
             } else {
                 ItemCollection.Handle();
             }
@@ -377,6 +378,7 @@ public static class ItemDBExt {
 
     public static void SetupSprite(this Gun gun, tk2dSpriteCollectionData collection = null, string defaultSprite = null, int fps = 0) {
         AmmonomiconController.ForceInstance.EncounterIconCollection.Handle();
+        ETGMod.Databases.Items.ProjectileCollection.Handle();
         collection = collection ?? ETGMod.Databases.Items.WeaponCollection;
         collection.Handle();
 

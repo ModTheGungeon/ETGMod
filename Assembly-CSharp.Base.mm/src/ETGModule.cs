@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using UnityEngine;
 
 /// <summary>
 /// Game mod class. All game mods should have a class / type extending this.
@@ -26,21 +27,21 @@ public abstract class ETGModule {
     /// This method gets called when ETGMod initializes, after all mods have been loaded.
     /// Do not depend on any specific order in which the mods get initialized.
     /// </summary>
-    public virtual void Init() { }
+    public abstract void Init();
 
     /// <summary>
     /// This method gets called when ETGMod enters its first frame, after all mods have been loaded.
     /// Do not depend on any specific order in which the mods get started.
     /// </summary>
-    public virtual void Start() { }
+    public abstract void Start();
 
     [Obsolete("Add your own MonoBehaviour to the ETGModMainBehaviour.Instance.gameObject!")]
     public virtual void Update() { }
 
     /// <summary>
-    /// This method gets called when ETGMod exits.
+    /// This method gets called when the mod gets unloaded.
     /// </summary>
-    public virtual void Exit() { }
+    public abstract void Exit();
 
 }
 
@@ -123,6 +124,24 @@ public class ETGModuleMetadata {
                 throw new InvalidOperationException("The ETGModuleMetadata name is read-only!");
             }
             _Name = value;
+        }
+    }
+
+    private Texture2D _Icon;
+    /// <summary>
+    /// The icon of the mod to be used in the mod menu. In case of backends or lack of icon, this will return null.
+    /// 
+    /// Can only be set by ETGMod itself by default, unless you're having your own ETGModuleMetadata - extending type.
+    /// </summary>
+    public virtual Texture2D Icon {
+        get {
+            return _Icon;
+        }
+        set {
+            if (_Icon != null) {
+                throw new InvalidOperationException("The ETGModuleMetadata name is read-only!");
+            }
+            _Icon = value;
         }
     }
 

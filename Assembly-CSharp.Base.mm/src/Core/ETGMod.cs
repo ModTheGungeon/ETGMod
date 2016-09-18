@@ -28,7 +28,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, "b12"); // no tag
+        new Profile(0, "b13"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -139,7 +139,7 @@ public static partial class ETGMod {
         ETGModGUI.Start();
 
         TestGunController.Add();
-        BalloonGunController.Add();
+        // BalloonGunController.Add();
 
         dfInputManager manager = GameUIRoot.Instance.Manager.GetComponent<dfInputManager>();
         manager.Adapter = new SGUIDFInput(manager.Adapter);
@@ -235,7 +235,11 @@ public static partial class ETGMod {
             if (path[0] == '#') {
                 continue;
             }
-            InitMod(path.Trim());
+            try {
+                InitMod(path.Trim());
+#pragma warning disable RECS0022
+            } catch (Exception) { /* Just continue on. */ }
+#pragma warning restore RECS0022
         }
 
     }
@@ -266,6 +270,7 @@ public static partial class ETGMod {
 
         using (ZipFile zip = ZipFile.Read(archive)) {
             // First read the metadata, ...
+            Texture2D icon = null;
             foreach (ZipEntry entry in zip.Entries) {
                 if (entry.FileName == "metadata.txt") {
                     using (MemoryStream ms = new MemoryStream()) {
@@ -273,8 +278,22 @@ public static partial class ETGMod {
                         ms.Seek(0, SeekOrigin.Begin);
                         metadata = ETGModuleMetadata.Parse(archive, "", ms);
                     }
-                    break;
+                    continue;
                 }
+                if (entry.FileName == "icon.png") {
+                    icon = new Texture2D(2, 2);
+                    icon.name = "icon";
+                    using (MemoryStream ms = new MemoryStream()) {
+                        entry.Extract(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        icon.LoadImage(ms.GetBuffer());
+                    }
+                    icon.filterMode = FilterMode.Point;
+                    continue;
+                }
+            }
+            if (icon != null) {
+                metadata.Icon = icon;
             }
 
             // ... then check if the mod runs on this profile ...

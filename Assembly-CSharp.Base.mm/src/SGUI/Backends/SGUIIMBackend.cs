@@ -645,8 +645,16 @@ namespace SGUI {
                 float y = 0f;
                 for (int i = 0; i < lines.Length; i++) {
                     string line = lines[i];
+                    bool iconMissing = icon != null && i > 0;
                     Vector2 lineSize = MeasureText(ref line, size, font: elem?.Font);
-                    Text(elem, position + new Vector2(0f, y), lineSize, line, alignment);
+                    Text_(
+                        elem,
+                        position + new Vector2(iconMissing ? icon.width : 0f, y),
+                        lineSize.WithX(size.x - (iconMissing ? icon.width : 0f)),
+                        line, alignment,
+                        i == 0 ? icon : null,
+                        registerProperly
+                    );
                     y += lineSize.y;
                 }
                 return;
@@ -661,6 +669,7 @@ namespace SGUI {
             GUI.skin.label.alignment = alignment;
             RegisterNextComponentIn(elem);
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, registerProperly ? bounds : NULLRECT, text);
+            if (icon != null) text = $" {text}";
             GUI.Label(bounds, new GUIContent(text, icon));
         }
 
@@ -1018,6 +1027,8 @@ namespace SGUI {
             float y = 0f;
 
             StringBuilder rebuilt = new StringBuilder();
+            int lastSpace = -1;
+            int offset = 0;
             for (int i = 0; i < text.Length; i++) {
                 char c = text[i];
                 CharacterInfo ci;
@@ -1031,13 +1042,20 @@ namespace SGUI {
 
                 if (ciGot) x += ci.advance;
                 if (x > bounds.x || c == '\n') {
-                    rebuilt.AppendLine();
+                    if (lastSpace == -1 || c == '\n') {
+                        rebuilt.Append('\n');
+                    } else {
+                        rebuilt.Insert(lastSpace + offset, '\n');
+                    }
+                    ++offset;
+                    lastSpace = -1;
                     x = 0f;
                     y += LineHeight;
                 }
                 if (c == '\n') {
                     continue;
                 }
+                if (c == ' ') lastSpace = i;
                 rebuilt.Append(c);
             }
 
