@@ -59,7 +59,7 @@ public class ETGModLoaderMenu : ETGModMenu {
                 new SLabel("DISABLED MODS") {
                     Foreground = Color.gray,
                     OnUpdateStyle = delegate (SElement elem) {
-                        elem.Position = new Vector2(DisabledListGroup.Position.x, DisabledListGroup.Position.y - elem.Backend.LineHeight);
+                        elem.Position = new Vector2(DisabledListGroup.Position.x, DisabledListGroup.Position.y - elem.Backend.LineHeight - 4f);
                     },
                 },
 
@@ -79,7 +79,7 @@ public class ETGModLoaderMenu : ETGModMenu {
                 new SLabel("ENABLED MODS") {
                     Foreground = Color.gray,
                     OnUpdateStyle = delegate (SElement elem) {
-                        elem.Position = new Vector2(ModListGroup.Position.x, ModListGroup.Position.y - elem.Backend.LineHeight);
+                        elem.Position = new Vector2(ModListGroup.Position.x, ModListGroup.Position.y - elem.Backend.LineHeight - 4f);
                     },
                 },
 
@@ -99,7 +99,7 @@ public class ETGModLoaderMenu : ETGModMenu {
                 new SLabel("LASTBULLET MODS") {
                     Foreground = Color.gray,
                     OnUpdateStyle = delegate (SElement elem) {
-                        elem.Position = new Vector2(ModOnlineListGroup.Position.x, ModListGroup.Position.y - elem.Backend.LineHeight);
+                        elem.Position = new Vector2(ModOnlineListGroup.Position.x, ModListGroup.Position.y - elem.Backend.LineHeight - 4f);
                     },
                 },
             }
