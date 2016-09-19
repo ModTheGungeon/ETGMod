@@ -4,11 +4,11 @@ using UnityEngine;
 namespace SGUI {
     public class SRandomLabelModifier : SModifier {
 
-        public override void Update(SElement elem) {
+        public override void Update() {
             if (Random.value > 0.1f) {
                 return;
             }
-            SLabel label = (SLabel) elem;
+            SLabel label = (SLabel) Elem;
             string orig = label.Text;
             StringBuilder repl = new StringBuilder();
             while (orig.Length > 0) {

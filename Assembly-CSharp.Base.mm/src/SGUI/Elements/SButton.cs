@@ -9,7 +9,7 @@ namespace SGUI {
 
         public TextAnchor Alignment = TextAnchor.MiddleLeft;
 
-        public Vector2 Border = new Vector2(2f, 2f);
+        public Vector2 Border = new Vector2(4f, 4f);
 
         public Action<SButton> OnClick;
 
@@ -38,12 +38,9 @@ namespace SGUI {
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text, font: Font);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.InnerSize, font: Font);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize - Border * 2f - (Icon == null ? Vector2.zero : new Vector2(Icon.width + 1f, 0f)), font: Font);
                 }
                 Size += new Vector2(16f, 2f);
-                if (Icon != null) {
-                    Size = Size.WithX(Size.x + Size.y + 4f);
-                }
                 Size += Border * 2f;
             }
 

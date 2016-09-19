@@ -327,7 +327,6 @@ public static partial class ETGMod {
                         }
                     }
                 } else {
-                    Console.WriteLine("Found resource " + entryName + " in " + archive + ".");
                     Assets.AddMapping(entryName, new AssetMetadata(archive, entryName) {
                         AssetType = entry.IsDirectory ? Assets.t_AssetDirectory : null
                     });

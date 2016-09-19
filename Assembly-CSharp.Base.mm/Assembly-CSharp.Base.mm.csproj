@@ -166,7 +166,7 @@
     <Compile Include="src\Core\AIActor.cs" />
     <Compile Include="src\Patches\patch_AIActor.cs" />
     <Compile Include="src\SGUI\SModifier.cs" />
-    <Compile Include="src\SGUI\ExampleModifiers\SRandomLabelModifier.cs" />
+    <Compile Include="src\SGUI\Modifiers\SRandomLabelModifier.cs" />
     <Compile Include="src\Core\Chest.cs" />
     <Compile Include="src\Core\Gun.cs" />
     <Compile Include="src\Patches\patch_Gun.cs" />
@@ -180,6 +180,8 @@
     <Compile Include="src\Core\Objects.cs" />
     <Compile Include="src\ETGGUI\Repo\ModRepo.cs" />
     <Compile Include="src\ETGGUI\Repo\RemoteMod.cs" />
+    <Compile Include="src\SGUI\Modifiers\SFadeInModifier.cs" />
+    <Compile Include="src\SGUI\Modifiers\STimedModifier.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -331,7 +333,7 @@
   -->
   <ItemGroup>
     <Folder Include="Content\etgmod\gui\" />
-    <Folder Include="src\SGUI\ExampleModifiers\" />
+    <Folder Include="src\SGUI\Modifiers\" />
     <Folder Include="src\Guns\" />
     <Folder Include="src\ETGGUI\Repo\" />
   </ItemGroup>

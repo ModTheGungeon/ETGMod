@@ -46,12 +46,11 @@ public class ETGModLoaderMenu : ETGModMenu {
                 (DisabledListGroup = new SGroup {
                     Background = new Color(0f, 0f, 0f, 0f),
                     AutoLayout = (SGroup g) => g.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
                     ScrollDirection = SGroup.EDirection.Vertical,
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Size = new Vector2(
                             Mathf.Max(256f, elem.Parent.InnerSize.x * 0.2f),
-                            Mathf.Min(((SGroup) elem).ContentSize.y, 160f)
+                            Mathf.Max(256f, elem.Parent.InnerSize.y * 0.2f)
                         );
                         elem.Position = new Vector2(0f, elem.Parent.InnerSize.y - elem.Size.y);
                     },
@@ -66,7 +65,6 @@ public class ETGModLoaderMenu : ETGModMenu {
                 (ModListGroup = new SGroup {
                     Background = new Color(0f, 0f, 0f, 0f),
                     AutoLayout = (SGroup g) => g.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
                     ScrollDirection = SGroup.EDirection.Vertical,
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Position = new Vector2(0f, elem.Backend.LineHeight * 2.5f);
@@ -86,7 +84,6 @@ public class ETGModLoaderMenu : ETGModMenu {
                 (ModOnlineListGroup = new SGroup {
                     Background = new Color(0f, 0f, 0f, 0f),
                     AutoLayout = (SGroup g) => g.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
                     ScrollDirection = SGroup.EDirection.Vertical,
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Position = new Vector2(ModOnlineListGroup.Size.x + 4f, ModListGroup.Position.y);
@@ -118,7 +115,7 @@ public class ETGModLoaderMenu : ETGModMenu {
             ETGModule mod = ETGMod.GameMods[i];
             ETGModuleMetadata meta = mod.Metadata;
 
-            ModListGroup.Children.Add(new SButton(meta.Name) { Icon = meta.Icon ?? IconMod });
+            ModListGroup.Children.Add(NewEntry(meta.Name, meta.Icon));
             yield return null;
         }
 
@@ -128,7 +125,7 @@ public class ETGModLoaderMenu : ETGModMenu {
             string file = Path.GetFileName(files[i]);
             if (!file.EndsWithInvariant(".zip")) continue;
             if (ETGMod.GameMods.Exists(mod => mod.Metadata.Archive == files[i])) continue;
-            DisabledListGroup.Children.Add(new SButton(file.Substring(0, file.Length - 4)) { Icon = IconZip });
+            DisabledListGroup.Children.Add(NewEntry(file.Substring(0, file.Length - 4), IconZip));
             yield return null;
         }
         files = Directory.GetDirectories(ETGMod.ModsDirectory);
@@ -136,7 +133,7 @@ public class ETGModLoaderMenu : ETGModMenu {
             string file = Path.GetFileName(files[i]);
             if (file == "RelinkCache") continue;
             if (ETGMod.GameMods.Exists(mod => mod.Metadata.Directory == files[i])) continue;
-            DisabledListGroup.Children.Add(new SButton($"{file}/") { Icon = IconDir });
+            DisabledListGroup.Children.Add(NewEntry($"{file}/", IconDir));
             yield return null;
         }
 
@@ -156,12 +153,20 @@ public class ETGModLoaderMenu : ETGModMenu {
                 }
 
                 RemoteMod mod = (RemoteMod) mods.Current;
-                ModOnlineListGroup.Children.Add(new SButton(mod.Name) { Icon = IconMod });
+                ModOnlineListGroup.Children.Add(NewEntry(mod.Name, IconMod));
                 yield return null;
             }
         }
 
         ModOnlineListGroup.Children.RemoveAt(0);
+    }
+
+    public virtual SButton NewEntry(string name, Texture icon = null) {
+        SButton button = new SButton(name) {
+            Icon = icon ?? IconMod,
+            With = { new SFadeInModifier() }
+        };
+        return button;
     }
 
 

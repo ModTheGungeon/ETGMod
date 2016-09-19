@@ -6,11 +6,13 @@ using UnityEngine;
 namespace SGUI {
 	public class SModifier {
 
-        public virtual void UpdateStyle(SElement elem) {
+        public SElement Elem;
+
+        public virtual void UpdateStyle() {
 
         }
 
-        public virtual void Update(SElement elem) {
+        public virtual void Update() {
 
         }
 
@@ -19,13 +21,13 @@ namespace SGUI {
     public class SDModifier : SModifier {
 
         public Action<SElement> OnUpdateStyle;
-        public override void UpdateStyle(SElement elem) {
-            OnUpdateStyle?.Invoke(elem);
+        public override void UpdateStyle() {
+            OnUpdateStyle?.Invoke(Elem);
         }
 
         public Action<SElement> OnUpdate;
-        public override void Update(SElement elem) {
-            OnUpdate?.Invoke(elem);
+        public override void Update() {
+            OnUpdate?.Invoke(Elem);
         }
 
     }

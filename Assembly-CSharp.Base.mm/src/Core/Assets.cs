@@ -93,6 +93,7 @@ public static partial class ETGMod {
         }
 
         public static void Crawl(string dir, string root = null) {
+            if (Path.GetDirectoryName(dir).StartsWithInvariant("DUMP")) return;
             if (root == null) root = dir;
             string[] files = Directory.GetFiles(dir);
             for (int i = 0; i < files.Length; i++) {
@@ -102,7 +103,6 @@ public static partial class ETGMod {
             files = Directory.GetDirectories(dir);
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
-                Console.WriteLine("Found resource " + file.Substring(root.Length + 1) + " in " + dir + ".");
                 AddMapping(file.Substring(root.Length + 1), new AssetMetadata(file) {
                     AssetType = t_AssetDirectory
                 });
@@ -119,7 +119,6 @@ public static partial class ETGMod {
                     continue;
                 }
                 name = name.Substring(indexOfContent + 8);
-                Console.WriteLine("Found resource " + name + " in .dll");
                 AddMapping(name, new AssetMetadata(asm, resourceNames[i]));
             }
         }

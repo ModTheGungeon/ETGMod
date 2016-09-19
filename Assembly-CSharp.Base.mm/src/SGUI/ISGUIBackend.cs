@@ -25,6 +25,8 @@ namespace SGUI {
         /// <value><c>true</c> if the backend uses GUILayout.</value>
         bool RenderOnGUILayout { get; }
 
+        bool IsOnGUIRepainting { get; }
+
         float LineHeight { get; set; }
         object Font { get; set; }
 

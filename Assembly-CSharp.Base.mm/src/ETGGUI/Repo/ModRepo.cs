@@ -76,7 +76,7 @@ public sealed class LastBulletModRepo : ModRepo {
 
                 Console.WriteLine($"Found mod: \"{mod.Name}\" by {mod.Author}");
                 _Current = mod;
-                while (_Current != null) {
+                while (_Current != null && _Alive) {
                     Thread.Sleep(16);
                 }
             }

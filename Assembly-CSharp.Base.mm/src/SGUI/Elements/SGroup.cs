@@ -49,7 +49,7 @@ namespace SGUI {
         }
 
         public override void HandleChange(object sender, ListChangedEventArgs e) {
-            if (e.ListChangedType == ListChangedType.ItemAdded) {
+            if (e?.ListChangedType == ListChangedType.ItemAdded) {
                 SElement elem = Children[e.NewIndex];
                 if (elem is SWindowTitleBar) {
                     Children.RemoveAt(e.NewIndex);

@@ -135,7 +135,10 @@ namespace SGUI {
         }
 
         public virtual void HandleChange(object sender, ListChangedEventArgs e) {
-            ParentTop.UpdateStyle();
+            Parent?.HandleChange(null, null);
+            UpdateStyle();
+
+            if (sender == null || e == null) return;
 
             // TODO Also send event to backend.
             if (Root != null) {
@@ -145,6 +148,7 @@ namespace SGUI {
                     if (0 <= disposeIndex) {
                         Root.DisposingChildren.RemoveAt(disposeIndex);
                     }
+                    child.UpdateStyle();
 
                 } else if (e.ListChangedType == ListChangedType.ItemDeleted) {
                     // TODO Dispose.
@@ -190,7 +194,8 @@ namespace SGUI {
             UpdateChildrenStyles();
         }
         protected void _ModifierUpdateStyle(SModifier modifier) {
-            modifier.UpdateStyle(this);
+            modifier.Elem = this;
+            modifier.UpdateStyle();
         }
         public virtual void UpdateChildrenStyles() {
             for (int i = 0; i < Children.Count; i++) {
@@ -206,7 +211,8 @@ namespace SGUI {
             UpdateChildren();
         }
         protected void _ModifierUpdate(SModifier modifier) {
-            modifier.Update(this);
+            modifier.Elem = this;
+            modifier.Update();
         }
         public void UpdateChildren() {
             for (int i = 0; i < Children.Count; i++) {

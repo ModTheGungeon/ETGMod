@@ -18,22 +18,6 @@ public class ETGModMainBehaviour : MonoBehaviour {
 
     public void Start() {
         ETGMod.Start();
-
-        // StartCoroutine(ListTextures());
-    }
-
-    public IEnumerator ListTextures() {
-        yield return new WaitForSeconds(1f);
-        while (isActiveAndEnabled) {
-            tk2dSpriteCollectionData[] atlases = Resources.FindObjectsOfTypeAll<tk2dSpriteCollectionData>();
-            Console.WriteLine("Found " + atlases.Length + " atlases:");
-            for (int i = 0; i < atlases.Length; i++) {
-                tk2dSpriteCollectionData atlas = atlases[i];
-                Console.WriteLine(i + ": " + atlas.spriteCollectionName + " (" + atlas.transform.GetPath() + "): " + (atlas.materials[0]?.mainTexture?.name ?? "NULL"));
-                atlas.Handle();
-            }
-            yield return new WaitForSeconds(10f);
-        }
     }
 
     public void Update() {

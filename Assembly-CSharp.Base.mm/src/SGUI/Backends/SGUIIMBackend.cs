@@ -37,13 +37,6 @@ namespace SGUI {
         private readonly List<Rect> _OPBounds = new List<Rect>();
         private readonly List<object[]> _OPData = new List<object[]>();
 
-        private Event _Reason;
-        public bool Repainting {
-            get {
-                return _Reason.type == EventType.Repaint;
-            }
-        }
-
         public SGUIRoot CurrentRoot { get; private set; }
 
         public bool UpdateStyleOnGUI {
@@ -61,6 +54,13 @@ namespace SGUI {
         public bool RenderOnGUILayout {
             get {
                 return false;
+            }
+        }
+
+        private Event _Reason;
+        public bool IsOnGUIRepainting {
+            get {
+                return _Reason.type == EventType.Repaint;
             }
         }
 
@@ -133,7 +133,7 @@ namespace SGUI {
 
             GUI.depth = Depth;
 
-            if (Repainting) {
+            if (IsOnGUIRepainting) {
                 if (_GlobalComponentSemaphore == 0) {
                     _ComponentElements.Clear();
                 }
@@ -178,7 +178,7 @@ namespace SGUI {
             }
 
             // After the normal (possibly) repaint run, check for any mouse movement.
-            if (Repainting) {
+            if (IsOnGUIRepainting) {
                 Vector2 mousePosition = Input.mousePosition;
                 mousePosition = new Vector2(
                     mousePosition.x,
@@ -285,7 +285,7 @@ namespace SGUI {
             if (group.IsWindow) {
                 SWindowTitleBar bar = group.WindowTitleBar;
 
-                Rect bounds = (_ClipScopeRects.Count == 0 || !Repainting) ?
+                Rect bounds = (_ClipScopeRects.Count == 0 || !IsOnGUIRepainting) ?
                         new Rect(group.AbsoluteOffset + group.Position, bar.Size) :
                         new Rect(Vector2.zero, bar.Size);
                 if (e.type == EventType.MouseDown && bounds.Contains(e.mousePosition)) {
@@ -538,7 +538,7 @@ namespace SGUI {
         }
 
         public bool IsRelativeContext(SElement elem) {
-            if (!Repainting) {
+            if (!IsOnGUIRepainting) {
                 // Everything's absolute in event-handling mode.
                 return false;
             }
@@ -579,7 +579,7 @@ namespace SGUI {
             Texture(position, size, texture, color);
         }
         public void Texture(Vector2 position, Vector2 size, Texture texture, Color? color = null) {
-            if (!Repainting) return;
+            if (!IsOnGUIRepainting) return;
             Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
             GUI.color = color ?? Color.white;
@@ -595,7 +595,7 @@ namespace SGUI {
             Rect(position, size, color);
         }
         public void Rect(Vector2 position, Vector2 size, Color color) {
-            if (!Repainting) return;
+            if (!IsOnGUIRepainting) return;
             Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
             GUI.color = color;
@@ -649,9 +649,10 @@ namespace SGUI {
                     Vector2 lineSize = MeasureText(ref line, size, font: elem?.Font);
                     Text_(
                         elem,
-                        position + new Vector2(iconMissing ? icon.width : 0f, y),
+                        position + new Vector2(iconMissing ? (icon.width + 1f) : 0f, y),
                         lineSize.WithX(size.x - (iconMissing ? icon.width : 0f)),
-                        line, alignment,
+                        !iconMissing ? line : $" {line}",
+                        alignment,
                         i == 0 ? icon : null,
                         registerProperly
                     );
@@ -677,7 +678,7 @@ namespace SGUI {
             GUI.skin.font = (Font) elem?.Font ?? _Font;
             PreparePosition(elem, ref position);
 
-            if (elem != null && Repainting) {
+            if (elem != null && IsOnGUIRepainting) {
                 GUI.skin.textField.normal.textColor = elem.Foreground * 0.8f;
                 GUI.skin.textField.active.textColor = elem.Foreground;
                 GUI.skin.textField.hover.textColor = elem.Foreground;
@@ -702,7 +703,7 @@ namespace SGUI {
             string prevText = text;
             TextField(new Rect(position, elem.Size), ref text);
 
-            if (Repainting) {
+            if (IsOnGUIRepainting) {
                 elem.SetFocused(_Secret, IsFocused(CurrentComponentID));
             } else if (field != null && elem.IsFocused) {
                 TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
@@ -720,7 +721,7 @@ namespace SGUI {
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.TextField, bounds, text);
             text = GUI.TextField(bounds, text);
 
-            if (!GUI.skin.font.dynamic && IsFocused(CurrentComponentID) && Repainting) {
+            if (!GUI.skin.font.dynamic && IsFocused(CurrentComponentID) && IsOnGUIRepainting) {
                 TextEditor editor = (TextEditor) GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
 #pragma warning disable CS0618
                 // TextEditor.content is obsolete, yet it must be accessed.
@@ -799,7 +800,7 @@ namespace SGUI {
             GUI.skin.font = (Font) elem?.Font ?? _Font;
             PreparePosition(elem, ref position);
 
-            if (elem != null && Repainting) {
+            if (elem != null && IsOnGUIRepainting) {
                 GUI.skin.label.normal.textColor = elem.Foreground * (elem.IsHovered ? 1f : 0.9f);
                 GUI.backgroundColor = elem.Background;
             }
@@ -808,15 +809,17 @@ namespace SGUI {
             Button(position, size, text, (elem as SButton)?.Border, alignment, icon);
         }
         public void Button(Vector2 position, Vector2 size, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
-            Vector2 border_ = border ?? new Vector2(2f, 2f);
-            // FIXME Fix undebuggable crash.
-            border_ = Vector2.zero;
+            Vector2 border_ = border ?? new Vector2(4f, 4f);
             RegisterNextComponent();
             Rect(null, position, size, GUI.backgroundColor);
+
+            position = position + border_;
+            size = size - border_ * 2f;
+            MeasureText(ref text, size);
             Text_(
                 null,
-                position + border_,
-                size - border_ * 2f,
+                position,
+                size,
                 text, alignment, icon, false);
         }
 
@@ -1021,7 +1024,6 @@ namespace SGUI {
                 return auto;
             }
 
-            // TODO split by word (space), not by character
             Vector2 bounds = size.Value;
             float x = 0f;
             float y = 0f;
@@ -1036,6 +1038,7 @@ namespace SGUI {
                 if (!font_.GetCharacterInfo(c, out ci)) {
                     ciGot = false;
                     if (c != '\n') {
+                        offset--;
                         continue;
                     }
                 }
@@ -1044,10 +1047,11 @@ namespace SGUI {
                 if (x > bounds.x || c == '\n') {
                     if (lastSpace == -1 || c == '\n') {
                         rebuilt.Append('\n');
+                        if (c != '\n') ++offset;
                     } else {
-                        rebuilt.Insert(lastSpace + offset, '\n');
+                        rebuilt[lastSpace + offset] = '\n';
                     }
-                    ++offset;
+
                     lastSpace = -1;
                     x = 0f;
                     y += LineHeight;
