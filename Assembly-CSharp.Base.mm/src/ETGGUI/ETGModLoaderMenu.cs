@@ -141,7 +141,8 @@ public class ETGModLoaderMenu : ETGModMenu {
 
     public virtual IEnumerator RefreshOnline() {
         ModOnlineListGroup.Children.Clear();
-        ModOnlineListGroup.Children.Add(new SLabel("Downloading mod list..."));
+        SLabel downloadingLabel = new SLabel("Downloading mod list...");
+        ModOnlineListGroup.Children.Add(downloadingLabel);
         yield return null;
 
         for (int i = 0; i < Repos.Count; i++) {
@@ -153,12 +154,14 @@ public class ETGModLoaderMenu : ETGModMenu {
                 }
 
                 RemoteMod mod = (RemoteMod) mods.Current;
+                ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
                 ModOnlineListGroup.Children.Add(NewEntry(mod.Name, IconMod));
+                ModOnlineListGroup.Children.Add(downloadingLabel);
                 yield return null;
             }
         }
 
-        ModOnlineListGroup.Children.RemoveAt(0);
+        ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
     }
 
     public virtual SButton NewEntry(string name, Texture icon = null) {
