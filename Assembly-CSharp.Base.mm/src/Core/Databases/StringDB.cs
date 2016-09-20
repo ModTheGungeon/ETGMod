@@ -19,11 +19,14 @@ public sealed class StringDB {
     public readonly StringDBTable Enemies   = new StringDBTable(() => StringTableManager.EnemyTable);
     public readonly StringDBTable Intro     = new StringDBTable(() => StringTableManager.IntroTable);
 
-    public void Refresh() {
-        Core    .Refresh();
-        Items   .Refresh();
-        Enemies .Refresh();
-        Intro   .Refresh();
+    public Action<StringTableManager.GungeonSupportedLanguages> OnLanguageChanged;
+
+    public void LanguageChanged() {
+        Core    .LanguageChanged();
+        Items   .LanguageChanged();
+        Enemies .LanguageChanged();
+        Intro   .LanguageChanged();
+        OnLanguageChanged?.Invoke(CurrentLanguage);
     }
 
 }
@@ -74,14 +77,12 @@ public sealed class StringDBTable {
         this[key] = value_;
     }
 
-    public Action<StringTableManager.GungeonSupportedLanguages> OnLanguageChanged;
-    public void Refresh() {
+    public void LanguageChanged() {
         _CachedTable = null;
         Dictionary<string, StringTableManager.StringCollection> table = Table;
         for (int i = 0; i < _ChangeKeys.Count; i++) {
             table[_ChangeKeys[i]] = _ChangeValues[i];
         }
-        OnLanguageChanged?.Invoke(ETGMod.Databases.Strings.CurrentLanguage);
     }
 
 }
