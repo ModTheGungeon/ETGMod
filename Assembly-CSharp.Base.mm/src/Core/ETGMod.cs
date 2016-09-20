@@ -69,7 +69,10 @@ public static partial class ETGMod {
 
     private delegate string[] d_mono_runtime_get_main_args(); //ret MonoArray*
 
+    [Obsolete("Use StartGlobalCoroutine instead.")]
     public static Func<IEnumerator, Coroutine> StartCoroutine;
+    public static Func<IEnumerator, Coroutine> StartGlobalCoroutine;
+    public static Action<Coroutine> StopGlobalCoroutine;
 
     private static bool _Init = false;
     public static bool Initialized {
@@ -146,7 +149,7 @@ public static partial class ETGMod {
 
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
-        StartCoroutine(ETGModGUI.ListAllItemsAndGuns());
+        StartGlobalCoroutine(ETGModGUI.ListAllItemsAndGuns());
     }
 
     private static void _ScanBackends() {

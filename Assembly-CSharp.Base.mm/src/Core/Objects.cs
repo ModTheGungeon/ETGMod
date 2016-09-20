@@ -105,8 +105,8 @@ public static partial class ETGMod {
         }
 
         public static void HandleAll() {
-            StartCoroutine(HandleAllObjects());
-            StartCoroutine(HandleAllSprites());
+            StartGlobalCoroutine(HandleAllObjects());
+            StartGlobalCoroutine(HandleAllSprites());
         }
         private static IEnumerator HandleAllObjects() {
             Transform[] transforms = UnityEngine.Object.FindObjectsOfType<Transform>();
@@ -150,7 +150,7 @@ public static partial class ETGMod {
 
     private static void _HandleAuto(Action a) {
         if (ETGModGUI.TestTexture == null && false) {
-            StartCoroutine(_HandleAutoCoroutine(a));
+            StartGlobalCoroutine(_HandleAutoCoroutine(a));
             return;
         }
         a();

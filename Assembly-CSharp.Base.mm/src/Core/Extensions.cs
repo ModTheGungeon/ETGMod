@@ -186,4 +186,13 @@ public static partial class ETGMod {
             b.transform.GetComponentInParent<tk2dBaseSprite>();
     }
 
+    public static Coroutine StartGlobal(this IEnumerator c) {
+        if (c == null) return null;
+        return StartGlobalCoroutine(c);
+    }
+    public static void StopGlobal(this Coroutine c) {
+        if (c == null) return;
+        StopGlobalCoroutine(c);
+    }
+
 }

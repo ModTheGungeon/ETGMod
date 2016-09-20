@@ -182,6 +182,9 @@
     <Compile Include="src\ETGGUI\Repo\RemoteMod.cs" />
     <Compile Include="src\SGUI\Modifiers\SFadeInModifier.cs" />
     <Compile Include="src\SGUI\Modifiers\STimedModifier.cs" />
+    <Compile Include="src\Patches\patch_StringTableManager.cs" />
+    <Compile Include="src\Core\Databases\ItemDB.cs" />
+    <Compile Include="src\Core\Databases\StringDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -336,5 +339,6 @@
     <Folder Include="src\SGUI\Modifiers\" />
     <Folder Include="src\Guns\" />
     <Folder Include="src\ETGGUI\Repo\" />
+    <Folder Include="src\Core\Databases\" />
   </ItemGroup>
 </Project>

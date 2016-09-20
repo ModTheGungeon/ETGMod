@@ -104,12 +104,19 @@ public class ETGModLoaderMenu : ETGModMenu {
     }
 
     public override void OnOpen() {
-        ETGMod.StartCoroutine(RefreshMods());
-        ETGMod.StartCoroutine(RefreshOnline());
+        RefreshMods();
+        if (_C_RefreshOnline == null) {
+            RefreshOnline();
+        }
         base.OnOpen();
     }
 
-    public virtual IEnumerator RefreshMods() {
+    protected Coroutine _C_RefreshMods;
+    public void RefreshMods() {
+        _C_RefreshMods?.StopGlobal();
+        _C_RefreshMods = _RefreshMods().StartGlobal();
+    }
+    protected virtual IEnumerator _RefreshMods() {
         ModListGroup.Children.Clear();
         for (int i = 0; i < ETGMod.GameMods.Count; i++) {
             ETGModule mod = ETGMod.GameMods[i];
@@ -139,7 +146,12 @@ public class ETGModLoaderMenu : ETGModMenu {
 
     }
 
-    public virtual IEnumerator RefreshOnline() {
+    protected Coroutine _C_RefreshOnline;
+    public void RefreshOnline() {
+        _C_RefreshOnline?.StopGlobal();
+        _C_RefreshOnline = _RefreshOnline().StartGlobal();
+    }
+    protected virtual IEnumerator _RefreshOnline() {
         ModOnlineListGroup.Children.Clear();
         SLabel downloadingLabel = new SLabel("Downloading mod list...");
         ModOnlineListGroup.Children.Add(downloadingLabel);
@@ -174,7 +186,7 @@ public class ETGModLoaderMenu : ETGModMenu {
 
 
     internal void KeepSinging() {
-        ETGMod.StartCoroutine(_KeepSinging());
+        ETGMod.StartGlobalCoroutine(_KeepSinging());
     }
     private IEnumerator _KeepSinging() {
         for (int i = 0; i < 10 && (!SteamManager.Initialized || !Steamworks.SteamAPI.IsSteamRunning()); i++) {
