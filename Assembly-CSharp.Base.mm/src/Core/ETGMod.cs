@@ -240,9 +240,9 @@ public static partial class ETGMod {
             }
             try {
                 InitMod(path.Trim());
-#pragma warning disable RECS0022
-            } catch (Exception) { /* Just continue on. */ }
-#pragma warning restore RECS0022
+            } catch (Exception e) {
+                Debug.LogError("ETGMOD could not load mod " + path + ": " + e);
+            }
         }
 
     }

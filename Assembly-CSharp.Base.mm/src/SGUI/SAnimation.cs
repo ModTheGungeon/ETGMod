@@ -22,6 +22,10 @@ namespace SGUI {
         }
 
         public override void Init() {
+            if (Status != EStatus.Uninitialized) {
+                return;
+            }
+
             if (AutoStart) {
                 Start();
                 Animate(0f);
@@ -39,13 +43,14 @@ namespace SGUI {
                 return;
             }
 
+        Loop:
             float t = ((SpeedUnscaled ? Time.unscaledTime : Time.time) - TimeStart) / Duration;
-            if (t > 1f) {
+            if (t >= 1f) {
                 End();
-                if (!Loop) {
-                    return;
-                }
+                if (!Loop) return;
                 Start();
+                TimeStart += (t - 1f) * Duration;
+                goto Loop;
             }
 
             Animate(t);
