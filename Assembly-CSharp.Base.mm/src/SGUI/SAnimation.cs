@@ -26,12 +26,17 @@ namespace SGUI {
                 return;
             }
 
+            OnInit();
+
             if (AutoStart) {
                 Start();
                 Animate(0f);
             } else {
                 Status = EStatus.Finished;
             }
+        }
+
+        public virtual void OnInit() {
         }
 
         public override void Update() {
@@ -85,15 +90,20 @@ namespace SGUI {
     }
 
     public abstract class SDAnimation : SAnimation {
-        
-        public Action DOnStart;
-        public override void OnStart() {
-            DOnStart?.Invoke();
+
+        public Action<SAnimation> DOnInit;
+        public override void OnInit() {
+            DOnInit.Invoke(this);
         }
 
-        public Action<float> DOnAnimate;
+        public Action<SAnimation> DOnStart;
+        public override void OnStart() {
+            DOnStart?.Invoke(this);
+        }
+
+        public Action<SAnimation, float> DOnAnimate;
         public override void Animate(float t) {
-            DOnAnimate?.Invoke(t);
+            DOnAnimate?.Invoke(this, t);
         }
 
         public override void OnEnd() {

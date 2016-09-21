@@ -19,9 +19,12 @@ namespace SGUI {
         public Color TransparentForeground;
         public Color TransparentBackground;
 
-        public override void OnStart() {
+        public override void OnInit() {
             OrigForeground = Elem.Foreground;
             OrigBackground = Elem.Background;
+        }
+
+        public override void OnStart() {
         }
 
     }
