@@ -83,7 +83,8 @@ public sealed class ItemDB {
 
             WeightedGameObject lootGameObject = new WeightedGameObject() {
                 gameObject = value.gameObject,
-                weight = 1f
+                weight = 1f,
+                additionalPrerequisites = new DungeonPrerequisite[0]
             };
             if (value is Gun) {
                 GameManager.Instance.RewardManager.GunsLootTable.defaultItemDrops.Add(lootGameObject);

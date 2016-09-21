@@ -7,6 +7,7 @@ namespace SGUI {
     public sealed class SGUIIMBackend : ISGUIBackend {
 
         public readonly static Rect NULLRECT = new Rect(-1f, -1f, 0f, 0f);
+        public readonly static Vector2 MAXVEC2 = new Vector2(float.MaxValue, float.MaxValue);
 
         public static int DefaultDepth = 0x0ade;
         public int Depth = DefaultDepth;
@@ -14,10 +15,6 @@ namespace SGUI {
         public static Func<SGUIIMBackend, Font> GetFont;
 
         private readonly static Color _Transparent = new Color(0f, 0f, 0f, 0f);
-
-        // IDisposable, yet cannot be disposed. Let's keep one reference for the lifetime of all backend instances.
-        private readonly static TextGenerator _TextGenerator = new TextGenerator();
-        private TextGenerationSettings _TextGenerationSettings = new TextGenerationSettings();
 
         private readonly static List<SElement> _ComponentElements = new List<SElement>();
         private static int _GlobalComponentSemaphore;
@@ -64,7 +61,12 @@ namespace SGUI {
             }
         }
 
-        public float LineHeight { get; set; }
+        public float LineHeight { get; private set; }
+        public float IconPadding {
+            get {
+                return LineHeight * 0.333f + 1f; // Space is often 1/4 em; this should do the job well enough.
+            }
+        }
 
         private Font _Font;
         public object Font {
@@ -643,15 +645,15 @@ namespace SGUI {
             if (text.Contains("\n")) {
                 string[] lines = text.Split('\n');
                 float y = 0f;
+                Vector2 lineSize = new Vector2(size.x, LineHeight);
                 for (int i = 0; i < lines.Length; i++) {
                     string line = lines[i];
                     bool iconMissing = icon != null && i > 0;
-                    Vector2 lineSize = MeasureText(ref line, size, font: elem?.Font);
                     Text_(
                         elem,
                         position + new Vector2(iconMissing ? (icon.width + 1f) : 0f, y),
                         lineSize.WithX(size.x - (iconMissing ? icon.width : 0f)),
-                        !iconMissing ? line : $" {line}",
+                        iconMissing ? $" {line}" : line,
                         alignment,
                         i == 0 ? icon : null,
                         registerProperly
@@ -810,16 +812,14 @@ namespace SGUI {
         }
         public void Button(Vector2 position, Vector2 size, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
             Vector2 border_ = border ?? new Vector2(4f, 4f);
+            if (border == null) size += border_;
             RegisterNextComponent();
             Rect(null, position, size, GUI.backgroundColor);
 
-            position = position + border_;
-            size = size - border_ * 2f;
-            MeasureText(ref text, size);
             Text_(
                 null,
-                position,
-                size,
+                position + border_,
+                size - border_ * 2f,
                 text, alignment, icon, false);
         }
 
@@ -959,8 +959,7 @@ namespace SGUI {
             Rect(bar, Vector2.zero, bar.Size, group.Background);
 
             if (!string.IsNullOrEmpty(title)) {
-                Vector2 titleSize = MeasureText(title, font: Font);
-                Text(bar, new Vector2(group.Border, 0f), titleSize, title);
+                Text(bar, new Vector2(group.Border, 0f), bar.InnerSize, title);
             }
 
             // TODO Window header buttons.
@@ -999,32 +998,7 @@ namespace SGUI {
         public Vector2 MeasureText(ref string text, Vector2? size = null, object font = null) {
             Font font_ = (Font) font ?? _Font;
 
-            _TextGenerationSettings.richText = true;
-
-            _TextGenerationSettings.font = font_;
-            _TextGenerationSettings.fontSize = font_.fontSize;
-            _TextGenerationSettings.lineSpacing = LineHeight;
-
-            if (size != null) {
-                _TextGenerationSettings.generateOutOfBounds = false;
-                _TextGenerationSettings.horizontalOverflow = HorizontalWrapMode.Wrap;
-                _TextGenerationSettings.generationExtents = size.Value;
-            } else {
-                _TextGenerationSettings.generateOutOfBounds = true;
-                _TextGenerationSettings.horizontalOverflow = HorizontalWrapMode.Overflow;
-                _TextGenerationSettings.generationExtents = Vector2.zero;
-            }
-
-            _TextGenerator.Populate(text, _TextGenerationSettings);
-            Vector2 auto = new Vector2(
-                _TextGenerator.GetPreferredWidth(text, _TextGenerationSettings),
-                font_.dynamic ? _TextGenerator.GetPreferredHeight(text, _TextGenerationSettings) : (LineHeight * _TextGenerator.lineCount)
-            );
-            if (size == null || auto.x <= size.Value.x) {
-                return auto;
-            }
-
-            Vector2 bounds = size.Value;
+            Vector2 bounds = size ?? MAXVEC2;
             float x = 0f;
             float y = 0f;
 
@@ -1034,9 +1008,8 @@ namespace SGUI {
             for (int i = 0; i < text.Length; i++) {
                 char c = text[i];
                 CharacterInfo ci;
-                bool ciGot = true;
-                if (!font_.GetCharacterInfo(c, out ci)) {
-                    ciGot = false;
+                bool ciGot = font_.GetCharacterInfo(c, out ci);
+                if (!ciGot) {
                     if (c != '\n') {
                         offset--;
                         continue;
@@ -1063,8 +1036,8 @@ namespace SGUI {
                 rebuilt.Append(c);
             }
 
-            text = rebuilt.ToString();
-            return new Vector2(x, y);
+            text = rebuilt.ToString().TrimEnd();
+            return new Vector2(x, y + LineHeight);
         }
 
         public void Dispose() {

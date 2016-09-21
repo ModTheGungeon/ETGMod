@@ -39,9 +39,9 @@ namespace SGUI {
             }
         }
 
-        public readonly List<SModifier> Modifiers = new List<SModifier>();
+        public readonly BindingList<SModifier> Modifiers = new BindingList<SModifier>();
         // Alias for when creating an SElement
-        public List<SModifier> With {
+        public BindingList<SModifier> With {
             get {
                 return Modifiers;
             }
@@ -127,6 +127,7 @@ namespace SGUI {
 
         public SElement() {
             Children.ListChanged += HandleChange;
+            Modifiers.ListChanged += HandleModifierChange;
             if (SGUIRoot.Main != null) {
                 SGUIRoot.Main.AdoptedChildren.Add(this);
                 Foreground = SGUIRoot.Main.Foreground;
@@ -154,6 +155,16 @@ namespace SGUI {
                     // TODO Dispose.
                     // Root.DisposingChildren.Add(null);
                 }
+            }
+        }
+
+        public virtual void HandleModifierChange(object sender, ListChangedEventArgs e) {
+            if (sender == null || e == null) return;
+
+            if (e.ListChangedType == ListChangedType.ItemAdded) {
+                SModifier modifier = Modifiers[e.NewIndex];
+                modifier.Elem = this;
+                modifier.Init();
             }
         }
 

@@ -35,12 +35,13 @@ namespace SGUI {
             if (Root == null) return;
 
             if (UpdateBounds) {
+                Vector2 iconWidth = Icon == null ? Vector2.zero : new Vector2(Icon.width + Backend.IconPadding, 0f);
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text, font: Font);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.InnerSize - Border * 2f - (Icon == null ? Vector2.zero : new Vector2(Icon.width + 1f, 0f)), font: Font);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize - Border * 2f - iconWidth, font: Font);
                 }
-                Size += new Vector2(16f, 2f);
+                Size += iconWidth;
                 Size += Border * 2f;
             }
 

@@ -27,7 +27,8 @@ namespace SGUI {
 
         bool IsOnGUIRepainting { get; }
 
-        float LineHeight { get; set; }
+        float LineHeight { get; }
+        float IconPadding { get; }
         object Font { get; set; }
 
         bool LastMouseEventConsumed { get; }

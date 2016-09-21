@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Collections;
+using System.ComponentModel;
 
 public static partial class ETGMod {
     // ETGMod helper extension methods.
@@ -91,6 +92,17 @@ public static partial class ETGMod {
     public static void AddRange(this IDictionary to, IDictionary from) {
         foreach (DictionaryEntry entry in from) {
             to.Add(entry.Key, entry.Value);
+        }
+    }
+
+    public static void ForEach<T>(this BindingList<T> list, Action<T> a) {
+        for (int i = 0; i < list.Count; i++) {
+            a(list[i]);
+        }
+    }
+    public static void AddRange<T>(this BindingList<T> list, BindingList<T> other) {
+        for (int i = 0; i < other.Count; i++) {
+            list.Add(other[i]);
         }
     }
 

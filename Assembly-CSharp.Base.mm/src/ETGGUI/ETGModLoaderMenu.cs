@@ -179,7 +179,7 @@ public class ETGModLoaderMenu : ETGModMenu {
     public virtual SButton NewEntry(string name, Texture icon = null) {
         SButton button = new SButton(name) {
             Icon = icon ?? IconMod,
-            With = { new SFadeInModifier() }
+            With = { new SFadeInAnimation() }
         };
         return button;
     }

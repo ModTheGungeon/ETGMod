@@ -2,13 +2,13 @@
 using UnityEngine;
 
 namespace SGUI {
-    public class SFadeOutModifier : STimedModifier {
+    public abstract class SFadeAnimation : SAnimation {
 
-        public SFadeOutModifier()
+        public SFadeAnimation()
             : this(0.3f) {
         }
 
-        public SFadeOutModifier(float duration)
+        public SFadeAnimation(float duration)
             : base(duration) {
             Duration = duration;
         }
@@ -22,11 +22,6 @@ namespace SGUI {
         public override void OnStart() {
             OrigForeground = Elem.Foreground;
             OrigBackground = Elem.Background;
-        }
-
-        public override void Animate(float t) {
-            Elem.Foreground = OrigForeground.WithAlpha(t * OrigForeground.a);
-            Elem.Background = OrigBackground.WithAlpha(t * OrigBackground.a);
         }
 
     }

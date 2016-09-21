@@ -23,10 +23,7 @@ namespace SGUI {
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.InnerSize);
-                }
-                if (Icon != null) {
-                    Size = Size.WithX(Size.x + Size.y + 4f);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize - (Icon == null ? Vector2.zero : new Vector2(Icon.width + 1f + Backend.IconPadding, 0f)), font: Font);
                 }
             }
 

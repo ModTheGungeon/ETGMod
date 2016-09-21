@@ -8,6 +8,10 @@ namespace SGUI {
 
         public SElement Elem;
 
+        public virtual void Init() {
+            
+        }
+
         public virtual void UpdateStyle() {
 
         }
@@ -19,6 +23,11 @@ namespace SGUI {
 	}
 
     public class SDModifier : SModifier {
+
+        public Action<SElement> OnInit;
+        public override void Init() {
+            OnInit?.Invoke(Elem);
+        }
 
         public Action<SElement> OnUpdateStyle;
         public override void UpdateStyle() {

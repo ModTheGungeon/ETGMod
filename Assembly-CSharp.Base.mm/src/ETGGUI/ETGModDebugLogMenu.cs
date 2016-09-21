@@ -32,7 +32,6 @@ public class ETGModDebugLogMenu : ETGModMenu {
             Border = 20f,
             OnUpdateStyle = (SElement elem) => elem.Fill(),
             AutoLayout = (SGroup g) => g.AutoLayoutVertical,
-            AutoLayoutVerticalStretch = false,
             ScrollDirection = SGroup.EDirection.Vertical,
             Children = {
                 new SLabel("THIS LOG IS <color=#ff0000ff>WORK IN PROGRESS</color>."),
@@ -148,7 +147,8 @@ public class ETGModDebugLogMenu : ETGModMenu {
                 OnClick = delegate (SButton button) {
                     IsStacktraceShown = !IsStacktraceShown;
                     Instance.GUI.UpdateStyle();
-                }
+                },
+                With = { new SFadeInAnimation() }
             };
             GUIStacktrace = new SLabel(Stacktace) {
                 Parent = Instance.GUI,
