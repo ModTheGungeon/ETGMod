@@ -10,7 +10,6 @@ namespace SGUI {
 
         public SFadeAnimation(float duration)
             : base(duration) {
-            Duration = duration;
         }
 
         public Color OrigForeground;

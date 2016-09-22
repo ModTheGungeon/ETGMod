@@ -4,13 +4,11 @@ using UnityEngine;
 namespace SGUI {
     public class SPreloader : SElement {
 
-        public Texture Texture;
-
         public Vector2 IndividualSize = new Vector2(1f, 1f);
         public Vector2 Padding = new Vector2(0f, 0f);
         public IntVector2 Count = new IntVector2(32, 32);
 
-        public bool IsCentered = false;
+        public bool IsCentered = true;
 
         public Func<float, float, float, float> Function = DefaultFunction;
 
@@ -35,11 +33,8 @@ namespace SGUI {
         public float TimeStart;
 
         public SPreloader()
-            : this(SGUIRoot.White) { }
-        public SPreloader(Texture texture)
-            : this(texture, Color.white) { }
-        public SPreloader(Texture texture, Color color) {
-            Texture = texture;
+            : this(Color.white) { }
+        public SPreloader(Color color) {
             Foreground = color;
             TimeStart = Time.unscaledTime;
         }
@@ -50,20 +45,22 @@ namespace SGUI {
 
             if (UpdateBounds) {
                 Size = InnerSize;
+                if (Parent != null) Size.x = Parent.InnerSize.x;
             }
 
             base.UpdateStyle();
         }
 
         public override void Render() {
-            Vector2 offs = InnerOrigin - Position;
             float t = Time.unscaledTime - TimeStart;
+            float dx = IndividualSize.x + Padding.x;
+            float dy = IndividualSize.y + Padding.y;
             for (int y = 0; y < Count.y; y++) {
                 for (int x = 0; x < Count.x; x++) {
                     Draw.Texture(this, new Vector2(
-                        offs.x + (IndividualSize.x + Padding.x) * x,
-                        offs.y + (IndividualSize.y + Padding.y) * y
-                    ), IndividualSize, Texture, Foreground.WithAlpha(Foreground.a * Function((x + 0.5f) / Count.x, (y + 0.5f) / Count.y, t)));
+                        dx * x,
+                        dy * y
+                    ), IndividualSize, SGUIRoot.White, Foreground.WithAlpha(Foreground.a * Function((x + 0.5f) / Count.x, (y + 0.5f) / Count.y, t)));
                 }
             }
         }

@@ -166,14 +166,12 @@ public class ETGModLoaderMenu : ETGModMenu {
                 }
 
                 RemoteMod mod = (RemoteMod) mods.Current;
-                ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
                 ModOnlineListGroup.Children.Add(NewEntry(mod.Name, IconMod));
-                ModOnlineListGroup.Children.Add(preloader);
                 yield return null;
             }
         }
 
-        // ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
+        preloader.Modifiers.Add(new SFadeOutShrinkSequence());
     }
 
     public virtual SButton NewEntry(string name, Texture icon = null) {

@@ -1001,6 +1001,7 @@ namespace SGUI {
 
             Vector2 bounds = size ?? MAXVEC2;
             float x = 0f;
+            float maxX = 0f;
             float y = 0f;
 
             StringBuilder rebuilt = new StringBuilder();
@@ -1018,6 +1019,7 @@ namespace SGUI {
                 }
 
                 if (ciGot) x += ci.advance;
+                if (x > maxX) maxX = x;
                 if (x > bounds.x || c == '\n') {
                     if (lastSpace == -1 || c == '\n') {
                         rebuilt.Append('\n');
@@ -1038,7 +1040,7 @@ namespace SGUI {
             }
 
             text = rebuilt.ToString().TrimEnd();
-            return new Vector2(x, y + LineHeight);
+            return new Vector2(maxX, y + LineHeight);
         }
 
         public void Dispose() {

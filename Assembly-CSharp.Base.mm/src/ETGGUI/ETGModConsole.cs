@@ -64,7 +64,6 @@ public class ETGModConsole : ETGModMenu {
                 new SGroup {
                     Background = new Color(0f, 0f, 0f, 0f),
                     AutoLayout = (SGroup g) => g.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
                     ScrollDirection = SGroup.EDirection.Vertical,
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Fill();

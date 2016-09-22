@@ -10,7 +10,6 @@ namespace SGUI {
 
         public SFadeInAnimation(float duration)
             : base(duration) {
-            Duration = duration;
         }
 
         public override void Animate(float t) {
