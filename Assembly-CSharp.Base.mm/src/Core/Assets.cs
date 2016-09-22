@@ -153,6 +153,13 @@ public static partial class ETGMod {
                 return UnityEngine.Object.Instantiate(Databases.Items.GetModItemByName(path.Substring(7)));
             }
 
+            if (path.StartsWithInvariant("ENEMYDB_GUID:")) {
+                Debug.Log("Pulling enemy from database: " + path.Substring(13));
+                global::AIActor thingy = UnityEngine.Object.Instantiate(Databases.Enemies.GetModEnemyByGuid(path.Substring(13)));
+                thingy.gameObject.SetActive(true);
+                return thingy;
+            }
+
 #if DEBUG
             if (DumpResources) {
                 Dump.DumpResource(path);
