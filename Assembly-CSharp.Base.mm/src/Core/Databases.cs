@@ -11,7 +11,7 @@ public static partial class ETGMod {
 
         public readonly static ItemDB Items = new ItemDB();
         public readonly static StringDB Strings = new StringDB();
-
+        public readonly static EnemyDB Enemies = new EnemyDB();
     }
 
 }
