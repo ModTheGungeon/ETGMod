@@ -582,6 +582,7 @@ namespace SGUI {
         }
         public void Texture(Vector2 position, Vector2 size, Texture texture, Color? color = null) {
             if (!IsOnGUIRepainting) return;
+            if (color != null && color.Value.a < 0.01f) return;
             Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
             GUI.color = color ?? Color.white;

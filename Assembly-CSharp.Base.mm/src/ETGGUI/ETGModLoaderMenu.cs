@@ -153,8 +153,8 @@ public class ETGModLoaderMenu : ETGModMenu {
     }
     protected virtual IEnumerator _RefreshOnline() {
         ModOnlineListGroup.Children.Clear();
-        SLabel downloadingLabel = new SLabel("Downloading mod list...");
-        ModOnlineListGroup.Children.Add(downloadingLabel);
+        SPreloader preloader = new SPreloader();
+        ModOnlineListGroup.Children.Add(preloader);
         yield return null;
 
         for (int i = 0; i < Repos.Count; i++) {
@@ -168,24 +168,18 @@ public class ETGModLoaderMenu : ETGModMenu {
                 RemoteMod mod = (RemoteMod) mods.Current;
                 ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
                 ModOnlineListGroup.Children.Add(NewEntry(mod.Name, IconMod));
-                ModOnlineListGroup.Children.Add(downloadingLabel);
+                ModOnlineListGroup.Children.Add(preloader);
                 yield return null;
             }
         }
 
-        ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
+        // ModOnlineListGroup.Children.RemoveAt(ModOnlineListGroup.Children.Count - 1);
     }
 
     public virtual SButton NewEntry(string name, Texture icon = null) {
         SButton button = new SButton(name) {
             Icon = icon ?? IconMod,
             With = { new SFadeInAnimation() }
-            /*With = {
-                new SAnimationSequence {
-                    Sequence = { new SFadeInAnimation(), new SFadeOutAnimation() },
-                    Loop = true
-                }
-            }*/
         };
         return button;
     }

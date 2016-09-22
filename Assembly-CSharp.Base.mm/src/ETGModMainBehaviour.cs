@@ -12,6 +12,9 @@ public class ETGModMainBehaviour : MonoBehaviour {
 
     public void Awake() {
         DontDestroyOnLoad(gameObject);
+#pragma warning disable CS0618
+        ETGMod.StartCoroutine = StartCoroutine;
+#pragma warning restore CS0618
         ETGMod.StartGlobalCoroutine = StartCoroutine;
         ETGMod.StopGlobalCoroutine = StopCoroutine;
         ETGMod.Init();

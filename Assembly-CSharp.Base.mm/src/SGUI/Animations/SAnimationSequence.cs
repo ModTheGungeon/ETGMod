@@ -63,7 +63,7 @@ namespace SGUI {
             if (Current == null) return;
 
             t = ((t * Duration) - CurrentOffset) / Current.Duration;
-            Current.Animate(t);
+            Current.Animate(Current.Easing(t));
             if (t >= 1f) Current.End();
         }
 

@@ -13,6 +13,8 @@ namespace SGUI {
         public bool AutoStart = true;
         public bool Loop = false;
 
+        public Func<float, float> Easing = SEasings.SineEaseInOut;
+
         public SAnimation()
             : this(0.3f) {
         }
@@ -58,7 +60,7 @@ namespace SGUI {
                 goto Loop;
             }
 
-            Animate(t);
+            Animate(Easing(t));
         }
 
         public void Start() {

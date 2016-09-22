@@ -94,9 +94,9 @@ namespace SGUI {
         public Vector2 Centered {
             get {
                 if (Parent == null) {
-                    return Root.Size / 2f - Size / 2f;
+                    return Root.Size * 0.5f - Size * 0.5f;
                 }
-                return Parent.InnerSize / 2f - Size / 2f;
+                return Parent.InnerSize * 0.5f - Size * 0.5f;
             }
         }
 
