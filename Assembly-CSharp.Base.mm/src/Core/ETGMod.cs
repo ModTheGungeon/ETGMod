@@ -28,7 +28,7 @@ public static partial class ETGMod {
         #elif DEBUG
         new Profile(1, "debug");
         #else
-        new Profile(0, "b13"); // no tag
+        new Profile(0, "b14"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -241,10 +241,32 @@ public static partial class ETGMod {
             try {
                 InitMod(path.Trim());
             } catch (Exception e) {
-                Debug.LogError("ETGMOD could not load mod " + path + ": " + e);
+                Debug.LogError("ETGMOD could not load mod " + path + "! Check your output log / player log.");
+                LogDetailed(e);
             }
         }
 
+    }
+
+    public static void LogDetailed(Exception e, string tag = null) {
+        for (Exception e_ = e; e_ != null; e_ = e_.InnerException) {
+            Console.WriteLine(e_.GetType().FullName + ": " + e_.Message + "\n" + e_.StackTrace);
+            if (e_ is ReflectionTypeLoadException) {
+                ReflectionTypeLoadException rtle = (ReflectionTypeLoadException) e_;
+                for (int i = 0; i < rtle.Types.Length; i++) {
+                    Console.WriteLine("ReflectionTypeLoadException.Types[" + i + "]: " + rtle.Types[i]);
+                }
+                for (int i = 0; i < rtle.LoaderExceptions.Length; i++) {
+                    LogDetailed(rtle.LoaderExceptions[i], tag + (tag == null ? "" : ", ") + "rtle:" + i);
+                }
+            }
+            if (e_ is TypeLoadException) {
+                Console.WriteLine("TypeLoadException.TypeName: " + ((TypeLoadException) e_).TypeName);
+            }
+            if (e_ is BadImageFormatException) {
+                Console.WriteLine("BadImageFormatException.FileName: " + ((BadImageFormatException) e_).FileName);
+            }
+        }
     }
 
     public static void InitMod(string path) {

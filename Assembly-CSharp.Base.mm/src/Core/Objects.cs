@@ -57,7 +57,7 @@ public static partial class ETGMod {
             } else {
                 all = hook;
             }
-            Hooks[type] = hook;
+            Hooks[type] = all;
         }
 
         public static ComponentHook GetHooks<T>() where T : Component {
@@ -69,6 +69,17 @@ public static partial class ETGMod {
                 return all;
             }
             return null;
+        }
+
+        public static void RemoveHook<T>(ComponentHook hook) where T : Component {
+            RemoveHook(typeof(T), hook);
+        }
+        public static void RemoveHook(Type type, ComponentHook hook) {
+            ComponentHook all;
+            if (Hooks.TryGetValue(type, out all)) {
+                all -= hook;
+                Hooks[type] = all;
+            }
         }
 
         public static void HandleGameObject(GameObject go, bool recursive = true) {
