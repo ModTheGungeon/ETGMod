@@ -41,6 +41,9 @@ namespace SGUI {
                 } else {
                     Size = Backend.MeasureText(ref Text, Parent.InnerSize - Border * 2f - iconWidth, font: Font);
                 }
+                if (Icon != null && Icon.height > Backend.LineHeight) {
+                    Size.y = (Size.y / Backend.LineHeight) * (Icon.height + Backend.IconPadding);
+                }
                 Size += iconWidth;
                 Size += Border * 2f;
             }

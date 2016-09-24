@@ -25,6 +25,9 @@ namespace SGUI {
                 } else {
                     Size = Backend.MeasureText(ref Text, Parent.InnerSize - (Icon == null ? Vector2.zero : new Vector2(Icon.width + 1f + Backend.IconPadding, 0f)), font: Font);
                 }
+                if (Icon != null && Icon.height > Backend.LineHeight) {
+                    Size.y = (Size.y / Backend.LineHeight) * (Icon.height + Backend.IconPadding);
+                }
             }
 
             base.UpdateStyle();

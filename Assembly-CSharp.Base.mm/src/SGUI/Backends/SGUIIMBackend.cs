@@ -646,10 +646,13 @@ namespace SGUI {
             if (text.Contains("\n")) {
                 string[] lines = text.Split('\n');
                 float y = 0f;
-                Vector2 lineSize = new Vector2(size.x, LineHeight);
                 for (int i = 0; i < lines.Length; i++) {
                     string line = lines[i];
                     bool iconMissing = icon != null && i > 0;
+                    Vector2 lineSize = new Vector2(size.x, LineHeight);
+                    if (i == 0 && icon != null && icon.height > LineHeight) {
+                        lineSize.y = (lineSize.y / LineHeight) * (icon.height + IconPadding);
+                    }
                     Text_(
                         elem,
                         position + new Vector2(iconMissing ? (icon.width + 1f) : 0f, y),
