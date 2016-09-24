@@ -9,7 +9,8 @@ public class TestGunController : GunBehaviour {
         // Let's just call it "Test Gun", and use "gshbd" for all sprites and as "codename".
         Gun gun = ETGMod.Databases.Items.NewGun("Test Gun", "gshbd");
         // If you really want to, you can pass another gun object between the name and short name.
-        // That gun then gets "cleared" to be a base gun for your modded gun.
+        // 0.2.0-b13 and older: That gun then gets "cleared" to be a base gun for your modded gun.
+        // 0.2.0-b14 and newer: That gun then gets used as         a base gun for your modded gun.
 
         // If you want to transform from another gun, do it now,
         // otherwise that transformation overwrites everything else that comes now.
