@@ -49,7 +49,7 @@ public class ETGModLoaderMenu : ETGModMenu {
                     ScrollDirection = SGroup.EDirection.Vertical,
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Size = new Vector2(
-                            Mathf.Max(256f, elem.Parent.InnerSize.x * 0.2f),
+                            Mathf.Max(288f, elem.Parent.InnerSize.x * 0.25f),
                             Mathf.Max(256f, elem.Parent.InnerSize.y * 0.2f)
                         );
                         elem.Position = new Vector2(0f, elem.Parent.InnerSize.y - elem.Size.y);

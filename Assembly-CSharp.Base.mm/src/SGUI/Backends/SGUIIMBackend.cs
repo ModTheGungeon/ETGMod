@@ -646,24 +646,35 @@ namespace SGUI {
             if (text.Contains("\n")) {
                 string[] lines = text.Split('\n');
                 float y = 0f;
+                Vector2 lineSize = new Vector2(size.x, LineHeight);
+                float iconWidth = icon != null ? (icon.width + 1f) : 0f;
+
+                if (icon != null) {
+                    y = size.y * 0.5f - (lines.Length * lineSize.y) * 0.5f;
+                }
+
                 for (int i = 0; i < lines.Length; i++) {
                     string line = lines[i];
-                    bool iconMissing = icon != null && i > 0;
-                    Vector2 lineSize = new Vector2(size.x, LineHeight);
-                    if (i == 0 && icon != null && icon.height > LineHeight) {
-                        lineSize.y = (lineSize.y / LineHeight) * (icon.height + IconPadding);
-                    }
                     Text_(
                         elem,
-                        position + new Vector2(iconMissing ? (icon.width + 1f) : 0f, y),
-                        lineSize.WithX(size.x - (iconMissing ? icon.width : 0f)),
-                        iconMissing ? $" {line}" : line,
+                        position + new Vector2(iconWidth, y),
+                        lineSize.WithX(size.x - iconWidth),
+                        icon != null ? $" {line}" : line,
                         alignment,
-                        i == 0 ? icon : null,
+                        null,
                         registerProperly
                     );
                     y += lineSize.y;
                 }
+
+                if (icon != null) {
+                    Texture(
+                        elem,
+                        position + new Vector2(0f, size.y * 0.5f - icon.height * 0.5f),
+                        new Vector2(icon.width, icon.height),
+                        icon);
+                }
+
                 return;
             }
 
