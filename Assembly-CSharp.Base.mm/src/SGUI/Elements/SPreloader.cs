@@ -35,6 +35,7 @@ namespace SGUI {
         public SPreloader()
             : this(Color.white) { }
         public SPreloader(Color color) {
+            ColorCount = 1;
             Foreground = color;
             TimeStart = Time.unscaledTime;
         }

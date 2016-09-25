@@ -6,6 +6,7 @@ namespace SGUI {
         public bool Dragging;
 
         public SWindowTitleBar() {
+            ColorCount = 1;
             Background = Background.WithAlpha(Background.a * 2f);
 
             Children.Add(new SButton {

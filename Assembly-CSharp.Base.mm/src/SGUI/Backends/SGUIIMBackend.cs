@@ -585,7 +585,7 @@ namespace SGUI {
             if (color != null && color.Value.a < 0.01f) return;
             Rect bounds = new Rect(position, size);
             Color prevGUIColor = GUI.color;
-            GUI.color = color ?? Color.white;
+            GUI.color = color ?? prevGUIColor;
             RegisterNextComponent();
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Rect, bounds);
             GUI.DrawTexture(bounds, texture, ScaleMode.StretchToFill);
@@ -642,12 +642,23 @@ namespace SGUI {
         }
         private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true) {
             GUI.skin.font = (Font) elem?.Font ?? _Font;
+            float y = 0f;
+
+            Vector2 iconScale =
+                (elem as SLabel)?.IconScale ??
+                (elem as SButton)?.IconScale ??
+                Vector2.one;
+
+            float iconWidth = icon != null ? icon.width * iconScale.x : 0f;
+            float iconHeight = icon != null ? icon.height * iconScale.y : 0f;
+            if (icon != null) {
+                iconWidth += 1f;
+            }
 
             if (text.Contains("\n")) {
                 string[] lines = text.Split('\n');
-                float y = 0f;
+
                 Vector2 lineSize = new Vector2(size.x, LineHeight);
-                float iconWidth = icon != null ? (icon.width + 1f) : 0f;
 
                 if (icon != null) {
                     y = size.y * 0.5f - (lines.Length * lineSize.y) * 0.5f;
@@ -667,28 +678,45 @@ namespace SGUI {
                     y += lineSize.y;
                 }
 
+                PreparePosition(elem, ref position);
+
                 if (icon != null) {
                     Texture(
-                        elem,
-                        position + new Vector2(0f, size.y * 0.5f - icon.height * 0.5f),
-                        new Vector2(icon.width, icon.height),
-                        icon);
+                        null,
+                        position + new Vector2(0f, size.y * 0.5f - iconHeight * 0.5f),
+                        new Vector2(iconWidth, iconHeight),
+                        icon,
+                        elem?.Colors?.AtOr(1, Color.white) ?? Color.white
+                    );
                 }
-
                 return;
             }
 
             PreparePosition(elem, ref position);
-            Rect bounds = new Rect(position, size);
+            if (icon != null) {
+                y = size.y * 0.5f - LineHeight * 0.5f;
+            }
+            Rect bounds = new Rect(position + new Vector2(iconWidth, y), size - new Vector2(iconWidth, y * 2f));
 
-            if (elem != null) {
-                GUI.skin.label.normal.textColor = elem.Foreground;
+            GUI.skin.label.normal.textColor = elem?.Foreground ?? Color.white;
+            if (elem != null && elem is SButton) {
+                GUI.skin.label.normal.textColor = GUI.skin.label.normal.textColor.WithAlpha(GUI.skin.label.normal.textColor.a * (elem.IsHovered ? 1f : 0.8f));
             }
             GUI.skin.label.alignment = alignment;
             RegisterNextComponentIn(elem);
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, registerProperly ? bounds : NULLRECT, text);
             if (icon != null) text = $" {text}";
-            GUI.Label(bounds, new GUIContent(text, icon));
+            GUI.Label(bounds, text);
+
+            if (icon != null) {
+                Texture(
+                    null,
+                    position + new Vector2(0f, size.y * 0.5f - iconHeight * 0.5f),
+                    new Vector2(iconWidth, iconHeight),
+                    icon,
+                    elem?.Colors?.AtOr(1, Color.white) ?? Color.white
+                );
+            }
         }
 
         public void TextField(SElement elem, Vector2 position, Vector2 size, ref string text) {
@@ -815,24 +843,18 @@ namespace SGUI {
 
         public void Button(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
             GUI.skin.font = (Font) elem?.Font ?? _Font;
-            PreparePosition(elem, ref position);
 
             if (elem != null && IsOnGUIRepainting) {
-                GUI.skin.label.normal.textColor = elem.Foreground * (elem.IsHovered ? 1f : 0.9f);
                 GUI.backgroundColor = elem.Background;
             }
 
-            RegisterNextComponentIn(elem);
-            Button(position, size, text, (elem as SButton)?.Border, alignment, icon);
-        }
-        public void Button(Vector2 position, Vector2 size, string text, Vector2? border = null, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
-            Vector2 border_ = border ?? new Vector2(4f, 4f);
-            if (border == null) size += border_;
-            RegisterNextComponent();
-            Rect(null, position, size, GUI.backgroundColor);
+            Vector2 border_ = (elem as SButton)?.Border ?? new Vector2(4f, 4f);
+            if (!(elem is SButton)) size += border_;
+
+            Rect(elem, position, size, GUI.backgroundColor);
 
             Text_(
-                null,
+                elem,
                 position + border_,
                 size - border_ * 2f,
                 text, alignment, icon, false);

@@ -12,10 +12,8 @@ namespace SGUI {
             : base(duration) {
         }
 
-        public override void Animate(float t) {
-            t = 1f - t;
-            Elem.Foreground = OrigForeground.WithAlpha(t * OrigForeground.a);
-            Elem.Background = OrigBackground.WithAlpha(t * OrigBackground.a);
+        public override Color Animate(float t, Color c) {
+            return c.WithAlpha((1f - t) * c.a);
         }
 
     }

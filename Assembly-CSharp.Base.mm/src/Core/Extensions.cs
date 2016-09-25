@@ -89,6 +89,11 @@ public static partial class ETGMod {
         return null;
     }
 
+    public static T AtOr<T>(this T[] a, int i, T or) {
+        if (i < 0 || a.Length <= i) return or;
+        return a[i];
+    }
+
     public static void AddRange(this IDictionary to, IDictionary from) {
         foreach (DictionaryEntry entry in from) {
             to.Add(entry.Key, entry.Value);

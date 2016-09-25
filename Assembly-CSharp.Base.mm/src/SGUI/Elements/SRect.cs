@@ -9,6 +9,7 @@ namespace SGUI {
         public SRect()
             : this(Color.white) { }
         public SRect(Color color) {
+            ColorCount = 1;
             Foreground = color;
         }
 

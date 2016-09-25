@@ -7,6 +7,16 @@ namespace SGUI {
         public string Text;
         public Texture Icon;
 
+        public Vector2 IconScale = Vector2.one;
+        public Color IconColor {
+            get {
+                return Colors[1];
+            }
+            set {
+                Colors[1] = value;
+            }
+        }
+
         public TextAnchor Alignment = TextAnchor.MiddleLeft;
 
         public Vector2 Border = new Vector2(4f, 4f);
@@ -28,6 +38,8 @@ namespace SGUI {
             : this("") { }
         public SButton(string text) {
             Text = text;
+            ColorCount = 3;
+            IconColor = Color.white;
         }
 
         public override void UpdateStyle() {
@@ -35,14 +47,14 @@ namespace SGUI {
             if (Root == null) return;
 
             if (UpdateBounds) {
-                Vector2 iconWidth = Icon == null ? Vector2.zero : new Vector2(Icon.width + Backend.IconPadding, 0f);
+                Vector2 iconWidth = Icon == null ? Vector2.zero : new Vector2(Icon.width * IconScale.x + 1f + Backend.IconPadding, 0f);
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text, font: Font);
                 } else {
                     Size = Backend.MeasureText(ref Text, Parent.InnerSize - Border * 2f - iconWidth, font: Font);
                 }
                 if (Icon != null) {
-                    Size.y = Mathf.Max(Size.y, Icon.height + Backend.IconPadding);
+                    Size.y = Mathf.Max(Size.y, Icon.height * IconScale.y + Backend.IconPadding);
                 }
                 Size += iconWidth;
                 Size += Border * 2f;

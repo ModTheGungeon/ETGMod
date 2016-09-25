@@ -12,16 +12,20 @@ namespace SGUI {
             : base(duration) {
         }
 
-        public Color OrigForeground;
-        public Color OrigBackground;
-
-        public Color TransparentForeground;
-        public Color TransparentBackground;
+        public Color[] OrigColors;
 
         public override void OnInit() {
-            OrigForeground = Elem.Foreground;
-            OrigBackground = Elem.Background;
+            OrigColors = new Color[Elem.Colors.Length];
+            Elem.Colors.CopyTo(OrigColors, 0);
         }
+
+        public override void Animate(float t) {
+            for (int i = 0; i < OrigColors.Length; i++) {
+                Elem.Colors[i] = Animate(t, OrigColors[i]);
+            }
+        }
+
+        public abstract Color Animate(float t, Color c);
 
         public override void OnStart() {
         }

@@ -11,6 +11,7 @@ namespace SGUI {
             : this(texture, Color.white) { }
         public SImage(Texture texture, Color color) {
             Texture = texture;
+            ColorCount = 1;
             Foreground = color;
         }
 

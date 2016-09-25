@@ -100,8 +100,34 @@ namespace SGUI {
             }
         }
 
-        public virtual Color Foreground { get; set; }
-        public virtual Color Background { get; set; }
+        public Color[] Colors = new Color[2];
+        public virtual int ColorCount {
+            get {
+                return Colors.Length;
+            }
+            set {
+                Color[] newColors = new Color[value];
+                Array.Copy(Colors, 0, newColors, 0, Math.Min(Colors.Length, value) - 1);
+                newColors[value - 1] = Colors[Colors.Length - 1];
+                Colors = newColors;
+            }
+        }
+        public virtual Color Foreground {
+            get {
+                return Colors[0];
+            }
+            set {
+                Colors[0] = value;
+            }
+        }
+        public virtual Color Background {
+            get {
+                return Colors[Colors.Length - 1];
+            }
+            set {
+                Colors[Colors.Length - 1] = value;
+            }
+        }
         public object Font;
 
         /// <summary>
