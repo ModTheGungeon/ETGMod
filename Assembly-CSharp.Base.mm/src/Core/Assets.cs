@@ -150,13 +150,29 @@ public static partial class ETGMod {
             }
 
             if (path.StartsWithInvariant("ITEMDB:")) {
-                return UnityEngine.Object.Instantiate(Databases.Items.GetModItemByName(path.Substring(7)));
+                var moditem = Databases.Items.GetModItemByName(path.Substring(7));
+                if (moditem == null) {
+                    return null;
+                }
+                return UnityEngine.Object.Instantiate(moditem);
             }
 
             if (path.StartsWithInvariant("ENEMYDB_GUID:")) {
-                Debug.Log("Pulling enemy from database: " + path.Substring(13));
-                global::AIActor thingy = UnityEngine.Object.Instantiate(Databases.Enemies.GetModEnemyByGuid(path.Substring(13)));
+                global::AIActor modenemy = Databases.Enemies.GetModEnemyByGuid(path.Substring(13));
+                if (modenemy == null) {
+                    return null;
+                }
+                global::AIActor thingy = UnityEngine.Object.Instantiate(modenemy);
                 thingy.gameObject.SetActive(true);
+                return thingy;
+            }
+
+            if (path.StartsWithInvariant("CHARACTERDB:")) {
+                GameObject modcharacter = Databases.Characters.GetModCharacterByName(path.Substring(12));
+                if (modcharacter == null) {
+                    return null;
+                }
+                GameObject thingy = UnityEngine.Object.Instantiate(modcharacter);
                 return thingy;
             }
 

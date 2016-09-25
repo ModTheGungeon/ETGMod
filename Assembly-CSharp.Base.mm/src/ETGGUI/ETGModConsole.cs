@@ -130,6 +130,7 @@ public class ETGModConsole : ETGModMenu {
                 .AddUnit ("screenshake", SetShake)
                 .AddUnit ("echo",        Echo    )
                 .AddUnit ("tp",          Teleport)
+                .AddUnit ("character",   SwitchCharacter)
                 .AddUnit ("clear",       (string[] args) => GUI[0].Children.Clear())
                 .AddUnit ("godmode", delegate(string[] args) {
                     GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
@@ -161,6 +162,7 @@ public class ETGModConsole : ETGModMenu {
                 .AddGroup ("spawn", SpawnGUID)
                 .AddGroup ("resources")
                 .AddUnit  ("cubulon", TestCustomEnemy)
+                .AddUnit  ("dude",    TestCustomCharacter)
                 .AddUnit  ("skiplevel", delegate(string[] args) {
                     Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
                     GameManager.Instance.DelayedLoadNextLevel(0.5f);
@@ -210,8 +212,11 @@ public class ETGModConsole : ETGModMenu {
         GUI[0].Children.Add(new SLabel(text));
         ((SGroup) GUI[0]).ScrollPosition.y = float.MaxValue;
     }
-    public static void Log(string text) {
+    public static void Log(string text, bool debuglog = false) {
         Instance._Log(text);
+        if (debuglog) {
+            Debug.Log(text);
+        }
     }
 
     public string[] SplitArgs(string args) {
@@ -354,6 +359,8 @@ public class ETGModConsole : ETGModMenu {
                 command.RunCommand (args);
             } catch (Exception e) {
                 Log(e.ToString ());
+
+                Debug.LogError("Exception occured while running command:" + e.ToString());
             }
         }
     }
@@ -716,6 +723,63 @@ public class ETGModConsole : ETGModMenu {
         thing.healthHaver.SetHealthMaximum(999f);
         string guid = ETGMod.Databases.Enemies.AddEnemy(thing, "my_cubulon");
         Log("Added enemy with GUID: " + guid);
+    }
+
+    void TestCustomCharacter (string[] args) {
+        DudeBehaviour.Add();
+    }
+
+    void SwitchCharacter (string[] args) {
+        if (!ArgCount(args, 1, 2)) return;
+        var prefab = (GameObject)Resources.Load("CHARACTERDB:" + args[0]);
+        if (prefab == null) {
+            Debug.Log(args[0] + " is not a mod character, checking if it's one of the standard characters");
+            prefab = (GameObject)Resources.Load("Player" + args[0]);
+        }
+        if (prefab == null) {
+            Log("Failed getting prefab for " + args[0]);
+            return;
+        }
+
+        Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
+        bool wasInGunGame = false;
+        if (GameManager.Instance.PrimaryPlayer) {
+            wasInGunGame = GameManager.Instance.PrimaryPlayer.CharacterUsesRandomGuns;
+        }
+        GameManager.Instance.PrimaryPlayer.SetInputOverride("getting deleted");
+
+        PlayerController primaryPlayer = GameManager.Instance.PrimaryPlayer;
+        Vector3 position = primaryPlayer.transform.position;
+        UnityEngine.Object.Destroy(primaryPlayer.gameObject);
+        GameManager.Instance.ClearPrimaryPlayer();
+        GameManager.PlayerPrefabForNewGame = prefab;
+        PlayerController component = GameManager.PlayerPrefabForNewGame.GetComponent<PlayerController>();
+        GameStatsManager.Instance.BeginNewSession(component);
+        PlayerController playerController;
+        GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(GameManager.PlayerPrefabForNewGame, position, Quaternion.identity);
+        GameManager.PlayerPrefabForNewGame = null;
+        gameObject.SetActive(true);
+        playerController = gameObject.GetComponent<PlayerController>();
+        if (args.Length == 2) {
+            playerController.SwapToAlternateCostume();
+        }
+        GameManager.Instance.PrimaryPlayer = playerController;
+        playerController.PlayerIDX = 0;
+
+        GameManager.Instance.MainCameraController.ClearPlayerCache();
+        GameManager.Instance.MainCameraController.SetManualControl(false, true);
+        Foyer.Instance.PlayerCharacterChanged(playerController);
+
+        Pixelator.Instance.FadeToBlack(0.5f, true, 0f);
+
+        if (wasInGunGame) {
+            GameManager.Instance.PrimaryPlayer.CharacterUsesRandomGuns = true;
+            while (GameManager.Instance.PrimaryPlayer.inventory.AllGuns.Count > 1) {
+                var gun = GameManager.Instance.PrimaryPlayer.inventory.AllGuns[1];
+                GameManager.Instance.PrimaryPlayer.inventory.RemoveGunFromInventory(gun);
+                UnityEngine.Object.Destroy(gun.gameObject);
+            }
+        }
     }
 }
 

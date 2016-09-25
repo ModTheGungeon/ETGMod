@@ -23,6 +23,8 @@ public sealed class ItemDB {
         }
     }
 
+    // Example name: "gshbd"
+    // NOT "Test Gun"
     public PickupObject this[string name] {
         get {
             return PickupObjectDatabase.Instance.InternalGetByName(name);

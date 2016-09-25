@@ -58,6 +58,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Security" />
+    <Reference Include="PlayMaker">
+      <HintPath>..\..\..\.local\share\Steam\steamapps\common\Enter the Gungeon\EtG_Data\Managed\PlayMaker.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -193,6 +196,10 @@
     <Compile Include="src\SGUI\Animations\SFadeOutShrinkSequence.cs" />
     <Compile Include="src\SGUI\Animations\SShrinkAnimation.cs" />
     <Compile Include="src\Core\Databases\EnemyDB.cs" />
+    <Compile Include="src\Core\Databases\CharacterDB.cs" />
+    <Compile Include="src\Patches\patch_PlayerController.cs" />
+    <Compile Include="src\Core\PlayerBehaviour.cs" />
+    <Compile Include="src\Characters\DudeBehaviour.cs" />
     <Compile Include="src\SGUI\Modifiers\SInGameModifier.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -350,5 +357,6 @@
     <Folder Include="src\ETGGUI\Repo\" />
     <Folder Include="src\Core\Databases\" />
     <Folder Include="src\SGUI\Animations\" />
+    <Folder Include="src\Characters\" />
   </ItemGroup>
 </Project>
