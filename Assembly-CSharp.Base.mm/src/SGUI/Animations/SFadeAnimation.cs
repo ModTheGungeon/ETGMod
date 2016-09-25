@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using UnityEngine;
+using System.Linq.Expressions;
+using System.Linq;
 
 namespace SGUI {
     public abstract class SFadeAnimation : SAnimation {
@@ -17,6 +19,14 @@ namespace SGUI {
         public override void OnInit() {
             OrigColors = new Color[Elem.Colors.Length];
             Elem.Colors.CopyTo(OrigColors, 0);
+
+            for (int i = 0; i < Elem.Children.Count; i++) {
+                SElement child = Elem.Children[i];
+                if (child.Modifiers.Where(m => m is SFadeAnimation) != null) continue;
+                SFadeAnimation clone = (SFadeAnimation) MemberwiseClone();
+                clone.Elem = child;
+                child.Modifiers.Add(clone);
+            }
         }
 
         public override void Animate(float t) {
