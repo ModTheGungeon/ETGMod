@@ -147,8 +147,6 @@ public static partial class ETGMod {
         dfInputManager manager = GameUIRoot.Instance.Manager.GetComponent<dfInputManager>();
         manager.Adapter = new SGUIDFInput(manager.Adapter);
 
-        Resources.Load<tk2dSpriteCollectionData>("sprites/Winchester");
-
         CallInEachModule("Start");
         // Needs to happen late as mods can add their own guns.
         StartGlobalCoroutine(ETGModGUI.ListAllItemsAndGuns());
