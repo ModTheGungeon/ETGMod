@@ -53,8 +53,8 @@ public static partial class ETGMod {
 
         public static RuntimeAtlasPacker Packer = new RuntimeAtlasPacker();
 
-        public static bool TryGetMapped(string path, out AssetMetadata metadata, bool dataless = false) {
-            if (!dataless) {
+        public static bool TryGetMapped(string path, out AssetMetadata metadata, bool includeDirs = false) {
+            if (includeDirs) {
                 if (MapDirs.TryGetValue(path, out metadata)) { return true; }
                 if (MapDirs.TryGetValue(path.ToLowerInvariant(), out metadata)) { return true; }
             }
@@ -222,9 +222,10 @@ public static partial class ETGMod {
                     if (metadata.AssetType == t_AssetDirectory) {
                         // Separate textures
                         // TODO create collection from "children" assets
-                        tk2dSpriteCollectionData data = new tk2dSpriteCollectionData();
+                        tk2dSpriteCollectionData data = new GameObject(path.StartsWithInvariant("sprites/") ? path.Substring(8) : path).AddComponent<tk2dSpriteCollectionData>();
                         tk2dSpriteCollectionSize size = tk2dSpriteCollectionSize.Default();
 
+                        data.spriteCollectionName = data.name;
                         data.Transient = true;
                         data.version = 3;
                         data.invOrthoSize = 1f / size.OrthoSize;
@@ -361,8 +362,10 @@ public static partial class ETGMod {
                 } else {
                     // Add new sprite.
                     if (list == null) {
-                        list = new List<tk2dSpriteDefinition>(sprites.spriteDefinitions.Length);
-                        list.AddRange(sprites.spriteDefinitions);
+                        list = new List<tk2dSpriteDefinition>(sprites.spriteDefinitions?.Length ?? 32);
+                        if (sprites.spriteDefinitions != null) {
+                            list.AddRange(sprites.spriteDefinitions);
+                        }
                     }
                     frame = new tk2dSpriteDefinition();
                     frame.name = name;
