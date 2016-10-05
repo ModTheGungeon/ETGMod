@@ -42,7 +42,8 @@ namespace UnityEngine {
         [MonoModOriginal] public static extern void OnloadAsset(Object assetToUnload);
         [MonoModOriginalName("OnloadAsset")]
         public static void UnloadAsset(Object asset) {
-            if (ETGModUnityEngineHooks.UnloadAsset(asset)) {
+            bool? overrideUnload = ETGModUnityEngineHooks.UnloadAsset?.Invoke(asset);
+            if (overrideUnload.HasValue && overrideUnload.Value) {
                 return;
             }
             OnloadAsset(asset);
