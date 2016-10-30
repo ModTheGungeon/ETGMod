@@ -4,7 +4,7 @@
 
 ----
 
-This repository houses the "Mod the Gungeon" (ETGMod) modding API for the game "Enter the Gungeon."
+This repository houses the "Mod the Gungeon" (ETGMod) modding API for the game "Enter the Gungeon."  
 
 The "base backend" will be installed before anything else in [the ETGMod.Installer](https://github.com/ModTheGungeon/ETGMod.Installer).
 
