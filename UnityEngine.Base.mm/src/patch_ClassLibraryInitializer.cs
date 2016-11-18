@@ -21,6 +21,9 @@ namespace UnityEngine {
                 }
             }
 
+	    /*
+	    RIP MONODEBUG 2016-2016
+
             try {
                 if (debuggerClient) MonoDebug.SetupDebuggerAgent();
                 MonoDebug.Init();
@@ -29,6 +32,7 @@ namespace UnityEngine {
                 Debug.Log("Called MonoDebug and it sudoku'd.");
                 Debug.Log(e);
             }
+	    */
         }
 
     }
