@@ -132,20 +132,6 @@ public sealed class ItemDB {
         if (_GunGivenPrototype == null) {
             _GunGivenPrototype = (Gun) ETGMod.Databases.Items["Pea_Shooter"];
             ProjectileCollection = _GunGivenPrototype.DefaultModule.projectiles[0].GetComponentInChildren<tk2dBaseSprite>().Collection;
-
-            GameObject go = UnityEngine.Object.Instantiate(_GunGivenPrototype.gameObject);
-            go.name = _GunGivenPrototype.name;
-
-            _GunGivenPrototype = go.GetComponent<Gun>();
-
-            _GunGivenPrototype.modifiedVolley = null;
-            _GunGivenPrototype.singleModule = null;
-
-            _GunGivenPrototype.RawSourceVolley = ScriptableObject.CreateInstance<ProjectileVolleyData>();
-            _GunGivenPrototype.Volley.projectiles = new List<ProjectileModule>();
-
-            _GunGivenPrototype.SetBaseMaxAmmo(300);
-            _GunGivenPrototype.reloadTime = 0.625f;
         }
 
         return NewGun(gunName, _GunGivenPrototype, gunNameShort);
@@ -162,6 +148,15 @@ public sealed class ItemDB {
         SetupItem(gun, gunName);
         gun.gunName = gunName;
         gun.gunSwitchGroup = gunNameShort;
+
+        gun.modifiedVolley = null;
+        gun.singleModule = null;
+
+        gun.RawSourceVolley = ScriptableObject.CreateInstance<ProjectileVolleyData>();
+        gun.Volley.projectiles = new List<ProjectileModule>();
+
+        gun.SetBaseMaxAmmo(300);
+        gun.reloadTime = 0.625f;
 
         return gun;
     }
