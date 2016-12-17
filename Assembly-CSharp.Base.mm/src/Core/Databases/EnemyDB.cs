@@ -32,7 +32,7 @@ public sealed class EnemyDB {
         EnemyDatabaseEntry entry = new EnemyDatabaseEntry(actor);
         _ModEnemies[guid] = actor;
         entry.myGuid = guid;
-        entry.path = "Assets/Resources/ENEMYDB_GUID:" + guid + ".prefab";
+        entry.path = "Assets/Resources/ENEMYDB.GUID:" + guid + ".prefab";
         EnemyDatabase.Instance.Objects.Add(actor);
         EnemyDatabase.Instance.Entries.Add(entry);
         return guid;

@@ -15,6 +15,12 @@ public static partial class ETGMod {
     /// </summary>
     public static partial class Assets {
 
+        private readonly static Protocol[] _Protocols = {
+            new CharacterProtocol(),
+            new EnemyGuidProtocol(),
+            new ItemProtocol()
+        };
+
         public readonly static Type t_Object = typeof(UnityEngine.Object);
         public readonly static Type t_AssetDirectory = typeof(AssetDirectory);
         public readonly static Type t_Texture = typeof(Texture);
@@ -149,31 +155,11 @@ public static partial class ETGMod {
                 path = Player.PlayerReplacement;
             }
 
-            if (path.StartsWithInvariant("ITEMDB:")) {
-                var moditem = Databases.Items.GetModItemByName(path.Substring(7));
-                if (moditem == null) {
-                    return null;
-                }
-                return UnityEngine.Object.Instantiate(moditem);
-            }
-
-            if (path.StartsWithInvariant("ENEMYDB_GUID:")) {
-                global::AIActor modenemy = Databases.Enemies.GetModEnemyByGuid(path.Substring(13));
-                if (modenemy == null) {
-                    return null;
-                }
-                global::AIActor thingy = UnityEngine.Object.Instantiate(modenemy);
-                thingy.gameObject.SetActive(true);
-                return thingy;
-            }
-
-            if (path.StartsWithInvariant("CHARACTERDB:")) {
-                GameObject modcharacter = Databases.Characters.GetModCharacterByName(path.Substring(12));
-                if (modcharacter == null) {
-                    return null;
-                }
-                GameObject thingy = UnityEngine.Object.Instantiate(modcharacter);
-                return thingy;
+            UnityEngine.Object customobj = null;
+            for (int i = 0; i < _Protocols.Length; i++) {
+                var protocol = _Protocols[i];
+                customobj = protocol.Get(path);
+                if (customobj != null) return customobj;
             }
 
 #if DEBUG
