@@ -27,7 +27,6 @@ public static partial class ETGMod {
         public readonly static Type t_Texture2D = typeof(Texture2D);
         public readonly static Type t_tk2dSpriteCollectionData = typeof(tk2dSpriteCollectionData);
         public readonly static Type t_tk2dSpriteDefinition = typeof(tk2dSpriteDefinition);
-        public static Dictionary<string, tk2dSpriteAnimation> AnimationCache = new Dictionary<string, tk2dSpriteAnimation>();
 
         private readonly static FieldInfo f_tk2dSpriteCollectionData_spriteNameLookupDict =
             typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -149,23 +148,6 @@ public static partial class ETGMod {
             DefaultSpriteShader = Shader.Find("tk2d/BlendVertexColor");
         }
 
-        public static tk2dSpriteAnimation CreateAnimation(string directory) {
-            if (AnimationCache.ContainsKey(directory)) return AnimationCache[directory];
-            Console.WriteLine($"CREATING ANIMATION OF {directory}");
-            TextAsset animationtxt = Resources.Load<TextAsset>(Path.Combine(directory, "animation.json") + ETGModUnityEngineHooks.SkipSuffix);
-            if (animationtxt == null) return null;
-            Console.WriteLine("STILL HERE");
-            tk2dSpriteCollectionData data = new GameObject(directory.RemovePrefix("sprites/")).AddComponent<tk2dSpriteCollectionData>();
-            tk2dSpriteAnimation animation = new tk2dSpriteAnimation();
-            AnimationInfo info = JSONHelper.ReadJSON<AnimationInfo>(new MemoryStream(animationtxt.bytes));
-            foreach (var clip in info.clips) {
-                Console.WriteLine($"JSON CLIP {clip}");
-            }
-
-            AnimationCache[directory] = animation;
-            return animation;
-        }
-
         public static UnityEngine.Object Load(string path, Type type) {
             if (path == "PlayerCoopCultist" && Player.CoopReplacement != null) {
                 path = Player.CoopReplacement;
@@ -193,9 +175,7 @@ public static partial class ETGMod {
             else if (TryGetMapped(path + ".json", out metadata)) { isJson = true; }
             else if (TryGetMapped(path + ".patch.json", out metadata)) { isPatch = true; isJson = true; }
 
-            Console.WriteLine($"METADATA {path}");
             if (metadata != null) {
-                CreateAnimation(Path.GetDirectoryName(path));
                 if (isJson) {
                     if (isPatch) {
                         UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
@@ -228,9 +208,8 @@ public static partial class ETGMod {
                     if (metadata.AssetType == t_AssetDirectory) {
                         // Separate textures
                         // TODO create collection from "children" assets
-                        tk2dSpriteCollectionData data = new GameObject(path.RemovePrefix("sprites/")).AddComponent<tk2dSpriteCollectionData>();
+                        tk2dSpriteCollectionData data = new GameObject(path.StartsWithInvariant("sprites/") ? path.Substring(8) : path).AddComponent<tk2dSpriteCollectionData>();
                         tk2dSpriteCollectionSize size = tk2dSpriteCollectionSize.Default();
-                        tk2dSpriteAnimation animation = new tk2dSpriteAnimation();
 
                         data.spriteCollectionName = data.name;
                         data.Transient = true;
@@ -242,14 +221,12 @@ public static partial class ETGMod {
                         data.materials = new Material[] { data.material };
                         data.buildKey = UnityEngine.Random.Range(0, int.MaxValue);
 
+                        data.Handle();
+
                         data.textures = new Texture2D[data.spriteDefinitions.Length];
                         for (int i = 0; i < data.spriteDefinitions.Length; i++) {
                             data.textures[i] = data.spriteDefinitions[i].materialInst.mainTexture;
                         }
-
-                        animation.name = path.RemovePrefix("sprites/");
-                        Console.WriteLine($"NAME XYZZY {animation.name}");
-                        //AnimationInfo info = JSONHelper.ReadJSON<AnimationInfo>(Path.Combine(path))
 
                         return data;
                     }

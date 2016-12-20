@@ -53,7 +53,3 @@ We suggest supporting the awesome devs! Things would probably look a lot differe
 
 ETGMod is work in progress software. We're working on simple tutorials.  
 We'll make sure to have them before we release a stable version.
-
-# ETGMod lives thanks to...
-
-* Newtonsoft.Json, the fantastic C# JSON library we use! Its license can be found in the `NEWTONSOFT-JSON.LICENSE` file at the tree of the repository.

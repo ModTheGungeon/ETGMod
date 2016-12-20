@@ -199,7 +199,6 @@
     <Compile Include="src\Characters\DudeBehaviour.cs" />
     <Compile Include="src\SGUI\Modifiers\SInGameModifier.cs" />
     <Compile Include="src\Core\Assets.Protocol.cs" />
-    <Compile Include="src\Core\Assets.AnimationInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
