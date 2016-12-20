@@ -1,0 +1,10 @@
+﻿using System;
+namespace AssemblyCSharp.Base.mm
+{
+	public class Assets
+	{
+		public Assets()
+		{
+		}
+	}
+}

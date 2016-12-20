@@ -54,6 +54,14 @@ public static partial class ETGMod {
         return s.EndsWith(a, StringComparison.InvariantCulture);
     }
 
+    public static string RemovePrefix(this string str, string prefix) {
+        return str.StartsWithInvariant(prefix) ? str.Substring(prefix.Length) : str;
+    }
+
+    public static string RemoveSuffix(this string str, string suffix) {
+        return str.EndsWithInvariant(suffix) ? str.Substring(suffix.Length) : str;
+    }
+
     public static string Combine(this IList<string> sa, string c) {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < sa.Count; i++) {
