@@ -9,10 +9,9 @@ using Mono.Cecil;
 public static partial class ETGMod {
     public static partial class Assets {
         public static class Dump {
-
             public static void DumpResource(string path) {
                 string dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMP");
-                // JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
+                JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
                 string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
                 if (!File.Exists(dumppath)) {
                     UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
@@ -20,18 +19,18 @@ public static partial class ETGMod {
                         Directory.GetParent(dumppath).Create();
                         Console.WriteLine("JSON WRITING " + path);
                         obj.WriteJSON(dumppath);
-                        Console.WriteLine("JSON READING " + path);
-                        object testobj = JSONHelper.ReadJSON(dumppath);
+                        //Console.WriteLine("JSON READING " + path);
+                        //object testobj = JSONHelper.ReadJSON(dumppath);
                         JSONHelper.LOG = false;
 
                         dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMPA");
                         // JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
                         dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
                         Directory.GetParent(dumppath).Create();
-                        Console.WriteLine("JSON REWRITING " + path);
-                        testobj.WriteJSON(dumppath);
-                        Console.WriteLine("JSON REREADING " + path);
-                        testobj = JSONHelper.ReadJSON(dumppath);
+                        //Console.WriteLine("JSON REWRITING " + path);
+                        //testobj.WriteJSON(dumppath);
+                        //Console.WriteLine("JSON REREADING " + path);
+                        //testobj = JSONHelper.ReadJSON(dumppath);
                         JSONHelper.LOG = false;
                         Console.WriteLine("JSON DONE " + path);
                     }
