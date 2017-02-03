@@ -77,12 +77,17 @@ public class RuntimeAtlasPage {
         Texture.wrapMode = TextureWrapMode.Clamp;
         Texture.filterMode = FilterMode.Point;
         Texture.anisoLevel = 0;
-        Color[] data = new Color[width * height];
+        Color[] data = new Color[128 * 128];
         Color blank = new Color(0f, 0f, 0f, 0f);
         for (int i = 0; i < data.Length; i++) {
             data[i] = blank;
         }
-        Texture.SetPixels(data);
+
+        for (int y = 0; y < height; y += 128) {
+            for (int x = 0; x < width; x += 128) {
+                Texture.SetPixels(x, y, 128, 128, data);
+            }
+        }
 
         _MainRect = new Rect(0, 0, width, height);
 
@@ -207,14 +212,7 @@ public class RuntimeAtlasSegment {
     public int height;
 
     public Vector2[] uvs {
-        get {
-            return new Vector2[] {
-                new Vector2((x        ) / (float) texture.width, (y         ) / (float) texture.height),
-                new Vector2((x + width) / (float) texture.width, (y         ) / (float) texture.height),
-                new Vector2((x        ) / (float) texture.width, (y + height) / (float) texture.height),
-                new Vector2((x + width) / (float) texture.width, (y + height) / (float) texture.height),
-            };
-        }
+        get { return ETGMod.Assets.GenerateUVs(texture, x, y, width, height); }
     }
 
 }

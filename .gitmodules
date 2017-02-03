@@ -1,0 +1,3 @@
+[submodule "libs/YamlDotNet"]
+	path = libs/YamlDotNet
+	url = https://github.com/aaubry/YamlDotNet

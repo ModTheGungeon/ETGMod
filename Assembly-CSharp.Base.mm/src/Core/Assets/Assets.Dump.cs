@@ -9,10 +9,9 @@ using Mono.Cecil;
 public static partial class ETGMod {
     public static partial class Assets {
         public static class Dump {
-
             public static void DumpResource(string path) {
                 string dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMP");
-                // JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
+                JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
                 string dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
                 if (!File.Exists(dumppath)) {
                     UnityEngine.Object obj = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix);
@@ -20,18 +19,18 @@ public static partial class ETGMod {
                         Directory.GetParent(dumppath).Create();
                         Console.WriteLine("JSON WRITING " + path);
                         obj.WriteJSON(dumppath);
-                        Console.WriteLine("JSON READING " + path);
-                        object testobj = JSONHelper.ReadJSON(dumppath);
+                        //Console.WriteLine("JSON READING " + path);
+                        //object testobj = JSONHelper.ReadJSON(dumppath);
                         JSONHelper.LOG = false;
 
                         dumpdir = Path.Combine(Application.streamingAssetsPath.Replace('/', Path.DirectorySeparatorChar), "DUMPA");
                         // JSONHelper.SharedDir = Path.Combine(dumpdir, "SHARED");
                         dumppath = Path.Combine(dumpdir, path.Replace('/', Path.DirectorySeparatorChar) + ".json");
                         Directory.GetParent(dumppath).Create();
-                        Console.WriteLine("JSON REWRITING " + path);
-                        testobj.WriteJSON(dumppath);
-                        Console.WriteLine("JSON REREADING " + path);
-                        testobj = JSONHelper.ReadJSON(dumppath);
+                        //Console.WriteLine("JSON REWRITING " + path);
+                        //testobj.WriteJSON(dumppath);
+                        //Console.WriteLine("JSON REREADING " + path);
+                        //testobj = JSONHelper.ReadJSON(dumppath);
                         JSONHelper.LOG = false;
                         Console.WriteLine("JSON DONE " + path);
                     }
@@ -54,7 +53,7 @@ public static partial class ETGMod {
                 for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
                     tk2dSpriteDefinition frame = sprites.spriteDefinitions[i];
                     Texture2D texOrig = frame.material.mainTexture as Texture2D;
-                    if (texOrig == null || !frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D) frame.materialInst.mainTexture))) {
+                    if (texOrig == null || !frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D)frame.materialInst.mainTexture))) {
                         continue;
                     }
                     string pathFull = path + "/" + frame.name;
@@ -96,10 +95,10 @@ public static partial class ETGMod {
                         if (y2UV < frame.uvs[ii].y) y2UV = frame.uvs[ii].y;
                     }
 
-                    int x1 = (int) Math.Floor(x1UV * texOrig.width);
-                    int y1 = (int) Math.Floor(y1UV * texOrig.height);
-                    int x2 = (int) Math.Ceiling(x2UV * texOrig.width);
-                    int y2 = (int) Math.Ceiling(y2UV * texOrig.height);
+                    int x1 = (int)Math.Floor(x1UV * texOrig.width);
+                    int y1 = (int)Math.Floor(y1UV * texOrig.height);
+                    int x2 = (int)Math.Ceiling(x2UV * texOrig.width);
+                    int y2 = (int)Math.Ceiling(y2UV * texOrig.height);
                     int w = x2 - x1;
                     int h = y2 - y1;
 
@@ -139,9 +138,9 @@ public static partial class ETGMod {
                         double fyY0h = fyY < e ? 0D : hO;
 
                         for (int y = 0; y < h; y++) {
-                            double fy = y / (double) h;
+                            double fy = y / (double)h;
                             for (int x = 0; x < w; x++) {
-                                double fx = x / (double) w;
+                                double fx = x / (double)w;
 
                                 double fxUV0w = fx * fxX0w + fy * fyX0w;
                                 double fyUV0h = fx * fxY0h + fy * fyY0h;
@@ -150,7 +149,7 @@ public static partial class ETGMod {
                                     Math.Round(frame.uvs[0].y * texOrig.height + fyUV0h) * texOrig.width +
                                     Math.Round(frame.uvs[0].x * texOrig.width + fxUV0w);
 
-                                texRegion.SetPixel(x, y, texRWData[(int) p]);
+                                texRegion.SetPixel(x, y, texRWData[(int)p]);
 
                             }
                         }
@@ -176,8 +175,8 @@ public static partial class ETGMod {
                 JSONHelper.WriteJSON(AssetSpriteData.FromTK2D(sprites), diskPath);
                 for (int i = 0; i < sprites.spriteDefinitions.Length; i++) {
                     tk2dSpriteDefinition frame = sprites.spriteDefinitions[i];
-                    Texture2D texOrig = (Texture2D) frame.material.mainTexture;
-                    if (!frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D) frame.materialInst.mainTexture))) {
+                    Texture2D texOrig = (Texture2D)frame.material.mainTexture;
+                    if (!frame.Valid || (frame.materialInst != null && TextureMap.ContainsValue((Texture2D)frame.materialInst.mainTexture))) {
                         continue;
                     }
                     string pathFull = path + "/" + frame.name;

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 
 public static partial class ETGMod {
     // ETGMod helper extension methods.
@@ -33,6 +34,22 @@ public static partial class ETGMod {
             return t;
         }
         return default(T);
+    }
+
+    public static string ToTitleCaseInvariant(this string s) {
+        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s);
+    }
+
+    public static string ToStringInvariant(this float o) {
+        return o.ToString(CultureInfo.InvariantCulture);
+    }
+
+    public static string RemovePrefix(this string str, string prefix) {
+        return str.StartsWithInvariant(prefix) ? str.Substring(prefix.Length) : str;
+    }
+
+    public static string RemoveSuffix(this string str, string suffix) {
+        return str.StartsWithInvariant(suffix) ? str.Substring(0, suffix.Length - suffix.Length) : str;
     }
 
     public static int IndexOfInvariant(this string s, string a) {

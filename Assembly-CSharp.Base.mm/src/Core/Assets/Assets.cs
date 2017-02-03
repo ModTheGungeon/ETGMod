@@ -8,6 +8,8 @@ using System.Reflection;
 using Newtonsoft.Json;
 using System.Collections;
 using AttachPoint = tk2dSpriteDefinition.AttachPoint;
+using YamlDotNet;
+using YamlDotNet.Serialization;
 
 public static partial class ETGMod {
     /// <summary>
@@ -30,7 +32,7 @@ public static partial class ETGMod {
 
         private readonly static FieldInfo f_tk2dSpriteCollectionData_spriteNameLookupDict =
             typeof(tk2dSpriteCollectionData).GetField("spriteNameLookupDict", BindingFlags.Instance | BindingFlags.NonPublic);
-
+        
         /// <summary>
         /// Asset map. All string - AssetMetadata entries here will cause an asset to be remapped. Use ETGMod.Assets.AddMapping to add an entry.
         /// </summary>
@@ -56,8 +58,18 @@ public static partial class ETGMod {
             new Vector2(1f, 1f)
         };
         public static Shader DefaultSpriteShader;
-
         public static RuntimeAtlasPacker Packer = new RuntimeAtlasPacker();
+        public static Deserializer Deserializer = new DeserializerBuilder().Build();
+        public static Serializer Serializer = new SerializerBuilder().Build();
+
+        public static Vector2[] GenerateUVs(Texture2D texture, int x, int y, int width, int height) {
+            return new Vector2[] {
+                new Vector2((x        ) / (float) texture.width, (y         ) / (float) texture.height),
+                new Vector2((x + width) / (float) texture.width, (y         ) / (float) texture.height),
+                new Vector2((x        ) / (float) texture.width, (y + height) / (float) texture.height),
+                new Vector2((x + width) / (float) texture.width, (y + height) / (float) texture.height),
+            };
+        }
 
         public static bool TryGetMapped(string path, out AssetMetadata metadata, bool includeDirs = false) {
             if (includeDirs) {
@@ -104,12 +116,135 @@ public static partial class ETGMod {
             string[] files = Directory.GetFiles(dir);
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
-                AddMapping(file.Substring(root.Length + 1), new AssetMetadata(file));
+
+                if (file.EndsWithInvariant("animation.yml")) {
+                    var texture = Resources.Load<Texture2D>("sprites/test");
+                    Console.WriteLine("TEXTURE " + texture.ToString());
+
+                    var tk2d_collection = new tk2dSpriteCollectionData {
+                        assetName = "test",
+                        spriteCollectionName = "test",
+                        spriteCollectionGUID = "12834012341324"
+                    };
+
+                    var material = new Material(DefaultSpriteShader);
+
+                    var tk2d_spritedef = new tk2dSpriteDefinition {
+                        normals = new Vector3[] {
+                            new Vector3(0.0f, 0.0f, -1.0f),
+                            new Vector3(0.0f, 0.0f, -1.0f),
+                            new Vector3(0.0f, 0.0f, -1.0f),
+                            new Vector3(0.0f, 0.0f, -1.0f),
+                        },
+                        tangents = new Vector4[] {
+                            new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                            new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                            new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                            new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                        },
+                        indices = new int[] { 0, 3, 1, 2, 3, 0 },
+                        texelSize = new Vector2(0.1f, 0.1f),
+                        extractRegion = false,
+                        regionX = 0,
+                        regionY = 0,
+                        regionW = 0,
+                        regionH = 0,
+                        flipped = tk2dSpriteDefinition.FlipMode.None,
+                        complexGeometry = false,
+                        physicsEngine = tk2dSpriteDefinition.PhysicsEngine.Physics3D,
+                        colliderType = tk2dSpriteDefinition.ColliderType.Box,
+                        collisionLayer = CollisionLayer.PlayerHitBox,
+                        position0 = new Vector3(0.1f, 0.0f),
+                        position1 = new Vector3(0.8f, 0.0f),
+                        position2 = new Vector3(0.1f, 0.5f),
+                        position3 = new Vector3(0.8f, 0.5f),
+                        material = material,
+                        materialInst = material,
+                        materialId = 0
+                    };
+
+                    tk2d_spritedef.uvs = GenerateUVs(texture, 0, 0, 32, 32);
+
+                    tk2d_collection.textures = new Texture[] { texture };
+                    tk2d_collection.textureInsts = new Texture2D[] { texture };
+
+                    material.mainTexture = texture;
+                    tk2d_collection.spriteDefinitions = new tk2dSpriteDefinition[] { tk2d_spritedef };
+
+                    tk2d_collection.material = material;
+                    tk2d_collection.materials = new Material[] {material};
+                    tk2d_collection.materialInsts = tk2d_collection.materials;
+
+                    Console.WriteLine("MY COLLECTION");
+                    Console.WriteLine(ObjectDumper.Dump(tk2d_collection));
+                }
+
+                //if (file.RemovePrefix(dir + Path.DirectorySeparatorChar) == "animation.yml") {
+                //    var reader = new StreamReader(file);
+                //    Console.WriteLine("DESERIALIZING " + file);
+                //    var anim = Deserializer.Deserialize<YAML.Animation>(reader);
+
+                //    Console.WriteLine("CREATE ANIMATION");
+                //    var animation = new tk2dSpriteAnimation();
+
+                //    var tk2d_data = new tk2dSpriteCollectionData {
+                //        name = anim.Name,
+                //        spriteCollectionName = anim.Name,
+                //        assetName = anim.Name,
+                //    };
+
+                //    var tk2d_collection = new tk2dSpriteCollection {
+                //        name = anim.Name,
+                //        assetName = anim.Name,
+                //        spriteCollection = tk2d_data
+                //    };
+
+                //    Console.WriteLine("CREATE CLIPS");
+                //    var tk2d_clips = new List<tk2dSpriteAnimationClip>();
+
+                //    foreach (var clip in anim.Clips) {
+                //        var tk2d_clip = new tk2dSpriteAnimationClip {
+                //            name = clip.Key,
+                //            fps = clip.Value.FPS,
+                //            wrapMode = clip.Value.WrapMode,
+                //            loopStart = 0,
+                //        };
+
+                //        var tk2d_frames = new List<tk2dSpriteAnimationFrame>();
+
+                //        foreach (var frame in clip.Value.Frames) {
+                //            tk2d_data.textureInsts
+
+                //            var tk2d_frame = new tk2dSpriteAnimationFrame {
+                //                spriteCollection = tk2d_data,
+                //            }
+                //        }
+                            
+                //        tk2d_clips.Add(tk2d_clip);
+                //    }
+
+                //    Console.WriteLine("CREATE ANIMATOR");
+                //    var animator = new tk2dSpriteAnimator {
+                //        name = anim.Name,
+                //        ClipFps = anim.FPS,
+                //        DefaultClipId = 0,
+                //    };
+
+                //    foreach (var clip in anim.Clips) {
+                //        Console.WriteLine("CLIP " + clip.Key + ":");
+                //        foreach (var frame in clip.Value) {
+                //            Console.WriteLine("FRAME " + frame);
+                //        }
+                //    }
+                //    Console.WriteLine("SERIALIZING " + anim);
+                //    Console.WriteLine(Serializer.Serialize(anim));
+                //}
+                AddMapping(file.RemovePrefix(root).Substring(1), new AssetMetadata(file));
             }
             files = Directory.GetDirectories(dir);
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
-                AddMapping(file.Substring(root.Length + 1), new AssetMetadata(file) {
+                AddMapping(file.RemovePrefix(root).Substring(1), new AssetMetadata(file) {
                     AssetType = t_AssetDirectory
                 });
                 Crawl(file, root);
@@ -243,7 +378,8 @@ public static partial class ETGMod {
                 }
 
             }
-            
+
+            Console.WriteLine("HERE!");
             UnityEngine.Object orig = Resources.Load(path + ETGModUnityEngineHooks.SkipSuffix, type);
             if (orig is GameObject) {
                 Objects.HandleGameObject((GameObject) orig);
