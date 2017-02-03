@@ -142,7 +142,6 @@
     <Compile Include="src\Core\RuntimeAtlas.cs" />
     <Compile Include="src\Core\GunBehaviour.cs" />
     <Compile Include="src\Core\Platform.cs" />
-    <Compile Include="src\Patches\patch_PlatformInterface.cs" />
     <Compile Include="src\SGUI\SGUIRoot.cs" />
     <Compile Include="src\SGUI\SElement.cs" />
     <Compile Include="src\SGUI\ISGUIBackend.cs" />

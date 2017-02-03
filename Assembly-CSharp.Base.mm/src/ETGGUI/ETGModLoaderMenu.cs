@@ -197,7 +197,7 @@ public class ETGModLoaderMenu : ETGModMenu {
         int r = UnityEngine.Random.Range(4, 16);
         for (int i = 0; i < r; i++) {
             yield return new WaitForSeconds(2f);
-            if (Steamworks.SteamUserStats.GetStat("ITEMS_STOLEN", out pData)) {
+            if (Steamworks.SteamUserStats.GetStat("ITEMS_STOLEN", out pData) && SteamManager.Initialized && Steamworks.SteamAPI.IsSteamRunning()) {
                 yield break;
             }
         }

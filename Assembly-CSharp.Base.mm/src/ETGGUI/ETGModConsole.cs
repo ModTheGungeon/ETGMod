@@ -185,7 +185,8 @@ public class ETGModConsole : ETGModMenu {
 
         Commands.GetGroup ("dump")
                 .AddGroup ("sprites",      (args) => SetBool(args, ref ETGMod.Assets.DumpSprites        ))
-                .AddUnit  ("packer",       (args) => ETGMod.Assets.Dump.DumpPacker());
+                .AddUnit  ("packer",       (args) => ETGMod.Assets.Dump.DumpPacker())
+                .AddUnit  ("synergies",    DumpSynergies);
 
         Commands.GetGroup ("dump").GetGroup ("sprites")
                 .AddUnit  ("metadata", (args) => SetBool (args, ref ETGMod.Assets.DumpSpritesMetadata));
@@ -198,7 +199,6 @@ public class ETGModConsole : ETGModMenu {
                 .AddUnit  ("cut_input_focus_on_command", (args) => SetBool (args, ref _CutInputFocusOnCommand))
                 .AddUnit  ("enable_damage_indicators", (args) => SetBool (args, ref ETGModGUI.UseDamageIndicators))
                 .AddUnit  ("match_contains", (args) => SetBool (args, ref AutocompletionSettings.MatchContains))
-                .AddUnit  ("enable_achievements", (args) => SetBool (args, ref ETGMod.Platform.EnableAchievements))
                 .AddUnit  ("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled))
                 .AddUnit  ("player", (args) => ETGMod.Player.PlayerReplacement = args.Length == 1 ? args[0] : null)
                 .AddUnit  ("player_coop", (args) => ETGMod.Player.CoopReplacement = args.Length == 1 ? args[0] : null);
@@ -778,6 +778,54 @@ public class ETGModConsole : ETGModMenu {
                 var gun = GameManager.Instance.PrimaryPlayer.inventory.AllGuns[1];
                 GameManager.Instance.PrimaryPlayer.inventory.RemoveGunFromInventory(gun);
                 UnityEngine.Object.Destroy(gun.gameObject);
+            }
+        }
+    }
+
+    void DumpSynergies(string[] args) {
+        if (!ArgCount(args, 0, 0)) return;
+        var db = GameManager.Instance.SynergyManager;
+        Console.WriteLine("synergies:");
+        foreach (var entry in db.synergies) {
+            Console.WriteLine("  - items_or: " + entry.ItemsOR.ToString().ToLowerInvariant());
+            Console.WriteLine("    guns_or: " + entry.GunsOR.ToString().ToLowerInvariant());
+            if (entry.statModifiers.Count == 0) {
+                Console.WriteLine("    stat_mods: [] ");
+            } else {
+                Console.WriteLine("    stat_mods:");
+                foreach (var mod in entry.statModifiers) {
+                    Console.WriteLine("      - stat: " + (int)mod.statToBoost);
+                    Console.WriteLine("        operation: " + (int)mod.modifyType);
+                    Console.WriteLine("        amount: " + mod.amount.ToStringInvariant());
+                }
+            }
+            if (entry.itemIDs.Count == 0) {
+                Console.WriteLine("    items: []");
+            } else {
+                Console.WriteLine("    items:");
+                foreach (var item in entry.itemIDs) {
+                    var pickupobject = PickupObjectDatabase.Instance.InternalGetById(item);
+                    Console.WriteLine("      - name: " + pickupobject.EncounterNameOrDisplayName ?? "null");
+                    Console.WriteLine("        id: " + item);
+                }
+            }
+            if (entry.gunIDs.Count == 0) {
+                Console.WriteLine("    guns: []");
+            } else {
+                Console.WriteLine("    guns:");
+                foreach (var item in entry.gunIDs) {
+                    var pickupobject = PickupObjectDatabase.Instance.InternalGetById(item);
+                    Console.WriteLine("      - name: " + pickupobject.EncounterNameOrDisplayName ?? "null");
+                    Console.WriteLine("        id: " + item);
+                }
+            }
+            if (entry.bonusSynergies.Count == 0) {
+                Console.WriteLine("    bonus: []");
+            } else {
+                Console.WriteLine("    bonus:");
+                foreach (var synergy in entry.bonusSynergies) {
+                    Console.WriteLine("      - " + (int)synergy);
+                }
             }
         }
     }
