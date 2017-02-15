@@ -5,6 +5,8 @@ using System;
 
 namespace UnityEngine {
     internal static class patch_ClassLibraryInitializer {
+	/*
+	RIP MONODEBUG 2016-2016
 
         private delegate string[] d_mono_runtime_get_main_args(); //ret MonoArray*
 
@@ -20,9 +22,6 @@ namespace UnityEngine {
                     debuggerClient = true;
                 }
             }
-
-	    /*
-	    RIP MONODEBUG 2016-2016
 
             try {
                 if (debuggerClient) MonoDebug.SetupDebuggerAgent();
