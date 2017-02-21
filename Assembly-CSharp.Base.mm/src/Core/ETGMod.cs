@@ -26,9 +26,9 @@ public static partial class ETGMod {
         #if TRAVIS
         new Profile(2, "travis");
         #elif DEBUG
-        new Profile(1, "b18-debug");
+        new Profile(1, "debug");
         #else
-        new Profile(0, "b18"); // no tag
+        new Profile(0, ""); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -181,6 +181,37 @@ public static partial class ETGMod {
         Debug.Log("Backend " + module.Metadata.Name + " initialized.");
     }
 
+	private static void _CreateModsListFile()
+	{
+		using (StreamWriter writer = File.CreateText(ModsListFile))
+		{
+			writer.WriteLine("# Lines beginning with # are comment lines and thus ignored.");
+			writer.WriteLine("# Each line here should either be the name of a mod .zip or the path to it.");
+			writer.WriteLine("# The order in this .txt is the order in which the mods get loaded.");
+			writer.WriteLine("# Delete this file and it will be auto-filled.");
+			string[] files = Directory.GetFiles(ModsDirectory);
+			for (int i = 0; i < files.Length; i++)
+			{
+				string file = Path.GetFileName(files[i]);
+				if (!file.EndsWithInvariant(".zip"))
+				{
+					continue;
+				}
+				writer.WriteLine(file);
+			}
+			files = Directory.GetDirectories(ModsDirectory);
+			for (int i = 0; i < files.Length; i++)
+			{
+				string file = Path.GetFileName(files[i]);
+				if (file == "RelinkCache")
+				{
+					continue;
+				}
+				writer.WriteLine(file);
+			}
+		}
+	}
+
     private static void _LoadMods() {
         Debug.Log("Loading game mods...");
 
@@ -189,31 +220,9 @@ public static partial class ETGMod {
             Directory.CreateDirectory(ModsDirectory);
         }
 
-        CreateModsListFile:
         if (!File.Exists(ModsListFile)) {
-            Debug.Log("Mod list file not existing or invalid, creating...");
-            using (StreamWriter writer = File.CreateText(ModsListFile)) {
-                writer.WriteLine("# Lines beginning with # are comment lines and thus ignored.");
-                writer.WriteLine("# Each line here should either be the name of a mod .zip or the path to it.");
-                writer.WriteLine("# The order in this .txt is the order in which the mods get loaded.");
-                writer.WriteLine("# Delete this file and it will be auto-filled.");
-                string[] files = Directory.GetFiles(ModsDirectory);
-                for (int i = 0; i < files.Length; i++) {
-                    string file = Path.GetFileName(files[i]);
-                    if (!file.EndsWithInvariant(".zip")) {
-                        continue;
-                    }
-                    writer.WriteLine(file);
-                }
-                files = Directory.GetDirectories(ModsDirectory);
-                for (int i = 0; i < files.Length; i++) {
-                    string file = Path.GetFileName(files[i]);
-                    if (file == "RelinkCache") {
-                        continue;
-                    }
-                    writer.WriteLine(file);
-                }
-            }
+			Debug.Log("Mod list file not existing or invalid, creating...");
+			_CreateModsListFile();
         }
 
         // Pre-run all lines to check if something's invalid
@@ -231,7 +240,7 @@ public static partial class ETGMod {
             if (!File.Exists(path) && !File.Exists(absolutePath) &&
                 !Directory.Exists(path) && !Directory.Exists(absolutePath)) {
                 File.Delete(ModsListFile);
-                goto CreateModsListFile;
+				_CreateModsListFile();
             }
         }
 

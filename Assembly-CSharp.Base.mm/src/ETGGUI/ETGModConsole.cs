@@ -20,7 +20,7 @@ public class ETGModConsole : ETGModMenu {
     /// All commands supported by the ETGModConsole. Add your own commands here!
     /// </summary>
     public static ConsoleCommandGroup Commands = new ConsoleCommandGroup(delegate (string[] args) {
-      Log("Command or group " + args[0] + " doesn't exist");
+        Log("Command or group " + args[0] + " doesn't exist");
     });
 
     /// <summary>
@@ -33,9 +33,9 @@ public class ETGModConsole : ETGModMenu {
     protected bool _CloseConsoleOnCommand = false;
     protected bool _CutInputFocusOnCommand = false;
 
-    protected static char[] _SplitArgsCharacters = {' '};
+    protected static char[] _SplitArgsCharacters = { ' ' };
 
-    protected static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
+    protected static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate (string input) {
         List<string> ret = new List<string>();
         foreach (string key in AllItems.Keys) {
             if (key.AutocompletionMatch(input.ToLower())) {
@@ -45,7 +45,7 @@ public class ETGModConsole : ETGModMenu {
         return ret.ToArray();
     });
 
-    protected static AutocompletionSettings _StatAutocompletionSettings = new AutocompletionSettings(delegate(string input) {
+    protected static AutocompletionSettings _StatAutocompletionSettings = new AutocompletionSettings(delegate (string input) {
         List<string> ret = new List<string>();
         foreach (string key in Enum.GetNames(typeof(TrackedStats))) {
             if (key.AutocompletionMatch(input.ToUpper())) {
@@ -119,51 +119,74 @@ public class ETGModConsole : ETGModMenu {
 
         // GLOBAL NAMESPACE
         Commands
-                .AddUnit ("help", delegate(string[] args) {
+                .AddUnit("help", delegate (string[] args) {
                     List<List<string>> paths = Commands.ConstructPaths();
                     for (int i = 0; i < paths.Count; i++) {
                         Log(string.Join(" ", paths[i].ToArray()));
                     }
                 })
-                .AddUnit ("exit", (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None)
-                .AddUnit ("give", GiveItem, _GiveAutocompletionSettings)
-                .AddUnit ("screenshake", SetShake)
-                .AddUnit ("echo",        Echo    )
-                .AddUnit ("tp",          Teleport)
-                .AddUnit ("character",   SwitchCharacter)
-                .AddUnit ("clear",       (string[] args) => GUI[0].Children.Clear())
-                .AddUnit ("godmode", delegate(string[] args) {
+                .AddUnit("exit", (string[] args) => ETGModGUI.CurrentMenu = ETGModGUI.MenuOpened.None)
+                .AddUnit("screenshake", SetShake)
+                .AddUnit("echo", Echo)
+                .AddUnit("tp", Teleport)
+                .AddUnit("character", SwitchCharacter)
+                .AddUnit("clear", (string[] args) => GUI[0].Children.Clear())
+                .AddUnit("godmode", delegate (string[] args) {
                     GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
                 });
+
+        // GIVE NAMESPACE
+        Commands.AddGroup("give", GiveItem, _GiveAutocompletionSettings);
+
+        Commands.GetGroup("give")
+                .AddGroup("all", (string[] args) => {
+                    foreach (int id in AllItems.Values)
+                        if (id != 392 /* cell key (bugged!) */) ETGMod.Player.GiveItemID(id);
+                });
+
+        // GIVE ALL NAMESPACE
+        Commands.GetGroup("give").GetGroup("all")
+                                 .AddUnit("guns", (string[] args) => {
+                                     foreach (int id in AllItems.Values)
+                                         if (ETGMod.Databases.Items[id] is Gun) ETGMod.Player.GiveItemID(id);
+                                 })
+                                 .AddUnit("passives", (string[] args) => {
+                                     foreach (int id in AllItems.Values)
+                                         if (ETGMod.Databases.Items[id] is PassiveItem) ETGMod.Player.GiveItemID(id);
+                                 })
+                                 .AddUnit("actives", (string[] args) => {
+                                     foreach (int id in AllItems.Values)
+                                         if (ETGMod.Databases.Items[id] is PlayerItem) ETGMod.Player.GiveItemID(id);
+                                 });
 
         // STAT NAMESPACE
         Commands.AddGroup("stat");
 
         Commands.GetGroup("stat")
-                .AddUnit ("get",  StatGet, _StatAutocompletionSettings)
-                .AddGroup("set",  StatSetCurrentCharacter, _StatAutocompletionSettings)
-                .AddUnit ("mod",  StatMod, _StatAutocompletionSettings)
-                .AddUnit ("list", StatList);
+                .AddUnit("get", StatGet, _StatAutocompletionSettings)
+                .AddGroup("set", StatSetCurrentCharacter, _StatAutocompletionSettings)
+                .AddUnit("mod", StatMod, _StatAutocompletionSettings)
+                .AddUnit("list", StatList);
 
-        Commands.GetGroup ("stat").GetGroup ("set")
-                                  .AddUnit  ("session", StatSetSession, _StatAutocompletionSettings);
+        Commands.GetGroup("stat").GetGroup("set")
+                                  .AddUnit("session", StatSetSession, _StatAutocompletionSettings);
 
         // ROLL NAMESPACE
-        Commands.AddGroup ("roll");
+        Commands.AddGroup("roll");
 
-        Commands.GetGroup ("roll")
-                .AddUnit  ("distance", DodgeRollDistance)
-                .AddUnit  ("speed",    DodgeRollSpeed   );
+        Commands.GetGroup("roll")
+                .AddUnit("distance", DodgeRollDistance)
+                .AddUnit("speed", DodgeRollSpeed);
 
         // TEST NAMESPACE
-        Commands.AddUnit  ("test", new ConsoleCommandGroup());
+        Commands.AddUnit("test", new ConsoleCommandGroup());
 
-        Commands.GetGroup ("test")
-                .AddGroup ("spawn", SpawnGUID)
-                .AddGroup ("resources")
-                .AddUnit  ("cubulon", TestCustomEnemy)
-                .AddUnit  ("dude",    TestCustomCharacter)
-                .AddUnit  ("skiplevel", delegate(string[] args) {
+        Commands.GetGroup("test")
+                .AddGroup("spawn", SpawnGUID)
+                .AddGroup("resources")
+                .AddUnit("cubulon", TestCustomEnemy)
+                .AddUnit("dude", TestCustomCharacter)
+                .AddUnit("skiplevel", delegate (string[] args) {
                     Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
                     GameManager.Instance.DelayedLoadNextLevel(0.5f);
                 }).AddUnit("charselect", delegate (string[] args) {
@@ -172,36 +195,36 @@ public class ETGModConsole : ETGModMenu {
                 });
 
         //// TEST.RESOURCES NAMESPACE
-        Commands.GetGroup ("test").GetGroup ("resources")
-                .AddUnit  ("load", ResourcesLoad);
+        Commands.GetGroup("test").GetGroup("resources")
+                                  .AddUnit("load", ResourcesLoad);
 
         //// TEST.SPAWN NAMESPACE
-        Commands.GetGroup ("test").GetGroup ("spawn")
-                .AddUnit  ("chest", SpawnChest)
-                .AddUnit  ("all",   SpawnAll);
+        Commands.GetGroup("test").GetGroup("spawn")
+                                  .AddUnit("chest", SpawnChest)
+                                  .AddUnit("all", SpawnAll);
 
         // DUMP NAMESPACE
-        Commands.AddUnit  ("dump", new ConsoleCommandGroup());
+        Commands.AddUnit("dump", new ConsoleCommandGroup());
 
-        Commands.GetGroup ("dump")
-                .AddGroup ("sprites",      (args) => SetBool(args, ref ETGMod.Assets.DumpSprites        ))
-                .AddUnit  ("packer",       (args) => ETGMod.Assets.Dump.DumpPacker())
-                .AddUnit  ("synergies",    DumpSynergies);
+        Commands.GetGroup("dump")
+                .AddGroup("sprites", (args) => SetBool(args, ref ETGMod.Assets.DumpSprites))
+                .AddUnit("packer", (args) => ETGMod.Assets.Dump.DumpPacker())
+                .AddUnit("synergies", DumpSynergies);
 
-        Commands.GetGroup ("dump").GetGroup ("sprites")
-                .AddUnit  ("metadata", (args) => SetBool (args, ref ETGMod.Assets.DumpSpritesMetadata));
+        Commands.GetGroup("dump").GetGroup("sprites")
+                                  .AddUnit("metadata", (args) => SetBool(args, ref ETGMod.Assets.DumpSpritesMetadata));
 
         // CONF NAMESPACE
-        Commands.AddGroup ("conf");
+        Commands.AddGroup("conf");
 
-        Commands.GetGroup ("conf")
-                .AddUnit  ("close_console_on_command", (args) => SetBool (args, ref _CloseConsoleOnCommand))
-                .AddUnit  ("cut_input_focus_on_command", (args) => SetBool (args, ref _CutInputFocusOnCommand))
-                .AddUnit  ("enable_damage_indicators", (args) => SetBool (args, ref ETGModGUI.UseDamageIndicators))
-                .AddUnit  ("match_contains", (args) => SetBool (args, ref AutocompletionSettings.MatchContains))
-                .AddUnit  ("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled))
-                .AddUnit  ("player", (args) => ETGMod.Player.PlayerReplacement = args.Length == 1 ? args[0] : null)
-                .AddUnit  ("player_coop", (args) => ETGMod.Player.CoopReplacement = args.Length == 1 ? args[0] : null);
+        Commands.GetGroup("conf")
+                .AddUnit("close_console_on_command", (args) => SetBool(args, ref _CloseConsoleOnCommand))
+                .AddUnit("cut_input_focus_on_command", (args) => SetBool(args, ref _CutInputFocusOnCommand))
+                .AddUnit("enable_damage_indicators", (args) => SetBool(args, ref ETGModGUI.UseDamageIndicators))
+                .AddUnit("match_contains", (args) => SetBool(args, ref AutocompletionSettings.MatchContains))
+                .AddUnit("enable_stat_set", (args) => SetBool(args, ref StatSetEnabled))
+                .AddUnit("player", (args) => ETGMod.Player.PlayerReplacement = args.Length == 1 ? args[0] : null)
+                .AddUnit("player_coop", (args) => ETGMod.Player.CoopReplacement = args.Length == 1 ? args[0] : null);
     }
 
     public override void Update() {
@@ -210,7 +233,7 @@ public class ETGModConsole : ETGModMenu {
 
     protected virtual void _Log(string text) {
         GUI[0].Children.Add(new SLabel(text));
-        ((SGroup) GUI[0]).ScrollPosition.y = float.MaxValue;
+        ((SGroup)GUI[0]).ScrollPosition.y = float.MaxValue;
     }
     public static void Log(string text, bool debuglog = false) {
         Instance._Log(text);
@@ -220,7 +243,7 @@ public class ETGModConsole : ETGModMenu {
     }
 
     public string[] SplitArgs(string args) {
-        return args.Split (_SplitArgsCharacters, StringSplitOptions.RemoveEmptyEntries);
+        return args.Split(_SplitArgsCharacters, StringSplitOptions.RemoveEmptyEntries);
     }
 
     public void ParseCommand(string text) {
@@ -243,7 +266,7 @@ public class ETGModConsole : ETGModMenu {
         if (GUI.Children.Count >= 3) {
             return;
         }
-        STextField field = (STextField) GUI[1];
+        STextField field = (STextField)GUI[1];
 
         // AUTO COMPLETIONATOR 3000
         // (by Zatherz)
@@ -270,14 +293,14 @@ public class ETGModConsole : ETGModMenu {
         // Get an array of available completions
         int matchindex = input.Length - path.Length;
         /*
-        HACK! blame Zatherz
-        matchindex will be off by +1 if the current keyword your cursor is on isn't empty
-        this will check if there are no spaces on the left on the cursor
-        and if so, decrease matchindex
-        if there *are* spaces on the left of the cursor, that means the current
-        "token" the cursor is on is an empty string, so that doesn't have any problems
-        Hopefully this is a good enough explanation, if not, ping @Zatherz on Discord
-        */
+		HACK! blame Zatherz
+		matchindex will be off by +1 if the current keyword your cursor is on isn't empty
+		this will check if there are no spaces on the left on the cursor
+		and if so, decrease matchindex
+		if there *are* spaces on the left of the cursor, that means the current
+		"token" the cursor is on is an empty string, so that doesn't have any problems
+		Hopefully this is a good enough explanation, if not, ping @Zatherz on Discord
+		*/
 
         string matchkeyword = string.Empty;
         if (!inputtext.EndsWithInvariant(" ")) {
@@ -288,12 +311,12 @@ public class ETGModConsole : ETGModMenu {
         string[] completions = unit.Autocompletion.Match(Math.Max(matchindex, 0), matchkeyword);
 
         if (completions == null || completions.Length == 0) {
-            Debug.Log ("ETGModConsole: no completions available (match returned null)");
+            Debug.Log("ETGModConsole: no completions available (match returned null)");
         } else if (completions.Length == 1) {
             if (path.Length > 0) {
-                field.Text = string.Join (" ", path) + " " + completions [0] + " " + otherinput;
+                field.Text = string.Join(" ", path) + " " + completions[0] + " " + otherinput;
             } else {
-                field.Text = completions [0] + " " + otherinput;
+                field.Text = completions[0] + " " + otherinput;
             }
 
             field.MoveCursor(field.Text.Length);
@@ -303,7 +326,7 @@ public class ETGModConsole : ETGModMenu {
                 AutoLayout = (SGroup g) => g.AutoLayoutVertical,
                 ScrollDirection = SGroup.EDirection.Vertical,
                 OnUpdateStyle = delegate (SElement elem) {
-                    elem.Size = new Vector2(elem.Parent.InnerSize.x, Mathf.Min(((SGroup) elem).ContentSize.y, 160f));
+                    elem.Size = new Vector2(elem.Parent.InnerSize.x, Mathf.Min(((SGroup)elem).ContentSize.y, 160f));
                     elem.Position = GUI[1].Position - new Vector2(0f, elem.Size.y + 4f);
                 }
             };
@@ -349,16 +372,16 @@ public class ETGModConsole : ETGModMenu {
     /// Runs the provided command with the provided args.
     /// </summary>
     public static void RunCommand(string[] unit, string[] args) {
-        ConsoleCommandUnit command = Commands.GetUnit (unit);
+        ConsoleCommandUnit command = Commands.GetUnit(unit);
         if (command == null) {
-            if (Commands.GetGroup (unit) == null) {
+            if (Commands.GetGroup(unit) == null) {
                 Log("Command doesn't exist");
             }
         } else {
             try {
-                command.RunCommand (args);
+                command.RunCommand(args);
             } catch (Exception e) {
-                Log(e.ToString ());
+                Log(e.ToString());
 
                 Debug.LogError("Exception occured while running command:" + e.ToString());
             }
@@ -381,7 +404,7 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void DodgeRollDistance(string[] args) {
-        if (!ArgCount (args, 1, 1)) return;
+        if (!ArgCount(args, 1, 1)) return;
         Debug.Log(args[0]);
 
         if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
@@ -390,7 +413,7 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void DodgeRollSpeed(string[] args) {
-        if (!ArgCount (args, 1, 1)) return;
+        if (!ArgCount(args, 1, 1)) return;
         Debug.Log(args[0]);
 
         if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
@@ -399,13 +422,13 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void Teleport(string[] args) {
-        if (!ArgCount (args, 2, 2)) return;
+        if (!ArgCount(args, 2, 2)) return;
 
         if (GameManager.Instance != null && GameManager.Instance.PrimaryPlayer != null) {
             GameManager.Instance.PrimaryPlayer.TeleportToPoint(new Vector2(
                 float.Parse(args[0]),
                 float.Parse(args[1])
-            ),true);
+            ), true);
         }
     }
 
@@ -416,19 +439,19 @@ public class ETGModConsole : ETGModMenu {
         value = SetBool(args, fallbackValue);
     }
     public bool SetBool(string[] args, bool fallbackValue) {
-        if (args.Length!=1)
+        if (args.Length != 1)
             return fallbackValue;
 
-        if (args[0].ToLower()=="true")
+        if (args[0].ToLower() == "true")
             return true;
-        else if (args[0].ToLower()=="false")
+        else if (args[0].ToLower() == "false")
             return false;
         else
             return fallbackValue;
     }
 
     void GiveItem(string[] args) {
-        if (!ArgCount (args, 1, 2)) return;
+        if (!ArgCount(args, 1, 2)) return;
 
         if (!GameManager.Instance.PrimaryPlayer) {
             Log("Couldn't access Player Controller");
@@ -445,12 +468,12 @@ public class ETGModConsole : ETGModMenu {
             return;
         }
 
-        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + PickupObjectDatabase.GetById (id).GetType());
+        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + PickupObjectDatabase.GetById(id).GetType());
 
         if (args.Length == 2) {
             int count = int.Parse(args[1]);
 
-            for (int i = 0; i<count; i++)
+            for (int i = 0; i < count; i++)
                 ETGMod.Player.GiveItemID(id);
         } else {
             ETGMod.Player.GiveItemID(id);
@@ -458,14 +481,14 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void SetShake(string[] args) {
-        if (!ArgCount (args, 1, 1)) return;
+        if (!ArgCount(args, 1, 1)) return;
         Log("Vlambeer set to " + args[0]);
-        ScreenShakeSettings.GLOBAL_SHAKE_MULTIPLIER = float.Parse (args [0]);
+        ScreenShakeSettings.GLOBAL_SHAKE_MULTIPLIER = float.Parse(args[0]);
     }
 
     void SpawnGUID(string[] args) {
-        if (!ArgCount (args, 1, 2)) return;
-        AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid (args[0]);
+        if (!ArgCount(args, 1, 2)) return;
+        AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid(args[0]);
         if (enemyPrefab == null) {
             Log("GUID " + args[0] + " doesn't exist");
             return;
@@ -473,25 +496,25 @@ public class ETGModConsole : ETGModMenu {
         Log("Spawning GUID " + args[0]);
         int count = 1;
         if (args.Length > 1) {
-            bool success = int.TryParse (args[1], out count);
+            bool success = int.TryParse(args[1], out count);
             if (!success) {
                 Log("Second argument must be an integer (number)");
                 return;
             }
         }
         for (int i = 0; i < count; i++) {
-            IntVector2? targetCenter = new IntVector2? (GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2 (VectorConversions.Floor));
+            IntVector2? targetCenter = new IntVector2?(GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2(VectorConversions.Floor));
             Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {
                 for (int j = 0; j < enemyPrefab.Clearance.x; j++) {
                     for (int k = 0; k < enemyPrefab.Clearance.y; k++) {
-                        if (GameManager.Instance.Dungeon.data.isTopWall (c.x + j, c.y + k)) {
+                        if (GameManager.Instance.Dungeon.data.isTopWall(c.x + j, c.y + k)) {
                             return false;
                         }
                         if (targetCenter.HasValue) {
-                            if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) < 4) {
+                            if (IntVector2.Distance(targetCenter.Value, c.x + j, c.y + k) < 4) {
                                 return false;
                             }
-                            if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) > 20) {
+                            if (IntVector2.Distance(targetCenter.Value, c.x + j, c.y + k) > 20) {
                                 return false;
                             }
                         }
@@ -499,74 +522,74 @@ public class ETGModConsole : ETGModMenu {
                 }
                 return true;
             };
-            IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell (new IntVector2? (enemyPrefab.Clearance), new Dungeonator.CellTypes? (enemyPrefab.PathableTiles), false, cellValidator);
+            IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell(new IntVector2?(enemyPrefab.Clearance), new Dungeonator.CellTypes?(enemyPrefab.PathableTiles), false, cellValidator);
             if (randomAvailableCell.HasValue) {
-                AIActor aIActor = AIActor.Spawn (enemyPrefab, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
-                aIActor.HandleReinforcementFallIntoRoom (0);
+                AIActor aIActor = AIActor.Spawn(enemyPrefab, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
+                aIActor.HandleReinforcementFallIntoRoom(0);
             }
         }
     }
 
     void SpawnChest(string[] args) {
-        if (!ArgCount (args, 1, 2)) return;
+        if (!ArgCount(args, 1, 2)) return;
         Dungeonator.RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
         RewardManager rewardManager = GameManager.Instance.RewardManager;
         Chest chest;
         bool glitched = false;
-        string name = args [0].ToLower ();
+        string name = args[0].ToLower();
         switch (name) {
-        case "brown":
-        case "d":
-            chest = rewardManager.D_Chest;
-            break;
-        case "blue":
-        case "c":
-            chest = rewardManager.C_Chest;
-            break;
-        case "green":
-        case "b":
-            chest = rewardManager.B_Chest;
-            break;
-        case "red":
-        case "a":
-            chest = rewardManager.A_Chest;
-            break;
-        case "black":
-        case "s":
-            chest = rewardManager.S_Chest;
-            break;
-        case "rainbow":
-        case "r":
-            chest = rewardManager.Rainbow_Chest;
-            break;
-        case "glitched":
-        case "g":
-            chest = rewardManager.B_Chest;
-            glitched = true;
-            break;
-        default:
-            Log("Chest type " + args [0] + " doesn't exist! Valid types: brown, blue, green, red, black, rainbow");
-            return;
+            case "brown":
+            case "d":
+                chest = rewardManager.D_Chest;
+                break;
+            case "blue":
+            case "c":
+                chest = rewardManager.C_Chest;
+                break;
+            case "green":
+            case "b":
+                chest = rewardManager.B_Chest;
+                break;
+            case "red":
+            case "a":
+                chest = rewardManager.A_Chest;
+                break;
+            case "black":
+            case "s":
+                chest = rewardManager.S_Chest;
+                break;
+            case "rainbow":
+            case "r":
+                chest = rewardManager.Rainbow_Chest;
+                break;
+            case "glitched":
+            case "g":
+                chest = rewardManager.B_Chest;
+                glitched = true;
+                break;
+            default:
+                Log("Chest type " + args[0] + " doesn't exist! Valid types: brown, blue, green, red, black, rainbow");
+                return;
         }
-        WeightedGameObject wGameObject = new WeightedGameObject ();
+        WeightedGameObject wGameObject = new WeightedGameObject();
         wGameObject.gameObject = chest.gameObject;
-        WeightedGameObjectCollection wGameObjectCollection = new WeightedGameObjectCollection ();
-        wGameObjectCollection.Add (wGameObject);
+        WeightedGameObjectCollection wGameObjectCollection = new WeightedGameObjectCollection();
+        wGameObjectCollection.Add(wGameObject);
         int count = 1;
         float origMimicChance = chest.overrideMimicChance;
         chest.overrideMimicChance = 0f;
         if (args.Length > 1) {
-            bool success = int.TryParse (args[1], out count);
+            bool success = int.TryParse(args[1], out count);
             if (!success) {
                 Log("Second argument must be an integer (number)");
                 return;
             }
         }
         for (int i = 0; i < count; i++) {
-            Chest spawnedChest = currentRoom.SpawnRoomRewardChest (wGameObjectCollection, currentRoom.GetBestRewardLocation (new IntVector2 (2, 1), Dungeonator.RoomHandler.RewardLocationStyle.PlayerCenter, true));
-            spawnedChest.ForceUnlock ();
+            Chest spawnedChest = currentRoom.SpawnRoomRewardChest(wGameObjectCollection, currentRoom.GetBestRewardLocation(new IntVector2(2, 1), Dungeonator.RoomHandler.RewardLocationStyle.PlayerCenter, true));
+            spawnedChest.ForceUnlock();
             if (glitched) {
-                spawnedChest.BecomeGlitchChest ();
+                spawnedChest.BecomeGlitchChest();
             }
         }
         chest.overrideMimicChance = origMimicChance;
@@ -605,7 +628,7 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void ResourcesLoad(string[] args) {
-        if (!ArgCount (args, 1)) return;
+        if (!ArgCount(args, 1)) return;
         string resourcepath = string.Join(" ", args);
         object resource = Resources.Load(resourcepath);
         if (resource == null) {
@@ -644,92 +667,92 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void StatGet(string[] args) {
-        if (!ArgCount (args, 1)) return;
-        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!ArgCount(args, 1)) return;
+        TrackedStats? stat = _GetStatFromString(args[0].ToUpper());
         if (!stat.HasValue) {
             Log("The stat isn't a real TrackedStat");
             return;
         }
         if (GameManager.Instance.PrimaryPlayer != null) {
-            float characterstat = GameStatsManager.Instance.GetCharacterStatValue (stat.Value);
+            float characterstat = GameStatsManager.Instance.GetCharacterStatValue(stat.Value);
             Log("Character: " + characterstat);
-            float sessionstat = GameStatsManager.Instance.GetSessionStatValue (stat.Value);
+            float sessionstat = GameStatsManager.Instance.GetSessionStatValue(stat.Value);
             Log("Session: " + sessionstat);
         } else {
             Log("Character and Session stats are unavailable, please select a character first");
         }
-        float playerstat = GameStatsManager.Instance.GetPlayerStatValue (stat.Value);
+        float playerstat = GameStatsManager.Instance.GetPlayerStatValue(stat.Value);
         Log("This save file: " + playerstat);
     }
 
     void StatSetSession(string[] args) {
-        if (!_VerifyStatSetEnabled ("stat set session")) return;
-        if (!ArgCount (args, 2)) return;
-        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!_VerifyStatSetEnabled("stat set session")) return;
+        if (!ArgCount(args, 2)) return;
+        TrackedStats? stat = _GetStatFromString(args[0].ToUpper());
         if (!stat.HasValue) {
             Log("The stat isn't a real TrackedStat");
             return;
         }
         float value;
-        if (!float.TryParse (args [1], out value)) {
+        if (!float.TryParse(args[1], out value)) {
             Log("The value isn't a proper number");
             return;
         }
-        GameStatsManager.Instance.SetStat (stat.Value, value);
+        GameStatsManager.Instance.SetStat(stat.Value, value);
     }
 
     void StatSetCurrentCharacter(string[] args) {
-        if (!_VerifyStatSetEnabled ("stat set")) return;
-        if (!ArgCount (args, 2)) return;
-        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!_VerifyStatSetEnabled("stat set")) return;
+        if (!ArgCount(args, 2)) return;
+        TrackedStats? stat = _GetStatFromString(args[0].ToUpper());
         if (!stat.HasValue) {
             Log("The stat isn't a real TrackedStat");
             return;
         }
         float value;
-        if (!float.TryParse (args [1], out value)) {
+        if (!float.TryParse(args[1], out value)) {
             Log("The value isn't a proper number");
             return;
         }
         PlayableCharacters currentCharacter = GameManager.Instance.PrimaryPlayer.characterIdentity;
-        GameStatsManager.Instance.m_characterStats [currentCharacter].SetStat (stat.Value, value);
+        GameStatsManager.Instance.m_characterStats[currentCharacter].SetStat(stat.Value, value);
     }
 
     void StatMod(string[] args) {
-        if (!_VerifyStatSetEnabled ("stat mod")) return;
-        if (!ArgCount (args, 2)) return;
-        TrackedStats? stat = _GetStatFromString(args [0].ToUpper ());
+        if (!_VerifyStatSetEnabled("stat mod")) return;
+        if (!ArgCount(args, 2)) return;
+        TrackedStats? stat = _GetStatFromString(args[0].ToUpper());
         if (!stat.HasValue) {
             Log("The value isn't a proper number");
             return;
         }
         float value;
-        if (!float.TryParse (args [1], out value)) {
+        if (!float.TryParse(args[1], out value)) {
             Log("The value isn't a proper number");
             return;
         }
-        GameStatsManager.Instance.RegisterStatChange (stat.Value, value);
+        GameStatsManager.Instance.RegisterStatChange(stat.Value, value);
     }
 
     void StatList(string[] args) {
-        if (!ArgCount (args, 0)) return;
+        if (!ArgCount(args, 0)) return;
         foreach (var value in Enum.GetValues(typeof(TrackedStats))) {
             Log(value.ToString().ToLower());
         }
     }
 
-    void TestCustomEnemy (string[] args) {
+    void TestCustomEnemy(string[] args) {
         AIActor thing = ETGMod.Databases.Enemies.CopyEnemyByGuid("864ea5a6a9324efc95a0dd2407f42810");
         thing.healthHaver.SetHealthMaximum(999f);
         string guid = ETGMod.Databases.Enemies.AddEnemy(thing, "my_cubulon");
         Log("Added enemy with GUID: " + guid);
     }
 
-    void TestCustomCharacter (string[] args) {
+    void TestCustomCharacter(string[] args) {
         DudeBehaviour.Add();
     }
 
-    void SwitchCharacter (string[] args) {
+    void SwitchCharacter(string[] args) {
         if (!ArgCount(args, 1, 2)) return;
         var prefab = (GameObject)Resources.Load("CHARACTERDB:" + args[0]);
         if (prefab == null) {
@@ -830,4 +853,3 @@ public class ETGModConsole : ETGModMenu {
         }
     }
 }
-
