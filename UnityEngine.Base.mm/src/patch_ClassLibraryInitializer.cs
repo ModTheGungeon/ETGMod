@@ -1,12 +1,13 @@
-﻿#pragma warning disable 0626
+﻿/*
+RIP MONODEBUG 2016-2016
+
+#pragma warning disable 0626
 #pragma warning disable 0649
 
 using System;
 
 namespace UnityEngine {
     internal static class patch_ClassLibraryInitializer {
-	/*
-	RIP MONODEBUG 2016-2016
 
         private delegate string[] d_mono_runtime_get_main_args(); //ret MonoArray*
 
@@ -32,7 +33,7 @@ namespace UnityEngine {
                 Debug.Log(e);
             }
         }
-	*/
 
     }
 }
+*/

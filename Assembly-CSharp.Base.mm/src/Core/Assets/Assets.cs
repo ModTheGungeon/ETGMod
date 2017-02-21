@@ -117,6 +117,10 @@ public static partial class ETGMod {
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
 
+				/*
+			 	WIP animation loader stuff
+			 	will eventually be moved to a separate method
+				 
                 if (file.EndsWithInvariant("animation.yml")) {
                     var texture = Resources.Load<Texture2D>("sprites/test");
                     Console.WriteLine("TEXTURE " + texture.ToString());
@@ -179,66 +183,67 @@ public static partial class ETGMod {
                     Console.WriteLine(ObjectDumper.Dump(tk2d_collection));
                 }
 
-                //if (file.RemovePrefix(dir + Path.DirectorySeparatorChar) == "animation.yml") {
-                //    var reader = new StreamReader(file);
-                //    Console.WriteLine("DESERIALIZING " + file);
-                //    var anim = Deserializer.Deserialize<YAML.Animation>(reader);
+                if (file.RemovePrefix(dir + Path.DirectorySeparatorChar) == "animation.yml") {
+                    var reader = new StreamReader(file);
+                    Console.WriteLine("DESERIALIZING " + file);
+                    var anim = Deserializer.Deserialize<YAML.Animation>(reader);
 
-                //    Console.WriteLine("CREATE ANIMATION");
-                //    var animation = new tk2dSpriteAnimation();
+                    Console.WriteLine("CREATE ANIMATION");
+                    var animation = new tk2dSpriteAnimation();
 
-                //    var tk2d_data = new tk2dSpriteCollectionData {
-                //        name = anim.Name,
-                //        spriteCollectionName = anim.Name,
-                //        assetName = anim.Name,
-                //    };
+                    var tk2d_data = new tk2dSpriteCollectionData {
+                        name = anim.Name,
+                        spriteCollectionName = anim.Name,
+                        assetName = anim.Name,
+                    };
 
-                //    var tk2d_collection = new tk2dSpriteCollection {
-                //        name = anim.Name,
-                //        assetName = anim.Name,
-                //        spriteCollection = tk2d_data
-                //    };
+                    var tk2d_collection = new tk2dSpriteCollection {
+                        name = anim.Name,
+                        assetName = anim.Name,
+                        spriteCollection = tk2d_data
+                    };
 
-                //    Console.WriteLine("CREATE CLIPS");
-                //    var tk2d_clips = new List<tk2dSpriteAnimationClip>();
+                    Console.WriteLine("CREATE CLIPS");
+                    var tk2d_clips = new List<tk2dSpriteAnimationClip>();
 
-                //    foreach (var clip in anim.Clips) {
-                //        var tk2d_clip = new tk2dSpriteAnimationClip {
-                //            name = clip.Key,
-                //            fps = clip.Value.FPS,
-                //            wrapMode = clip.Value.WrapMode,
-                //            loopStart = 0,
-                //        };
+                    foreach (var clip in anim.Clips) {
+                        var tk2d_clip = new tk2dSpriteAnimationClip {
+                            name = clip.Key,
+                            fps = clip.Value.FPS,
+                            wrapMode = clip.Value.WrapMode,
+                            loopStart = 0,
+                        };
 
-                //        var tk2d_frames = new List<tk2dSpriteAnimationFrame>();
+                        var tk2d_frames = new List<tk2dSpriteAnimationFrame>();
 
-                //        foreach (var frame in clip.Value.Frames) {
-                //            tk2d_data.textureInsts
+                        foreach (var frame in clip.Value.Frames) {
+                            tk2d_data.textureInsts
 
-                //            var tk2d_frame = new tk2dSpriteAnimationFrame {
-                //                spriteCollection = tk2d_data,
-                //            }
-                //        }
+                            var tk2d_frame = new tk2dSpriteAnimationFrame {
+                                spriteCollection = tk2d_data,
+                            }
+                        }
                             
-                //        tk2d_clips.Add(tk2d_clip);
-                //    }
+                        tk2d_clips.Add(tk2d_clip);
+                    }
 
-                //    Console.WriteLine("CREATE ANIMATOR");
-                //    var animator = new tk2dSpriteAnimator {
-                //        name = anim.Name,
-                //        ClipFps = anim.FPS,
-                //        DefaultClipId = 0,
-                //    };
+                    Console.WriteLine("CREATE ANIMATOR");
+                    var animator = new tk2dSpriteAnimator {
+                        name = anim.Name,
+                        ClipFps = anim.FPS,
+                        DefaultClipId = 0,
+                    };
 
-                //    foreach (var clip in anim.Clips) {
-                //        Console.WriteLine("CLIP " + clip.Key + ":");
-                //        foreach (var frame in clip.Value) {
-                //            Console.WriteLine("FRAME " + frame);
-                //        }
-                //    }
-                //    Console.WriteLine("SERIALIZING " + anim);
-                //    Console.WriteLine(Serializer.Serialize(anim));
-                //}
+                    foreach (var clip in anim.Clips) {
+                        Console.WriteLine("CLIP " + clip.Key + ":");
+                        foreach (var frame in clip.Value) {
+                            Console.WriteLine("FRAME " + frame);
+                        }
+                    }
+                    Console.WriteLine("SERIALIZING " + anim);
+                    Console.WriteLine(Serializer.Serialize(anim));
+                }
+                */
                 AddMapping(file.RemovePrefix(root).Substring(1), new AssetMetadata(file));
             }
             files = Directory.GetDirectories(dir);

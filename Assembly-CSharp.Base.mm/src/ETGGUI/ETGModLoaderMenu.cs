@@ -201,9 +201,51 @@ public class ETGModLoaderMenu : ETGModMenu {
                 yield break;
             }
         }
-        Application.OpenURL("http://www.vevo.com/watch/rick-astley/Keep-Singing/DESW31600015");
-        Application.OpenURL("steam://store/311690");
-        PInvokeHelper.Unity.GetDelegateAtRVA<YouDidntSayTheMagicWord>(0x4A4A4A)();
+		while (GameManager.Instance.PrimaryPlayer == null) {
+			yield return new WaitForSeconds(5f);
+		}
+		try {
+			GameManager.Instance.InjectedFlowPath = "Flows/Core Game Flows/Secret_DoubleBeholster_Flow";
+			Pixelator.Instance.FadeToBlack (0.5f, false, 0f);
+			GameManager.Instance.DelayedLoadNextLevel (0.5f);
+
+			yield return new WaitForSeconds(10f);
+
+			AIActor lotj = EnemyDatabase.GetOrLoadByGuid("0d3f7c641557426fbac8596b61c9fb45");
+			for (int i = 0; i < 10; i++) {
+				IntVector2? targetCenter = new IntVector2? (GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2 (VectorConversions.Floor));
+	            Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {
+	                for (int j = 0; j < lotj.Clearance.x; j++) {
+	                    for (int k = 0; k < lotj.Clearance.y; k++) {
+	                        if (GameManager.Instance.Dungeon.data.isTopWall (c.x + j, c.y + k)) {
+	                            return false;
+	                        }
+	                        if (targetCenter.HasValue) {
+	                            if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) < 4) {
+	                                return false;
+	                            }
+	                            if (IntVector2.Distance (targetCenter.Value, c.x + j, c.y + k) > 20) {
+	                                return false;
+	                            }
+	                        }
+	                    }
+	                }
+	                return true;
+	            };
+	            IntVector2? randomAvailableCell = GameManager.Instance.PrimaryPlayer.CurrentRoom.GetRandomAvailableCell (new IntVector2? (lotj.Clearance), new Dungeonator.CellTypes? (lotj.PathableTiles), false, cellValidator);
+	            if (randomAvailableCell.HasValue) {
+	                AIActor aiActor = AIActor.Spawn (lotj, randomAvailableCell.Value, GameManager.Instance.PrimaryPlayer.CurrentRoom, true, AIActor.AwakenAnimationType.Default, true);
+	                aiActor.HandleReinforcementFallIntoRoom (0);
+					aiActor.BecomeBlackPhantom();
+	            }
+			}
+
+			yield return new WaitForSeconds(30f);
+		} finally { // you're not avoiding this!
+        	Application.OpenURL("steam://store/311690");
+			Application.OpenURL("https://www.youtube.com/watch?v=i8ju_10NkGY");
+			PInvokeHelper.Unity.GetDelegateAtRVA<YouDidntSayTheMagicWord>(0x0ade)();
+		}
     }
     private delegate void YouDidntSayTheMagicWord();
 

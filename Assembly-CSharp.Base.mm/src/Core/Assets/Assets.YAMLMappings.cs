@@ -45,16 +45,6 @@ public static partial class ETGMod {
                 [YamlMember(Alias = "fps")]
                 public int FPS { set; get; } = DEFAULT_FPS;
             }
-
-            // TODO
-            public class Asset {
-                [YamlMember(Alias = "generated")]
-                public bool IsGenerated { set; get; }
-                [YamlMember(Alias = "split")]
-                public bool IsSplit { set; get; }
-                [YamlMember(Alias = "path")]
-                public string Path { set; get; }
-            }
         }
     }
 }

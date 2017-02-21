@@ -26,9 +26,9 @@ public static partial class ETGMod {
         #if TRAVIS
         new Profile(2, "travis");
         #elif DEBUG
-        new Profile(1, "b17-debug");
+        new Profile(1, "b18-debug");
         #else
-        new Profile(0, "b17"); // no tag
+        new Profile(0, "b18"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -65,9 +65,11 @@ public static partial class ETGMod {
     public static List<ETGModule> GameMods = new List<ETGModule>();
     public static List<ETGBackend> Backends = new List<ETGBackend>();
 
+	/*
     public static string[] LaunchArguments;
 
     private delegate string[] d_mono_runtime_get_main_args(); //ret MonoArray*
+    */
 
     [Obsolete("Use StartGlobalCoroutine instead.")]
     public static Func<IEnumerator, Coroutine> StartCoroutine;
@@ -86,6 +88,7 @@ public static partial class ETGMod {
         }
         _Init = true;
 
+		/*
         LaunchArguments = PInvokeHelper.Mono.GetDelegate<d_mono_runtime_get_main_args>()();
         for (int i = 1; i < LaunchArguments.Length; i++) {
             string arg = LaunchArguments[i];
@@ -93,8 +96,10 @@ public static partial class ETGMod {
                 Platform.DisableSteam = true;
             }
         }
+        */
 
-        GameFolder = Directory.GetParent(LaunchArguments[0]).FullName;
+		GameFolder = Application.dataPath;
+		Debug.Log($"ETGMOD INIT: GAMEFOLDER = {GameFolder}");
         ModsDirectory = Path.Combine(GameFolder, "Mods");
         ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
         RelinkCacheDirectory = Path.Combine(ModsDirectory, "RelinkCache");
