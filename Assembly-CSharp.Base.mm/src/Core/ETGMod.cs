@@ -98,7 +98,7 @@ public static partial class ETGMod {
         }
         */
 
-		GameFolder = Application.dataPath;
+		GameFolder = Path.Combine(Application.dataPath, "..");
 		Debug.Log($"ETGMOD INIT: GAMEFOLDER = {GameFolder}");
         ModsDirectory = Path.Combine(GameFolder, "Mods");
         ModsListFile = Path.Combine(ModsDirectory, "mods.txt");
