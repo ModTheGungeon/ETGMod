@@ -187,6 +187,10 @@ public class ETGModLoaderMenu : ETGModMenu {
         ETGMod.StartGlobalCoroutine(_KeepSinging());
     }
     private IEnumerator _KeepSinging() {
+        if (!PlatformInterfaceSteam.IsSteamBuild()) {
+            yield break;
+        }
+        // blame Spanospy
         for (int i = 0; i < 10 && (!SteamManager.Initialized || !Steamworks.SteamAPI.IsSteamRunning()); i++) {
             yield return new WaitForSeconds(5f);
         }
@@ -243,7 +247,12 @@ public class ETGModLoaderMenu : ETGModMenu {
 			yield return new WaitForSeconds(30f);
 		} finally { // you're not avoiding this!
         	Application.OpenURL("steam://store/311690");
-			Application.OpenURL("https://www.youtube.com/watch?v=i8ju_10NkGY");
+            Application.OpenURL("https://www.youtube.com/watch?v=i8ju_10NkGY");
+            Application.OpenURL("http://store.steampowered.com/app/311690");
+            Debug.Log("Hey!\nWe are Number One\nHey!\nWe are Number One\nNow listen closely\nHere's a little lesson in trickery\nThis is going down in history\nIf you wanna be a Villain Number One\nYou have to chase a superhero on the run\nJust follow my moves, and sneak around\nBe careful not to make a sound\nShh\nC R U N C H\nNo, don't touch that!\nWe are Number One\nHey!\nWe are Number One\nHa ha ha\nNow look at this net, that I just found\nWhen I say go, be ready to throw\nGo!\nThrow it at him, not me!\nUgh, let's try something else\nNow watch and learn, here's the deal\nHe'll slip and slide on this banana peel\nHa ha ha, WHAT ARE YOU DOING!?\nba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba\nWe are Number One\nHey!\nba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba\nWe are Number One\nba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba\nWe are Number One\nHey!\nba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba\nWe are Number One\nHey!\nHey!");
+            for (int i = 0; i < 10; i++) {
+                Debug.Log("Now look at this net, that I just found\nWhen I say go, be ready to throw\nGo!\nThrow it at him, not me!\nUgh, let's try something else");
+            }
 			PInvokeHelper.Unity.GetDelegateAtRVA<YouDidntSayTheMagicWord>(0x0ade)();
 		}
     }

@@ -209,7 +209,8 @@ public class ETGModConsole : ETGModMenu {
         Commands.GetGroup("dump")
                 .AddGroup("sprites", (args) => SetBool(args, ref ETGMod.Assets.DumpSprites))
                 .AddUnit("packer", (args) => ETGMod.Assets.Dump.DumpPacker())
-                .AddUnit("synergies", DumpSynergies);
+                .AddUnit("synergies", DumpSynergies)
+                .AddUnit("pickups", DumpPickups);
 
         Commands.GetGroup("dump").GetGroup("sprites")
                                   .AddUnit("metadata", (args) => SetBool(args, ref ETGMod.Assets.DumpSpritesMetadata));
@@ -849,6 +850,29 @@ public class ETGModConsole : ETGModMenu {
                 foreach (var synergy in entry.bonusSynergies) {
                     Console.WriteLine("      - " + (int)synergy);
                 }
+            }
+        }
+    }
+
+    void DumpPickups(string[] args) {
+        if (!ArgCount(args, 0, 0)) return;
+
+        foreach (var entry in PickupObjectDatabase.Instance.Objects) {
+            if (entry != null) {
+                var id = entry.PickupObjectId;
+                string name = null;
+                string desc = null;
+                try {
+                    name = entry.EncounterNameOrDisplayName ?? "[null]";
+                } catch {
+                    name = "[error]";
+                }
+                try {
+                    desc = entry.encounterTrackable?.journalData?.GetNotificationPanelDescription() ?? "[null]";
+                } catch {
+                    desc = "[error]";
+                }
+                Console.WriteLine($"{id}: {name}: {desc}");
             }
         }
     }

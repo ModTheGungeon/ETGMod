@@ -15,7 +15,7 @@ using ETGMultiplayer;
 /// </summary>
 public static partial class ETGMod {
     
-    public readonly static Version BaseVersion = new Version(0, 2, 0);
+    public readonly static Version BaseVersion = new Version(0, 3, 0);
     // The following line will be replaced by Travis.
     public readonly static int BaseTravisBuild = 0;
     /// <summary>
@@ -26,9 +26,9 @@ public static partial class ETGMod {
         #if TRAVIS
         new Profile(2, "travis");
         #elif DEBUG
-        new Profile(1, "debug");
+        new Profile(1, "b1-debug");
         #else
-        new Profile(0, ""); // no tag
+        new Profile(0, "b1"); // no tag
         #endif
 
     public static string BaseUIVersion {
