@@ -187,6 +187,9 @@ public class ETGModLoaderMenu : ETGModMenu {
         ETGMod.StartGlobalCoroutine(_KeepSinging());
     }
     private IEnumerator _KeepSinging() {
+        if (!PlatformInterfaceSteam.IsSteamBuild()) {
+            yield break;
+        }
         for (int i = 0; i < 10 && (!SteamManager.Initialized || !Steamworks.SteamAPI.IsSteamRunning()); i++) {
             yield return new WaitForSeconds(5f);
         }
