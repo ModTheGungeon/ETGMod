@@ -24,7 +24,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE;UNITYENGINE</DefineConstants>
@@ -43,8 +44,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Assembly-CSharp.Base.mm\src\MonoMod\Platform.cs">
+      <Link>src\MonoMod\Platform.cs</Link>
+    </Compile>
+    <Compile Include="..\Assembly-CSharp.Base.mm\src\MonoMod\PlatformHelper.cs">
+      <Link>src\MonoMod\PlatformHelper.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\ETGModUnityEngineHooks.cs" />
+    <Compile Include="src\MonoMod\MonoModConstructor.cs" />
     <Compile Include="src\MonoMod\MonoModIgnore.cs" />
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
     <Compile Include="src\MonoMod\MonoModOriginal.cs" />
@@ -56,17 +64,11 @@
     <Compile Include="..\Assembly-CSharp.Base.mm\src\PInvokeHelper.cs">
       <Link>src\PInvokeHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Assembly-CSharp.Base.mm\src\MonoMod\Platform.cs">
-      <Link>src\MonoMod\Platform.cs</Link>
-    </Compile>
-    <Compile Include="..\Assembly-CSharp.Base.mm\src\MonoMod\PlatformHelper.cs">
-      <Link>src\MonoMod\PlatformHelper.cs</Link>
-    </Compile>
     <Compile Include="src\MonoDebug.cs" />
     <Compile Include="src\patch_ClassLibraryInitializer.cs" />
-    <Compile Include="src\MonoMod\MonoModConstructor.cs" />
     <Compile Include="src\patch_GameObject.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
