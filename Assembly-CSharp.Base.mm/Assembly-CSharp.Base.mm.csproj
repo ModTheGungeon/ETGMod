@@ -83,9 +83,13 @@
     <Compile Include="src\ETGGUI\ETGModGUI.cs" />
     <Compile Include="src\ETGModMainBehaviour.cs" />
     <Compile Include="src\LimitedStream.cs" />
+    <Compile Include="src\MonoModRules.cs" />
+    <Compile Include="src\MonoMod\MonoModAdded.cs" />
     <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
     <Compile Include="src\MonoMod\MonoModConstructor.cs" />
     <Compile Include="src\MonoMod\MonoModEnumReplace.cs" />
+    <Compile Include="src\MonoMod\MonoModHook.cs" />
+    <Compile Include="src\MonoMod\MonoModIfFlag.cs" />
     <Compile Include="src\MonoMod\MonoModIgnore.cs" />
     <Compile Include="src\MonoMod\MonoModInline.cs" />
     <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
@@ -350,14 +354,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Content\etgmod\gui\" />
-    <Folder Include="src\SGUI\Modifiers\" />
-    <Folder Include="src\Guns\" />
-    <Folder Include="src\ETGGUI\Repo\" />
-    <Folder Include="src\Core\Databases\" />
-    <Folder Include="src\SGUI\Animations\" />
-    <Folder Include="src\Characters\" />
-    <Folder Include="src\Core\Assets\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

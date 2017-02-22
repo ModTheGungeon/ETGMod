@@ -19,7 +19,7 @@ internal class patch_AIActor : AIActor {
     }
 
     [MonoModIgnore]
-    private extern void BecomeBlackPhantom();
+    private extern new void BecomeBlackPhantom();
     internal void INTERNAL_BecomeBlackPhantom() {
         BecomeBlackPhantom();
     }
