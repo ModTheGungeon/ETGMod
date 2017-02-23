@@ -8,6 +8,9 @@ public class TestGunController : GunBehaviour {
         // Get yourself a new gun "base" first.
         // Let's just call it "Test Gun", and use "gshbd" for all sprites and as "codename".
         Gun gun = ETGMod.Databases.Items.NewGun("Test Gun", "gshbd");
+        Gungeon.Items.Add("etgmod", "test_gun", gun);
+        //FIXME Test Gun respects Gungeon.Items, so we remove it from the catch-all namespace
+        Gungeon.Items.Remove("outdated_gun_mods:test_gun");
         // If you really want to, you can pass another gun object between the name and short name.
         // That gun then gets "cleared" to be a base gun for your modded gun.
 

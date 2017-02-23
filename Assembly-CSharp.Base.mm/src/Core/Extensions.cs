@@ -24,8 +24,9 @@ public static partial class ETGMod {
 
     public static int Count(this string @in, char c) {
         int count = 0;
-        int lastIndex = 0;
-        while ((lastIndex = @in.IndexOf(c, lastIndex)) != -1) ++count;
+        for (int i = 0; i < @in.Length; i++) {
+            if (@in[i] == c) count++;
+        }
         return count;
     }
 

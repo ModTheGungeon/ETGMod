@@ -60,7 +60,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\AssetMetadata.cs" />
     <Compile Include="src\Core\Extensions.cs" />
-    <Compile Include="src\Core\Player.cs" />
     <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
     <Compile Include="src\ETGGUI\FontConverter.cs" />
     <!--Something went wrong while time-traveling... whoops!-->
@@ -178,7 +177,6 @@
     <Compile Include="src\ETGGUI\Repo\ModRepo.cs" />
     <Compile Include="src\ETGGUI\Repo\RemoteMod.cs" />
     <Compile Include="src\Patches\patch_StringTableManager.cs" />
-    <Compile Include="src\Core\Databases\ItemDB.cs" />
     <Compile Include="src\Core\Databases\StringDB.cs" />
     <Compile Include="src\SGUI\Animations\SFadeAnimation.cs" />
     <Compile Include="src\SGUI\Animations\SFadeInAnimation.cs" />
@@ -189,18 +187,23 @@
     <Compile Include="src\SGUI\Animations\SEasings.cs" />
     <Compile Include="src\SGUI\Animations\SFadeOutShrinkSequence.cs" />
     <Compile Include="src\SGUI\Animations\SShrinkAnimation.cs" />
-    <Compile Include="src\Core\Databases\EnemyDB.cs" />
-    <Compile Include="src\Core\Databases\CharacterDB.cs" />
     <Compile Include="src\Patches\patch_PlayerController.cs" />
     <Compile Include="src\Core\PlayerBehaviour.cs" />
     <Compile Include="src\Characters\DudeBehaviour.cs" />
     <Compile Include="src\SGUI\Modifiers\SInGameModifier.cs" />
     <Compile Include="src\Core\Assets\Assets.cs" />
-    <Compile Include="src\Core\Assets\Assets.Data.cs" />
-    <Compile Include="src\Core\Assets\Assets.Dump.cs" />
-    <Compile Include="src\Core\Assets\Assets.Protocol.cs" />
-    <Compile Include="src\Core\Assets\Assets.YAMLMappings.cs" />
+    <Compile Include="src\Core\Assets\Data.cs" />
+    <Compile Include="src\Core\Assets\Dump.cs" />
+    <Compile Include="src\Core\Assets\Protocol.cs" />
+    <Compile Include="src\Core\Assets\YAMLMappings.cs" />
     <Compile Include="src\ObjectDumper.cs" />
+    <Compile Include="src\Core\IDPool.cs" />
+    <Compile Include="src\API\Gungeon\Gungeon.cs" />
+    <Compile Include="src\API\Gungeon\Player.cs" />
+    <Compile Include="src\Core\Player.cs" />
+    <Compile Include="src\Core\Databases\CharacterDB.cs" />
+    <Compile Include="src\Core\Databases\EnemyDB.cs" />
+    <Compile Include="src\Core\Databases\ItemDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -345,6 +348,12 @@
     <EmbeddedResource Include="Content\etgmod\gui\icon_zip.png">
       <LogicalName>Content/etgmod/gui/icon_zip.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Content\gungeon_id_map\items.txt">
+      <LogicalName>Content/gungeon_id_map/items.txt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Content\gungeon_id_map\enemies.txt">
+      <LogicalName>Content/gungeon_id_map/enemies.txt</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -354,5 +363,16 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Content\etgmod\gui\" />
+    <Folder Include="src\SGUI\Modifiers\" />
+    <Folder Include="src\Guns\" />
+    <Folder Include="src\ETGGUI\Repo\" />
+    <Folder Include="src\Core\Databases\" />
+    <Folder Include="src\SGUI\Animations\" />
+    <Folder Include="src\Characters\" />
+    <Folder Include="src\Core\Assets\" />
+    <Folder Include="src\API\" />
+    <Folder Include="src\API\Gungeon\" />
+  </ItemGroup>
 </Project>

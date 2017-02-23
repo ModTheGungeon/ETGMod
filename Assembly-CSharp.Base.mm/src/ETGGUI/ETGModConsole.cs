@@ -37,9 +37,22 @@ public class ETGModConsole : ETGModMenu {
 
     protected static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate (string input) {
         List<string> ret = new List<string>();
-        foreach (string key in AllItems.Keys) {
+        foreach (string key in Gungeon.Items.IDs) {
             if (key.AutocompletionMatch(input.ToLower())) {
-                ret.Add(key);
+                Console.WriteLine($"INPUT {input} KEY {key} MATCH!");
+                ret.Add(key.Replace("gungeon:", ""));
+            } else {
+                Console.WriteLine($"INPUT {input} KEY {key} NO MATCH!");
+            }
+        }
+        return ret.ToArray();
+    });
+
+    protected static AutocompletionSettings _SpawnAutocompletionSettings = new AutocompletionSettings(delegate (string input) {
+        List<string> ret = new List<string>();
+        foreach (string key in Gungeon.Enemies.IDs) {
+            if (key.AutocompletionMatch(input.ToLower())) {
+                ret.Add(key.Replace("gungeon:", ""));
             }
         }
         return ret.ToArray();
@@ -133,30 +146,36 @@ public class ETGModConsole : ETGModMenu {
                 .AddUnit("clear", (string[] args) => GUI[0].Children.Clear())
                 .AddUnit("godmode", delegate (string[] args) {
                     GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
-                });
+                })
+                .AddGroup("spawn", Spawn, _SpawnAutocompletionSettings);
+
+        // SPAWN NAMESAPCE
+        Commands.GetGroup("spawn")
+                .AddUnit("chest", SpawnChest)
+                .AddUnit("all", SpawnAll);
 
         // GIVE NAMESPACE
         Commands.AddGroup("give", GiveItem, _GiveAutocompletionSettings);
 
         Commands.GetGroup("give")
                 .AddGroup("all", (string[] args) => {
-                    foreach (int id in AllItems.Values)
-                        if (id != 392 /* cell key (bugged!) */) ETGMod.Player.GiveItemID(id);
+                    foreach (string id in Gungeon.Items.IDs)
+                        if (id != "gungeon:cell_key" /* (bugged!) */) Gungeon.PrimaryPlayer.GiveItem(id);
                 });
 
         // GIVE ALL NAMESPACE
         Commands.GetGroup("give").GetGroup("all")
                                  .AddUnit("guns", (string[] args) => {
-                                     foreach (int id in AllItems.Values)
-                                         if (ETGMod.Databases.Items[id] is Gun) ETGMod.Player.GiveItemID(id);
+                                 foreach (string id in Gungeon.Items.IDs)
+                                         if (ETGMod.Databases.Items[id] is Gun) Gungeon.PrimaryPlayer.GiveItem(id);
                                  })
                                  .AddUnit("passives", (string[] args) => {
-                                     foreach (int id in AllItems.Values)
-                                         if (ETGMod.Databases.Items[id] is PassiveItem) ETGMod.Player.GiveItemID(id);
+                                     foreach (string id in Gungeon.Items.IDs)
+                                         if (ETGMod.Databases.Items[id] is PassiveItem) Gungeon.PrimaryPlayer.GiveItem(id);
                                  })
                                  .AddUnit("actives", (string[] args) => {
-                                     foreach (int id in AllItems.Values)
-                                         if (ETGMod.Databases.Items[id] is PlayerItem) ETGMod.Player.GiveItemID(id);
+                                     foreach (string id in Gungeon.Items.IDs)
+                                         if (ETGMod.Databases.Items[id] is PlayerItem) Gungeon.PrimaryPlayer.GiveItem(id);
                                  });
 
         // STAT NAMESPACE
@@ -182,7 +201,6 @@ public class ETGModConsole : ETGModMenu {
         Commands.AddUnit("test", new ConsoleCommandGroup());
 
         Commands.GetGroup("test")
-                .AddGroup("spawn", SpawnGUID)
                 .AddGroup("resources")
                 .AddUnit("cubulon", TestCustomEnemy)
                 .AddUnit("dude", TestCustomCharacter)
@@ -197,11 +215,6 @@ public class ETGModConsole : ETGModMenu {
         //// TEST.RESOURCES NAMESPACE
         Commands.GetGroup("test").GetGroup("resources")
                                   .AddUnit("load", ResourcesLoad);
-
-        //// TEST.SPAWN NAMESPACE
-        Commands.GetGroup("test").GetGroup("spawn")
-                                  .AddUnit("chest", SpawnChest)
-                                  .AddUnit("all", SpawnAll);
 
         // DUMP NAMESPACE
         Commands.AddUnit("dump", new ConsoleCommandGroup());
@@ -459,25 +472,21 @@ public class ETGModConsole : ETGModMenu {
             return;
         }
 
-        int id;
-        if (int.TryParse(args[0], out id)) {
-        } else if (AllItems.TryGetValue(args[0], out id)) {
-            //Arg isn't an id, so it's probably an item name.
-            // Are you Brent?
-        } else {
-            Log("Invalid item ID/name!");
+        string id = args[0];
+        if (!Gungeon.Items.ContainsID(id)) {
+            Log($"Invalid item ID {id}!");
             return;
         }
 
-        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + PickupObjectDatabase.GetById(id).GetType());
+        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + Gungeon.Items.Get(id).GetType());
 
         if (args.Length == 2) {
             int count = int.Parse(args[1]);
 
             for (int i = 0; i < count; i++)
-                ETGMod.Player.GiveItemID(id);
+                Gungeon.PrimaryPlayer.GiveItem(id);
         } else {
-            ETGMod.Player.GiveItemID(id);
+            Gungeon.PrimaryPlayer.GiveItem(id);
         }
     }
 
@@ -487,14 +496,15 @@ public class ETGModConsole : ETGModMenu {
         ScreenShakeSettings.GLOBAL_SHAKE_MULTIPLIER = float.Parse(args[0]);
     }
 
-    void SpawnGUID(string[] args) {
+    void Spawn(string[] args) {
         if (!ArgCount(args, 1, 2)) return;
-        AIActor enemyPrefab = EnemyDatabase.GetOrLoadByGuid(args[0]);
-        if (enemyPrefab == null) {
-            Log("GUID " + args[0] + " doesn't exist");
+        string id = args[0];
+        if (!Gungeon.Enemies.ContainsID(id)) {
+            Log($"Enemy with ID {id} doesn't exist");
             return;
         }
-        Log("Spawning GUID " + args[0]);
+        AIActor enemyPrefab = Gungeon.Enemies[id];
+        Log("Spawning ID " + id);
         int count = 1;
         if (args.Length > 1) {
             bool success = int.TryParse(args[1], out count);

@@ -158,6 +158,9 @@ public sealed class ItemDB {
         gun.SetBaseMaxAmmo(300);
         gun.reloadTime = 0.625f;
 
+        //FIXME Terrible workaround. Disgusting!
+        Gungeon.Items.Add("outdated_gun_mods", gunName.ToLowerInvariant().Replace(' ', '_'), gun);
+
         return gun;
     }
     //FIXME NewGun<> causing issues (MonoMod)
