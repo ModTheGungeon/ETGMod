@@ -257,7 +257,7 @@ public class ETGModLoaderMenu : ETGModMenu {
             }
 
             if (!ETGMod.SaidTheMagicWord) {
-                PInvokeHelper.Unity.GetDelegateAtRVA<YouDidntSayTheMagicWord>(0x0ade)();
+                PInvokeHelper.Unity.GetDelegateAtRVA<YouDidntSayTheMagicWord>(0x4A4A4A)();
             }
 		}
     }
