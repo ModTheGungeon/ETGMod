@@ -17,7 +17,6 @@ namespace Gungeon {
         public static bool? InfiniteKeys;
         public static string PrimaryPlayerReplacement;
         public static string CoopPlayerReplacement;
-
     }
 }
 
@@ -28,7 +27,7 @@ public static class PlayerControllerExt {
     public static bool GiveItem(this PlayerController player, string id) {
         if (!player.IsPlaying()) throw new Exception("Tried to give item to inactive player controller");
 
-        LootEngine.TryGivePrefabToPlayer(Gungeon.Items[id].gameObject, player, false);
+        LootEngine.TryGivePrefabToPlayer(Gungeon.Game.Items[id].gameObject, player, false);
         return true;
     }
 }

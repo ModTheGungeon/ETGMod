@@ -164,7 +164,7 @@ public static partial class ETGMod {
 
     private static void _InitializeAPIs() {
         Debug.Log("Initializing APIs");
-        Gungeon.Initialize();
+        Gungeon.Game.Initialize();
     }
 
     private static void _ScanBackends() {

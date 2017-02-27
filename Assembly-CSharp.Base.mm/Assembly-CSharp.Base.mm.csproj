@@ -192,7 +192,6 @@
     <Compile Include="src\Core\Assets\Data.cs" />
     <Compile Include="src\Core\Assets\Dump.cs" />
     <Compile Include="src\Core\Assets\Protocol.cs" />
-    <Compile Include="src\Core\Assets\YAMLMappings.cs" />
     <Compile Include="src\ObjectDumper.cs" />
     <Compile Include="src\Core\IDPool.cs" />
     <Compile Include="src\API\Gungeon\Gungeon.cs" />
@@ -202,6 +201,9 @@
     <Compile Include="src\API\Gungeon\CustomGun.cs" />
     <Compile Include="src\Core\Extensions\Extensions.cs" />
     <Compile Include="src\Core\Extensions\Gun.cs" />
+    <Compile Include="src\API\Gungeon\AnimLoader\AnimLoader.cs" />
+    <Compile Include="src\API\Gungeon\AnimLoader\YAMLMappings.cs" />
+    <Compile Include="src\Core\Gun.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
@@ -372,5 +374,6 @@
     <Folder Include="src\API\" />
     <Folder Include="src\API\Gungeon\" />
     <Folder Include="src\Core\Extensions\" />
+    <Folder Include="src\API\Gungeon\AnimLoader\" />
   </ItemGroup>
 </Project>

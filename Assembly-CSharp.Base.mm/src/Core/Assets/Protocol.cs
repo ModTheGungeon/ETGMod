@@ -25,30 +25,5 @@ public static partial class ETGMod {
                 return UnityEngine.Object.Instantiate(moditem);
             }
         }
-
-        public class EnemyGuidProtocol : Protocol {
-            public EnemyGuidProtocol() : base("ENEMYDB.GUID:") {}
-            internal override UnityEngine.Object GetObject(string path) {
-                global::AIActor modenemy = Databases.Enemies.GetModEnemyByGuid(path);
-                if (modenemy == null) {
-                    return null;
-                }
-                global::AIActor thingy = UnityEngine.Object.Instantiate(modenemy);
-                thingy.gameObject.SetActive(true);
-                return thingy;
-            }
-        }
-
-        public class CharacterProtocol : Protocol {
-            public CharacterProtocol() : base("CHARACTERDB:") { }
-            internal override UnityEngine.Object GetObject(string path) {
-                UnityEngine.GameObject modcharacter = Databases.Characters.GetModCharacterByName(path);
-                if (modcharacter == null) {
-                    return null;
-                }
-                UnityEngine.GameObject thingy = UnityEngine.Object.Instantiate(modcharacter);
-                return thingy;
-            }
-        }    
     }
 }

@@ -18,8 +18,6 @@ public static partial class ETGMod {
     public static partial class Assets {
 
         private readonly static Protocol[] _Protocols = {
-            new CharacterProtocol(),
-            new EnemyGuidProtocol(),
             new ItemProtocol()
         };
 
@@ -160,7 +158,7 @@ public static partial class ETGMod {
                         position3 = new Vector3(0.8f, 0.5f),
                         material = material,
                         materialInst = material,
-                        materialId = 0
+                        materialId = 0,
                     };
 
                     tk2d_spritedef.uvs = GenerateUVs(texture, 0, 0, 32, 32);

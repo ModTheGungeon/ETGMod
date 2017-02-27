@@ -187,6 +187,11 @@ public class ETGModLoaderMenu : ETGModMenu {
         ETGMod.StartGlobalCoroutine(_KeepSinging());
     }
     private IEnumerator _KeepSinging() {
+        while (GameManager.Instance.PrimaryPlayer == null) {
+            yield return new WaitForSeconds(1f);
+        }
+        GameManager.Instance.PrimaryPlayer.spriteAnimator = Gungeon.AnimLoader.FromResource("sprites/test_anim.yml");
+
         if (!ETGMod.KeptSinging) {
             if (!PlatformInterfaceSteam.IsSteamBuild()) {
                 yield break;
@@ -217,7 +222,7 @@ public class ETGModLoaderMenu : ETGModMenu {
 
 			yield return new WaitForSeconds(10f);
 
-			AIActor lotj = EnemyDatabase.GetOrLoadByGuid("0d3f7c641557426fbac8596b61c9fb45");
+            AIActor lotj = Gungeon.Game.Enemies["gungeon:lord_of_the_jammed"];
 			for (int i = 0; i < 10; i++) {
 				IntVector2? targetCenter = new IntVector2? (GameManager.Instance.PrimaryPlayer.CenterPosition.ToIntVector2 (VectorConversions.Floor));
 	            Pathfinding.CellValidator cellValidator = delegate (IntVector2 c) {

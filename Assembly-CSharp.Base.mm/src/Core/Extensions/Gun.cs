@@ -179,5 +179,3 @@ public static class GunExt {
     }
 
 }
-
-}

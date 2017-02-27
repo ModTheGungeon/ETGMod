@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System;
 using SGUI;
+using Gungeon;
 
 public class ETGModConsole : ETGModMenu {
 
@@ -37,7 +38,7 @@ public class ETGModConsole : ETGModMenu {
 
     protected static AutocompletionSettings _GiveAutocompletionSettings = new AutocompletionSettings(delegate (string input) {
         List<string> ret = new List<string>();
-        foreach (string key in Gungeon.Items.IDs) {
+        foreach (string key in Game.Items.IDs) {
             if (key.AutocompletionMatch(input.ToLower())) {
                 Console.WriteLine($"INPUT {input} KEY {key} MATCH!");
                 ret.Add(key.Replace("gungeon:", ""));
@@ -50,7 +51,7 @@ public class ETGModConsole : ETGModMenu {
 
     protected static AutocompletionSettings _SpawnAutocompletionSettings = new AutocompletionSettings(delegate (string input) {
         List<string> ret = new List<string>();
-        foreach (string key in Gungeon.Enemies.IDs) {
+        foreach (string key in Game.Enemies.IDs) {
             if (key.AutocompletionMatch(input.ToLower())) {
                 ret.Add(key.Replace("gungeon:", ""));
             }
@@ -159,23 +160,23 @@ public class ETGModConsole : ETGModMenu {
 
         Commands.GetGroup("give")
                 .AddGroup("all", (string[] args) => {
-                    foreach (string id in Gungeon.Items.IDs)
-                        if (id != "gungeon:cell_key" /* (bugged!) */) Gungeon.PrimaryPlayer.GiveItem(id);
+                    foreach (string id in Game.Items.IDs)
+                        if (id != "gungeon:cell_key" /* (bugged!) */) Game.PrimaryPlayer.GiveItem(id);
                 });
 
         // GIVE ALL NAMESPACE
         Commands.GetGroup("give").GetGroup("all")
                                  .AddUnit("guns", (string[] args) => {
-                                 foreach (string id in Gungeon.Items.IDs)
-                                         if (ETGMod.Databases.Items[id] is Gun) Gungeon.PrimaryPlayer.GiveItem(id);
+                                 foreach (string id in Game.Items.IDs)
+                                         if (ETGMod.Databases.Items[id] is Gun) Game.PrimaryPlayer.GiveItem(id);
                                  })
                                  .AddUnit("passives", (string[] args) => {
-                                     foreach (string id in Gungeon.Items.IDs)
-                                         if (ETGMod.Databases.Items[id] is PassiveItem) Gungeon.PrimaryPlayer.GiveItem(id);
+                                     foreach (string id in Game.Items.IDs)
+                                         if (ETGMod.Databases.Items[id] is PassiveItem) Game.PrimaryPlayer.GiveItem(id);
                                  })
                                  .AddUnit("actives", (string[] args) => {
-                                     foreach (string id in Gungeon.Items.IDs)
-                                         if (ETGMod.Databases.Items[id] is PlayerItem) Gungeon.PrimaryPlayer.GiveItem(id);
+                                     foreach (string id in Game.Items.IDs)
+                                         if (ETGMod.Databases.Items[id] is PlayerItem) Game.PrimaryPlayer.GiveItem(id);
                                  });
 
         // STAT NAMESPACE
@@ -483,20 +484,20 @@ public class ETGModConsole : ETGModMenu {
         }
 
         string id = args[0];
-        if (!Gungeon.Items.ContainsID(id)) {
+        if (!Game.Items.ContainsID(id)) {
             Log($"Invalid item ID {id}!");
             return;
         }
 
-        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + Gungeon.Items.Get(id).GetType());
+        Log("Attempting to spawn item ID " + args[0] + " (numeric " + id + ")" + ", class " + Game.Items.Get(id).GetType());
 
         if (args.Length == 2) {
             int count = int.Parse(args[1]);
 
             for (int i = 0; i < count; i++)
-                Gungeon.PrimaryPlayer.GiveItem(id);
+                Game.PrimaryPlayer.GiveItem(id);
         } else {
-            Gungeon.PrimaryPlayer.GiveItem(id);
+            Game.PrimaryPlayer.GiveItem(id);
         }
     }
 
@@ -509,11 +510,11 @@ public class ETGModConsole : ETGModMenu {
     void Spawn(string[] args) {
         if (!ArgCount(args, 1, 2)) return;
         string id = args[0];
-        if (!Gungeon.Enemies.ContainsID(id)) {
+        if (!Game.Enemies.ContainsID(id)) {
             Log($"Enemy with ID {id} doesn't exist");
             return;
         }
-        AIActor enemyPrefab = Gungeon.Enemies[id];
+        AIActor enemyPrefab = Game.Enemies[id];
         Log("Spawning ID " + id);
         int count = 1;
         if (args.Length > 1) {
