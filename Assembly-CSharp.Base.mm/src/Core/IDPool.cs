@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class IDPool<T> {
     private Dictionary<string, T> _Storage = new Dictionary<string, T>();
@@ -13,6 +14,12 @@ public class IDPool<T> {
         }
         get {
             return Get(id);
+        }
+    }
+
+    public int Count {
+        get {
+            return _Storage.Count;
         }
     }
 
@@ -41,25 +48,22 @@ public class IDPool<T> {
     }
 
     private void Set(string id, T obj) {
-        _Storage[id] = obj;
+        id = Resolve(id);
+        VerifyID(id);
         var entry = Split(id);
+        if (_LockedNamespaces.Contains(entry.Namespace)) throw new LockedNamespaceException(entry.Namespace);
+        if (id.Any(char.IsWhiteSpace)) throw new BadIDElementException("name");
+        _Storage[id] = obj;
         if (!_Namespaces.Contains(entry.Namespace)) {
             _Namespaces.Add(entry.Namespace);
         }
     }
 
-    public void Set(string namesp, string id, T obj) {
-        if (_LockedNamespaces.Contains(namesp)) throw new LockedNamespaceException(namesp);
-        if (namesp.Contains(":")) throw new BadIDElementException("namespace");
-        if (id.Contains(":")) throw new BadIDElementException("name");
-        if (namesp.Any(char.IsWhiteSpace)) throw new BadIDElementException("namespace");
-        if (id.Any(char.IsWhiteSpace)) throw new BadIDElementException("name");
-        Set($"{namesp}:{id}", obj);
-    }
-
-    public void Add(string namesp, string id, T obj) {
-        if (_Storage.ContainsKey($"{namesp}:{id}")) throw new ItemIDExistsException($"{namesp}:{id}");
-        Set(namesp, id, obj);
+    public void Add(string id, T obj) {
+        id = Resolve(id);
+        VerifyID(id);
+        if (_Storage.ContainsKey(id)) throw new ItemIDExistsException(id);
+        Set(id, obj);
     }
 
     public T Get(string id) {
@@ -69,15 +73,28 @@ public class IDPool<T> {
         return _Storage[id];
     }
 
-    public void Remove(string id) {
+    public void Remove(string id, bool destroy = true) {
         id = Resolve(id);
         var split = Split(id);
         if (_LockedNamespaces.Contains(split.Namespace)) throw new LockedNamespaceException(split.Namespace);
         if (!_Storage.ContainsKey(id)) throw new NonExistantIDException(id);
+        if (_Storage[id] is UnityEngine.Object && destroy) UnityEngine.Object.Destroy(_Storage[id] as UnityEngine.Object);
         _Storage.Remove(id);
     }
 
-    protected static void VerifyID(string id) {
+    public void Rename(string source, string target) {
+        source = Resolve(source);
+        target = Resolve(target);
+        var target_entry = Split(target);
+        if (_LockedNamespaces.Contains(target_entry.Namespace)) throw new LockedNamespaceException(target_entry.Namespace);
+        if (!_Storage.ContainsKey(source)) throw new NonExistantIDException(source);
+
+        var obj = _Storage[source];
+        _Storage.Remove(source);
+        _Storage[target] = obj;
+    }
+
+    public static void VerifyID(string id) {
         if (id.Count(':') > 1) throw new BadlyFormattedIDException(id);
     }
 
@@ -119,9 +136,33 @@ public class IDPool<T> {
         return _LockedNamespaces.Contains(namesp);
     }
 
-    public string[] IDs {
+    public string[] AllIDs {
         get {
             return _Storage.Keys.ToArray();
+        }
+    }
+
+    public IEnumerable<T> Entries {
+        get {
+            foreach (var v in _Storage.Values) {
+                yield return v;
+            }
+        }
+    }
+
+    public IEnumerable<string> IDs {
+        get {
+            foreach (var k in _Storage.Keys) {
+                yield return k;
+            }
+        }
+    }
+
+    public IEnumerable<KeyValuePair<string, T>> Pairs {
+        get {
+            foreach (var kv in _Storage) {
+                yield return new KeyValuePair<string, T>(kv.Key, kv.Value);
+            }
         }
     }
 }

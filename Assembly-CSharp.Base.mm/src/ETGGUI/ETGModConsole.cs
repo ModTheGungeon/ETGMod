@@ -202,8 +202,6 @@ public class ETGModConsole : ETGModMenu {
 
         Commands.GetGroup("test")
                 .AddGroup("resources")
-                .AddUnit("cubulon", TestCustomEnemy)
-                .AddUnit("dude", TestCustomCharacter)
                 .AddUnit("skiplevel", delegate (string[] args) {
                     Pixelator.Instance.FadeToBlack(0.5f, false, 0f);
                     GameManager.Instance.DelayedLoadNextLevel(0.5f);
@@ -750,17 +748,6 @@ public class ETGModConsole : ETGModMenu {
         foreach (var value in Enum.GetValues(typeof(TrackedStats))) {
             Log(value.ToString().ToLower());
         }
-    }
-
-    void TestCustomEnemy(string[] args) {
-        AIActor thing = ETGMod.Databases.Enemies.CopyEnemyByGuid("864ea5a6a9324efc95a0dd2407f42810");
-        thing.healthHaver.SetHealthMaximum(999f);
-        string guid = ETGMod.Databases.Enemies.AddEnemy(thing, "my_cubulon");
-        Log("Added enemy with GUID: " + guid);
-    }
-
-    void TestCustomCharacter(string[] args) {
-        DudeBehaviour.Add();
     }
 
     void SwitchCharacter(string[] args) {

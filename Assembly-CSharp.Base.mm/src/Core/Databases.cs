@@ -8,11 +8,8 @@ public static partial class ETGMod {
     /// ETGMod database configuration.
     /// </summary>
     public static class Databases {
-
         public readonly static ItemDB Items = new ItemDB();
         public readonly static StringDB Strings = new StringDB();
-        public readonly static EnemyDB Enemies = new EnemyDB();
-        public readonly static CharacterDB Characters = new CharacterDB();
     }
 
 }

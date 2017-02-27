@@ -77,6 +77,10 @@ public sealed class StringDBTable {
         this[key] = value_;
     }
 
+    public string Get(string key) {
+        return StringTableManager.GetString(key);
+    }
+
     public void LanguageChanged() {
         _CachedTable = null;
         Dictionary<string, StringTableManager.StringCollection> table = Table;

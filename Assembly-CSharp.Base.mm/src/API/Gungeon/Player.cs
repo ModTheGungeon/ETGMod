@@ -1,21 +1,24 @@
 ﻿using System;
 using UnityEngine;
 
-public static partial class Gungeon {
-    public static PlayerController PrimaryPlayer {
-        get {
-            return GameManager.Instance.PrimaryPlayer;
+namespace Gungeon {
+    public static partial class Game {
+        public static PlayerController PrimaryPlayer {
+            get {
+                return GameManager.Instance.PrimaryPlayer;
+            }
         }
-    }
-    public static PlayerController CoopPlayer {
-        get {
-            return GameManager.Instance.SecondaryPlayer;
+        public static PlayerController CoopPlayer {
+            get {
+                return GameManager.Instance.SecondaryPlayer;
+            }
         }
-    }
 
-    public static bool? InfiniteKeys;
-    public static string PrimaryPlayerReplacement;
-    public static string CoopPlayerReplacement;
+        public static bool? InfiniteKeys;
+        public static string PrimaryPlayerReplacement;
+        public static string CoopPlayerReplacement;
+
+    }
 }
 
 public static class PlayerControllerExt {
