@@ -403,6 +403,18 @@ public class ETGModConsole : ETGModMenu {
     // Example commands
 
     void Echo(string[] args) {
+        if (string.Join(" ", args) == "the magic word") {
+            ETGMod.SayTheMagicWord();
+            return;
+        }
+
+        if (string.Join(" ", args) == "Keep singing, woah, I keep singing") {
+            ETGMod.KeepSinging();
+            Log("Keep singing, woah, I keep singing\nPraising to the heavens with my voice ringing\nKeep singing, woah, I keep singing\nClap to the beat till my hands are stinging\nAnd I'd be saved some sunny day\nFrom throwing my life, throwing my life away");
+            ETGModLoaderMenu.Instance.KeepSinging();
+            return;
+        }
+
         StringBuilder combined = new StringBuilder();
         for (int i = 0; i < args.Length; i++) {
             combined.Append(args[i]);

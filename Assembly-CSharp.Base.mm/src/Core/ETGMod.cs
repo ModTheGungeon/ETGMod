@@ -65,6 +65,9 @@ public static partial class ETGMod {
     public static List<ETGModule> GameMods = new List<ETGModule>();
     public static List<ETGBackend> Backends = new List<ETGBackend>();
 
+    internal static bool SaidTheMagicWord = false;
+    internal static bool KeptSinging = false;
+
 	/*
     public static string[] LaunchArguments;
 
@@ -716,4 +719,11 @@ public static partial class ETGMod {
         }
     }
 
+    public static void SayTheMagicWord() {
+        SaidTheMagicWord = true;
+    }
+
+    public static void KeepSinging() {
+        KeptSinging = true;
+    }
 }
