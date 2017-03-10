@@ -1,37 +1,36 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{363A46E8-D9DD-4F31-9307-73B664E71D45}</ProjectGuid>
+    <ProjectGuid>{34E81F62-F88C-44EF-96D9-DBBD2C46DF34}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ETGMod</RootNamespace>
     <AssemblyName>Assembly-CSharp.Base.mm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
@@ -41,339 +40,50 @@
     <Reference Include="Mono.Cecil">
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Security" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\libs\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\AssetMetadata.cs" />
-    <Compile Include="src\ETGGUI\ETGDamageIndicatorGUI.cs" />
-    <Compile Include="src\ETGGUI\FontConverter.cs" />
-    <!--Something went wrong while time-traveling... whoops!-->
-    <!--Compile Include="src\ETGGUI\Inspector\BasePropertyInspector.cs" /-->
-    <Compile Include="src\ETGGUI\Inspector\Properties\BoolPropertyInspector.cs" />
-    <Compile Include="src\ETGGUI\Inspector\Properties\FloatPropertyInspector.cs" />
-    <Compile Include="src\ETGGUI\Inspector\Properties\StringPropertyInspector.cs" />
-    <Compile Include="src\ETGGUI\Inspector\Properties\IBasePropertyInspector.cs" />
-    <Compile Include="src\ETGGUI\Inspector\Components\GenericComponentInspector.cs" />
-    <Compile Include="src\ETGGUI\Inspector\Properties\VectorPropertyInspector.cs" />
-    <Compile Include="src\ETGModRelinker.cs" />
-    <Compile Include="src\ETGModule.cs" />
-    <Compile Include="src\ETGGUI\ETGModConsole.cs" />
-    <Compile Include="src\ETGGUI\ETGModDebugLogMenu.cs" />
-    <Compile Include="src\ETGGUI\ETGModInspector.cs" />
-    <Compile Include="src\ETGGUI\Hierarchy\ETGHierarchy.cs" />
-    <Compile Include="src\ETGGUI\Hierarchy\HierarchyComponent.cs" />
-    <Compile Include="src\ETGGUI\IETGModMenu.cs" />
-    <Compile Include="src\ETGGUI\ETGModLoaderMenu.cs" />
-    <Compile Include="src\ETGGUI\ETGModGUI.cs" />
-    <Compile Include="src\ETGModMainBehaviour.cs" />
-    <Compile Include="src\LimitedStream.cs" />
-    <Compile Include="src\MonoModRules.cs" />
-    <Compile Include="src\MonoMod\MonoModAdded.cs" />
-    <Compile Include="src\MonoMod\MonoModBlacklisted.cs" />
-    <Compile Include="src\MonoMod\MonoModConstructor.cs" />
-    <Compile Include="src\MonoMod\MonoModEnumReplace.cs" />
-    <Compile Include="src\MonoMod\MonoModHook.cs" />
-    <Compile Include="src\MonoMod\MonoModIfFlag.cs" />
-    <Compile Include="src\MonoMod\MonoModIgnore.cs" />
-    <Compile Include="src\MonoMod\MonoModInline.cs" />
-    <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
-    <Compile Include="src\MonoMod\MonoModNoNew.cs" />
-    <Compile Include="src\MonoMod\MonoModOnPlatform.cs" />
-    <Compile Include="src\MonoMod\MonoModOriginal.cs" />
-    <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
-    <Compile Include="src\MonoMod\MonoModRemove.cs" />
-    <Compile Include="src\MonoMod\MonoModReplace.cs" />
-    <Compile Include="src\MonoMod\Platform.cs" />
-    <Compile Include="src\MonoMod\PlatformHelper.cs" />
-    <Compile Include="src\Multiplayer\MultiplayerGUI.cs" />
-    <Compile Include="src\Multiplayer\MultiplayerManager.cs" />
-    <Compile Include="src\Multiplayer\Steam\LobbyHelper.cs" />
-    <Compile Include="src\Multiplayer\Steam\MPDataHelper.cs" />
-    <Compile Include="src\Multiplayer\RPC\CustomRPC.cs" />
-    <Compile Include="src\Multiplayer\RPC\RPCSerializer.cs" />
-    <Compile Include="src\Multiplayer\Steam\SteamHelper.cs" />
-    <Compile Include="src\Patches\patch_CharacterSelectController.cs" />
-    <Compile Include="src\Patches\patch_Dungeon.cs" />
-    <Compile Include="src\Patches\patch_HealthHaver.cs" />
-    <Compile Include="src\Patches\patch_GameManager.cs" />
-    <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
-    <Compile Include="src\ReflectionHelper.cs" />
-    <Compile Include="src\Patches\patch_PlayerConsumables.cs" />
-    <Compile Include="src\Core\ETGMod.cs" />
-    <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommand.cs" />
-    <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommandUnit.cs" />
-    <Compile Include="src\ETGGUI\AutocompletionSettings.cs" />
-    <Compile Include="src\ETGGUI\ConsoleCommand\ConsoleCommandGroup.cs" />
-    <Compile Include="src\JSON\JSONHelper.Common.cs" />
-    <Compile Include="src\JSON\JSONRule.cs" />
-    <Compile Include="src\JSON\JSONMappedRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONTextureRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONDictionaryEntryRule.cs" />
-    <Compile Include="src\JSON\JsonHelperWriter.cs" />
-    <Compile Include="src\JSON\Rules\JSONGameObjectRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONTransformRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONValueTypeRule.cs" />
-    <Compile Include="src\JSON\JsonHelperReader.cs" />
-    <Compile Include="src\JSON\JSONHelper.META.cs" />
-    <Compile Include="src\JSON\JSONHelper.Write.cs" />
-    <Compile Include="src\JSON\JSONHelper.Read.cs" />
-    <Compile Include="src\JSON\Rules\JSONTextAssetRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONVectorQuaternionRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONMaterialRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONBagelColliderRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONAttachPointDataRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONOverridableBoolRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONScriptableObjectRule.cs" />
-    <Compile Include="src\JSON\Rules\JSONComponentRule.cs" />
-    <Compile Include="src\PInvokeHelper.cs" />
-    <Compile Include="src\Core\Databases.cs" />
-    <Compile Include="src\Core\RuntimeAtlas.cs" />
-    <Compile Include="src\Core\GunBehaviour.cs" />
-    <Compile Include="src\Core\Platform.cs" />
-    <Compile Include="src\SGUI\SGUIRoot.cs" />
-    <Compile Include="src\SGUI\SElement.cs" />
-    <Compile Include="src\SGUI\ISGUIBackend.cs" />
-    <Compile Include="src\SGUI\Elements\SLabel.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="src\SGUI\Backends\SGUIIMBackend.cs" />
-    <Compile Include="src\SGUI\Elements\STextField.cs" />
-    <Compile Include="src\SGUI\Elements\SButton.cs" />
-    <Compile Include="src\SGUI\Elements\SGroup.cs" />
-    <Compile Include="src\SGUI\Elements\SWindowTitleBar.cs" />
-    <Compile Include="src\SGUI\DFEXT\SGUIDFInput.cs" />
-    <Compile Include="src\SGUI\EMouseStatus.cs" />
-    <Compile Include="src\SGUI\Elements\SImage.cs" />
-    <Compile Include="src\SGUI\Elements\SRect.cs" />
-    <Compile Include="src\Core\AIActor.cs" />
-    <Compile Include="src\Patches\patch_AIActor.cs" />
-    <Compile Include="src\SGUI\SModifier.cs" />
-    <Compile Include="src\SGUI\Modifiers\SRandomLabelModifier.cs" />
-    <Compile Include="src\Core\Chest.cs" />
-    <Compile Include="src\Patches\patch_Gun.cs" />
-    <Compile Include="src\Patches\patch_Chest.cs" />
-    <Compile Include="src\Patches\patch_BossCardUIController.cs" />
-    <Compile Include="src\Patches\patch_SteamManager.cs" />
-    <Compile Include="src\Core\Time.cs" />
-    <Compile Include="src\Patches\patch_BraveTime.cs" />
-    <Compile Include="src\Guns\TestGunController.cs" />
-    <Compile Include="src\Guns\BalloonGunController.cs" />
-    <Compile Include="src\Core\Objects.cs" />
-    <Compile Include="src\ETGGUI\Repo\ModRepo.cs" />
-    <Compile Include="src\ETGGUI\Repo\RemoteMod.cs" />
-    <Compile Include="src\Patches\patch_StringTableManager.cs" />
-    <Compile Include="src\Core\Databases\StringDB.cs" />
-    <Compile Include="src\SGUI\Animations\SFadeAnimation.cs" />
-    <Compile Include="src\SGUI\Animations\SFadeInAnimation.cs" />
-    <Compile Include="src\SGUI\Animations\SFadeOutAnimation.cs" />
-    <Compile Include="src\SGUI\SAnimation.cs" />
-    <Compile Include="src\SGUI\Animations\SAnimationSequence.cs" />
-    <Compile Include="src\SGUI\Elements\SPreloader.cs" />
-    <Compile Include="src\SGUI\Animations\SEasings.cs" />
-    <Compile Include="src\SGUI\Animations\SFadeOutShrinkSequence.cs" />
-    <Compile Include="src\SGUI\Animations\SShrinkAnimation.cs" />
-    <Compile Include="src\Patches\patch_PlayerController.cs" />
-    <Compile Include="src\Core\PlayerBehaviour.cs" />
-    <Compile Include="src\SGUI\Modifiers\SInGameModifier.cs" />
-    <Compile Include="src\Core\Assets\Assets.cs" />
-    <Compile Include="src\Core\Assets\Data.cs" />
-    <Compile Include="src\Core\Assets\Dump.cs" />
-    <Compile Include="src\Core\Assets\Protocol.cs" />
-    <Compile Include="src\ObjectDumper.cs" />
-    <Compile Include="src\Core\IDPool.cs" />
-    <Compile Include="src\API\Gungeon\Gungeon.cs" />
-    <Compile Include="src\API\Gungeon\Player.cs" />
-    <Compile Include="src\Core\Player.cs" />
-    <Compile Include="src\Core\Databases\ItemDB.cs" />
-    <Compile Include="src\API\Gungeon\CustomGun.cs" />
-    <Compile Include="src\Core\Extensions\Extensions.cs" />
-    <Compile Include="src\Core\Extensions\Gun.cs" />
-    <Compile Include="src\API\Gungeon\AnimLoader\AnimLoader.cs" />
-    <Compile Include="src\API\Gungeon\AnimLoader\YAMLMappings.cs" />
-    <Compile Include="src\Core\Gun.cs" />
+    <Compile Include="src\ETGMod\ETGMod.cs" />
+    <Compile Include="src\BlackMagic\ReflectionHelper.cs" />
+    <Compile Include="src\ETGMod\ETGModBehaviour.cs" />
+    <Compile Include="src\ModLoader\Mod.cs" />
+    <Compile Include="src\ModLoader\ModLoader.cs" />
+    <Compile Include="src\FSUtils\FSUtils.cs" />
+    <Compile Include="src\Extensions\String.cs" />
+    <Compile Include="src\ModLoader\Metadata.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="src\" />
+    <Folder Include="src\Patches\" />
+    <Folder Include="src\ETGMod\" />
+    <Folder Include="src\BlackMagic\" />
+    <Folder Include="src\ModLoader\" />
+    <Folder Include="src\FSUtils\" />
+    <Folder Include="src\Extensions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Assembly-CSharp.BasePre.mm\Assembly-CSharp.BasePre.mm.csproj">
+      <Project>{EC6C2E23-2BFD-494B-8D02-637314C4B0BB}</Project>
+      <Name>Assembly-CSharp.BasePre.mm</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
-      <Project>{3C105AF3-D405-4536-B45E-C764D6ED84C7}</Project>
+      <Project>{BCD03ACB-E715-4A3D-A4C2-C5717A5D41E4}</Project>
       <Name>UnityEngine.Base.mm</Name>
     </ProjectReference>
-    <ProjectReference Include="..\libs\YamlDotNet\YamlDotNet\YamlDotNet.csproj">
-      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
-      <Name>YamlDotNet</Name>
+    <ProjectReference Include="..\Assembly-CSharp.Core.mm\Assembly-CSharp.Core.mm.csproj">
+      <Project>{4473AD38-DAF1-449A-A850-4296D3368413}</Project>
+      <Name>Assembly-CSharp.Core.mm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.Core.mm\UnityEngine.Core.mm.csproj">
+      <Project>{85EEF778-D1A0-4DFD-8B6C-AF6BE334DB92}</Project>
+      <Name>UnityEngine.Core.mm</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Content\test\texture.png">
-      <LogicalName>Content/test/texture.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\etgmod\logo.png">
-      <LogicalName>Content/etgmod/logo.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_006.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_006.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_007.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_007.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_008.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_008.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_009.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_009.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_010.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_010.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_011.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_011.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_logo_pound_012.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_logo_pound_012.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_014.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_014.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_015.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_015.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_016.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_016.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_017.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_017.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_018.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_018.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_019.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_019.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\IntroSequenceCollection_01\logo_roguego_020.png">
-      <LogicalName>Content/sprites/IntroSequenceCollection_01/logo_roguego_020.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\Foyer_Collection\top_floor_001.png">
-      <LogicalName>Content/sprites/Foyer_Collection/top_floor_001.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\Ammonomicon Encounter Icon Collection\gshbd_fire_002.png">
-      <LogicalName>Content/sprites/Ammonomicon Encounter Icon Collection/gshbd_fire_002.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_001.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_001.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_001.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_001.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_002.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_002.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_002.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_003.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_003.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_003.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_003.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_004.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_004.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_004.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_004.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_001.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_001.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_001.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_001.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_002.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_002.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_002.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_002.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_003.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_003.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_003.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_003.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_004.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_004.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_idle_004.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_idle_004.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_001.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_001.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_001.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_001.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_002.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_002.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_002.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_002.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_003.json">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_003.json</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_intro_003.png">
-      <LogicalName>Content/sprites/WeaponCollection/gshbd_intro_003.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\etgmod\gui\icon_api.png">
-      <LogicalName>Content/etgmod/gui/icon_api.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\etgmod\gui\icon_dir.png">
-      <LogicalName>Content/etgmod/gui/icon_dir.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\etgmod\gui\icon_mod.png">
-      <LogicalName>Content/etgmod/gui/icon_mod.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\etgmod\gui\icon_zip.png">
-      <LogicalName>Content/etgmod/gui/icon_zip.png</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\gungeon_id_map\items.txt">
-      <LogicalName>Content/gungeon_id_map/items.txt</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Content\gungeon_id_map\enemies.txt">
-      <LogicalName>Content/gungeon_id_map/enemies.txt</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <ItemGroup>
-    <Folder Include="Content\etgmod\gui\" />
-    <Folder Include="src\SGUI\Modifiers\" />
-    <Folder Include="src\Guns\" />
-    <Folder Include="src\ETGGUI\Repo\" />
-    <Folder Include="src\Core\Databases\" />
-    <Folder Include="src\SGUI\Animations\" />
-    <Folder Include="src\Core\Assets\" />
-    <Folder Include="src\API\" />
-    <Folder Include="src\API\Gungeon\" />
-    <Folder Include="src\Core\Extensions\" />
-    <Folder Include="src\API\Gungeon\AnimLoader\" />
-  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

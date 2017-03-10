@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BCD03ACB-E715-4A3D-A4C2-C5717A5D41E4}</ProjectGuid>
+    <ProjectGuid>{85EEF778-D1A0-4DFD-8B6C-AF6BE334DB92}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ETGMod</RootNamespace>
-    <AssemblyName>UnityEngine.Base.mm</AssemblyName>
+    <AssemblyName>UnityEngine.Core.mm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -34,16 +34,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Patches\patch_Resources.cs" />
-    <Compile Include="src\MonoMod\MonoModConstructor.cs" />
-    <Compile Include="src\MonoMod\MonoModIgnore.cs" />
-    <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
-    <Compile Include="src\MonoMod\MonoModOriginal.cs" />
-    <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
+    <Compile Include="src\Patches\patch_Debug.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\Patches\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Assembly-CSharp.Core.mm\Assembly-CSharp.Core.mm.csproj">
+      <Project>{4473AD38-DAF1-449A-A850-4296D3368413}</Project>
+      <Name>Assembly-CSharp.Core.mm</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

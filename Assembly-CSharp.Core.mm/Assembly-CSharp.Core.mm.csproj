@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BCD03ACB-E715-4A3D-A4C2-C5717A5D41E4}</ProjectGuid>
+    <ProjectGuid>{4473AD38-DAF1-449A-A850-4296D3368413}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ETGMod</RootNamespace>
-    <AssemblyName>UnityEngine.Base.mm</AssemblyName>
+    <AssemblyName>Assembly-CSharp.Core.mm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -17,33 +17,32 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\libs\UnityEngine.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Patches\patch_Resources.cs" />
-    <Compile Include="src\MonoMod\MonoModConstructor.cs" />
-    <Compile Include="src\MonoMod\MonoModIgnore.cs" />
-    <Compile Include="src\MonoMod\MonoModLinkTo.cs" />
-    <Compile Include="src\MonoMod\MonoModOriginal.cs" />
-    <Compile Include="src\MonoMod\MonoModOriginalName.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\Patches\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\Patches\patch_GameManager.cs" />
+    <Compile Include="src\Backend.cs" />
+    <Compile Include="src\Logger.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="UnityEngine">
+      <HintPath>..\libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
