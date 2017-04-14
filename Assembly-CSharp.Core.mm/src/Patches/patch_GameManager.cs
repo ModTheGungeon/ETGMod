@@ -13,34 +13,31 @@ using System.Reflection;
 internal class patch_GameManager : GameManager {
     protected extern void orig_Awake();
     private void Awake() {
-        ETGMod.DefaultLogger.Info("Mod the Gungeon entry point");
+        Loader.Logger.Info("Mod the Gungeon entry point");
+        Backend.GameObject = new GameObject("Mod the Gungeon");
 
         var asm = Assembly.GetExecutingAssembly();
         var types = asm.GetTypes();
         for (int i = 0; i < types.Length; i++) {
             var type = types[i];
-            if (typeof(Backend).IsAssignableFrom(type) && !type.IsAbstract) {
-                var method = type.GetMethod("Init", BindingFlags.Static | BindingFlags.Public);
-                if (method == null) {
-                    DefaultLogger.Error($"Failed getting Init method for backend {type.Name}. Ignoring.");
-                    continue;
-                }
-
-                var version = (Version)type.GetField("Version")?.GetValue(null);
-                if (version == null) {
-                    DefaultLogger.Error($"Failed getting Version for backend {type.Name}. Defaulting to 1.0.0.");
-                    version = new Version(1, 0, 0);
-                }
+            if (type.IsSubclassOf(typeof(Backend))) {
+                var backend = (Backend)Backend.GameObject.AddComponent(type);
 
                 Backend.AllBackends.Add(new Backend.Info {
                     Name = type.Name,
-                    Version = version,
-                    Type = type
+                    StringVersion = backend.StringVersion,
+                    Version = backend.Version,
+                    Type = type,
+                    Instance = backend
                 });
 
-                DefaultLogger.Info($"Initializing backend {type.Name}");
-                method.Invoke(null, null);
+                Loader.Logger.Info($"Initializing backend {type.Name} {backend.StringVersion}");
+                backend.Loaded();
             }
+        }
+
+        for (int i = 0; i < Backend.AllBackends.Count; i++) {
+            Backend.AllBackends[i].Instance.AllBackendsLoaded();
         }
 
         orig_Awake();

@@ -1,8 +1,16 @@
 ﻿using System;
 namespace UnityEngine {
+    /// <summary>
+    /// Patches the UnityEngine logger to use ETGMod's logger
+    /// </summary>
     public class patch_Logger {
         public static ETGMod.Logger GungeonLogger = new ETGMod.Logger("Gungeon");
 
+        /// <summary>
+        /// Converts a UnityEngine.LogType to an ETGMod.Logger.LogLevel
+        /// </summary>
+        /// <returns>The ETGMod LogLevel</returns>
+        /// <param name="type">The Unity LogType</param>
         private ETGMod.Logger.LogLevel _LogTypeToLogLevel(LogType type) {
             switch(type) {
                 case LogType.Log: return ETGMod.Logger.LogLevel.Info;

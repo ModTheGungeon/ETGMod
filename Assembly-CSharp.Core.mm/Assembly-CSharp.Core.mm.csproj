@@ -32,6 +32,7 @@
     <Compile Include="src\Patches\patch_GameManager.cs" />
     <Compile Include="src\Backend.cs" />
     <Compile Include="src\Logger.cs" />
+    <Compile Include="src\Loader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

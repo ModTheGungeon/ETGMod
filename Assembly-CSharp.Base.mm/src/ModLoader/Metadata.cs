@@ -1,87 +1,81 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using YamlDotNet.Serialization;
 
-namespace ETGMod.ModLoader {
-    public class Metadata {
-        public struct Dependency {
-            public string Name;
-            public Version Version;
-        }
+namespace ETGMod {
+    public partial class ModLoader {
+        public partial class ModInfo {
+            /// <summary>
+            /// Mod metadata class (the YML file is parsed into this object)
+            /// </summary>
+            public class Metadata {
+                public class Dependency {
+                    [YamlMember(Alias = "name")]
+                    public string Name { set; get; } = "Unknown";
 
-        public static char[] SPLIT_SEPARATOR_ARRAY = { ':' };
-
-        public string Name = "Unknown";
-        public string Version = "1.0.0";
-        public string Author = "Unknown";
-        public string URL = "None";
-        public string DLL = "mod.dll";
-        public List<Dependency> Dependencies = new List<Dependency>();
-
-        public class ParseException : Exception {
-            public ParseException() : base("Failed parsing mod metadata") { }
-        }
-
-        private void Set(string key, string value) {
-            switch(key) {
-            case "name": Name = value; break;
-            case "version": Version = value; break;
-            case "author": Author = value; break;
-            case "url": URL = value; break;
-            case "dll": DLL = value; break;
-            case "depends":
-                var dependencies = value.Split(';');
-                for (int i = 0; i < dependencies.Length; i++) {
-                    var dep = dependencies[i].Trim();
-                    var name_and_version = dep.Split(' ');
-
-                    if (name_and_version.Length < 2) throw new ParseException();
-
-                    var name = name_and_version[0].Trim();
-                    var version = name_and_version[1].Trim();
-
-                    DefaultLogger.Debug($"Mod dependency: {dep}");
-
-                    Dependencies.Add(new Dependency {
-                        Name = name,
-                        Version = new Version(version)
-                    });
+                    [YamlMember(Alias = "version")]
+                    public Version Version { set; get; } = new Version(1, 0, 0);
                 }
-                break;
-            default:
-                DefaultLogger.Warn($"Unknown mod metadata key: {key}");
-                break;
+                [YamlMember(Alias = "name")]
+                public string Name { set; get; } = "Unknown";
+
+                [YamlMember(Alias = "version")]
+                public Version Version { set; get; } = new Version(1, 0, 0);
+
+                [YamlMember(Alias = "description")]
+                public string Description { set; get; } = "";
+
+                [YamlMember(Alias = "author")]
+                public string Author { set; get; } = "Unknown";
+
+                [YamlMember(Alias = "url")]
+                public string URL { set; get; } = "";
+
+                [YamlMember(Alias = "dll")]
+                public string DLL { set; get; } = null;
+
+                [YamlMember(Alias = "dependencies")]
+                public List<Dependency> Dependencies { set; get; } = new List<Dependency>();
+
+                [YamlMember(Alias = "modpack_dir")]
+                public string ModPackDir { set; get; } = null;
+
+                /// <summary>
+                /// Extra information for other backends.
+                /// Deserialized and reparsed when needed.
+                /// </summary>
+                [YamlMember(Alias = "extra")]
+                public Dictionary<string, object> Extra { set; get; } = null;
+
+                public bool HasDLL {
+                    get {
+                        return DLL != null;
+                    }
+                }
+
+                public bool IsModPack {
+                    get {
+                        return ModPackDir != null;
+                    }
+                }
+
+                private Deserializer _ExtraDeserializer = new DeserializerBuilder().Build();
+                private Serializer _ExtraSerializer = new SerializerBuilder().Build();
+                public T ExtraData<T>(string id) {
+                    if (Extra == null) return default(T);
+
+                    object extra;
+                    if (!Extra.TryGetValue(id, out extra)) {
+                        return default(T);
+                    }
+
+                    // HACK
+                    string extra_ser = _ExtraSerializer.Serialize(extra);
+                    return (T)_ExtraDeserializer.Deserialize<T>(extra_ser);
+                }
             }
         }
-
-        public void ParseLine(string line) {
-            var split = line.Split(SPLIT_SEPARATOR_ARRAY, 2);
-
-            if (split.Length < 2) throw new ParseException();
-
-            var key = split[0].Trim();
-            var value = split[1].Trim();
-
-            Set(key, value);
-        }
-
-        public Metadata(Stream stream) {
-            var reader = new StreamReader(stream);
-
-            while (!reader.EndOfStream) {
-                ParseLine(reader.ReadLine());
-            }
-        }
-
-        public Metadata(string data) {
-            var reader = new StringReader(data);
-
-            string line;
-            while ((line = reader.ReadLine()) != null) {
-                ParseLine(line);
-            }
-        }
-
-        public Metadata() {}
     }
 }

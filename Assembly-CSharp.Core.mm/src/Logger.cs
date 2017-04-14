@@ -1,15 +1,5 @@
 ﻿using System;
 namespace ETGMod {
-    public static class DefaultLogger {
-        public static Logger Logger = new Logger("ETGMod");
-
-        public static void Debug(object o) { Logger.Debug(o); }
-        public static void Info(object o) { Logger.Info(o); }
-        public static void Warn(object o) { Logger.Warn(o); }
-        public static void Error(object o) { Logger.Error(o); }
-
-    }
-
     public class Logger {
         public enum LogLevel {
             Error = 0,
@@ -20,9 +10,9 @@ namespace ETGMod {
 
         public LogLevel MaxLogLevel =
 #if DEBUG
-        LogLevel.Debug;
+            LogLevel.Debug;
 #else
-        LogLevel.Info;
+            LogLevel.Warn;
 #endif
 
         public string ID;
@@ -49,7 +39,7 @@ namespace ETGMod {
 
         public void Error(object o, bool @throw = false) {
             if (!LogLevelEnabled(LogLevel.Error)) return;
-            Console.WriteLine($"[ETGMod {ID}] {o}");
+            Console.WriteLine($"[{ID} ERROR] {o}");
             if (@throw) {
                 throw new Exception(o.ToString());
             }

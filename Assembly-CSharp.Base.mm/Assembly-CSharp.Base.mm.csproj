@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -34,38 +33,49 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip">
-      <HintPath>..\libs\Ionic.Zip.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\libs\Mono.Cecil.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\libs\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\libs\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\libs\Mono.Cecil.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\ETGMod\ETGMod.cs" />
-    <Compile Include="src\BlackMagic\ReflectionHelper.cs" />
-    <Compile Include="src\ETGMod\ETGModBehaviour.cs" />
-    <Compile Include="src\ModLoader\Mod.cs" />
-    <Compile Include="src\ModLoader\ModLoader.cs" />
-    <Compile Include="src\FSUtils\FSUtils.cs" />
+    <Compile Include="src\External\ReflectionHelper.cs" />
     <Compile Include="src\Extensions\String.cs" />
     <Compile Include="src\ModLoader\Metadata.cs" />
+    <Compile Include="src\ModLoader\ModLoader.cs" />
+    <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
+    <Compile Include="src\External\ZipStorer.cs" />
+    <Compile Include="src\ModLoader\ModInfo.cs" />
+    <Compile Include="src\ETGMod\Mod.cs" />
+    <Compile Include="src\ModLoader\AssemblyNameMap.cs" />
+    <Compile Include="src\AnimLoader\AnimatorGenerator.cs" />
+    <Compile Include="src\AnimLoader\Animation.cs" />
+    <Compile Include="src\ModResources\ModInfoResources.cs" />
+    <Compile Include="src\ModResources\ResourcePool.cs" />
+    <Compile Include="src\ModResources\LoadedResource.cs" />
+    <Compile Include="src\Extensions\BinaryReader.cs" />
+    <Compile Include="src\AnimLoader\YAMLMapping.cs" />
+    <Compile Include="src\External\ObjectDumper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\Patches\" />
     <Folder Include="src\ETGMod\" />
-    <Folder Include="src\BlackMagic\" />
+    <Folder Include="src\External\" />
     <Folder Include="src\ModLoader\" />
-    <Folder Include="src\FSUtils\" />
     <Folder Include="src\Extensions\" />
+    <Folder Include="src\AnimLoader\" />
+    <Folder Include="src\ModResources\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.BasePre.mm\Assembly-CSharp.BasePre.mm.csproj">
@@ -83,6 +93,18 @@
     <ProjectReference Include="..\UnityEngine.Core.mm\UnityEngine.Core.mm.csproj">
       <Project>{85EEF778-D1A0-4DFD-8B6C-AF6BE334DB92}</Project>
       <Name>UnityEngine.Core.mm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\YamlDotNet\YamlDotNet\YamlDotNet.csproj">
+      <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
+      <Name>YamlDotNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
+      <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
+      <Name>MonoMod</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\Harmony\Harmony\Harmony.csproj">
+      <Project>{69AEE16A-B6E7-4642-8081-3928B32455DF}</Project>
+      <Name>Harmony</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
