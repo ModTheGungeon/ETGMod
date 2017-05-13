@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Text;
 using System.IO;
+using ETGMod;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace ETGMod {
     public class LoadedResource {
@@ -13,12 +15,15 @@ namespace ETGMod {
 
         public StorageType Type { get; protected set; }
         public string Path { get; protected set; }
+        public string ResourcePath { get; protected set; }
 
         public Stream Stream { get; protected set; }
         public string TextContent { get; protected set; }
         public byte[] BinaryContent { get; protected set; }
 
-        public static Func<Type, LoadedResource, object> SpecialCastCallback = (type, res) => {
+        private Dictionary<Type, object> _SpecialCastCache = new Dictionary<Type, object>();
+
+        public static Func<ModLoader.ModInfo, Type, LoadedResource, object> SpecialCastCallback = (info, type, res) => {
             if (type == typeof(string)) {
                 return res.ReadText();
             } else if (type == typeof(byte[])) {
@@ -33,12 +38,14 @@ namespace ETGMod {
                 tex.LoadImage(res.ReadBinary());
                 tex.filterMode = FilterMode.Point;
                 return tex;
+            } else if (type == typeof(Animation.Collection)) {
+                return new Animation.Collection(info, res.ReadText(), System.IO.Path.GetDirectoryName(res.ResourcePath));
             }
             return null;
         };
 
-        public LoadedResource(string path, StorageType type = StorageType.Stream) {
-
+        public LoadedResource(string resource_path, string path, StorageType type = StorageType.Stream) {
+            ResourcePath = resource_path;
             Path = path;
             Type = type;
 
@@ -58,15 +65,20 @@ namespace ETGMod {
             return BinaryContent = new BinaryReader(Stream).ReadAllBytes();
         }
 
-        public T SpecialCast<T>() {
-            var invlist = SpecialCastCallback.GetInvocationList();
+        public T SpecialCast<T>(ModLoader.ModInfo info) {
             object result = null;
-            for (int i = 0; i < invlist.Length; i++) {
-                var deleg = invlist[i];
+            var type = typeof(T);
 
-                result = deleg.DynamicInvoke(new object[] { typeof(T), this });
-                if (result != null) return (T)result;
+            if (_SpecialCastCache.TryGetValue(type, out result)) {
+                return (T)result;
             }
+
+            result = SpecialCastCallback.Invoke(info, type, this);
+            if (result != null) {
+                _SpecialCastCache[type] = result;
+                return (T)result;
+            }
+
             throw new InvalidOperationException($"Unsupported special type: {typeof(T).FullName}");
         }
     }

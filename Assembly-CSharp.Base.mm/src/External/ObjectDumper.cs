@@ -14,17 +14,23 @@ namespace ETGMod.Tools {
         private readonly char _indentChar;
         private readonly int _depth;
         private int _currentLine;
+        private BindingFlags _bindingFlags;
 
-        private ObjectDumper(int depth, int indentSize, char indentChar) {
+        private ObjectDumper(int depth, int indentSize, char indentChar, bool dump_private = false) {
             _depth = depth;
             _indentSize = indentSize;
             _indentChar = indentChar;
             _stringBuilder = new StringBuilder();
             _hashListOfFoundElements = new Dictionary<object, int>();
+            if (dump_private) {
+                _bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
+            } else {
+                _bindingFlags = BindingFlags.Public;
+            }
         }
 
-        public static string Dump(object element, int depth = 4, int indentSize = 2, char indentChar = ' ') {
-            var instance = new ObjectDumper(depth, indentSize, indentChar);
+        public static string Dump(object element, int depth = 4, int indentSize = 2, char indentChar = ' ', bool dump_private = false) {
+            var instance = new ObjectDumper(depth, indentSize, indentChar, dump_private);
             return instance.DumpElement(element, true);
         }
 
@@ -69,7 +75,7 @@ namespace ETGMod.Tools {
                     Write("{{{0}(HashCode:{1})}}", objectType.FullName, element.GetHashCode());
                     if (!AlreadyDumped(element)) {
                         _currentIndent++;
-                        MemberInfo[] members = objectType.GetMembers(BindingFlags.Public | BindingFlags.Instance);
+                        MemberInfo[] members = objectType.GetMembers(_bindingFlags);
                         foreach (var memberInfo in members) {
                             var fieldInfo = memberInfo as FieldInfo;
                             var propertyInfo = memberInfo as PropertyInfo;

@@ -13,25 +13,24 @@ namespace ETGMod {
         private ModLoader.ModInfo _ModInfo;
         private YAML.Animation _DeserializedYAMLDoc;
         private AnimatorGenerator _Generator;
-        private tk2dSpriteCollectionData _Collection;
+        public Collection _Collection;
         private tk2dSpriteAnimationClip[] _Clips;
         private int? _FPS = YAML.Animation.DEFAULT_FPS;
 
-        public Animation(ModLoader.ModInfo info, string text) {
-            _ModInfo = info;
-            _DeserializedYAMLDoc = _Deserializer.Deserialize<YAML.Animation>(text);
+        public Animation(ModLoader.ModInfo info, string text, string base_dir = null)
+            : this(info, _Deserializer.Deserialize<YAML.Animation>(text), base_dir) {}
 
-            _InitCollectionData();
-        }
-
-        public Animation(ModLoader.ModInfo info, YAML.Animation deserialized) {
+        public Animation(ModLoader.ModInfo info, YAML.Animation deserialized, string base_dir = null) {
             _ModInfo = info;
             _DeserializedYAMLDoc = deserialized;
+            if (base_dir == null) base_dir = info.Resources.BaseDir;
 
-            _InitCollectionData();
+            _Generator = new AnimatorGenerator(_ModInfo, base_dir, _DeserializedYAMLDoc);
+            _Collection = _Generator.Collection;
+            _Clips = _Generator.ConstructClips(_Collection.CollectionData);
         }
 
-        public Animation(tk2dSpriteCollectionData collection, tk2dSpriteAnimationClip[] clips, int? fps = null) {
+        public Animation(Collection collection, tk2dSpriteAnimationClip[] clips, int? fps = null) {
             _Collection = collection;
             _Clips = clips;
             _FPS = fps;
@@ -49,12 +48,6 @@ namespace ETGMod {
                 if (_Clips[i].name == name) return i;
             }
             return null;
-        }
-
-        private void _InitCollectionData() {
-            _Generator = new AnimatorGenerator(_ModInfo, _DeserializedYAMLDoc);
-            _Collection = _Generator.ConstructCollection();
-            _Clips = _Generator.ConstructClips(_Collection);
         }
 
         #region I wish C# had macros
@@ -227,103 +220,25 @@ namespace ETGMod {
             go.GetComponent<tk2dBaseSprite>().Collection = collection;
         }
 
-        public tk2dSpriteAnimator ApplyAnimator(GameObject go) {
+        public tk2dSpriteAnimator ApplyAnimator(GameObject go, bool patch_collection = false) {
             _Logger.Debug($"Applying animator on GameObject '{go.name}'");
 
-            UnityEngine.Object.Destroy(go.GetComponent<tk2dSpriteCollectionData>());
-            var new_collection = go.AddComponent<tk2dSpriteCollectionData>();
-
-            CopyCollection(_Collection, new_collection);
-
-            _UpdateCollectionInSprite(go, new_collection);
-
-            return _CreateAnimator(go, new_collection);
+            tk2dSpriteCollectionData collection;
+            if (patch_collection) {
+                collection = go.GetComponent<tk2dBaseSprite>().Collection;
+                _Collection.PatchCollection(collection);
+            } else {
+                collection = _Collection.CollectionData;
+                _Collection.ApplyCollection(go);
+            }
+            return _CreateAnimator(go, collection);
         }
 
         public tk2dSpriteAnimator ApplyAnimator(Component co) {
             return ApplyAnimator(co.gameObject);
         }
 
-        /// <summary>
-        /// Patches a collection with another collection.
-        /// </summary>
-        /// <returns>The sprite ID offset.</returns>
-        /// <param name="source">Source.</param>
-        /// <param name="target">Target.</param>
-        private int _PatchCollection(GameObject go, tk2dSpriteCollectionData source, tk2dSpriteCollectionData target) {
-            // since we modify the target, we have to save these now
-            int material_id_offset = target.materials.Length;
-
-            // the reason we calculate the sprite ID offset right now and
-            // don't even use it in this method (but instead just return it)
-            // is because we modify target.spriteDefinitions later on
-            // therefore, any attempt at calculating the offset after running this method
-            // will yield totally wrong results
-            int sprite_id_offset = target.spriteDefinitions.Length;
-
-            _Logger.Debug($"Material ID offset: {material_id_offset}, sprite ID offset: {sprite_id_offset}");
-
-            // list of merged materials from both target and source
-            // note the layout - first target materials, then source materials
-            // this means that the length of *just* the target materials
-            // will always be the where our target materials start
-            // therefore, `material_id_offset`
-            var materials_list = new List<Material>(target.materials);
-            for (int i = 0; i < source.materials.Length; i++) {
-                _Logger.Debug($"Adding patch material #{i}");
-                materials_list.Add(source.materials[i]);
-            }
-            var materials_arr = materials_list.ToArray();
-
-            // try to do the most sensible thing here
-            // if target is a bit more unusual and target.materialInsts doesn't have the same refs
-            // as target.materials, we do the same thing as above for materialInsts
-            // except that we use target.materialInsts
-            // in the current version of the animator generation materialInsts has the same refs as materials
-            // but just in case that's changed in the future, this also pulls from materialInsts on the
-            // patch
-            if (!target.materials.SequenceEqual(target.materialInsts)) {
-                _Logger.Debug($"target.materials sequence-inequal to target.materialInsts");
-
-                var materialinsts_list = new List<Material>(target.materialInsts);
-                for (int i = 0; i < source.materialInsts.Length; i++) {
-                    materialinsts_list.Add(source.materialInsts[i]);
-                }
-                target.materialInsts = materialinsts_list.ToArray();
-            } else {
-                // of course, if the refs are the same,
-                // then save on allocations and just assign the same array
-                // to both fields
-                target.materialInsts = materials_arr;
-            }
-
-            target.materials = materials_arr;
-
-            // here we create a merged spriteDefinitions
-            // containing definitions from both source and target
-            var definitions_list = new List<tk2dSpriteDefinition>(target.spriteDefinitions);
-            for (int i = 0; i < source.spriteDefinitions.Length; i++) {
-                var source_definition = source.spriteDefinitions[i];
-                var new_definition = new tk2dSpriteDefinition();
-                CopyDefinition(source_definition, new_definition);
-
-                // this is why we saved material_id_offset before
-                // we can update the definition's material data by simply adding the offset to the id
-                // and updating the materials
-                new_definition.materialId += material_id_offset;
-                new_definition.material = target.materials[new_definition.materialId];
-                new_definition.materialInst = target.materialInsts[new_definition.materialId];
-
-                definitions_list.Add(new_definition);
-            }
-
-            target.spriteDefinitions = definitions_list.ToArray();
-
-            // finally, return the sprite id offset
-            return sprite_id_offset;
-        }
-
-        private void _PatchClipsInAnimation(tk2dSpriteAnimationClip[] patch_clips, tk2dSpriteAnimation target, tk2dSpriteCollectionData collection, int sprite_id_offset) {
+        private void _PatchClipsInAnimation(tk2dSpriteAnimationClip[] patch_clips, tk2dSpriteAnimation target, tk2dSpriteCollectionData collection, int sprite_id_offset, Action<tk2dSpriteAnimationClip> each_clip = null) {
             _Logger.Debug($"Patching clips - clips length before: {target.clips.Length}");
             // init a hash of the patch clip names
             // we'll use this later for lookup when we create the new clip list
@@ -365,6 +280,8 @@ namespace ETGMod {
 
                 new_clip.frames = new_frames;
 
+                if (each_clip != null) each_clip.Invoke(new_clip);
+
                 _Logger.Debug($"Adding patch clip '{new_clip.name}'");
                 clip_list.Add(new_clip);
             }
@@ -373,13 +290,13 @@ namespace ETGMod {
             _Logger.Debug($"Patching clips - clips length after: {target.clips.Length}");
         }
 
-        public tk2dSpriteAnimator PatchAnimator(tk2dSpriteAnimator animator) {
+        public tk2dSpriteAnimator PatchAnimator(tk2dSpriteAnimator animator, Action<tk2dSpriteAnimationClip> each_clip = null) {
             _Logger.Debug($"Patching animator on GameObject '{animator.gameObject.name}'");
 
             var collection = animator.gameObject.GetComponent<tk2dBaseSprite>().Collection;
 
-            int sprite_id_offset = _PatchCollection(animator.gameObject, _Collection, collection);
-            _PatchClipsInAnimation(_Clips, animator.Library, collection, sprite_id_offset);
+            int sprite_id_offset = _Collection.PatchCollection(collection);
+            _PatchClipsInAnimation(_Clips, animator.Library, collection, sprite_id_offset, each_clip);
 
             if (_FPS != null) animator.ClipFps = _FPS.Value;
 

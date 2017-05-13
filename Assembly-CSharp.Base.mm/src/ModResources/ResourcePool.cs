@@ -17,10 +17,16 @@ namespace ETGMod {
                     protected set;
                 }
 
+                public string Path {
+                    get;
+                    protected set;
+                }
+
                 private Dictionary<string, LoadedResource> _LoadedResources = new Dictionary<string, LoadedResource>();
 
                 public ResourcePool(string base_dir) {
                     BaseDir = base_dir;
+                    Path = System.IO.Path.Combine(BaseDir, BaseResourceDir);
                 }
 
                 public LoadedResource Load(string relative_path) {
@@ -33,6 +39,7 @@ namespace ETGMod {
                     }
 
                     var res = new LoadedResource(
+                        normalized,
                         final_path
                     );
                     _LoadedResources[normalized] = res;

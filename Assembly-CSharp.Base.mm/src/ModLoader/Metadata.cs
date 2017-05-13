@@ -61,8 +61,8 @@ namespace ETGMod {
                     }
                 }
 
-                private Deserializer _ExtraDeserializer = new DeserializerBuilder().Build();
-                private Serializer _ExtraSerializer = new SerializerBuilder().Build();
+                private readonly Deserializer _ExtraDeserializer = new DeserializerBuilder().Build();
+                private readonly Serializer _ExtraSerializer = new SerializerBuilder().Build();
                 public T ExtraData<T>(string id) {
                     if (Extra == null) return default(T);
 
@@ -73,7 +73,7 @@ namespace ETGMod {
 
                     // HACK
                     string extra_ser = _ExtraSerializer.Serialize(extra);
-                    return (T)_ExtraDeserializer.Deserialize<T>(extra_ser);
+                    return _ExtraDeserializer.Deserialize<T>(extra_ser);
                 }
             }
         }

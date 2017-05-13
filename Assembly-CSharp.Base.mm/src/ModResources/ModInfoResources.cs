@@ -27,7 +27,7 @@ namespace ETGMod {
 
             public T Load<T>(string relative_path) {
                 try {
-                    return Resources.Load(relative_path).SpecialCast<T>();
+                    return Resources.Load(relative_path).SpecialCast<T>(this);
                 } catch (FileNotFoundException e) {
                     throw new FileNotFoundException($"[{Logger.ID}] While loading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
                 }

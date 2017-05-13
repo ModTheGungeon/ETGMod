@@ -66,6 +66,8 @@
     <Compile Include="src\Extensions\BinaryReader.cs" />
     <Compile Include="src\AnimLoader\YAMLMapping.cs" />
     <Compile Include="src\External\ObjectDumper.cs" />
+    <Compile Include="src\AnimLoader\Collection.cs" />
+    <Compile Include="src\AnimLoader\CollectionGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />

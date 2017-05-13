@@ -7,6 +7,52 @@ using YamlDotNet.Serialization;
 namespace ETGMod {
     public partial class Animation {
         public static class YAML {
+            public class Collection {
+                [YamlMember(Alias = "name")]
+                public string Name { set; get; }
+
+                [YamlMember(Alias = "spritesheet")]
+                public string Spritesheet { set; get; }
+
+                [YamlMember(Alias = "definitions")]
+                public Dictionary<string, Definition> Definitions { set; get; }
+
+                [YamlMember(Alias = "def_size")]
+                public FrameSize DefSize { set; get; }
+
+                [YamlMember(Alias = "offset")]
+                public Position Offset { set; get; } = new Position {
+                    X = 0,
+                    Y = 0
+                };
+            }
+
+            public class Definition {
+                [YamlMember(Alias = "spritesheet")]
+                public string Spritesheet { set; get; }
+
+                [YamlMember(Alias = "x")]
+                public int X { set; get; }
+
+                [YamlMember(Alias = "y")]
+                public int Y { set; get; }
+
+                [YamlMember(Alias = "w")]
+                public int? W { set; get; } = null;
+
+                [YamlMember(Alias = "h")]
+                public int? H { set; get; } = null;
+
+                [YamlMember(Alias = "offsx")]
+                public int? OffsetX { set; get; } = null;
+
+                [YamlMember(Alias = "offsy")]
+                public int? OffsetY { set; get; } = null;
+
+                // FILLED IN WHEN CREATING THE COLLECTION //
+                internal int SpriteDefinitionId;
+            }
+
             public static Deserializer Deserializer = new DeserializerBuilder().Build();
 
             public class FidgetDuration {
@@ -85,53 +131,21 @@ namespace ETGMod {
             public class Frame {
                 public static readonly Event DEFAULT_EVENT = new Event();
 
-                [YamlMember(Alias = "x")]
-                public int X { set; get; }
-
-                [YamlMember(Alias = "y")]
-                public int Y { set; get; }
-
-                // OPTIONAL //
-                [YamlMember(Alias = "w")]
-                public int? W { set; get; }
-
-                [YamlMember(Alias = "h")]
-                public int? H { set; get; }
-
-                [YamlMember(Alias = "offsx")]
-                public int? OffsetX { set; get; }
-
-                [YamlMember(Alias = "offsy")]
-                public int? OffsetY { set; get; }
+                [YamlMember(Alias = "definition")]
+                public string Definition { set; get; }
 
                 [YamlMember(Alias = "event")]
                 public Event Event { set; get; }
-
-                // FILLED IN WHEN CREATING THE COLLECTION //
-                internal int SpriteDefinitionId;
             }
 
             public class Clip {
                 public static readonly tk2dSpriteAnimationClip.WrapMode DEFAULT_WRAP_MODE = tk2dSpriteAnimationClip.WrapMode.Once;
-
-                // OPTIONAL
-                [YamlMember(Alias = "spritesheet")]
-                public string Spritesheet { set; get; } = null;
 
                 [YamlMember(Alias = "duplicate")]
                 public string Duplicate { set; get; }
 
                 [YamlMember(Alias = "wrap_mode")]
                 public string WrapMode { set; get; } = "once";
-
-                [YamlMember(Alias = "frame_size")]
-                public FrameSize FrameSize { set; get; }
-
-                [YamlMember(Alias = "offset")]
-                public Position Offset { set; get; } = new Position {
-                    X = 0,
-                    Y = 0
-                };
 
                 [YamlMember(Alias = "frames")]
                 public List<Frame> Frames { set; get; } = new List<Frame>();
@@ -159,8 +173,8 @@ namespace ETGMod {
                 public static readonly string DEFAULT_NAME = "unnamed";
                 public static readonly int DEFAULT_FPS = 12;
 
-                [YamlMember(Alias = "spritesheet")]
-                public string Spritesheet { set; get; }
+                [YamlMember(Alias = "collection")]
+                public string Collection { set; get; }
 
                 [YamlMember(Alias = "frame_size")]
                 public FrameSize FrameSize { set; get; } = new FrameSize {

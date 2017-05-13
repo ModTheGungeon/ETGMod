@@ -40,6 +40,9 @@
     <Compile Include="src\TexMod\TexMod.cs" />
     <Compile Include="src\TexMod\TexModExtra.cs" />
     <Compile Include="src\Patches\patch_tk2dSpriteAnimator.cs" />
+    <Compile Include="src\Patches\patch_tk2dSpriteCollectionData.cs" />
+    <Compile Include="src\Patches\patch_GameObject.cs" />
+    <Compile Include="src\Patches\patch_tk2dBaseSprite.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.Base.mm\Assembly-CSharp.Base.mm.csproj">
