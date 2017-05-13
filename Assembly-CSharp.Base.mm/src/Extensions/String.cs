@@ -48,4 +48,15 @@ public static class StringExt {
 
         return string.Join("/", list.ToArray());
     }
+
+    //used in IDPool.cs/VerifyID
+    public static int Count(this string @in, char c)
+    {
+        int count = 0;
+        for (int i = 0; i < @in.Length; i++)
+        {
+            if (@in[i] == c) count++;
+        }
+        return count;
+    }
 }
