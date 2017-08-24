@@ -23,6 +23,8 @@ internal class patch_GameManager : GameManager {
             if (type.IsSubclassOf(typeof(Backend))) {
                 var backend = (Backend)Backend.GameObject.AddComponent(type);
 
+                DontDestroyOnLoad(backend);
+
                 Backend.AllBackends.Add(new Backend.Info {
                     Name = type.Name,
                     StringVersion = backend.StringVersion,
@@ -31,9 +33,14 @@ internal class patch_GameManager : GameManager {
                     Instance = backend
                 });
 
-                Loader.Logger.Info($"Initializing backend {type.Name} {backend.StringVersion}");
-                backend.Loaded();
+                backend.NoBackendsLoadedYet();
             }
+        }
+
+        for (int i = 0; i < Backend.AllBackends.Count; i++) {
+            var backend = Backend.AllBackends[i];
+            Loader.Logger.Info($"Initializing backend {backend.Name} {backend.StringVersion}");
+            backend.Instance.Loaded();
         }
 
         for (int i = 0; i < Backend.AllBackends.Count; i++) {

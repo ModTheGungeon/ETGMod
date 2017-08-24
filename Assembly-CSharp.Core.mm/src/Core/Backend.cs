@@ -16,7 +16,7 @@ namespace ETGMod {
             get;
         }
 
-        public string StringVersion {
+        public virtual string StringVersion {
             get {
                 return Version.ToString();
             }
@@ -107,5 +107,6 @@ namespace ETGMod {
 
         public abstract void Loaded();
         public virtual void AllBackendsLoaded() {}
+        public virtual void NoBackendsLoadedYet() { }
     }
 }

@@ -27,12 +27,16 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\Patches\" />
+    <Folder Include="src\Core\" />
+    <Folder Include="src\Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Patches\patch_GameManager.cs" />
-    <Compile Include="src\Backend.cs" />
-    <Compile Include="src\Logger.cs" />
-    <Compile Include="src\Loader.cs" />
+    <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
+    <Compile Include="src\Core\Backend.cs" />
+    <Compile Include="src\Core\Loader.cs" />
+    <Compile Include="src\Core\Logger.cs" />
+    <Compile Include="src\Extensions\String.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

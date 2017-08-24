@@ -119,6 +119,7 @@ namespace ETGMod {
                     Logger.Debug($"Found Mod subclass: {type.FullName}");
 
                     var behaviour = (Mod)GameObject.AddComponent(type);
+                    UnityEngine.Object.DontDestroyOnLoad(behaviour);
                     info.Behaviours.Add(behaviour);
 
                     behaviour.Info = info;

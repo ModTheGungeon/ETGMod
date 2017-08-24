@@ -79,6 +79,7 @@ namespace ETGMod {
 
                 internal tk2dSpriteCollectionData ConstructCollection() {
                     var collection = TargetGameObject.AddComponent<tk2dSpriteCollectionData>();
+                    UnityEngine.Object.DontDestroyOnLoad(collection);
 
                     var name = Mapping.Name ?? YAML.Animation.DEFAULT_NAME;
 

@@ -46,19 +46,17 @@
     <Reference Include="Mono.Cecil">
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
     </Reference>
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\API\IDPool.cs" />
     <Compile Include="src\ETGMod\ETGMod.cs" />
     <Compile Include="src\External\ReflectionHelper.cs" />
-    <Compile Include="src\Extensions\String.cs" />
     <Compile Include="src\ModLoader\Metadata.cs" />
     <Compile Include="src\ModLoader\ModLoader.cs" />
-    <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\External\ZipStorer.cs" />
     <Compile Include="src\ModLoader\ModInfo.cs" />
-    <Compile Include="src\ETGMod\Mod.cs" />
     <Compile Include="src\ModLoader\AssemblyNameMap.cs" />
     <Compile Include="src\AnimLoader\AnimatorGenerator.cs" />
     <Compile Include="src\AnimLoader\Animation.cs" />
@@ -70,8 +68,19 @@
     <Compile Include="src\External\ObjectDumper.cs" />
     <Compile Include="src\AnimLoader\Collection.cs" />
     <Compile Include="src\AnimLoader\CollectionGenerator.cs" />
+    <Compile Include="src\ModLoader\Mod.cs" />
+    <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="src\" />
+    <Folder Include="src\ETGMod\" />
+    <Folder Include="src\External\" />
+    <Folder Include="src\ModLoader\" />
+    <Folder Include="src\Extensions\" />
+    <Folder Include="src\AnimLoader\" />
+    <Folder Include="src\ModResources\" />
+    <Folder Include="src\Patches\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.BasePre.mm\Assembly-CSharp.BasePre.mm.csproj">
       <Project>{EC6C2E23-2BFD-494B-8D02-637314C4B0BB}</Project>

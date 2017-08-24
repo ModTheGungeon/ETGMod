@@ -112,10 +112,6 @@ namespace ETGMod {
                     var def = target.spriteDefinitions[i];
                     tk2dSpriteDefinition source_definition = null;
                     if (patch_definition_name_lookup.TryGetValue(def.name, out source_definition)) {
-                        Console.WriteLine(def.boundsDataCenter);
-                        Console.WriteLine(def.boundsDataExtents);
-                        Console.WriteLine(def.untrimmedBoundsDataCenter);
-                        Console.WriteLine(def.untrimmedBoundsDataExtents);
                         _Logger.Debug($"Patching definition '{def.name}' at ID {i}");
 
                         var new_definition = new tk2dSpriteDefinition();

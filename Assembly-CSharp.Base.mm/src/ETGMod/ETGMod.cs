@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace ETGMod {
-    public class ETGMod : Backend {
+    public partial class ETGMod : Backend {
         public override Version Version { get { return new Version(0, 3, 0); } }
 
         public static Logger Logger = new Logger("ETGMod");
@@ -15,14 +15,14 @@ namespace ETGMod {
         public static string VersionTag = "";
 #endif
 
-        public new string StringVersion {
+        public override string StringVersion {
             get {
                 return $"{Version}-{VersionTag}";
             }
         }
 
-        public static ETGMod Instance;
 
+        public static ETGMod Instance;
         public static ModLoader ModLoader = new ModLoader(ModsFolder, CacheFolder);
 
         private static string _FullVersion;
@@ -142,13 +142,13 @@ namespace ETGMod {
             ModLoader.UnloadAll();
             _PrepareModsDirectory();
             _PrepareModLoadConfigFiles();
-            
+
             var entries = Directory.GetFileSystemEntries(ModsFolder);
 
             var order = new List<string>();
             var blacklist = new HashSet<string>();
 
-            using (var file = File.Open(ModsOrderFile, FileMode.Open))  {
+            using (var file = File.Open(ModsOrderFile, FileMode.Open)) {
                 using (var reader = new StreamReader(file)) {
                     string line;
                     while ((line = reader.ReadLine()) != null) {
@@ -212,7 +212,24 @@ namespace ETGMod {
         }
 
         public void Awake() {
-            
+            System.Console.WriteLine("ENEMY OBJECTS");
+            for (int i = 0; i < EnemyDatabase.Instance.Entries.Count; i++) {
+                var e = EnemyDatabase.Instance.Entries[i];
+
+                var name = "[ERROR]";
+
+                if (e == null) {
+                    name = "[NULL OBJECT]";
+                } else {
+                    try {
+                        var o = EnemyDatabase.GetOrLoadByGuid(e.myGuid);
+                        var pdn = o.encounterTrackable?.journalData?.PrimaryDisplayName;
+                        name = pdn != null ? StringTableManager.GetEnemiesString(pdn) : o.ActorName ?? "[NULL NAME]"; 
+                    } catch { }
+                }
+
+                System.Console.WriteLine($"{e.myGuid} {name}");
+            }
         }
 
         public void Update() {

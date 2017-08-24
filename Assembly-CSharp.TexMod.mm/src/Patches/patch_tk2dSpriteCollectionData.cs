@@ -12,8 +12,6 @@ public class patch_tk2dSpriteCollectionData : tk2dSpriteCollectionData {
     }
 
     public void TexModPatch() {
-        Console.WriteLine("COLLECTION: " + name);
-
         if (_texmod_init) return;
         _texmod_init = true;
 

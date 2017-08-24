@@ -1,0 +1,70 @@
+﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0A559AFA-0198-4B30-8BC5-BC86A953EE41}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ETGMod.Console</RootNamespace>
+    <AssemblyName>Assembly-CSharp.Console.mm</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>..\libs\System.Windows.Forms.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Parser\Token.cs" />
+    <Compile Include="src\Parser\Lexer.cs" />
+    <Compile Include="src\Parser\Parser.cs" />
+    <Compile Include="src\Parser\AST.cs" />
+    <Compile Include="src\Parser\Executor.cs" />
+    <Compile Include="src\Console\Backend.cs" />
+    <Compile Include="src\Console\Menu.cs" />
+    <Compile Include="src\Console\AutoCompletor.cs" />
+    <Compile Include="src\Console\Command.cs" />
+    <Compile Include="src\Console\History.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Nowy folder\" />
+    <Folder Include="src\" />
+    <Folder Include="src\Console\" />
+    <Folder Include="src\Parser\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Assembly-CSharp.Core.mm\Assembly-CSharp.Core.mm.csproj">
+      <Project>{4473AD38-DAF1-449A-A850-4296D3368413}</Project>
+      <Name>Assembly-CSharp.Core.mm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Assembly-CSharp.GUI.mm\Assembly-CSharp.GUI.mm.csproj">
+      <Project>{BA34AC90-F2B8-445E-A780-873F7321D975}</Project>
+      <Name>Assembly-CSharp.GUI.mm</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

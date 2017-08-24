@@ -244,6 +244,9 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
+# ETGMod build script result
+/build/
+
 # Dumbass protection - all stripped libs
 libs/UnityEngine.dll
 libs/Assembly-CSharp.dll
