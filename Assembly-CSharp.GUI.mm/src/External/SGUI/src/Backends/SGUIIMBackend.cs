@@ -662,10 +662,10 @@ namespace SGUI {
         }
 
 
-        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null) {
-            Text_(elem, position, size, text, alignment, icon);
+        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, int? color = null) {
+            Text_(elem, position, size, text, alignment, icon, color: color);
         }
-        private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true) {
+        private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true, int? color = null) {
             Skin.font = (Font) (elem == null ? null : elem.Font) ?? _Font;
             float y = 0f;
 
@@ -695,7 +695,8 @@ namespace SGUI {
                         icon != null ? (" " + line) : line,
                         alignment,
                         null,
-                        registerProperly
+                        registerProperly,
+                        color
                     );
                     y += lineSize.y;
                 }
@@ -728,7 +729,9 @@ namespace SGUI {
             RegisterNextComponentIn(elem);
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, registerProperly ? bounds : NULLRECT, text);
             if (icon != null) text = " " + text;
-            GUI.Label(bounds, text);
+            var real_text = text;
+            if (color != null) real_text = $"<color=#{color.Value.ToString("X6")}>{text}</color>";
+            GUI.Label(bounds, real_text);
 
             if (icon != null) {
                 Texture(

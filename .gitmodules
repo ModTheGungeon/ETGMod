@@ -7,9 +7,6 @@
 [submodule "libs/MonoMod"]
 	path = libs/MonoMod
 	url = https://github.com/0x0ade/MonoMod
-[submodule "Assembly-CSharp.Base.mm/src/External/SGUI"]
-	path = Assembly-CSharp.Base.mm/src/External/SGUI
-	url = https://github.com/0x0ade/SGUI
-[submodule "Assembly__DASH__CSharp.GUI.mm/src/External/SGUI"]
-	path = Assembly__DASH__CSharp.GUI.mm/src/External/SGUI
-	url = https://github.com/0x0ade/SGUI
+[submodule "Assembly-CSharp.GUI.mm/src/External/SGUI"]
+	path = Assembly-CSharp.GUI.mm/src/External/SGUI
+	url = https://github.com/ModTheGungeon/SGUI

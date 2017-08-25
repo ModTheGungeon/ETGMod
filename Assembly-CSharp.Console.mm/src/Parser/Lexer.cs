@@ -116,15 +116,16 @@ namespace ETGMod.Console.Parser {
                     var opening_line = Line;
                     var opening_char = Character;
                     var builder = new StringBuilder();
-
-                    var terminated = false;
+                    var level = 1;
 
                     while (true) {
                         MoveNext();
-                        if (CurrentChar == '}' || CurrentChar == '\0') {
-                            if (CurrentChar == '}') terminated = true;
-                            break;
-                        };
+                        if (CurrentChar == '{') level += 1;
+                        else if (CurrentChar == '}') {
+                            level -= 1;
+                            if (level <= 0) break;
+                        }
+                        if (CurrentChar == '\0') break;
                         builder.Append(CurrentChar);
                     }
 
@@ -133,7 +134,7 @@ namespace ETGMod.Console.Parser {
                         QuoteType = QuoteType.Verbatim
                     };
 
-                    token.LiteralInfo.IsTerminated = terminated;
+                    token.LiteralInfo.IsTerminated = level == 0;
 
                     break;
                 case ' ':

@@ -20,6 +20,15 @@ namespace TexMod {
 
         public override Version Version { get { return new Version(0, 1, 0); } }
 
+        public void Update() {
+            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F6)) {
+                UnityEngine.MonoBehaviour[] allObjects = FindObjectsOfType<UnityEngine.MonoBehaviour>();
+                foreach (var obj in allObjects) {
+                    Console.WriteLine($"<{obj.GetType().FullName} {obj.name}>");
+                }
+            }
+        }
+
         public override void Loaded() {
             Logger.Info("TexMod initialized, adding ModLoader hooks");
 
@@ -72,6 +81,19 @@ namespace TexMod {
                     }
                 }
             };
+
+            Logger.Info("Adding logo");
+            var logo_collection = _Deserializer.Deserialize<Animation.YAML.Collection>(File.ReadAllText(
+                Path.Combine(Paths.ResourcesFolder, "logo.yml")
+            ));
+
+            CollectionMap[logo_collection.Name] = new Animation.Collection(
+                new Dictionary<string, UnityEngine.Texture2D>() {
+                    {"logo.png", UnityUtil.LoadTexture2D(Path.Combine(Paths.ResourcesFolder, "logo.png"))}
+                },
+                logo_collection,
+                base_dir: Paths.ResourcesFolder
+            );
         }
     }
 }

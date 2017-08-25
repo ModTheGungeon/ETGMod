@@ -102,13 +102,7 @@ namespace SGUI {
         public SGUIRoot(bool inEditor) {
             InEditor = inEditor;
 
-            if (inEditor) {
-                Backend = new SGUIIMEditorBackend();
-                Awake();
-                Start();
-            } else {
-                Backend = new SGUIIMBackend();
-            }
+            Backend = new SGUIIMBackend();
         }
 
         public static SGUIRoot Setup() {

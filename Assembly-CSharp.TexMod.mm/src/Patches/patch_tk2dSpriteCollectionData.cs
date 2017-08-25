@@ -15,13 +15,15 @@ public class patch_tk2dSpriteCollectionData : tk2dSpriteCollectionData {
         if (_texmod_init) return;
         _texmod_init = true;
 
+        Console.WriteLine($"[{name}]");
+
         Animation.Collection collection;
         if (TexMod.TexMod.CollectionMap.TryGetValue(name, out collection)) {
             TexMod.TexMod.Logger.Debug($"Found patch collection '{name}', sprite defs: {spriteDefinitions.Length}");
             collection.PatchCollection(this);
             TexMod.TexMod.Logger.Debug($"Sprite defs after patching: {spriteDefinitions.Length}");
 
-            TexMod.TexMod.Logger.Debug($"knav '{GetSpriteDefinition("knav3_idle_001")}'");
+            Console.WriteLine(spriteDefinitions[84].materialId);
         }
     }
 }

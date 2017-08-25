@@ -65,6 +65,10 @@
       <Project>{BA34AC90-F2B8-445E-A780-873F7321D975}</Project>
       <Name>Assembly-CSharp.GUI.mm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Assembly-CSharp.Base.mm\Assembly-CSharp.Base.mm.csproj">
+      <Project>{34E81F62-F88C-44EF-96D9-DBBD2C46DF34}</Project>
+      <Name>Assembly-CSharp.Base.mm</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

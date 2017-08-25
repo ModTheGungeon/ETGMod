@@ -63,7 +63,6 @@
     <Compile Include="src\ModResources\ModInfoResources.cs" />
     <Compile Include="src\ModResources\ResourcePool.cs" />
     <Compile Include="src\ModResources\LoadedResource.cs" />
-    <Compile Include="src\Extensions\BinaryReader.cs" />
     <Compile Include="src\AnimLoader\YAMLMapping.cs" />
     <Compile Include="src\External\ObjectDumper.cs" />
     <Compile Include="src\AnimLoader\Collection.cs" />
@@ -76,7 +75,6 @@
     <Folder Include="src\ETGMod\" />
     <Folder Include="src\External\" />
     <Folder Include="src\ModLoader\" />
-    <Folder Include="src\Extensions\" />
     <Folder Include="src\AnimLoader\" />
     <Folder Include="src\ModResources\" />
     <Folder Include="src\Patches\" />

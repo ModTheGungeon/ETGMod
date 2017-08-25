@@ -12,7 +12,6 @@ namespace ETGMod {
             private static Deserializer _Deserializer = new DeserializerBuilder().Build();
 
             public GameObject GameObject;
-            private ModLoader.ModInfo _ModInfo;
             private YAML.Collection _DeserializedYAMLDoc;
             private CollectionGenerator _Generator;
             public tk2dSpriteCollectionData CollectionData;
@@ -21,13 +20,20 @@ namespace ETGMod {
                 : this(info, _Deserializer.Deserialize<YAML.Collection>(text), base_dir) { }
 
             public Collection(ModLoader.ModInfo info, YAML.Collection deserialized, string base_dir = null) {
-                _ModInfo = info;
                 _DeserializedYAMLDoc = deserialized;
                 if (base_dir == null) base_dir = info.Resources.BaseDir;
 
                 GameObject = new GameObject($"ETGMod Collection '{deserialized.Name}'");
 
-                _Generator = new CollectionGenerator(_ModInfo, base_dir, _DeserializedYAMLDoc, GameObject);
+                _Generator = new CollectionGenerator(info, base_dir, _DeserializedYAMLDoc, GameObject);
+                CollectionData = _Generator.ConstructCollection();
+            }
+
+            public Collection(Dictionary<string, Texture2D> textures, YAML.Collection deserialized, string base_dir) {
+                _DeserializedYAMLDoc = deserialized;
+                GameObject = new GameObject($"ETGMod Collection '{deserialized.Name}'");
+
+                _Generator = new CollectionGenerator(textures, base_dir, _DeserializedYAMLDoc, GameObject);
                 CollectionData = _Generator.ConstructCollection();
             }
 

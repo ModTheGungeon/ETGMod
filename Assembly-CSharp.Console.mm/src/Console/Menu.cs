@@ -7,9 +7,10 @@ using System.Text;
 
 namespace ETGMod.Console {
     public class ConsoleMenu : Menu {
+        public static ConsoleMenu Instance = null;
         public const char COMMAND_PATH_SEPARATOR = '/';
         private static Logger _Logger = new Logger("ConsoleMenu");
-        public Dictionary<string, Command> Commands = new Dictionary<string, ETGMod.Console.Command>();
+        public Dictionary<string, Command> Commands = new Dictionary<string, Command>();
 
         public string CurrentCommandText {
             set {
@@ -204,7 +205,6 @@ namespace ETGMod.Console {
                 var node = cmd.Name.Content[i];
 
                 if (node is Parser.Command && _CharFitsInASTNode(cursor_pos, node, tight: true)) {
-                    PrintLine($"cmd fit: {node.Position.FirstChar},{node.Position.LastChar} for {cursor_pos}");
                     // forget that shit, just autocomplete this command thank you very much
                     return _GetAutocompleteInfo((Parser.Command)node);
                 }
@@ -255,25 +255,32 @@ namespace ETGMod.Console {
             _GetChild<SGroup>(WindowChild.OutputBox).Children.Add(new SLabel());
         }
 
-        public void Print(string txt) {
+        public void PrintLine(string txt, int? color = null) {
             var outputbox = _GetChild<SGroup>(WindowChild.OutputBox);
-            if (outputbox.Children.Count == 0) {
-                outputbox.Children.Add(new SLabel(txt));
-                return;
-            } else {
-                var elem = outputbox.Children[outputbox.Children.Count - 1];
+            //if (outputbox.Children.Count == 0) {
+            outputbox.Children.Add(new SLabel(txt) {Color = color});
+            //  return;
+            //} else {
+            //    var elem = outputbox.Children[outputbox.Children.Count - 1];
 
-                if (elem is SLabel) ((SLabel)elem).Text += txt;
-                else outputbox.Children.Add(new SLabel(txt));
-            }
+            //    if (elem is SLabel) ((SLabel)elem).Text += txt;
+            //    else outputbox.Children.Add(new SLabel(txt));
+            //}
 
             var outbox = _GetChild<SGroup>(WindowChild.OutputBox);
             outbox.ScrollPosition = new Vector2(0, outbox.ContentSize.y);
 
             outbox.UpdateStyle(); // SGUI BUG! without this scroll breaks with labels with a lot of newlines
         }
-        public void PrintLine(string txt) {
-            Print(txt + "\n");
+
+        public void PrintError(string txt) {
+            if (txt.IndexOf('\n') == -1) {
+                PrintLine(txt, 0xFF6E6E);
+            } else {
+                foreach (var line in txt.Split('\n')) {
+                    PrintError(line);
+                }
+            }
         }
 
         public string ExecuteCommand(string cmd) {
@@ -281,21 +288,32 @@ namespace ETGMod.Console {
         }
 
         public void ExecuteCommandAndPrintResult(string cmd) {
-            if (PrintUsedCommand) PrintLine($"<color=#575757>> {cmd}</color>");
+            if (PrintUsedCommand) PrintLine("> " + cmd, color: 0x575757);
             try {
                 PrintLine(ExecuteCommand(cmd));
             } catch (Exception e) {
-                PrintLine("<color=#FF6E6E>Exception while executing command:</color>");
-                PrintLine($"<color=#FF6E6E>{e.Message}</color>");
-                PrintLine("<color=#FF6E6E>More detailed info in the log.</color>");
+                PrintError("Exception while executing command:");
+                PrintError(e.Message);
+                PrintError("More detailed info in the log.");
 
-                _Logger.Error($"Exception while running command: {e.Message}");
+                _Logger.Error($"Exception while running command '{cmd}':");
+                _Logger.Error(e.Message);
                 var stlines = e.StackTrace.Split('\n');
 
                 for (int i = 0; i < stlines.Length; i++) {
-                    _Logger.Error(stlines[i]);
+                    _Logger.ErrorIndent(stlines[i]);
                 }
             }
+        }
+
+        public Command AddGroup(string name) {
+            return AddCommand(new Command(name, (args, histindex, self) => {
+                PrintError($"Can't execute command group '{name}'. Did you mean:");
+                foreach (var cmd in self.SubCommands) {
+                    PrintError($"- {name}{COMMAND_PATH_SEPARATOR}{cmd.Key}");
+                }
+                return null;
+            }));
         }
 
         public Command AddCommand(Command cmd) {
@@ -311,8 +329,33 @@ namespace ETGMod.Console {
             return Commands[name] = new Command(name, callback);
         }
 
+        // for the debug/mods command
+        private void _GetModInfo(StringBuilder builder, ModLoader.ModInfo info, string indent = "") {
+            builder.AppendLine($"{indent}- {info.Name}: {info.Resources.ResourceCount} resources");
+            foreach (var mod in info.EmbeddedMods) {
+                if (mod.Parent == info) {
+                    _GetModInfo(builder, mod, indent + "  ");
+                }
+            }
+        }
+
+        private Logger.Subscriber _LoggerSubscriber;
+        private bool _Subscribed = false;
+        private static Dictionary<Logger.LogLevel, int> _LoggerColors = new Dictionary<Logger.LogLevel, int> {
+            {Logger.LogLevel.Debug, 0x0ADE00},
+            {Logger.LogLevel.Info, 0x00ADEE},
+            {Logger.LogLevel.Warn, 0xEDA000},
+            {Logger.LogLevel.Error, 0xFF1F1F}
+        };
+        private Logger.LogLevel _LogLevel = Logger.LogLevel.Debug;
+
         public override SElement CreateWindow() {
+            Instance = this;
             var etgmod = Backend.SearchForBackend("ETGMod");
+
+            _LoggerSubscriber = (logger, loglevel, indent, str) => {
+                PrintLine(logger.String(loglevel, str, indent: indent), color: _LoggerColors[loglevel]);
+            };
 
             _Executor = new Parser.Executor((name, args, history_index) => {
                 Command cmd = ResolveCommand(name);
@@ -340,16 +383,61 @@ namespace ETGMod.Console {
                 return "Hello, world!\nHello, world!\nHello, world!\nHello, world!\nHello, world!\nHello, world!";
             }));
 
-            AddCommand(new Command("debug", (args) => {
-                return null;
-            })).WithSubCommand(new Command("parser-bounds-test", (args) => {
-                var text = "echo Hello! \"Hello world!\" This\\ is\\ great \"It\"works\"with\"\\ wacky\" stuff\" \\[\\] \"\\[\\]\" [e[echo c][echo h][echo [echo \"o\"]] \"hel\"[echo lo][echo !]]";
-                CurrentCommandText = text;
-                return null;
-            }));
+            {
+                var g = AddGroup("debug");
+
+                g.WithSubCommand(new Command("parser-bounds-test", (args) => {
+                    var text = "echo Hello! \"Hello world!\" This\\ is\\ great \"It\"works\"with\"\\ wacky\" stuff\" \\[\\] \"\\[\\]\" [e[echo c][echo h][echo [echo \"o\"]] \"hel\"[echo lo][echo !]]";
+                    CurrentCommandText = text;
+                    return null;
+                }));
+
+                g.WithSubCommand(new Command("mods", (args) => {
+                    var s = new StringBuilder();
+
+                    s.AppendLine("Loaded mods:");
+                    foreach (var mod in ETGMod.ModLoader.LoadedMods) {
+                        _GetModInfo(s, mod);
+                    }
+                    return s.ToString();
+                }));
+            }
+
+            {
+                var g = AddGroup("log");
+               
+                g.WithSubCommand(new Command("sub", (args) => {
+                    if (_Subscribed) return "Already subscribed.";
+                    Logger.Subscribe(_LoggerSubscriber);
+                    _Subscribed = true;
+                    return "Done.";
+                }));
+
+                g.WithSubCommand(new Command("unsub", (args) => {
+                    if (!_Subscribed) return "Not subscribed yet.";
+                    Logger.Unsubscribe(_LoggerSubscriber);
+                    _Subscribed = false;
+                    return "Done.";
+                }));
+
+                g.WithSubCommand(new Command("level", (args) => {
+                    if (args.Count == 0) {
+                        return _LogLevel.ToString().ToLowerInvariant();
+                    } else {
+                        switch (args[0]) {
+                        case "debug": _LogLevel = Logger.LogLevel.Debug; break;
+                        case "info": _LogLevel = Logger.LogLevel.Info; break;
+                        case "warn": _LogLevel = Logger.LogLevel.Warn; break;
+                        case "error": _LogLevel = Logger.LogLevel.Error; break;
+                        default: throw new Exception($"Unknown log level '{args[0]}");
+                        }
+                        return "Done.";
+                    }
+                }));
+            }
 
             return new SGroup {
-                Background = new Color(0, 0f, 0f, 0.5f),
+                Background = new Color(0, 0f, 0f, 0.8f),
 
                 OnUpdateStyle = elem => {
                     elem.Fill(0);
@@ -365,8 +453,7 @@ namespace ETGMod.Console {
                             elem.Size -= new Vector2(0, elem.Backend.LineHeight);
                         },
                         Children = {
-                            new SLabel($"<color=#A1E7FF>ETGMod v{etgmod.BestMatch?.Instance.StringVersion ?? "?"}</color>\n"),
-                            new SLabel()
+                            new SLabel($"ETGMod v{etgmod.BestMatch?.Instance.StringVersion ?? "?"}") {Color = 0x00A1E7},
                         }
                     },
                     new SGroup { // AutocompleteBox

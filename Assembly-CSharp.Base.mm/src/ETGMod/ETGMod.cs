@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace ETGMod {
     public partial class ETGMod : Backend {
+        const KeyCode MOD_RELOAD_KEY = KeyCode.F5;
+
         public override Version Version { get { return new Version(0, 3, 0); } }
 
         public static Logger Logger = new Logger("ETGMod");
@@ -23,7 +25,7 @@ namespace ETGMod {
 
 
         public static ETGMod Instance;
-        public static ModLoader ModLoader = new ModLoader(ModsFolder, CacheFolder);
+        public static ModLoader ModLoader = new ModLoader(Paths.ModsFolder, Paths.CacheFolder);
 
         private static string _FullVersion;
         public static string FullVersion {
@@ -34,80 +36,24 @@ namespace ETGMod {
             }
         }
 
-        private static string _GameFolder;
-        public static string GameFolder {
-            get {
-                if (_GameFolder != null) return _GameFolder;
-                return _GameFolder = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-            }
-        }
-
-        private static string _ManagedFolder;
-        public static string ManagedFolder {
-            get {
-                if (_ManagedFolder != null) return _ManagedFolder;
-                return _ManagedFolder = Path.GetDirectoryName(typeof(ETGMod).Assembly.Location);
-            }
-        }
-
-        private static string _ModsFolder;
-        public static string ModsFolder {
-            get {
-                if (_ModsFolder != null) return _ModsFolder;
-                return _ModsFolder = Path.Combine(GameFolder, "Mods");
-            }
-        }
-
-        private static string _CacheFolder;
-        public static string CacheFolder {
-            get {
-                if (_CacheFolder != null) return _CacheFolder;
-                return _CacheFolder = Path.Combine(GameFolder, ".ETGModCache");
-            }
-        }
-
-        private static string _ModsOrderFile;
-        public static string ModsOrderFile {
-            get {
-                if (_ModsOrderFile != null) return _ModsOrderFile;
-                return _ModsOrderFile = Path.Combine(ModsFolder, "order.txt");
-            }
-        }
-
-        private static string _ModsBlacklistFile;
-        public static string ModsBlacklistFile {
-            get {
-                if (_ModsBlacklistFile != null) return _ModsBlacklistFile;
-                return _ModsBlacklistFile = Path.Combine(ModsFolder, "blacklist.txt");
-            }
-        }
-
-        private static string _ModsCacheFolder;
-        public static string ModsCacheFolder {
-            get {
-                if (_ModsCacheFolder != null) return _ModsCacheFolder;
-                return _ModsCacheFolder = Path.Combine(GameFolder, ".ModRelinkCache");
-            }
-        }
-
         private void _PrepareModsDirectory() {
-            if (!Directory.Exists(ModsFolder)) {
-                Logger.Debug($"Creating mods folder {ModsFolder}");
+            if (!Directory.Exists(Paths.ModsFolder)) {
+                Logger.Debug($"Creating mods folder {Paths.ModsFolder}");
                 try {
-                    Directory.CreateDirectory(ModsFolder);
+                    Directory.CreateDirectory(Paths.ModsFolder);
                 } catch (IOException e) {
-                    Logger.Error($"The mods folder ({ModsFolder}) already exists, but is a file. Please remove or rename it.");
+                    Logger.Error($"The mods folder ({Paths.ModsFolder}) already exists, but is a file. Please remove or rename it.");
                 } catch (UnauthorizedAccessException e) {
-                    Logger.Error($"Insufficient permissions to create mods folder ({ModsFolder}).");
+                    Logger.Error($"Insufficient permissions to create mods folder ({Paths.ModsFolder}).");
                 } catch (Exception e) {
-                    Logger.Error($"Unknown error while creating mods folder ({ModsFolder}): {e.Message}");
+                    Logger.Error($"Unknown error while creating mods folder ({Paths.ModsFolder}): {e.Message}");
                 }
             }
         }
 
         private void _PrepareModLoadConfigFiles() {
-            if (!File.Exists(ModsOrderFile)) {
-                using (var file = File.Create(ModsOrderFile)) {
+            if (!File.Exists(Paths.ModsOrderFile)) {
+                using (var file = File.Create(Paths.ModsOrderFile)) {
                     using (var writer = new StreamWriter(file)) {
                         writer.WriteLine("# Specify the order of loading mods here.");
                         writer.WriteLine("# First this file is read and all the mods specified here are loaded,");
@@ -116,8 +62,8 @@ namespace ETGMod {
                     }
                 }
             }
-            if (!File.Exists(ModsBlacklistFile)) {
-                using (var file = File.Create(ModsBlacklistFile)) {
+            if (!File.Exists(Paths.ModsBlacklistFile)) {
+                using (var file = File.Create(Paths.ModsBlacklistFile)) {
                     using (var writer = new StreamWriter(file)) {
                         writer.WriteLine("# Specify blacklisted mods here.");
                         writer.WriteLine("# Any mods specified here will not be loaded, even if they are specified");
@@ -143,18 +89,18 @@ namespace ETGMod {
             _PrepareModsDirectory();
             _PrepareModLoadConfigFiles();
 
-            var entries = Directory.GetFileSystemEntries(ModsFolder);
+            var entries = Directory.GetFileSystemEntries(Paths.ModsFolder);
 
             var order = new List<string>();
             var blacklist = new HashSet<string>();
 
-            using (var file = File.Open(ModsOrderFile, FileMode.Open)) {
+            using (var file = File.Open(Paths.ModsOrderFile, FileMode.Open)) {
                 using (var reader = new StreamReader(file)) {
                     string line;
                     while ((line = reader.ReadLine()) != null) {
                         line = line.Trim();
                         if (line.StartsWithInvariant("#")) continue;
-                        var file_path = Path.Combine(ModsFolder, line);
+                        var file_path = Path.Combine(Paths.ModsFolder, line);
                         if (!File.Exists(file_path)) {
                             Logger.Warn($"Ordered mod {line} does not exist. Ignoring.");
                             continue;
@@ -164,13 +110,13 @@ namespace ETGMod {
                 }
             }
 
-            using (var file = File.Open(ModsBlacklistFile, FileMode.Open)) {
+            using (var file = File.Open(Paths.ModsBlacklistFile, FileMode.Open)) {
                 using (var reader = new StreamReader(file)) {
                     string line;
                     while ((line = reader.ReadLine()) != null) {
                         line = line.Trim();
                         if (line.StartsWithInvariant("#")) continue;
-                        var file_path = Path.Combine(ModsFolder, line);
+                        var file_path = Path.Combine(Paths.ModsFolder, line);
                         if (!File.Exists(file_path)) {
                             Logger.Warn($"Blacklisted mod {line} does not exist. Ignoring.");
                             continue;
@@ -184,7 +130,7 @@ namespace ETGMod {
             for (int i = 0; i < order.Count; i++) {
                 var entry = order[i];
 
-                _LoadOrIgnoreIfBlacklisted(Path.Combine(ModsFolder, entry), blacklist);
+                _LoadOrIgnoreIfBlacklisted(Path.Combine(Paths.ModsFolder, entry), blacklist);
             }
 
             for (int i = 0; i < entries.Length; i++) {
@@ -202,11 +148,11 @@ namespace ETGMod {
             Instance = this;
 
             Logger.Info($"Core ETGMod init {FullVersion}");
-            Logger.Info($"Game folder: {GameFolder}");
+            Logger.Info($"Game folder: {Paths.GameFolder}");
         }
 
         public override void AllBackendsLoaded() {
-            Logger.Info($"Loading mods from {ModsFolder}");
+            Logger.Info($"Loading mods from {Paths.ModsFolder}");
 
             _LoadMods();
         }
@@ -233,7 +179,11 @@ namespace ETGMod {
         }
 
         public void Update() {
-            
+            if (Input.GetKeyDown(MOD_RELOAD_KEY)) {
+                Logger.Info($"Reloading all mods");
+
+                _LoadMods(); 
+            }
         }
 
         public void FixedUpdate() {

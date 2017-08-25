@@ -11,7 +11,6 @@ namespace ETGMod {
                 public static Shader DefaultSpriteShader = ShaderCache.Acquire("Sprites/Default");
 
                 public GameObject TargetGameObject;
-                public ModLoader.ModInfo ModInfo;
                 public YAML.Collection Mapping;
                 public Dictionary<string, int> SpritesheetIDMap = new Dictionary<string, int>();
                 public Texture2D[] Textures;
@@ -49,9 +48,34 @@ namespace ETGMod {
                     return id;
                 }
 
+                // Raw mode - you provide the path->texture map
+                public CollectionGenerator(Dictionary<string, Texture2D> textures, string base_dir, YAML.Collection mapping, GameObject gameobj) {
+                    TargetGameObject = gameobj;
+                    Mapping = mapping;
+
+                    var tex_list = new List<Texture2D>();
+                    // first the general spritesheet, if it exists
+                    if (mapping.Spritesheet != null) {
+                        _SpritesheetID(mapping.Spritesheet);
+                        tex_list.Add(textures[mapping.Spritesheet]);
+                        Logger.Debug($"New spritesheet: '{mapping.Spritesheet}', ID: {_LastSpritesheetID - 1}");
+                    }
+
+                    // ...then the clip spritesheets
+                    foreach (var def in mapping.Definitions) {
+                        if (def.Value.Spritesheet != null) {
+                            _SpritesheetID(def.Value.Spritesheet);
+                            tex_list.Add(textures[def.Value.Spritesheet]);
+                            Logger.Debug($"New spritesheet: '{def.Value.Spritesheet}', ID: {_LastSpritesheetID - 1}");
+                        }
+                    }
+
+                    Textures = tex_list.ToArray();
+                }
+
+                // Mod mode - use ModResources facilities to load textures
                 public CollectionGenerator(ModLoader.ModInfo mod_info, string base_dir, YAML.Collection mapping, GameObject gameobj) {
                     TargetGameObject = gameobj;
-                    ModInfo = mod_info;
                     Mapping = mapping;
 
                     // initialize texture array and spritesheet mappings

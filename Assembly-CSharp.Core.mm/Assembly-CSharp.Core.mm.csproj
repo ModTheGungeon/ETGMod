@@ -37,6 +37,9 @@
     <Compile Include="src\Core\Loader.cs" />
     <Compile Include="src\Core\Logger.cs" />
     <Compile Include="src\Extensions\String.cs" />
+    <Compile Include="src\Core\Paths.cs" />
+    <Compile Include="src\Core\UnityUtil.cs" />
+    <Compile Include="src\Extensions\BinaryReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

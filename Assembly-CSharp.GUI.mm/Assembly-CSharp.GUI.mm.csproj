@@ -51,7 +51,6 @@
     <Compile Include="src\External\SGUI\src\Animations\SFadeOutShrinkSequence.cs" />
     <Compile Include="src\External\SGUI\src\Animations\SShrinkAnimation.cs" />
     <Compile Include="src\External\SGUI\src\Backends\SGUIIMBackend.cs" />
-    <Compile Include="src\External\SGUI\src\Backends\SGUIIMEditorBackend.cs" />
     <Compile Include="src\External\SGUI\src\DFEXT\SGUIDFInput.cs" />
     <Compile Include="src\External\SGUI\src\DotNetEXT\AddingNewEventArgs.cs" />
     <Compile Include="src\External\SGUI\src\DotNetEXT\AddingNewEventHandler.cs" />

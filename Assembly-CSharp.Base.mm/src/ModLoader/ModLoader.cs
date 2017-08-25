@@ -38,7 +38,7 @@ namespace ETGMod {
 
                 _AssemblyRelinkMap = new Dictionary<string, ModuleDefinition>();
 
-                var entries = Directory.GetFileSystemEntries(ETGMod.ManagedFolder);
+                var entries = Directory.GetFileSystemEntries(Paths.ManagedFolder);
 
                 for (int i = 0; i < entries.Length; i++) {
                     var full_entry = entries[i];

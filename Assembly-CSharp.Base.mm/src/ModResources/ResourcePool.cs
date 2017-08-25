@@ -22,11 +22,27 @@ namespace ETGMod {
                     protected set;
                 }
 
+                public int ResourceCount {
+                    get {
+                        return _LoadedResources.Count;
+                    }
+                }
+
                 private Dictionary<string, LoadedResource> _LoadedResources = new Dictionary<string, LoadedResource>();
 
                 public ResourcePool(string base_dir) {
                     BaseDir = base_dir;
                     Path = System.IO.Path.Combine(BaseDir, BaseResourceDir);
+                }
+
+                public void Unload(string relative_path) {
+                    var normalized = relative_path.NormalizePath();
+
+                    LoadedResource res;
+                    if (_LoadedResources.TryGetValue(normalized, out res)) {
+                        _LoadedResources[normalized].Stream.Close();
+                        _LoadedResources.Remove(normalized);
+                    }
                 }
 
                 public LoadedResource Load(string relative_path) {

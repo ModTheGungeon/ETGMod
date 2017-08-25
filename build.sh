@@ -15,7 +15,7 @@ BUILD_ZIP="$BUILD_BASE/$BUILD_ETGMOD.zip"
 rm -rf $BUILD_BASE
 mkdir -p $BUILD
 
-xbuild
+msbuild
 
 deps=(
   # external
@@ -35,8 +35,6 @@ deps=(
   Assembly-CSharp.Console.mm/bin/$p/Assembly-CSharp.Console.mm.dll
   Assembly-CSharp.GUI.mm/bin/$p/Assembly-CSharp.GUI.mm.dll
   Assembly-CSharp.TexMod.mm/bin/$p/Assembly-CSharp.TexMod.mm.dll
-  GTKClipboard/bin/$p/GTKClipboard.dll
-  GTKClipboard/GTKClipboard.config
 
   # internal [UnityEngine]
   UnityEngine.Core.mm/bin/$p/UnityEngine.Core.mm.dll
@@ -45,10 +43,13 @@ deps=(
   # licenses
   LICENSE_ETGMOD
   LICENSE_MONO
+
+  # resources
+  ETGModResources
 )
 
 for d in ${deps[@]}; do
-  cp "$d" "$BUILD"
+  cp -r "$d" "$BUILD"
 done
 
 zip_name="$(mktemp -u -p "." .build-XXXXXXXXX.zip)"

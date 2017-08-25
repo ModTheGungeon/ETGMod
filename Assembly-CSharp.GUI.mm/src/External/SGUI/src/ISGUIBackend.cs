@@ -77,7 +77,8 @@ namespace SGUI {
         /// <param name="text">Text to render.</param>
         /// <param name="alignment">How to align the text in the label.</param>
         /// <param name="icon">An optional icon for the label.</param>
-        void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null);
+        /// <param name="color">Color for the label.</param>
+        void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, int? color = null);
 
         /// <summary>
         /// Render a text field on screen.

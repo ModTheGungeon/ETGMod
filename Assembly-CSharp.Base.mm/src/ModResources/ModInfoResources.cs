@@ -32,6 +32,14 @@ namespace ETGMod {
                     throw new FileNotFoundException($"[{Logger.ID}] While loading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
                 }
             }
+
+            public void Unload(string relative_path) {
+                try {
+                    Resources.Unload(relative_path);
+                } catch (FileNotFoundException e) {
+                    throw new FileNotFoundException($"[{Logger.ID}] While unloading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
+                }
+            }
         }
     }
 }

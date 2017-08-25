@@ -4,6 +4,7 @@ namespace SGUI {
     public class SLabel : SElement {
 
         public string Text;
+        public int? Color;
         public Texture Icon;
 
         public Vector2 IconScale = Vector2.one;
@@ -23,7 +24,8 @@ namespace SGUI {
         public SLabel(string text) {
             Text = text;
             ColorCount = 3;
-            IconColor = Color.white;
+            IconColor = UnityEngine.Color.white;
+            Color = null;
             Background = Background * 0f;
         }
 
@@ -47,7 +49,7 @@ namespace SGUI {
 
         public override void Render() {
             RenderBackground();
-            Draw.Text(this, Vector2.zero, Size, Text, Alignment, Icon);
+            Draw.Text(this, Vector2.zero, Size, Text, Alignment, Icon, Color);
         }
 
     }
