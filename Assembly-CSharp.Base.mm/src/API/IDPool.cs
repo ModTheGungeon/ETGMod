@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace ETGMod.src.API
-{
+namespace ETGMod {
     public class IDPool<T>
     {
-        //note: this is completely copy-pasted from 0.3-b1. This should probably be re-made, or at least re-ordered.
-
         private Dictionary<string, T> _Storage = new Dictionary<string, T>();
         private HashSet<string> _LockedNamespaces = new HashSet<string>();
         private HashSet<string> _Namespaces = new HashSet<string>();
@@ -34,27 +31,31 @@ namespace ETGMod.src.API
         }
 
         //Exceptions
-        public class NonExistantIDException : Exception
+        public class IDPoolException : Exception {
+            public IDPoolException(string msg) : base(msg) {}
+        }
+
+        public class NonExistantIDException : IDPoolException
         {
             public NonExistantIDException(string id) : base($"Object with ID {id} doesn't exist") { }
         }
 
-        public class BadIDElementException : Exception
+        public class BadIDElementException : IDPoolException
         {
             public BadIDElementException(string name) : base($"The ID's {name} can not contain any colons or whitespace") { }
         }
 
-        public class LockedNamespaceException : Exception
+        public class LockedNamespaceException : IDPoolException
         {
             public LockedNamespaceException(string namesp) : base($"The ID namespace {namesp} is locked") { }
         }
 
-        public class ItemIDExistsException : Exception
+        public class ItemIDExistsException : IDPoolException
         {
             public ItemIDExistsException(string id) : base($"Item {id} already exists") { }
         }
 
-        public class BadlyFormattedIDException : Exception
+        public class BadlyFormattedIDException : IDPoolException
         {
             public BadlyFormattedIDException(string id) : base($"ID was improperly formatted: {id}") { }
         }
@@ -65,7 +66,7 @@ namespace ETGMod.src.API
             _LockedNamespaces.Add(namesp);
         }
 
-        private void Set(string id, T obj)
+        public void Set(string id, T obj)
         {
             id = Resolve(id);
             VerifyID(id);
@@ -82,7 +83,6 @@ namespace ETGMod.src.API
         public void Add(string id, T obj)
         {
             id = Resolve(id);
-            VerifyID(id);
             if (_Storage.ContainsKey(id)) throw new ItemIDExistsException(id);
             Set(id, obj);
         }
@@ -125,17 +125,14 @@ namespace ETGMod.src.API
 
         public static string Resolve(string id)
         {
-            Console.WriteLine($"RESOLVING {id}");
             id = id.Trim();
             if (id.Contains(":"))
             {
-                Console.WriteLine("CONTAINS COLON, VERIFY AND GOOOOO");
                 VerifyID(id);
                 return id;
             }
             else
             {
-                Console.WriteLine($"DOESN'T CONTAIN COLON, RETURN gungeon:{id}");
                 return $"gungeon:{id}";
             }
         }

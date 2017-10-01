@@ -20,6 +20,9 @@ namespace ETGMod {
                 [YamlMember(Alias = "def_size")]
                 public FrameSize DefSize { set; get; }
 
+                [YamlMember(Alias = "def_scale")]
+                public Scale DefScale { set; get; }
+
                 [YamlMember(Alias = "offset")]
                 public Position Offset { set; get; } = new Position {
                     X = 0,
@@ -49,6 +52,12 @@ namespace ETGMod {
                 [YamlMember(Alias = "offsy")]
                 public int? OffsetY { set; get; } = null;
 
+                [YamlMember(Alias = "scalew")]
+                public float? ScaleW { set; get; } = null;
+
+                [YamlMember(Alias = "scaleh")]
+                public float? ScaleH { set; get; } = null;
+
                 // FILLED IN WHEN CREATING THE COLLECTION //
                 internal int SpriteDefinitionId;
             }
@@ -61,6 +70,19 @@ namespace ETGMod {
 
                 [YamlMember(Alias = "min")]
                 public float Min { set; get; }
+            }
+
+            public class Scale {
+                [YamlMember(Alias = "width")]
+                public float WScale { set; get; } = 1;
+
+                [YamlMember(Alias = "height")]
+                public int HScale { set; get; } = 1;
+
+                public Scale() {
+                    WScale = 0;
+                    HScale = 0;
+                }
             }
 
             public class FrameSize {

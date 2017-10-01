@@ -52,5 +52,11 @@
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
+      <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
+      <Name>MonoMod</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

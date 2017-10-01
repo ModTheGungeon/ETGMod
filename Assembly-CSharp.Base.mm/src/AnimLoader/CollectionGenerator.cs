@@ -153,11 +153,14 @@ namespace ETGMod {
                     var x = definition.OffsetX ?? Mapping.Offset.X;
                     var y = definition.OffsetY ?? Mapping.Offset.Y;
 
+                    var wscale = definition.ScaleW ?? Mapping.DefScale?.WScale ?? 1;
+                    var hscale = definition.ScaleH ?? Mapping.DefScale?.HScale ?? 1;
+
                     var spritesheet_id = _SpritesheetID(definition.Spritesheet ?? Mapping.Spritesheet);
                     var texture = Textures[spritesheet_id];
 
-                    var w = width * (1f / 16f);
-                    var h = height * (1f / 16f);
+                    var w = width * wscale / 16f;
+                    var h = height * hscale / 16f;
 
                     var spritedef = new tk2dSpriteDefinition {
                         normals = new Vector3[] {
@@ -169,15 +172,21 @@ namespace ETGMod {
                         tangents = new Vector4[] {
                             new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
                             new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+
                             new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
                             new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
                         },
                         texelSize = new Vector2(0.1f, 0.1f),
                         extractRegion = false,
-                        regionX = 0,
-                        regionY = 0,
-                        regionW = 0,
-                        regionH = 0,
+
+                        // data mostly used by texmod stuff, but can be useful for other things too
+                        // might use this at some point to make a tk2d to df atlas converter or similiar
+                        regionX = definition.X,
+                        regionY = definition.Y,
+                        regionW = width,
+                        regionH = height,
+                        //////////////////////////////////////////////
+
                         flipped = tk2dSpriteDefinition.FlipMode.None,
                         complexGeometry = false,
                         physicsEngine = tk2dSpriteDefinition.PhysicsEngine.Physics3D,
@@ -187,15 +196,15 @@ namespace ETGMod {
                         material = materials[spritesheet_id],
                         materialInst = materials[spritesheet_id],
                         name = name,
-                        position0 = new Vector3(0f, 0f, 0f),
-                        position1 = new Vector3(w, 0f, 0f),
-                        position2 = new Vector3(0f, h, 0f),
-                        position3 = new Vector3(w, h, 0f),
+                        position0 = new Vector3(x, y, 0f),
+                        position1 = new Vector3(x + w, y, 0f),
+                        position2 = new Vector3(x, y + h, 0f),
+                        position3 = new Vector3(x + w, y + h, 0f),
                         uvs = GenerateUVs(texture, definition.X, texture.height - 2 - height - definition.Y, width, height),
                         boundsDataCenter = new Vector3(w / 2f, h / 2f, 0f),
                         boundsDataExtents = new Vector3(w / 2f, h / 2f, 0f),
                         untrimmedBoundsDataCenter = new Vector3(w / 3f, h / 3f, 0f),
-                        untrimmedBoundsDataExtents = new Vector3(w / 3f, h / 3f, 0f)
+                        untrimmedBoundsDataExtents = new Vector3(w / 3f, h / 3f, 0f),
                     };
 
                     Logger.Debug($"DEFINITION {name}");

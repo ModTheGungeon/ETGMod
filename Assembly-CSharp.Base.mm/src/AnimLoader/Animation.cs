@@ -51,6 +51,10 @@ namespace ETGMod {
         }
 
         #region I wish C# had macros
+        public static void CopyAnimator(tk2dSpriteAnimator source, tk2dSpriteAnimator target) {
+            new MMILAccess.BatchAccess<tk2dSpriteAnimator>(source).CopyTo(target);
+        }
+
         public static void CopyCollection(tk2dSpriteCollectionData source, tk2dSpriteCollectionData target) {
             // Commented out lines cause NullReferenceExceptions
             // Most likely because `source` isn't assigned to a game object

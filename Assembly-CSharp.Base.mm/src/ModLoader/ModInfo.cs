@@ -66,7 +66,7 @@ namespace ETGMod {
                         Logger.Debug($"Resolving assembly: {args.Name}");
                         if (AssemblyNameMap.TryGetPath(args.Name, out path)) {
                             Logger.Debug($"Resolved with {path}");
-                            result = Assembly.LoadFrom(path);
+                            result = Assembly.LoadFile(path);
                         } else {
                             Logger.Debug($"Unresolved");
                         }
@@ -83,7 +83,7 @@ namespace ETGMod {
                     if (AssemblyPath == null) {
                         throw new InvalidOperationException($"Tried to access Assembly without AssemblyPath");
                     }
-                    return _Assembly = Assembly.LoadFrom(AssemblyPath);
+                    return _Assembly = Assembly.LoadFile(AssemblyPath);
                 }
             }
 

@@ -3,13 +3,16 @@
 
 using System;
 using SGUI;
+using MonoMod;
 
-public class patch_dfButton : dfButton {
+namespace ETGMod.GUI.Patches {
+    [MonoModPatch("global::dfButton")]
+    public class dfButton : global::dfButton {
+        protected extern void orig_OnKeyPress(dfKeyEventArgs args);
+        protected override void OnKeyPress(dfKeyEventArgs args) {
+            if (SGUIRoot.Main.Backend.LastKeyEventConsumed) return;
 
-    protected extern void orig_OnKeyPress(dfKeyEventArgs args);
-    protected override void OnKeyPress(dfKeyEventArgs args) {
-        if (SGUIRoot.Main.Backend.LastKeyEventConsumed) return;
-
-        orig_OnKeyPress(args);
+            orig_OnKeyPress(args);
+        }
     }
 }

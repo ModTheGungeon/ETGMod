@@ -47,6 +47,9 @@
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="NLua">
+      <HintPath>..\libs\Unity3D-NLua\Assets\Plugins\NLua.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,6 +72,11 @@
     <Compile Include="src\AnimLoader\CollectionGenerator.cs" />
     <Compile Include="src\ModLoader\Mod.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
+    <Compile Include="src\Patches\patch_tk2dSpriteDefinition.cs" />
+    <Compile Include="src\ETGMod\IDMaps.cs" />
+    <Compile Include="src\API\PickupObject.cs" />
+    <Compile Include="src\API\Prefab.cs" />
+    <Compile Include="src\ETGMod\API.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -103,10 +111,6 @@
     <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
       <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
       <Name>MonoMod</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\libs\Harmony\Harmony\Harmony.csproj">
-      <Project>{69AEE16A-B6E7-4642-8081-3928B32455DF}</Project>
-      <Name>Harmony</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

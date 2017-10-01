@@ -3,18 +3,22 @@
 
 using System;
 using SGUI;
+using MonoMod;
 
-public class patch_dfInputManager : dfInputManager {
-    bool _etgmod_sgui_patched = false;
+namespace ETGMod.GUI.Patches {
+    [MonoModPatch("global::dfInputManager")]
+    public class dfInputManager : global::dfInputManager {
+        bool _etgmod_sgui_patched = false;
 
-    public extern void orig_OnEnable();
-    public new void OnEnable() {
-        orig_OnEnable();
+        public extern void orig_OnEnable();
+        public new void OnEnable() {
+            orig_OnEnable();
 
-        if (_etgmod_sgui_patched) return;
-        _etgmod_sgui_patched = true;
+            if (_etgmod_sgui_patched) return;
+            _etgmod_sgui_patched = true;
 
-        ETGMod.GUI.GUI.Logger.Debug($"Patching dfInputManager adapter with SGUIDFInput");
-        Adapter = new SGUIDFInput(Adapter);
+            ETGMod.GUI.GUI.Logger.Debug($"Patching dfInputManager adapter with SGUIDFInput");
+            Adapter = new SGUIDFInput(Adapter);
+        }
     }
 }

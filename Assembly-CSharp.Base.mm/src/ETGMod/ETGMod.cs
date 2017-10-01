@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ETGMod {
     public partial class ETGMod : Backend {
-        const KeyCode MOD_RELOAD_KEY = KeyCode.F5;
+        public const KeyCode MOD_RELOAD_KEY = KeyCode.F5;
 
         public override Version Version { get { return new Version(0, 3, 0); } }
 
@@ -81,7 +81,14 @@ namespace ETGMod {
                 return;
             }
             Logger.Info($"Loading mod: {filename}");
-            ModLoader.Load(mods_dir_entry);
+            try {
+                ModLoader.Load(mods_dir_entry);
+            } catch (Exception e) {
+                Logger.Error($"Exception while loading mod {filename}: [{e.GetType().Name}] {e.Message}");
+                foreach (var l in e.StackTrace.Split('\n')) {
+                    Logger.ErrorIndent(l);
+                }
+            }
         }
 
         private void _LoadMods() {
@@ -149,11 +156,25 @@ namespace ETGMod {
 
             Logger.Info($"Core ETGMod init {FullVersion}");
             Logger.Info($"Game folder: {Paths.GameFolder}");
+
+            var state = new NLua.Lua();
+            state.LoadCLRPackage();
+            state.DoString(@"
+                import 'Assembly-CSharp'
+                import 'ETGMod'
+                local logger = Logger('Lua')
+                logger:Warn('LUA LUA LUA LUA')
+            ");
         }
 
         public override void AllBackendsLoaded() {
-            Logger.Info($"Loading mods from {Paths.ModsFolder}");
+            Logger.Info("Initializing ID pools");
+            _InitIDs();
 
+            Logger.Info("Initializing APIs");
+            _InitAPIs();
+
+            Logger.Info($"Loading mods from '{Paths.ModsFolder}'");
             _LoadMods();
         }
 
@@ -174,20 +195,23 @@ namespace ETGMod {
                     } catch { }
                 }
 
-                System.Console.WriteLine($"{e.myGuid} {name}");
+                Console.WriteLine($"{e.myGuid} {name}");
             }
         }
 
+        private static object[] _EmptyObjectArray = { };
         public void Update() {
             if (Input.GetKeyDown(MOD_RELOAD_KEY)) {
-                Logger.Info($"Reloading all mods");
+                Logger.Info($"Reloading all backends and mods");
 
-                _LoadMods(); 
+                foreach (var backend in AllBackends) {
+                    backend.Type.GetMethod("Reload").Invoke(backend.Instance, _EmptyObjectArray);
+                }
+                _LoadMods();
+                foreach (var backend in AllBackends) {
+                    backend.Type.GetMethod("ReloadAfterMods").Invoke(backend.Instance, _EmptyObjectArray);
+                }
             }
-        }
-
-        public void FixedUpdate() {
-            
         }
     }
 }

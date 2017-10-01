@@ -1,6 +1,6 @@
 ﻿using System;
 namespace ETGMod {
-    public class Logger {
+    public class Logger : MarshalByRefObject {
         public enum LogLevel {
             Error = 0,
             Warn = 1,
@@ -89,7 +89,7 @@ namespace ETGMod {
         public string ErrorPrefix {
             get {
                 if (_ErrorPrefix != null) return _ErrorPrefix;
-                return _ErrorPrefix = $"[{ID} DEBUG] ";
+                return _ErrorPrefix = $"[{ID} ERROR] ";
             }
         }
 
@@ -120,6 +120,50 @@ namespace ETGMod {
             get {
                 if (_ErrorIndentPrefix != null) return _ErrorIndentPrefix;
                 return _ErrorIndentPrefix = new String(' ', ErrorPrefix.Length);
+            }
+        }
+
+        public void DebugPretty(object o) {
+            if (!LogLevelEnabled(LogLevel.Debug)) return;
+            var s = o.ToString();
+            var split = s.Split('\n');
+            for (int i = 0; i < split.Length; i++) {
+                var e = split[i];
+                if (i == 0) Debug(e);
+                else DebugIndent(e);
+            }
+        }
+
+        public void InfoPretty(object o) {
+            if (!LogLevelEnabled(LogLevel.Info)) return;
+            var s = o.ToString();
+            var split = s.Split('\n');
+            for (int i = 0; i < split.Length; i++) {
+                var e = split[i];
+                if (i == 0) Info(e);
+                else InfoIndent(e);
+            }
+        }
+
+        public void WarnPretty(object o) {
+            if (!LogLevelEnabled(LogLevel.Warn)) return;
+            var s = o.ToString();
+            var split = s.Split('\n');
+            for (int i = 0; i < split.Length; i++) {
+                var e = split[i];
+                if (i == 0) Warn(e);
+                else WarnIndent(e);
+            }
+        }
+
+        public void ErrorPretty(object o) {
+            if (!LogLevelEnabled(LogLevel.Error)) return;
+            var s = o.ToString();
+            var split = s.Split('\n');
+            for (int i = 0; i < split.Length; i++) {
+                var e = split[i];
+                if (i == 0) Error(e);
+                else ErrorIndent(e);
             }
         }
 

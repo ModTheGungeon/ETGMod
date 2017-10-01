@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-//http://stackoverflow.com/questions/852181/c-printing-all-properties-of-an-object
 namespace ETGMod.Tools {
+    //http://stackoverflow.com/questions/852181/c-printing-all-properties-of-an-object
+    //https://github.com/mcshaz/BlowTrial/blob/master/GenericToDataFile/ObjectDumper.cs
     public class ObjectDumper {
         private int _currentIndent;
         private readonly int _indentSize;
@@ -14,23 +15,17 @@ namespace ETGMod.Tools {
         private readonly char _indentChar;
         private readonly int _depth;
         private int _currentLine;
-        private BindingFlags _bindingFlags;
 
-        private ObjectDumper(int depth, int indentSize, char indentChar, bool dump_private = false) {
+        private ObjectDumper(int depth, int indentSize, char indentChar) {
             _depth = depth;
             _indentSize = indentSize;
             _indentChar = indentChar;
             _stringBuilder = new StringBuilder();
             _hashListOfFoundElements = new Dictionary<object, int>();
-            if (dump_private) {
-                _bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
-            } else {
-                _bindingFlags = BindingFlags.Public;
-            }
         }
 
-        public static string Dump(object element, int depth = 4, int indentSize = 2, char indentChar = ' ', bool dump_private = false) {
-            var instance = new ObjectDumper(depth, indentSize, indentChar, dump_private);
+        public static string Dump(object element, int depth = 4, int indentSize = 2, char indentChar = ' ') {
+            var instance = new ObjectDumper(depth, indentSize, indentChar);
             return instance.DumpElement(element, true);
         }
 
@@ -59,8 +54,9 @@ namespace ETGMod.Tools {
                     Write(FormatValue(element));
                 }
             } else {
-                var enumerableElement = element as IEnumerable;
-                if (enumerableElement != null) {
+                if (element is IEnumerable)
+                {
+                    var enumerableElement = (IEnumerable)element;
                     foreach (object item in enumerableElement) {
                         if (item is IEnumerable && !(item is string)) {
                             _currentIndent++;
@@ -70,12 +66,14 @@ namespace ETGMod.Tools {
                             DumpElement(item);
                         }
                     }
-                } else {
+                }
+                else
+                {
                     Type objectType = element.GetType();
                     Write("{{{0}(HashCode:{1})}}", objectType.FullName, element.GetHashCode());
                     if (!AlreadyDumped(element)) {
                         _currentIndent++;
-                        MemberInfo[] members = objectType.GetMembers(_bindingFlags);
+                        MemberInfo[] members = objectType.GetMembers(BindingFlags.Public | BindingFlags.Instance);
                         foreach (var memberInfo in members) {
                             var fieldInfo = memberInfo as FieldInfo;
                             var propertyInfo = memberInfo as PropertyInfo;
@@ -153,7 +151,7 @@ namespace ETGMod.Tools {
                 }
             }
 
-            if (o is ValueType)
+            if (o is ValueType) 
                 return (o.ToString());
 
             if (o is IEnumerable)

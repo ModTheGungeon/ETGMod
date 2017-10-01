@@ -106,7 +106,10 @@ namespace ETGMod {
         }
 
         public abstract void Loaded();
-        public virtual void AllBackendsLoaded() {}
+        public virtual void AllBackendsLoaded() { }
         public virtual void NoBackendsLoadedYet() { }
+
+        public virtual void Reload() { }
+        public virtual void ReloadAfterMods() { }
     }
 }

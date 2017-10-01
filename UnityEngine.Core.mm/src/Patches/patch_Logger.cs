@@ -1,9 +1,12 @@
 ﻿using System;
-namespace UnityEngine {
+using MonoMod;
+
+namespace UnityEngine.Patches {
     /// <summary>
     /// Patches the UnityEngine logger to use ETGMod's logger
     /// </summary>
-    public class patch_Logger {
+    [MonoModPatch("UnityEngine.Logger")]
+    public class Logger {
         public static ETGMod.Logger GungeonLogger = new ETGMod.Logger("Gungeon");
 
         /// <summary>

@@ -4,12 +4,9 @@ spritesheet: logo.png
 
 definitions:
   title_words_black_001:
-    offsx: 0
-    offsy: 0
-    x: 0
-    y: 0
-  title_words_white_001:
-    offsx: 0
-    offsy: 0
+    scalew: 1.5
+    scaleh: 1.5
+    w: 437
+    h: 163
     x: 0
     y: 0

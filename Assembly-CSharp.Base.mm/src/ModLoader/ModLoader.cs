@@ -236,7 +236,11 @@ namespace ETGMod {
             for (int j = 0; j < info.Behaviours.Count; j++) {
                 var behaviour = info.Behaviours[j];
 
-                behaviour.Unloaded();
+                try {
+                    behaviour.Unloaded();
+                } catch {
+                    Logger.Warn($"Failed running the unload method on behavior #{j} of mod {info.Name}");
+                }
             }
 
             PostUnloadMod.Invoke(info);

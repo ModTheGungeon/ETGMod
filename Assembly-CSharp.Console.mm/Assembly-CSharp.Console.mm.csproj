@@ -49,6 +49,7 @@
     <Compile Include="src\Console\AutoCompletor.cs" />
     <Compile Include="src\Console\Command.cs" />
     <Compile Include="src\Console\History.cs" />
+    <Compile Include="src\Console\DefaultCommands.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Nowy folder\" />

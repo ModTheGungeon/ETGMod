@@ -5,7 +5,8 @@ using System.Diagnostics;
 using MonoMod;
 
 namespace UnityEngine {
-    internal sealed class patch_Resources {
+    [MonoModPatch("UnityEngine.Resources")]
+    internal sealed class Resources {
         // TODO
 
         [MonoModOriginal]

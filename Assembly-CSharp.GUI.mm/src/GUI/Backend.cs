@@ -18,7 +18,7 @@ namespace ETGMod.GUI {
             Logger.Info("Initializing SGUI");
 
             GUIRoot = SGUIRoot.Setup();
-            SGUIIMBackend.GetFont = (SGUIIMBackend backend) => FontCache.GungeonFont ?? (FontCache.GungeonFont = FontConverter.DFFontToUnityFont((dfFont)patch_MainMenuFoyerController.Instance.VersionLabel.Font, 2));
+            SGUIIMBackend.GetFont = (SGUIIMBackend backend) => FontCache.GungeonFont ?? (FontCache.GungeonFont = FontConverter.DFFontToUnityFont((dfFont)ETGMod.CorePatches.MainMenuFoyerController.Instance.VersionLabel.Font, 2));
 
             Logger.Info("Initializing menu controller");
             MenuController = _GameObject.AddComponent<MenuController>();
