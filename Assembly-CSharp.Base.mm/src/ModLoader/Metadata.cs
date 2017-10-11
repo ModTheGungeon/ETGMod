@@ -33,8 +33,8 @@ namespace ETGMod {
                 [YamlMember(Alias = "url")]
                 public string URL { set; get; } = "";
 
-                [YamlMember(Alias = "dll")]
-                public string DLL { set; get; } = null;
+                [YamlMember(Alias = "script")]
+                public string Script { set; get; } = null;
 
                 [YamlMember(Alias = "dependencies")]
                 public List<Dependency> Dependencies { set; get; } = new List<Dependency>();
@@ -49,9 +49,9 @@ namespace ETGMod {
                 [YamlMember(Alias = "extra")]
                 public Dictionary<string, object> Extra { set; get; } = null;
 
-                public bool HasDLL {
+                public bool HasScript {
                     get {
-                        return DLL != null;
+                        return Script != null;
                     }
                 }
 

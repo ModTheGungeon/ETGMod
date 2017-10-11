@@ -54,7 +54,12 @@ namespace ETGMod.Console {
                             elem.Size -= new Vector2(0, elem.Backend.LineHeight);
                         },
                         Children = {
-                            new SLabel($"ETGMod v{etgmod.BestMatch?.Instance.StringVersion ?? "?"}") {Color = 0x00A1E7},
+                            new SLabel($"ETGMod v{etgmod.BestMatch?.Instance.StringVersion ?? "?"}") {
+                                Foreground = UnityUtil.NewColorRGB(0, 161, 231),
+                                Modifiers = {
+                                    new STest()
+                                }
+                            }
                         }
                     },
                     new SGroup { // AutocompleteBox

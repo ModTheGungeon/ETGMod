@@ -31,7 +31,21 @@ namespace ETGMod.CorePatches {
             }
         }
 
-        private void Awake() => AddModVersions();
+        public extern void orig_InitializeMainMenu();
+        public new void InitializeMainMenu() {
+            orig_InitializeMainMenu();
+            if (!_Notified) EventHooks.InvokeMainMenuLoadedFirstTime(this);
+            _Notified = true;
+        }
+
+        private bool _Notified = false;
+        protected void core_Awake() {
+            AddModVersions();
+        }
+
+        private void Awake() {
+            core_Awake();
+        }
 
         public void AddLine(string line) {
             if (VersionLabel.Text.Length > 0) {

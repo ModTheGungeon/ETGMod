@@ -70,13 +70,15 @@
     <Compile Include="src\External\ObjectDumper.cs" />
     <Compile Include="src\AnimLoader\Collection.cs" />
     <Compile Include="src\AnimLoader\CollectionGenerator.cs" />
-    <Compile Include="src\ModLoader\Mod.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\Patches\patch_tk2dSpriteDefinition.cs" />
     <Compile Include="src\ETGMod\IDMaps.cs" />
     <Compile Include="src\API\PickupObject.cs" />
     <Compile Include="src\API\Prefab.cs" />
     <Compile Include="src\ETGMod\API.cs" />
+    <Compile Include="src\Lua\Events.cs" />
+    <Compile Include="src\Lua\LuaTool.cs" />
+    <Compile Include="src\Lua\Globals.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -86,6 +88,7 @@
     <Folder Include="src\AnimLoader\" />
     <Folder Include="src\ModResources\" />
     <Folder Include="src\Patches\" />
+    <Folder Include="src\Lua\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.BasePre.mm\Assembly-CSharp.BasePre.mm.csproj">

@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp.Console.mm"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp.GUI.mm", "Assembly-CSharp.GUI.mm\Assembly-CSharp.GUI.mm.csproj", "{BA34AC90-F2B8-445E-A780-873F7321D975}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLua", "NLua\NLua.csproj", "{40210593-BC8D-491F-9970-0F23603432E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLua", "libs\NLua\NLua.csproj", "{40210593-BC8D-491F-9970-0F23603432E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

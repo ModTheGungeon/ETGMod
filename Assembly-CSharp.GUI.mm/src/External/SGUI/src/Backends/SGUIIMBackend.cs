@@ -662,10 +662,10 @@ namespace SGUI {
         }
 
 
-        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, int? color = null) {
+        public void Text(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, Color? color = null) {
             Text_(elem, position, size, text, alignment, icon, color: color);
         }
-        private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true, int? color = null) {
+        private void Text_(SElement elem, Vector2 position, Vector2 size, string text, TextAnchor alignment = TextAnchor.MiddleCenter, Texture icon = null, bool registerProperly = true, Color? color = null) {
             Skin.font = (Font) (elem == null ? null : elem.Font) ?? _Font;
             float y = 0f;
 
@@ -730,8 +730,12 @@ namespace SGUI {
             RegisterOperation(EGUIOperation.Draw, EGUIComponent.Label, registerProperly ? bounds : NULLRECT, text);
             if (icon != null) text = " " + text;
             var real_text = text;
-            if (color != null) real_text = $"<color=#{color.Value.ToString("X6")}>{text}</color>";
-            GUI.Label(bounds, real_text);
+
+            var old_font_style = Skin.label.fontStyle;
+            Skin.label.fontStyle = ((SLabel)elem).FontStyle;
+            GUI.Label(bounds, text);
+            Skin.label.fontStyle = old_font_style;
+
 
             if (icon != null) {
                 Texture(
@@ -1057,15 +1061,15 @@ namespace SGUI {
 
         }
 
-        public Vector2 MeasureText(string text, Vector2? size = null, object font = null) {
-            return MeasureText(ref text, size, font);
+        public Vector2 MeasureText(string text, float? width = null, object font = null) {
+            return MeasureText(ref text, width, font);
         }
-        public Vector2 MeasureText(ref string text, Vector2? size = null, object font = null) {
+        public Vector2 MeasureText(ref string text, float? width = null, object font = null) {
             Font font_ = (Font) font ?? _Font;
 
             font_.RequestCharactersInTexture(text, 0);
 
-            Vector2 bounds = size ?? MAXVEC2;
+            float max_width = width ?? MAXVEC2.x;
             float x = 0f;
             float maxX = 0f;
             float y = 0f;
@@ -1086,7 +1090,7 @@ namespace SGUI {
 
                 if (ciGot) x += ci.advance;
                 if (x > maxX) maxX = x;
-                if (x > bounds.x || c == '\n') {
+                if (x > max_width || c == '\n') {
                     if (lastSpace == -1 || c == '\n') {
                         rebuilt.Append('\n');
                         if (c != '\n') ++offset;

@@ -2,12 +2,16 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using NLua;
 
 namespace ETGMod {
     public partial class ETGMod : Backend {
         public const KeyCode MOD_RELOAD_KEY = KeyCode.F5;
 
         public override Version Version { get { return new Version(0, 3, 0); } }
+
+        public static bool AutoReloadMods = true;
+        private static bool _ShouldAutoReload = false;
 
         public static Logger Logger = new Logger("ETGMod");
 
@@ -27,6 +31,9 @@ namespace ETGMod {
         public static ETGMod Instance;
         public static ModLoader ModLoader = new ModLoader(Paths.ModsFolder, Paths.CacheFolder);
 
+        public static Action<string, Exception> ErrorLoadingMod = (filename, ex) => { };
+        public static Action<Exception> ErrorCreatingModsDirectory = (ex) => { };
+
         private static string _FullVersion;
         public static string FullVersion {
             // extremely tiny optimization
@@ -36,19 +43,26 @@ namespace ETGMod {
             }
         }
 
-        private void _PrepareModsDirectory() {
+        private FileSystemWatcher _FSWatcher;
+
+        private bool _PrepareModsDirectory() {
             if (!Directory.Exists(Paths.ModsFolder)) {
                 Logger.Debug($"Creating mods folder {Paths.ModsFolder}");
                 try {
                     Directory.CreateDirectory(Paths.ModsFolder);
-                } catch (IOException e) {
-                    Logger.Error($"The mods folder ({Paths.ModsFolder}) already exists, but is a file. Please remove or rename it.");
-                } catch (UnauthorizedAccessException e) {
-                    Logger.Error($"Insufficient permissions to create mods folder ({Paths.ModsFolder}).");
                 } catch (Exception e) {
-                    Logger.Error($"Unknown error while creating mods folder ({Paths.ModsFolder}): {e.Message}");
+                    ErrorCreatingModsDirectory.Invoke(e);
+                    if (e is IOException) {
+                        Logger.Error($"The mods folder ({Paths.ModsFolder}) already exists, but is a file. Please remove or rename it.");
+                    } else if (e is UnauthorizedAccessException) {
+                        Logger.Error($"Insufficient permissions to create mods folder ({Paths.ModsFolder}).");
+                    } else {
+                        Logger.Error($"Unknown error while creating mods folder ({Paths.ModsFolder}): {e.Message}");
+                    }
+                    return false;
                 }
             }
+            return true;
         }
 
         private void _PrepareModLoadConfigFiles() {
@@ -74,26 +88,35 @@ namespace ETGMod {
             }
         }
 
-        private void _LoadOrIgnoreIfBlacklisted(string mods_dir_entry, HashSet<string> blacklist) {
+        private ModLoader.ModInfo _LoadOrIgnoreIfBlacklisted(string mods_dir_entry, HashSet<string> blacklist) {
             var filename = Path.GetFileName(mods_dir_entry);
             if (blacklist.Contains(mods_dir_entry)) {
                 Logger.Info($"Refusing to load blacklisted mod: {filename}");
-                return;
+                return null;
             }
             Logger.Info($"Loading mod: {filename}");
             try {
-                ModLoader.Load(mods_dir_entry);
+                return ModLoader.Load(mods_dir_entry);
             } catch (Exception e) {
                 Logger.Error($"Exception while loading mod {filename}: [{e.GetType().Name}] {e.Message}");
+                ErrorLoadingMod.Invoke(filename, e);
+
                 foreach (var l in e.StackTrace.Split('\n')) {
                     Logger.ErrorIndent(l);
                 }
+
+                if (e.InnerException != null) {
+                    Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
+                    foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+                }
             }
+            return null;
         }
 
         private void _LoadMods() {
             ModLoader.UnloadAll();
-            _PrepareModsDirectory();
+            ModLoader.RefreshLuaState();
+            if (!_PrepareModsDirectory()) return;
             _PrepareModLoadConfigFiles();
 
             var entries = Directory.GetFileSystemEntries(Paths.ModsFolder);
@@ -137,7 +160,7 @@ namespace ETGMod {
             for (int i = 0; i < order.Count; i++) {
                 var entry = order[i];
 
-                _LoadOrIgnoreIfBlacklisted(Path.Combine(Paths.ModsFolder, entry), blacklist);
+                var info = _LoadOrIgnoreIfBlacklisted(Path.Combine(Paths.ModsFolder, entry), blacklist);
             }
 
             for (int i = 0; i < entries.Length; i++) {
@@ -151,20 +174,38 @@ namespace ETGMod {
             }
         }
 
+        public void OnApplicationFocus() {
+            if (_ShouldAutoReload) {
+                Logger.Debug($"Focused, auto-reloading mods");
+                _ShouldAutoReload = false;
+                _ReloadMods();
+            }
+        }
+
         public override void Loaded() {
             Instance = this;
 
             Logger.Info($"Core ETGMod init {FullVersion}");
             Logger.Info($"Game folder: {Paths.GameFolder}");
 
-            var state = new NLua.Lua();
-            state.LoadCLRPackage();
-            state.DoString(@"
-                import 'Assembly-CSharp'
-                import 'ETGMod'
-                local logger = Logger('Lua')
-                logger:Warn('LUA LUA LUA LUA')
-            ");
+            if (AutoReloadMods) {
+                _FSWatcher = new FileSystemWatcher {
+                    Path = Paths.ModsFolder,
+                    NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime
+                                                    | NotifyFilters.DirectoryName | NotifyFilters.FileName
+                                                    | NotifyFilters.LastAccess | NotifyFilters.LastWrite
+                                                    | NotifyFilters.Security | NotifyFilters.Size,
+                    IncludeSubdirectories = true,
+                };
+
+                var deleg = new FileSystemEventHandler((source, e) => _ShouldAutoReload = true);
+                _FSWatcher.Changed += deleg;
+                _FSWatcher.Created += deleg;
+                _FSWatcher.Deleted += deleg;
+                _FSWatcher.Renamed += (source, e) => _ShouldAutoReload = true;
+
+                _FSWatcher.EnableRaisingEvents = true;
+            }
         }
 
         public override void AllBackendsLoaded() {
@@ -199,19 +240,21 @@ namespace ETGMod {
             }
         }
 
+        private void _ReloadMods() {
+            Logger.Info($"Reloading all backends and mods");
+
+            foreach (var backend in AllBackends) {
+                backend.Type.GetMethod("Reload").Invoke(backend.Instance, _EmptyObjectArray);
+            }
+            _LoadMods();
+            foreach (var backend in AllBackends) {
+                backend.Type.GetMethod("ReloadAfterMods").Invoke(backend.Instance, _EmptyObjectArray);
+            }
+        }
+
         private static object[] _EmptyObjectArray = { };
         public void Update() {
-            if (Input.GetKeyDown(MOD_RELOAD_KEY)) {
-                Logger.Info($"Reloading all backends and mods");
-
-                foreach (var backend in AllBackends) {
-                    backend.Type.GetMethod("Reload").Invoke(backend.Instance, _EmptyObjectArray);
-                }
-                _LoadMods();
-                foreach (var backend in AllBackends) {
-                    backend.Type.GetMethod("ReloadAfterMods").Invoke(backend.Instance, _EmptyObjectArray);
-                }
-            }
+            if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods();
         }
     }
 }

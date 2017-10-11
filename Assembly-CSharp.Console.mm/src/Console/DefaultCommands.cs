@@ -1,10 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ETGMod.GUI;
+using UnityEngine;
 
 namespace ETGMod.Console {
     public partial class Console : Backend {
         private Logger.Subscriber _LoggerSubscriber;
+        private bool _Subscribed = false;
+        private static Dictionary<Logger.LogLevel, Color> _LoggerColors = new Dictionary<Logger.LogLevel, Color> {
+            {Logger.LogLevel.Debug, UnityUtil.NewColorRGB(10, 222, 0)},
+            {Logger.LogLevel.Info, UnityUtil.NewColorRGB(0, 173, 238)},
+            {Logger.LogLevel.Warn, UnityUtil.NewColorRGB(237, 160, 0)},
+            {Logger.LogLevel.Error, UnityUtil.NewColorRGB(255, 31, 31)}
+        };
+        private Logger.LogLevel _LogLevel = Logger.LogLevel.Debug;
 
         // for the debug/mods command
         private void _GetModInfo(StringBuilder builder, ModLoader.ModInfo info, string indent = "") {

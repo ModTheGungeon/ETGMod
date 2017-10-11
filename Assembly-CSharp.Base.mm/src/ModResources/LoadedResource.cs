@@ -21,28 +21,23 @@ namespace ETGMod {
         public string TextContent { get; protected set; }
         public byte[] BinaryContent { get; protected set; }
 
-        private Dictionary<Type, object> _SpecialCastCache = new Dictionary<Type, object>();
+        private Texture2D _Texture2D;
+        public Texture2D GetTexture2D() {
+            if (_Texture2D != null) return _Texture2D;
+            return _Texture2D = UnityUtil.LoadTexture2D(ReadBinary(), Path);
+        }
 
-        public static Func<ModLoader.ModInfo, Type, LoadedResource, object> SpecialCastCallback = (info, type, res) => {
-            if (type == typeof(string)) {
-                return res.ReadText();
-            } else if (type == typeof(byte[])) {
-                return res.ReadBinary();
-            } else if (type == typeof(Stream)) {
-                return res.Stream;
-            } else if (type == typeof(LoadedResource)) {
-                return res;
-            } else if (type == typeof(Texture2D)) {
-                var tex = new Texture2D(0, 0);
-                tex.name = res.Path;
-                tex.LoadImage(res.ReadBinary());
-                tex.filterMode = FilterMode.Point;
-                return tex;
-            } else if (type == typeof(Animation.Collection)) {
-                return new Animation.Collection(info, res.ReadText(), System.IO.Path.GetDirectoryName(res.ResourcePath));
-            }
-            return null;
-        };
+        private Animation.Collection _AnimationCollection;
+        public Animation.Collection GetAnimationCollection(ModLoader.ModInfo info) {
+            if (_AnimationCollection != null) return _AnimationCollection;
+            return _AnimationCollection = new Animation.Collection(info, ReadText(), System.IO.Path.GetDirectoryName(ResourcePath));
+        }
+
+        private Animation _Animation;
+        public Animation GetAnimation(ModLoader.ModInfo info) {
+            if (_Animation != null) return _Animation;
+            return _Animation = new Animation(info, ReadText(), System.IO.Path.GetDirectoryName(ResourcePath));
+        }
 
         public LoadedResource(string resource_path, string path, StorageType type = StorageType.Stream) {
             ResourcePath = resource_path;
@@ -63,23 +58,6 @@ namespace ETGMod {
         public byte[] ReadBinary() {
             if (BinaryContent != null) return BinaryContent;
             return BinaryContent = new BinaryReader(Stream).ReadAllBytes();
-        }
-
-        public T SpecialCast<T>(ModLoader.ModInfo info) {
-            object result = null;
-            var type = typeof(T);
-
-            if (_SpecialCastCache.TryGetValue(type, out result)) {
-                return (T)result;
-            }
-
-            result = SpecialCastCallback.Invoke(info, type, this);
-            if (result != null) {
-                _SpecialCastCache[type] = result;
-                return (T)result;
-            }
-
-            throw new InvalidOperationException($"Unsupported special type: {typeof(T).FullName}");
         }
     }
 }

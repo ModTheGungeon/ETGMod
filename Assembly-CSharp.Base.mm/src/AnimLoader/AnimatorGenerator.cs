@@ -17,7 +17,7 @@ namespace ETGMod {
                 ModInfo = mod_info;
                 Mapping = mapping;
 
-                Collection = mod_info.Load<Collection>(Path.Combine(base_dir, mapping.Collection));
+                Collection = mod_info.LoadCollection(Path.Combine(base_dir, mapping.Collection));
             }
 
             internal tk2dSpriteAnimationClip[] ConstructClips(tk2dSpriteCollectionData collection) {

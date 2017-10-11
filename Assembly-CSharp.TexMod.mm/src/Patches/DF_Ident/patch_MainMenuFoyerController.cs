@@ -23,7 +23,7 @@ namespace TexMod.Patches {
 
         private void Awake() {
             IdentifyDFTitleCard();
-            AddModVersions();
+            core_Awake();
         }
     }
 }

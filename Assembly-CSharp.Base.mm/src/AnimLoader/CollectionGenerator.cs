@@ -84,7 +84,7 @@ namespace ETGMod {
                     // first the general spritesheet, if it exists
                     if (mapping.Spritesheet != null) {
                         _SpritesheetID(mapping.Spritesheet);
-                        tex_list.Add(mod_info.Load<Texture2D>(Path.Combine(base_dir, mapping.Spritesheet)));
+                        tex_list.Add(mod_info.LoadTexture(Path.Combine(base_dir, mapping.Spritesheet)));
                         Logger.Debug($"New spritesheet: '{mapping.Spritesheet}', ID: {_LastSpritesheetID - 1}");
                     }
 
@@ -92,7 +92,7 @@ namespace ETGMod {
                     foreach (var def in mapping.Definitions) {
                         if (def.Value.Spritesheet != null) {
                             _SpritesheetID(def.Value.Spritesheet);
-                            tex_list.Add(mod_info.Load<Texture2D>(Path.Combine(base_dir, def.Value.Spritesheet)));
+                            tex_list.Add(mod_info.LoadTexture(Path.Combine(base_dir, def.Value.Spritesheet)));
                             Logger.Debug($"New spritesheet: '{def.Value.Spritesheet}', ID: {_LastSpritesheetID - 1}");
                         }
                     }

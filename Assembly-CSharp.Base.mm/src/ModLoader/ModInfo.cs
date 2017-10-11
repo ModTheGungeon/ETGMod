@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using ETGMod.Lua;
+using NLua;
 
 namespace ETGMod {
     public partial class ModLoader {
         public partial class ModInfo {
-            internal Logger Logger = new Logger("Unnamed Mod");
+            public Logger Logger = new Logger("Unnamed Mod");
             private string _NameOverride;
 
             public ModInfo Parent;
@@ -24,10 +26,8 @@ namespace ETGMod {
                 get;
                 internal set;
             } = new List<ModInfo>();
-            public List<Mod> Behaviours {
-                get;
-                internal set;
-            } = new List<Mod>();
+
+            public EventContainer Events;
 
             private Metadata _ModMetadata;
             public Metadata ModMetadata {
@@ -41,61 +41,25 @@ namespace ETGMod {
                     }
                 }
             }
+
             public string RealPath {
                 get;
                 internal set;
             }
+
             public string Path {
                 get;
                 internal set;
             }
-            public string AssemblyPath {
+
+            public string ScriptPath {
                 get;
                 internal set;
             }
-            internal AssemblyNameMap AssemblyNameMap = new AssemblyNameMap();
 
-            private ResolveEventHandler _AssemblyResolveHandler;
-            public ResolveEventHandler AssemblyResolveHandler {
+            public bool HasScript {
                 get {
-                    if (_AssemblyResolveHandler != null) return _AssemblyResolveHandler;
-                    return (object sender, ResolveEventArgs args) => {
-                        Assembly result = null;
-                        string path;
-
-                        Logger.Debug($"Resolving assembly: {args.Name}");
-                        if (AssemblyNameMap.TryGetPath(args.Name, out path)) {
-                            Logger.Debug($"Resolved with {path}");
-                            result = Assembly.LoadFile(path);
-                        } else {
-                            Logger.Debug($"Unresolved");
-                        }
-
-                        return result;
-                    };
-                }
-            }
-
-            private Assembly _Assembly;
-            public Assembly Assembly {
-                get {
-                    if (_Assembly != null) return _Assembly;
-                    if (AssemblyPath == null) {
-                        throw new InvalidOperationException($"Tried to access Assembly without AssemblyPath");
-                    }
-                    return _Assembly = Assembly.LoadFile(AssemblyPath);
-                }
-            }
-
-            public bool HasAssembly {
-                get {
-                    return Assembly != null;
-                }
-            }
-
-            public bool HasAnyBehaviour {
-                get {
-                    return Behaviours.Count > 0;
+                    return ScriptPath != null;
                 }
             }
 

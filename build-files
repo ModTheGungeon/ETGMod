@@ -5,8 +5,7 @@ libs/MonoMod/bin/{TARGET}/MonoMod.exe
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.dll
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.Mdb.dll
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.Pdb.dll
-libs/System.Windows.Forms.dll
-libs/System.Drawing.dll
+libs/NLua/bin/{TARGET}/NLua.dll
 
 # internal [Assembly-CSharp]
 Assembly-CSharp.Core.mm/bin/{TARGET}/Assembly-CSharp.Core.mm.dll
@@ -18,9 +17,6 @@ Assembly-CSharp.TexMod.mm/bin/{TARGET}/Assembly-CSharp.TexMod.mm.dll
 # internal [UnityEngine]
 UnityEngine.Core.mm/bin/{TARGET}/UnityEngine.Core.mm.dll
 UnityEngine.Base.mm/bin/{TARGET}/UnityEngine.Base.mm.dll
-
-# internal [NLua]
-NLua/bin/{TARGET}/NLua.dll
 
 # licenses
 LICENSE_ETGMOD

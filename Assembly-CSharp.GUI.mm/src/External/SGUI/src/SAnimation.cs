@@ -12,6 +12,7 @@ namespace SGUI {
         public bool SpeedUnscaled = true;
         public bool AutoStart = true;
         public bool Loop = false;
+        public bool Paused = false;
 
         public Func<float, float> Easing = SEasings.SineEaseInOut;
 
@@ -46,7 +47,7 @@ namespace SGUI {
                 return;
             }
 
-            if (Status != EStatus.Running) {
+            if (Status != EStatus.Running || Paused) {
                 return;
             }
 

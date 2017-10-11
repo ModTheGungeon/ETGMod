@@ -25,9 +25,49 @@ namespace ETGMod {
                 return Directory.Exists(p);
             }
 
-            public T Load<T>(string relative_path) {
+            public LoadedResource LoadResource(string relative_path) {
                 try {
-                    return Resources.Load(relative_path).SpecialCast<T>(this);
+                    return Resources.Load(relative_path);
+                } catch (FileNotFoundException e) {
+                    throw new FileNotFoundException($"[{Logger.ID}] While loading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            public string LoadText(string relative_path) {
+                try {
+                    return Resources.Load(relative_path).ReadText();
+                } catch (FileNotFoundException e) {
+                    throw new FileNotFoundException($"[{Logger.ID}] While loading text resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            public byte[] LoadBytes(string relative_path) {
+                try {
+                    return Resources.Load(relative_path).ReadBinary();
+                } catch (FileNotFoundException e) {
+                    throw new FileNotFoundException($"[{Logger.ID}] While loading bytes resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            public UnityEngine.Texture2D LoadTexture(string relative_path) {
+                try {
+                    return Resources.Load(relative_path).GetTexture2D();
+                } catch (FileNotFoundException e) {
+                    throw new FileNotFoundException($"[{Logger.ID}] While loading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            public Animation LoadAnimation(string relative_path) {
+                try {
+                    return Resources.Load(relative_path).GetAnimation(this);
+                } catch (FileNotFoundException e) {
+                    throw new FileNotFoundException($"[{Logger.ID}] While loading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            public Animation.Collection LoadCollection(string relative_path) {
+                try {
+                    return Resources.Load(relative_path).GetAnimationCollection(this);
                 } catch (FileNotFoundException e) {
                     throw new FileNotFoundException($"[{Logger.ID}] While loading resource '{relative_path.NormalizePath()}': {e.Message}\n{e.StackTrace}");
                 }

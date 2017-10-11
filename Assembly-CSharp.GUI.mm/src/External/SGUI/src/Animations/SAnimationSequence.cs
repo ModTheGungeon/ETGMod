@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace SGUI {
     public class SAnimationSequence : SAnimation {
-
         public List<SAnimation> Sequence = new List<SAnimation>();
 
         protected float[] _Offsets;

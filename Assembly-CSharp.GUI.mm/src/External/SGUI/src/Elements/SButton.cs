@@ -47,16 +47,16 @@ namespace SGUI {
             if (Root == null) return;
 
             if (UpdateBounds) {
-                Vector2 iconWidth = Icon == null ? Vector2.zero : new Vector2(Icon.width * IconScale.x + 1f + Backend.IconPadding, 0f);
+                float iconWidth = Icon == null ? 0 : Icon.width * IconScale.x + 1f + Backend.IconPadding;
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text, font: Font);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.InnerSize - Border * 2f - iconWidth, font: Font);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize.x - Border.x * 2f - iconWidth, font: Font);
                 }
                 if (Icon != null) {
                     Size.y = Mathf.Max(Size.y, Icon.height * IconScale.y + Backend.IconPadding);
                 }
-                Size += iconWidth;
+                Size = new Vector2(Size.x + iconWidth, Size.y);
                 Size += Border * 2f;
             }
 

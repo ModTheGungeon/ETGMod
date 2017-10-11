@@ -10,10 +10,3 @@
 [submodule "Assembly-CSharp.GUI.mm/src/External/SGUI"]
 	path = Assembly-CSharp.GUI.mm/src/External/SGUI
 	url = https://github.com/ModTheGungeon/SGUI
-[submodule "libs/Unity3D-NLua"]
-	path = libs/Unity3D-NLua
-	url = https://github.com/Hexalotl/Unity3D-NLua/
-	branch = MultiplatformSupport
-[submodule "libs/NLua"]
-	path = libs/NLua
-	url = https://github.com/Mervill/Unity3D-NLua

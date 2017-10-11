@@ -73,9 +73,12 @@
     <Compile Include="src\External\SGUI\src\SGUIExtensions.cs" />
     <Compile Include="src\External\SGUI\src\SGUIRoot.cs" />
     <Compile Include="src\External\SGUI\src\SModifier.cs" />
-    <Compile Include="src\GUI\Menu.cs" />
     <Compile Include="src\Patches\patch_dfInputManager.cs" />
     <Compile Include="src\Patches\patch_dfButton.cs" />
+    <Compile Include="src\Menu\Menu.cs" />
+    <Compile Include="src\Notifications\Notification.cs" />
+    <Compile Include="src\Notifications\NotificationController.cs" />
+    <Compile Include="src\Notifications\Animations.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -83,6 +86,8 @@
     <Folder Include="src\External\" />
     <Folder Include="src\External\SGUI\" />
     <Folder Include="src\Patches\" />
+    <Folder Include="src\Menu\" />
+    <Folder Include="src\Notifications\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.Core.mm\Assembly-CSharp.Core.mm.csproj">
@@ -92,6 +97,10 @@
     <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
       <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
       <Name>MonoMod</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Assembly-CSharp.Base.mm\Assembly-CSharp.Base.mm.csproj">
+      <Project>{34E81F62-F88C-44EF-96D9-DBBD2C46DF34}</Project>
+      <Name>Assembly-CSharp.Base.mm</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -17,5 +17,9 @@ namespace SGUI {
             return c;
         }
 
+        public override void CopyTo(SElement elem) {
+            elem.Modifiers.Add(new SFadeOutAnimation(Duration));
+        }
+
     }
 }

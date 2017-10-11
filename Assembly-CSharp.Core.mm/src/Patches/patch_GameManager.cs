@@ -17,6 +17,7 @@ namespace ETGMod.CorePatches {
         protected extern void orig_Awake();
         private void Awake() {
             Loader.Logger.Info("Mod the Gungeon entry point");
+            EventHooks.InvokeGameStarted(this);
             Backend.GameObject = new GameObject("Mod the Gungeon");
 
             var asm = Assembly.GetExecutingAssembly();

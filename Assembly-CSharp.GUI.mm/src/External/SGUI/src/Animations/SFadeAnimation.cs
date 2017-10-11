@@ -19,13 +19,13 @@ namespace SGUI {
         public override void OnInit() {
             OrigColors = new Color[Elem.Colors.Length];
             Elem.Colors.CopyTo(OrigColors, 0);
+        }
 
+        public abstract void CopyTo(SElement elem);
+
+        public override void OnStart() {
             for (int i = 0; i < Elem.Children.Count; i++) {
-                SElement child = Elem.Children[i];
-                if (child.Modifiers.Where(m => m is SFadeAnimation) != null) continue;
-                SFadeAnimation clone = (SFadeAnimation) MemberwiseClone();
-                clone.Elem = child;
-                child.Modifiers.Add(clone);
+                CopyTo(Elem.Children[i]);
             }
         }
 
@@ -36,9 +36,5 @@ namespace SGUI {
         }
 
         public abstract Color Animate(float t, Color c);
-
-        public override void OnStart() {
-        }
-
     }
 }

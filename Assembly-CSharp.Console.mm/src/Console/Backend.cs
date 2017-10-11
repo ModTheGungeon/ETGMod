@@ -268,10 +268,12 @@ namespace ETGMod.Console {
             ConsoleMenu.Instance.OutputBox.Children.Add(new SLabel());
         }
 
-        public void PrintLine(string txt, bool log = false, int? color = null) {
+        public void PrintLine(string txt, bool log = false, Color? color = null) {
             var outputbox = ConsoleMenu.Instance.OutputBox;
             //if (outputbox.Children.Count == 0) {
-            outputbox.Children.Add(new SLabel(txt) { Color = color });
+            var label = new SLabel(txt);
+            if (color.HasValue) label.Foreground = color.Value;
+            outputbox.Children.Add(label);
             //  return;
             //} else {
             //    var elem = outputbox.Children[outputbox.Children.Count - 1];
@@ -286,7 +288,7 @@ namespace ETGMod.Console {
 
         public void PrintError(string txt, bool log = false) {
             if (txt.IndexOf('\n') == -1) {
-                PrintLine(txt, color: 0xFF6E6E);
+                PrintLine(txt, color: UnityUtil.NewColorRGB(255, 110, 110));
             } else {
                 foreach (var line in txt.Split('\n')) {
                     PrintError(line);
@@ -300,7 +302,7 @@ namespace ETGMod.Console {
         }
 
         public void ExecuteCommandAndPrintResult(string cmd) {
-            if (PrintUsedCommand) PrintLine("> " + cmd, color: 0x575757);
+            if (PrintUsedCommand) PrintLine("> " + cmd, color: UnityUtil.NewColorRGB(87, 87, 87));
             try {
                 PrintLine(ExecuteCommand(cmd));
             } catch (Exception e) {
@@ -342,15 +344,5 @@ namespace ETGMod.Console {
         public Command AddCommand(string name, Func<List<string>, string> callback) {
             return Commands[name] = new Command(name, callback);
         }
-
-        private bool _Subscribed = false;
-        private static Dictionary<Logger.LogLevel, int> _LoggerColors = new Dictionary<Logger.LogLevel, int> {
-            {Logger.LogLevel.Debug, 0x0ADE00},
-            {Logger.LogLevel.Info, 0x00ADEE},
-            {Logger.LogLevel.Warn, 0xEDA000},
-            {Logger.LogLevel.Error, 0xFF1F1F}
-        };
-        private Logger.LogLevel _LogLevel = Logger.LogLevel.Debug;
-
     }
 }

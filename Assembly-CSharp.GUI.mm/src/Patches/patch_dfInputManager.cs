@@ -17,7 +17,7 @@ namespace ETGMod.GUI.Patches {
             if (_etgmod_sgui_patched) return;
             _etgmod_sgui_patched = true;
 
-            ETGMod.GUI.GUI.Logger.Debug($"Patching dfInputManager adapter with SGUIDFInput");
+            GUI.Logger.Debug($"Patching dfInputManager adapter with SGUIDFInput");
             Adapter = new SGUIDFInput(Adapter);
         }
     }

@@ -21,15 +21,16 @@ public class patch_tk2dSpriteCollectionData : tk2dSpriteCollectionData {
 
     public void TexModPatch() {
         if (_texmod_init) return;
-        _texmod_init = true;
-
-        TexMod.TexMod.AddPatchedObject(this);
-
-        _texmod_saved_collection = new tk2dSpriteCollectionData();
-        Animation.CopyCollection(this, _texmod_saved_collection);
 
         Animation.Collection collection;
         if (TexMod.TexMod.CollectionMap.TryGetValue(name, out collection)) {
+            _texmod_init = true;
+
+            TexMod.TexMod.AddPatchedObject(this);
+
+            _texmod_saved_collection = new tk2dSpriteCollectionData();
+            Animation.CopyCollection(this, _texmod_saved_collection);
+
             TexMod.TexMod.Logger.Debug($"Found patch collection '{name}', sprite defs: {spriteDefinitions.Length}");
             collection.PatchCollection(this);
             TexMod.TexMod.Logger.Debug($"Sprite defs after patching: {spriteDefinitions.Length}");

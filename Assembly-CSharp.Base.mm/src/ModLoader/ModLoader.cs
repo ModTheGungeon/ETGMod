@@ -8,15 +8,18 @@ using YamlDotNet.Serialization;
 using Mono.Cecil;
 using System.Security.Cryptography;
 using System.Linq;
+using NLua;
+using ETGMod.Lua;
 
 namespace ETGMod {
     public partial class ModLoader {
         public static Logger Logger = new Logger("ModLoader");
-        public static string ModClassName = typeof(Mod).FullName;
         private static ModuleDefinition _AssemblyCSharpModuleDefinition = ModuleDefinition.ReadModule(typeof(WingsItem).Assembly.Location, new ReaderParameters(ReadingMode.Immediate));
         private static ModuleDefinition _UnityEngineModuleDefinition = ModuleDefinition.ReadModule(typeof(GameObject).Assembly.Location, new ReaderParameters(ReadingMode.Immediate));
 
         const string METADATA_FILE_NAME = "mod.yml";
+
+        public NLua.Lua LuaState { get; internal set; }
 
         public Deserializer Deserializer = new DeserializerBuilder().Build();
         public string CachePath;
@@ -28,8 +31,14 @@ namespace ETGMod {
 
         public List<ModInfo> LoadedMods = new List<ModInfo>();
 
-        public Action<ModInfo> PostLoadMod = (obj) => {};
+        public enum LuaEventMethod {
+            Loaded,
+            Unloaded
+        }
+
+        public Action<ModInfo> PostLoadMod = (obj) => { };
         public Action<ModInfo> PostUnloadMod = (obj) => { };
+        public Action<ModInfo, LuaEventMethod, Exception> LuaError = (obj, method, ex) => { };
 
         private Dictionary<string, ModuleDefinition> _AssemblyRelinkMap;
         public Dictionary<string, ModuleDefinition> AssemblyRelinkMap {
@@ -66,9 +75,25 @@ namespace ETGMod {
             RelinkCachePath = Path.Combine(cachepath, "Relink");
             ModsPath = modspath;
             GameObject = new GameObject("ETGMod Mod Loader");
+            RefreshLuaState();
         }
 
-        public ModInfo Load(string path, ModInfo parent = null) {
+        private void _InitializeLuaState() {
+            LuaState.DoFile(Path.Combine(Paths.ResourcesFolder, "lua/base.lua"));
+        }
+
+        public void RefreshLuaState() {
+            if (LuaState != null) LuaState.Dispose();
+            LuaState = new NLua.Lua();
+            LuaState.LoadCLRPackage();
+            //_InitializeLuaState();
+        }
+
+        public ModInfo Load(string path) {
+            return Load(path, null);
+        }
+
+        private ModInfo Load(string path, ModInfo parent) {
             ModInfo mod;
             if (Directory.Exists(path)) {
                 mod = _LoadFromDir(path);
@@ -89,13 +114,13 @@ namespace ETGMod {
                 _HandleModPack(mod);
             }
 
-            if (mod.ModMetadata.HasDLL && !mod.AssemblyNameMap.ContainsPath(Path.Combine(path, mod.ModMetadata.DLL))) {
-                throw new FileNotFoundException($"{mod.ModMetadata.DLL} doesn't exist in unpacked mod directory {path}");
+            if (mod.ModMetadata.HasScript && !File.Exists(Path.Combine(path, mod.ModMetadata.Script))) {
+                throw new FileNotFoundException($"{mod.ModMetadata.Script} doesn't exist in unpacked mod directory {path}");
             }
 
-            if (mod.ModMetadata.HasDLL) {
-                Logger.Debug($"Mod has DLL ({mod.ModMetadata.DLL}), injecting");
-                _Inject(mod);
+            if (mod.ModMetadata.HasScript) {
+                Logger.Debug($"Mod has script ({mod.ModMetadata.Script}), running");
+                _RunModScript(mod);
             }
 
             PostLoadMod.Invoke(mod);
@@ -104,34 +129,29 @@ namespace ETGMod {
             return mod;
         }
 
-        private void _Inject(ModInfo info, ModInfo parent = null) {
-            AppDomain.CurrentDomain.AssemblyResolve += info.AssemblyResolveHandler;
-            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += info.AssemblyResolveHandler;
+        private void _RunModScript(ModInfo info, ModInfo parent = null) {
+            info.ScriptPath = Path.Combine(info.RealPath, info.ModMetadata.Script);
+            Logger.Info($"Running Lua script at '{info.ScriptPath}'");
 
-            info.AssemblyPath = _PrepareRelinkPath(Path.Combine(info.RealPath, info.ModMetadata.DLL));
+            if (parent != null) info.Parent = parent;
 
-            var types = info.Assembly.GetTypes();
-            Logger.Debug("Scanning subclasses");
-            for (int i = 0; i < types.Length; i++) {
-                var type = types[i];
+            _InitializeLuaState();
 
-                if (type.BaseType.FullName == ModClassName) {
-                    Logger.Debug($"Found Mod subclass: {type.FullName}");
 
-                    var behaviour = (Mod)GameObject.AddComponent(type);
-                    UnityEngine.Object.DontDestroyOnLoad(behaviour);
-                    info.Behaviours.Add(behaviour);
+            try {
+                LuaState.DoFile(info.ScriptPath);
+            } catch (Exception e) {
+                Logger.Error($"Error while running Lua mod {info.Name}: [{e.GetType().Name}] {e.Message}");
+                LuaError.Invoke(info, LuaEventMethod.Loaded, e);
+                foreach (var l in e.StackTrace.Split('\n')) Logger.ErrorIndent(l);
 
-                    behaviour.Info = info;
+                if (e.InnerException != null) {
+                    Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
+                    foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
                 }
             }
 
-            if (parent != null) info.Parent = parent;
-            for (int i = 0; i < info.Behaviours.Count; i++) {
-                var behaviour = info.Behaviours[i];
-
-                behaviour.Loaded();
-            }
+            info.Events = new EventContainer(LuaState, info);
         }
 
         private string _HashPath(string path) {
@@ -227,22 +247,22 @@ namespace ETGMod {
         }
 
         public void Unload(ModInfo info) {
-            AppDomain.CurrentDomain.AssemblyResolve -= info.AssemblyResolveHandler;
-            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= info.AssemblyResolveHandler;
-
             UnloadAll(info.EmbeddedMods);
-            info.EmbeddedMods = new List<ModInfo>();
-
-            for (int j = 0; j < info.Behaviours.Count; j++) {
-                var behaviour = info.Behaviours[j];
-
+            if (info.HasScript) {
                 try {
-                    behaviour.Unloaded();
-                } catch {
-                    Logger.Warn($"Failed running the unload method on behavior #{j} of mod {info.Name}");
+                    info.Events.Unloaded?.Call();
+                } catch (Exception e) {
+                    Logger.Error($"Error while calling the Unloaded method in Lua mod: [{e.GetType().Name}] {e.Message}");
+                    LuaError.Invoke(info, LuaEventMethod.Unloaded, e);
+                    foreach (var l in e.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+
+                    if (e.InnerException != null) {
+                        Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
+                        foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+                    }
                 }
             }
-
+            info.EmbeddedMods = new List<ModInfo>();
             PostUnloadMod.Invoke(info);
         }
 
@@ -306,9 +326,7 @@ namespace ETGMod {
             for (int i = 0; i < entries.Length; i++) {
                 var full_entry = entries[i];
 
-                if (full_entry.EndsWithInvariant(".dll")) {
-                    info.AssemblyNameMap.AddAssembly(full_entry);
-                } else if (Path.GetFileName(full_entry) == METADATA_FILE_NAME) {
+                if (Path.GetFileName(full_entry) == METADATA_FILE_NAME) {
                     using (var file = File.OpenRead(full_entry)) {
                         using (var reader = new StreamReader(file)) {
                             info.ModMetadata = Deserializer.Deserialize<ModInfo.Metadata>(reader);

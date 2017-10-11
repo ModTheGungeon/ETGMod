@@ -34,12 +34,13 @@
     <Compile Include="src\Patches\patch_GameManager.cs" />
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\Core\Backend.cs" />
-    <Compile Include="src\Core\Loader.cs" />
+    <Compile Include="src\Core\Core.cs" />
     <Compile Include="src\Core\Logger.cs" />
     <Compile Include="src\Extensions\String.cs" />
     <Compile Include="src\Core\Paths.cs" />
     <Compile Include="src\Core\UnityUtil.cs" />
     <Compile Include="src\Extensions\BinaryReader.cs" />
+    <Compile Include="src\Core\EventHooks.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

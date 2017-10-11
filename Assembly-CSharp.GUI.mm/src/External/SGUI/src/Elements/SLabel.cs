@@ -4,8 +4,8 @@ namespace SGUI {
     public class SLabel : SElement {
 
         public string Text;
-        public int? Color;
         public Texture Icon;
+        public FontStyle FontStyle = FontStyle.Normal;
 
         public Vector2 IconScale = Vector2.one;
         public Color IconColor {
@@ -25,7 +25,6 @@ namespace SGUI {
             Text = text;
             ColorCount = 3;
             IconColor = UnityEngine.Color.white;
-            Color = null;
             Background = Background * 0f;
         }
 
@@ -37,7 +36,7 @@ namespace SGUI {
                 if (Parent == null) {
                     Size = Backend.MeasureText(ref Text);
                 } else {
-                    Size = Backend.MeasureText(ref Text, Parent.InnerSize - (Icon == null ? Vector2.zero : new Vector2(Icon.width * IconScale.x + 1f + Backend.IconPadding, 0f)), font: Font);
+                    Size = Backend.MeasureText(ref Text, Parent.InnerSize.x - (Icon == null ? 0 : Icon.width * IconScale.x + 1f + Backend.IconPadding), font: Font);
                 }
                 if (Icon != null) {
                     Size.y = Mathf.Max(Size.y, Icon.height * IconScale.y + Backend.IconPadding);
@@ -49,7 +48,7 @@ namespace SGUI {
 
         public override void Render() {
             RenderBackground();
-            Draw.Text(this, Vector2.zero, Size, Text, Alignment, Icon, Color);
+            Draw.Text(this, Vector2.zero, Size, Text, Alignment, Icon, Foreground);
         }
 
     }

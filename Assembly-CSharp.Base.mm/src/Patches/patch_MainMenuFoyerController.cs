@@ -13,5 +13,6 @@ namespace ETGMod.BasePatches {
             var word = ETGMod.ModLoader.LoadedMods.Count == 1 ? "mod" : "mods";
             AddLine($"{ETGMod.ModLoader.LoadedMods.Count} {word} loaded");
         }
+
     }
 }

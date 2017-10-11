@@ -117,8 +117,6 @@ namespace TexMod {
                     return;
                 }
 
-                AddLogo();
-
                 if (Directory.Exists(anim_dir)) {
                     var entries = Directory.GetFileSystemEntries(anim_dir);
                     for (int i = 0; i < entries.Length; i++) {
@@ -146,7 +144,7 @@ namespace TexMod {
                 }
             };
 
-
+            AddLogo();
         }
     }
 }
