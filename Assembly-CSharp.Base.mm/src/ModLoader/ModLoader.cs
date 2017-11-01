@@ -78,8 +78,25 @@ namespace ETGMod {
             RefreshLuaState();
         }
 
-        private void _InitializeLuaState() {
-            LuaState.DoFile(Path.Combine(Paths.ResourcesFolder, "lua/base.lua"));
+        private LuaTable _InitializeLuaState() {
+            var f = LuaState.LoadFile(Path.Combine(Paths.ResourcesFolder, "lua/env.lua"));
+
+            var prev_path = ((LuaTable)LuaState["package"])["path"];
+            ((LuaTable)LuaState["package"])["path"] = Path.Combine(Paths.ResourcesFolder, "lua/?.lua");
+
+            var ret = f.Call();
+
+            if (ret.Length == 1) Logger.Debug($"Ran env.lua, got an environment");
+            else if (ret.Length == 0) Logger.Error($"env.lua did not return anything", @throw: true);
+            else Logger.Warn($"env.lua returned more than 1 result");
+
+            ((LuaTable)LuaState["package"])["path"] = prev_path;
+
+            return (LuaTable)(ret[0]);
+        }
+
+        private void _SetupSandbox(LuaTable env) {
+            var f = LuaState.LoadFile(Path.Combine(Paths.ResourcesFolder, "lua/sandbox.lua"));
         }
 
         public void RefreshLuaState() {
@@ -135,23 +152,53 @@ namespace ETGMod {
 
             if (parent != null) info.Parent = parent;
 
-            _InitializeLuaState();
+            var func = LuaState.LoadFile(info.ScriptPath);
+            var env = _InitializeLuaState();
 
+            env["Mod"] = info;
+            env["Logger"] = info.Logger;
 
-            try {
-                LuaState.DoFile(info.ScriptPath);
-            } catch (Exception e) {
-                Logger.Error($"Error while running Lua mod {info.Name}: [{e.GetType().Name}] {e.Message}");
-                LuaError.Invoke(info, LuaEventMethod.Loaded, e);
-                foreach (var l in e.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+            env["package"] = LuaState.NewTable();
+            var mt = LuaState.NewTable();
+            var real_package = LuaState.NewTable();
+                
+            LuaState.DoString(@"
+                local __etgmod_fake_package_mt = {}
+                __etgmod_real_package = {}
+                __etgmod_fake_package = setmetatable({}, __etgmod_fake_package_mt)
 
-                if (e.InnerException != null) {
-                    Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
-                    foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
-                }
-            }
+                local real = __etgmod_real_package
+                local _error = error
 
-            info.Events = new EventContainer(LuaState, info);
+                function __etgmod_fake_package_mt.__index(self, key)
+                    return real[key]
+                end
+
+                function __etgmod_fake_package_mt.__newindex(self, key, value)
+                    _error('Modifying the package table is forbidden.')
+                end
+
+                function __etgmod_fake_package_mt.__metatable(self, key)
+                    return nil
+                end
+            ");
+
+            ((LuaTable)LuaState["__etgmod_real_package"])["path"] = Path.Combine(Paths.ResourcesFolder, "lua/?.lua") + ";" + info.RealPath + "/?.lua";
+            ((LuaTable)LuaState["__etgmod_real_package"])["cpath"] = "";
+
+            env["package"] = LuaState["__etgmod_fake_package"];
+
+            LuaState.DoString(@"
+                __etgmod_real_package = nil
+                __etgmod_fake_package = nil
+            ");
+
+            info.LuaEnvironment = env;
+
+            info.RunLua(func, "the main script");
+
+            info.Events = new EventContainer(info.LuaEnvironment, info);
+            info.Events.SetupExternalHooks();
         }
 
         private string _HashPath(string path) {
@@ -250,7 +297,7 @@ namespace ETGMod {
             UnloadAll(info.EmbeddedMods);
             if (info.HasScript) {
                 try {
-                    info.Events.Unloaded?.Call();
+                    info.Events?.Unloaded?.Call();
                 } catch (Exception e) {
                     Logger.Error($"Error while calling the Unloaded method in Lua mod: [{e.GetType().Name}] {e.Message}");
                     LuaError.Invoke(info, LuaEventMethod.Unloaded, e);

@@ -17,16 +17,6 @@ namespace ETGMod.GUI {
 
         public override void Loaded() {}
 
-        private IEnumerator _NotifyETGModLoaded() {
-            yield return new WaitForSeconds(5f);
-
-            NotificationController.Notify(new Notification(
-                image: _Bullet,
-                title: "ETGMod loaded",
-                content: "Thanks for using Mod the Gungeon!"
-            ));
-        }
-
         public override void NoBackendsLoadedYet() {
             Logger.Info("Initializing SGUI");
 
@@ -42,10 +32,6 @@ namespace ETGMod.GUI {
             DontDestroyOnLoad(NotificationController);
 
             _Bullet = UnityUtil.LoadTexture2D(Path.Combine(Paths.ResourcesFolder, "bullet.png"));
-
-            EventHooks.MainMenuLoadedFirstTime += (obj) => {
-                Coroutine.Start(_NotifyETGModLoaded());
-            };
 
             AppDomain.CurrentDomain.UnhandledException += (obj, e) => {
                 NotificationController.Notify(new Notification(
@@ -81,6 +67,20 @@ namespace ETGMod.GUI {
                 ) {
                     BackgroundColor = UnityUtil.NewColorRGB(57, 7, 7)
                 });
+            };
+
+            ETGMod.ModsReloaded += (manual) => {
+                if (manual) {
+                    NotificationController.Notify(new Notification(
+                        title: $"Reloaded!",
+                        content: "All mods have been reloaded as a result of pressing the F5 key."
+                    ));
+                } else {
+                    NotificationController.Notify(new Notification(
+                        title: $"Reloaded!",
+                        content: "All mods have been reloaded automatically as a result of at least one of them being modified."
+                    ));
+                }
             };
         }
 

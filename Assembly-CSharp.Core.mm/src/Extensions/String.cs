@@ -31,7 +31,7 @@ public static class StringExt {
         return text_info.ToTitleCase(s);
     }
 
-    private static char[] _SeparatorSplitArray = { Path.DirectorySeparatorChar };
+    private static char[] _SeparatorSplitArray = { '\\', '/' };
     public static string NormalizePath(this string path) {
         var split = path.Split(_SeparatorSplitArray, StringSplitOptions.RemoveEmptyEntries);
         var list = new List<string>();

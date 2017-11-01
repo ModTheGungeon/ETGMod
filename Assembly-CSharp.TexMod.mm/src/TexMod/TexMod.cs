@@ -25,15 +25,6 @@ namespace TexMod {
 
         public override Version Version { get { return new Version(0, 1, 0); } }
 
-        public void Update() {
-            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.F6)) {
-                UnityEngine.MonoBehaviour[] allObjects = FindObjectsOfType<UnityEngine.MonoBehaviour>();
-                foreach (var obj in allObjects) {
-                    Console.WriteLine($"<{obj.GetType().FullName} {obj.name}>");
-                }
-            }
-        }
-
         private static object[] _EmptyObjectArray = { };
         public override void Reload() {
             Logger.Info($"Reloading TexMod patches!");

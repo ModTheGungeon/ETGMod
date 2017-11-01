@@ -47,9 +47,6 @@
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="NLua">
-      <HintPath>..\libs\Unity3D-NLua\Assets\Plugins\NLua.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -114,6 +111,10 @@
     <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
       <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
       <Name>MonoMod</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\NLua\NLua.csproj">
+      <Project>{40210593-BC8D-491F-9970-0F23603432E2}</Project>
+      <Name>NLua</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

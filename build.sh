@@ -15,7 +15,7 @@ BUILD_ZIP="$BUILD_BASE/$BUILD_ETGMOD.zip"
 rm -rf $BUILD_BASE
 mkdir -p $BUILD
 
-msbuild
+xbuild
 
 deps=()
 

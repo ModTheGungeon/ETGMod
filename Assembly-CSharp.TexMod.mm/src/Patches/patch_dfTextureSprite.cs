@@ -14,7 +14,6 @@ public class patch_dfTextureSprite : dfTextureSprite {
     private Texture _texmod_saved_texture;
     private float _texmod_saved_width;
     private float _texmod_saved_height;
-    private Vector3 _texmod_saved_translation;
     private Material _texmod_saved_material;
     private Rect _texmod_saved_croprect;
     private bool _texmod_saved_croptexture;
@@ -72,8 +71,6 @@ public class patch_dfTextureSprite : dfTextureSprite {
                 Width = def.ETGModCropWidth * def.ETGModScaleW;
                 Height = def.ETGModCropHeight * def.ETGModScaleH;
 
-                Console.WriteLine(def.ETGModScaleH);
-
                 CropRect = new Rect(
                     def.ETGModCropX,
                     def.ETGModCropY,
@@ -81,15 +78,6 @@ public class patch_dfTextureSprite : dfTextureSprite {
                     def.ETGModCropHeight
                 );
                 CropTexture = true;
-
-                Console.WriteLine($"CRX {CropRect.x} CRY {CropRect.y}");
-                Console.WriteLine($"CRW {CropRect.width} CRH {CropRect.height}");
-                Console.WriteLine($"W {Width} H {Height}");
-
-                //_texmod_saved_translation = new Vector3(def.regionX, def.regionY, 0);
-                //RelativePosition += _texmod_saved_translation;
-
-                //Console.WriteLine(ETGMod.Tools.ObjectDumper.Dump(this));
             }
         } else {
             TexMod.TexMod.Logger.Debug("Not found.");

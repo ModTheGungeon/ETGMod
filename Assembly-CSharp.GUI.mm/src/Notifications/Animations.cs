@@ -34,8 +34,6 @@ namespace ETGMod.GUI {
             _XDiff = diff;
             _XOrig = Elem.Position.x;
 
-            Console.WriteLine($"XDIFF {_XDiff}");
-
             _XStart = target;
             Elem.Position.x = _XStart;
         }
@@ -89,17 +87,12 @@ namespace ETGMod.GUI {
         }
 
         public override void Animate(float t) {
-            Console.WriteLine($"POSY BEFORE {Elem.Position.y}");
             Elem.Position.y = _OriginalY + _YDiff * t;
-            Console.WriteLine($"POSY AFTER {Elem.Position.y}");
             if (Elem.Parent != null) {
                 for (int i = 0; i < Elem.Parent.Children.Count; i++) {
                     var child = Elem.Parent.Children[i];
                     if (child == Elem) continue;
-                    Console.WriteLine($"AMPREVIOUS {child.Previous == Elem}");
-                    Console.WriteLine($"CHILD POSY BEFORE {child.Position.y}");
                     child.UpdateStyle();
-                    Console.WriteLine($"CHILD POSY AFTER {child.Position.y}");
                 }
             }
         }
@@ -145,11 +138,9 @@ namespace ETGMod.GUI {
 
     public class STest : SAnimation {
         public override void Animate(float t) {
-            Console.WriteLine($"ANIMATE pre: ({Elem.Foreground})");
             var color = Elem.Foreground;
             color.a = t - 1f;
             Elem.Foreground = color;
-            Console.WriteLine($"ANIMATE post: ({Elem.Foreground})");
         }
 
         public override void OnStart() {

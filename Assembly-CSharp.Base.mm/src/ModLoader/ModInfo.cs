@@ -27,6 +27,8 @@ namespace ETGMod {
                 internal set;
             } = new List<ModInfo>();
 
+            public LuaTable LuaEnvironment;
+
             public EventContainer Events;
 
             private Metadata _ModMetadata;
@@ -73,6 +75,38 @@ namespace ETGMod {
                 get {
                     return RealPath != null && Path != null && ModMetadata != null;
                 }
+            }
+
+            public object[] RunLua(LuaFunction func, string name = "[unknown]", params object[] args) {
+                object[] ret = null;
+
+                try {
+                    func.Environment = LuaEnvironment;
+
+                    ret = func.Call(args);
+                } catch (Exception e) {
+                    Logger.Error($"{e.GetType().Name} thrown while running {name} of mod {Name}");
+
+                    Logger.ErrorIndent($"Lua error:");
+                    Logger.ErrorIndent("  " + e.Message);
+                    ETGMod.ModLoader.LuaError.Invoke(this, LuaEventMethod.Loaded, e);
+                    if (e is NLua.Exceptions.LuaScriptException && ((NLua.Exceptions.LuaScriptException)e).Traceback != null) {
+                        var luaex = (NLua.Exceptions.LuaScriptException)e;
+                        Logger.ErrorIndent($"Lua stack trace:");
+                        foreach (var l in luaex.Traceback) {
+                            Logger.ErrorIndent("  " + l);
+                        }
+                    }
+
+                    Logger.ErrorIndent($"C# stack trace: ");
+                    foreach (var l in e.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+
+                    if (e.InnerException != null) {
+                        Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
+                        foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+                    }
+                }
+                return ret;
             }
         }
     }

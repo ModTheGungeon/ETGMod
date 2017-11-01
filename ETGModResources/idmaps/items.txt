@@ -54,7 +54,7 @@
 53 au_gun
 54 laser_rifle
 55 void_shotgun
-56 38 special
+56 38_special
 57 alien_sidearm
 58 void_core_assault_rifle
 59 hegemony_rifle

@@ -27,6 +27,7 @@ namespace ETGMod {
             }
         }
 
+        public static Action<bool> ModsReloaded = (manual) => { };
 
         public static ETGMod Instance;
         public static ModLoader ModLoader = new ModLoader(Paths.ModsFolder, Paths.CacheFolder);
@@ -178,7 +179,7 @@ namespace ETGMod {
             if (_ShouldAutoReload) {
                 Logger.Debug($"Focused, auto-reloading mods");
                 _ShouldAutoReload = false;
-                _ReloadMods();
+                _ReloadMods(manual: false);
             }
         }
 
@@ -192,9 +193,9 @@ namespace ETGMod {
                 _FSWatcher = new FileSystemWatcher {
                     Path = Paths.ModsFolder,
                     NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime
-                                                    | NotifyFilters.DirectoryName | NotifyFilters.FileName
-                                                    | NotifyFilters.LastAccess | NotifyFilters.LastWrite
-                                                    | NotifyFilters.Security | NotifyFilters.Size,
+                                | NotifyFilters.DirectoryName | NotifyFilters.FileName
+                                | NotifyFilters.LastWrite | NotifyFilters.Security
+                                | NotifyFilters.Size,
                     IncludeSubdirectories = true,
                 };
 
@@ -240,7 +241,7 @@ namespace ETGMod {
             }
         }
 
-        private void _ReloadMods() {
+        private void _ReloadMods(bool manual) {
             Logger.Info($"Reloading all backends and mods");
 
             foreach (var backend in AllBackends) {
@@ -250,11 +251,13 @@ namespace ETGMod {
             foreach (var backend in AllBackends) {
                 backend.Type.GetMethod("ReloadAfterMods").Invoke(backend.Instance, _EmptyObjectArray);
             }
+
+            ModsReloaded.Invoke(manual);
         }
 
         private static object[] _EmptyObjectArray = { };
         public void Update() {
-            if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods();
+            if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods(manual: true);
         }
     }
 }

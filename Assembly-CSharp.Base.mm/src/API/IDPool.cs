@@ -210,5 +210,32 @@ namespace ETGMod {
                 }
             }
         }
+
+        public T RandomValue
+        {
+            get
+            {
+                var count = _Storage.Count;
+                var idx = UnityEngine.Random.Range(0, count - 1);
+                return _Storage.Values.ToList()[idx];
+            }
+        }
+
+        public string RandomKey {
+            get {
+                var count = _Storage.Count;
+                var idx = UnityEngine.Random.Range(0, count - 1);
+                return _Storage.Keys.ToList()[idx];
+            }
+        }
+
+        public KeyValuePair<string, T> RandomPair {
+            get {
+                var count = _Storage.Count;
+                var idx = UnityEngine.Random.Range(0, count - 1);
+                var key = _Storage.Keys.ToList()[idx];
+                return new KeyValuePair<string, T>(key, _Storage[key]);
+            }
+        }
     }
 }

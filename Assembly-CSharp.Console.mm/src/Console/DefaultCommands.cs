@@ -26,6 +26,16 @@ namespace ETGMod.Console {
             }
         }
 
+        private string _GetPickupObjectName(PickupObject obj) {
+            try {
+                var name = obj.EncounterNameOrDisplayName?.Trim();
+                if (name == null || name == "") return "NO NAME";
+                return name;
+            } catch {
+                return "ERROR";
+            }
+        }
+
         internal void AddDefaultCommands() {
             _LoggerSubscriber = (logger, loglevel, indent, str) => {
                 PrintLine(logger.String(loglevel, str, indent: indent), color: _LoggerColors[loglevel]);
@@ -54,62 +64,121 @@ namespace ETGMod.Console {
                     CurrentCommandText = text;
                     return null;
                 })
-                .WithSubCommand("mods", (args) => {
-                    var s = new StringBuilder();
+                .WithSubCommand("giveid", (args) => {
+                    if (args.Count < 1) throw new Exception("Exactly 1 argument required.");
+                    var pickup_obj = PickupObjectDatabase.Instance.InternalGetById(int.Parse(args[0]));
 
-                    s.AppendLine("Loaded mods:");
-                    foreach (var mod in ETGMod.ModLoader.LoadedMods) {
-                        _GetModInfo(s, mod);
+                    if (pickup_obj == null) {
+                        return "Item ID {args[0]} doesn't exist!";
                     }
-                    return s.ToString();
-                })
-                .WithSubCommand("give", (args) => {
-                    foreach (var c in ETGMod.Items[args[0]].gameObject.GetComponents(typeof(UnityEngine.Component))) {
-                        PrintLine(c.GetType().FullName);
-                    }
-                    LootEngine.TryGivePrefabToPlayer(ETGMod.Items[args[0]].gameObject, GameManager.Instance.PrimaryPlayer, true);
-                    return args[0];
-                })
+
+                    LootEngine.TryGivePrefabToPlayer(pickup_obj.gameObject, GameManager.Instance.PrimaryPlayer, true);
+                    return pickup_obj.EncounterNameOrDisplayName;
+                });
+
+            AddGroup("pool")
                 .WithSubGroup(
-                    new Group("dump")
-                    .WithSubCommand("items", (args) => {
-                        var b = new StringBuilder();
-                        var db = PickupObjectDatabase.Instance.Objects;
-                        for (int i = 0; i < db.Count; i++) {
-                            PickupObject obj = null;
-                            string name = null;
-                            try {
-                                obj = db[i];
-                            } catch {
-                                name = "[ERROR: failed getting object by index]";
-                            }
-                            if (obj != null) {
-                                try {
-                                    var displayname = obj.encounterTrackable.journalData.PrimaryDisplayName;
-                                    name = StringTableManager.ItemTable[displayname].GetWeightedString();
-                                } catch {
-                                    name = "[ERROR: failed getting ammonomicon name]";
-                                }
-                                if (name == null) {
-                                    try {
-                                        name = obj.EncounterNameOrDisplayName;
-                                    } catch {
-                                        name = "[ERROR: failed getting encounter or display name]";
-                                    }
-                                }
-                            }
-                            if (name == null && obj != null) {
-                                name = "[NULL NAME (but object is not null)]";
-                            }
-
-                            if (name != null) {
-                                b.AppendLine($"{i}: {name}");
-                                _Logger.Info($"{i}: {name}");
+                    new Group("items")
+                    .WithSubCommand("idof", (args) => {
+                        if (args.Count < 1) throw new Exception("Exactly 1 argument required (numeric ID).");
+                        var id = int.Parse(args[0]);
+                        foreach (var pair in ETGMod.Items.Pairs) {
+                            if (pair.Value.PickupObjectId == id) return pair.Key;
+                        }
+                        return "Entry not found.";
+                    })
+                    .WithSubCommand("nameof", (args) => {
+                        if (args.Count < 1) throw new Exception("Exactly 1 argument required (ID).");
+                        var id = args[0];
+                        foreach (var pair in ETGMod.Items.Pairs) {
+                            if (pair.Key == id) return _GetPickupObjectName(pair.Value);
+                        }
+                        return "Entry not found.";
+                    })
+                    .WithSubCommand("numericof", (args) => {
+                        if (args.Count < 1) throw new Exception("Exactly 1 argument required (ID).");
+                        var id = args[0];
+                        foreach (var pair in ETGMod.Items.Pairs) {
+                            if (pair.Key == id) return pair.Value.PickupObjectId.ToString();
+                        }
+                        return "Entry not found.";
+                    })
+                    .WithSubCommand("list", (args) => {
+                        var s = new StringBuilder();
+                        var pairs = new List<KeyValuePair<string, PickupObject>>();
+                        foreach (var pair in ETGMod.Items.Pairs) {
+                            pairs.Add(pair);
+                        }
+                        foreach (var pair in pairs) {
+                            if (_GetPickupObjectName(pair.Value) == "NO NAME") {
+                                s.AppendLine($"[{pair.Key}] {_GetPickupObjectName(pair.Value)}");
                             }
                         }
-                        return b.ToString();
+                        pairs.Sort((x, y) => string.Compare(_GetPickupObjectName(x.Value), _GetPickupObjectName(y.Value)));
+                        foreach (var pair in pairs) {
+                            if (_GetPickupObjectName(pair.Value) == "NO NAME") continue;
+                            s.AppendLine($"[{pair.Key}] {_GetPickupObjectName(pair.Value)}");
+                        }
+                        return s.ToString();
+                    })
+                    .WithSubCommand("random", (args) => {
+                        return ETGMod.Items.RandomKey;
                     })
                 );
+
+            AddCommand("listmods", (args) => {
+                var s = new StringBuilder();
+
+                s.AppendLine("Loaded mods:");
+                foreach (var mod in ETGMod.ModLoader.LoadedMods) {
+                    _GetModInfo(s, mod);
+                }
+                return s.ToString();
+            });
+
+            AddCommand("give", (args) => {
+                LootEngine.TryGivePrefabToPlayer(ETGMod.Items[args[0]].gameObject, GameManager.Instance.PrimaryPlayer, true);
+                return args[0];
+            });
+
+            AddGroup("dump")
+                .WithSubCommand("items", (args) => {
+                    var b = new StringBuilder();
+                    var db = PickupObjectDatabase.Instance.Objects;
+                    for (int i = 0; i < db.Count; i++) {
+                        PickupObject obj = null;
+                        string name = null;
+                        try {
+                            obj = db[i];
+                        } catch {
+                            name = "[ERROR: failed getting object by index]";
+                        }
+                        if (obj != null) {
+                            try {
+                                var displayname = obj.encounterTrackable.journalData.PrimaryDisplayName;
+                                name = StringTableManager.ItemTable[displayname].GetWeightedString();
+                            } catch {
+                                name = "[ERROR: failed getting ammonomicon name]";
+                            }
+                            if (name == null) {
+                                try {
+                                    name = obj.EncounterNameOrDisplayName;
+                                } catch {
+                                    name = "[ERROR: failed getting encounter or display name]";
+                                }
+                            }
+                        }
+                        if (name == null && obj != null) {
+                            name = "[NULL NAME (but object is not null)]";
+                        }
+
+                        if (name != null) {
+                            b.AppendLine($"{i}: {name}");
+                            _Logger.Info($"{i}: {name}");
+                        }
+                    }
+                    return b.ToString();
+                });
 
             AddGroup("log")
                 .WithSubCommand("sub", (args) => {
