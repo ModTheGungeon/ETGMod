@@ -10,18 +10,39 @@ local env = {
 }
 
 luanet.load_assembly("Assembly-CSharp")
+luanet.load_assembly("UnityEngine")
+
+
+local ns_etgmod = luanet.namespace {'ETGMod'}
+local function namespace(name, tab)
+  return setmetatable(tab, {
+    __index = luanet.namespace {name}
+  })
+end
+
+local _GAME = namespace("", {
+  ETGMod = namespace("ETGMod", {
+    GUI = luanet.namespace {'ETGMod.GUI'},
+    Lua = luanet.namespace {'ETGMod.Lua'},
+    Console = namespace("ETGMod.Console", {
+      Parser = luanet.namespace {'ETGMod.Console'}
+    }),
+    TexMod = luanet.namespace {'ETGMod.TexMod'}
+  })
+})
+env._GAME = _GAME
 
 for k, v in pairs(luanet.namespace {'ETGMod.Lua'}) do
   env[k] = v
 end
 
-local globals = luanet.namespace {'ETGMod.Globals'}
+local lua = luanet.namespace {'ETGMod.Lua'}
 env = setmetatable(env, {
   __index = function(self, k)
     if k == "PrimaryPlayer" then
-      return globals.PrimaryPlayer
+      return lua.Globals.PrimaryPlayer
     elseif k == "SecondaryPlayer" then
-      return globals.SecondaryPlayer
+      return lua.Globals.SecondaryPlayer
     end
   end
 })

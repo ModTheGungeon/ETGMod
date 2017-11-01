@@ -164,7 +164,9 @@ namespace ETGMod {
                 
             LuaState.DoString(@"
                 local __etgmod_fake_package_mt = {}
-                __etgmod_real_package = {}
+                __etgmod_real_package = {
+                    loaded = {}
+                }
                 __etgmod_fake_package = setmetatable({}, __etgmod_fake_package_mt)
 
                 local real = __etgmod_real_package
@@ -183,7 +185,7 @@ namespace ETGMod {
                 end
             ");
 
-            ((LuaTable)LuaState["__etgmod_real_package"])["path"] = Path.Combine(Paths.ResourcesFolder, "lua/?.lua") + ";" + info.RealPath + "/?.lua";
+            ((LuaTable)LuaState["__etgmod_real_package"])["path"] = Path.Combine(Paths.ResourcesFolder, "lua/libs/?.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/init.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/?.lua") + ";" + info.RealPath + "/?.lua";
             ((LuaTable)LuaState["__etgmod_real_package"])["cpath"] = "";
 
             env["package"] = LuaState["__etgmod_fake_package"];

@@ -124,25 +124,26 @@ return function(env)
   }
 
   local _require = require
-  local modules = {}
+  
 
   function env.require(name)
-    local formatted_name = name:gsub("[%./\\]+", "/") -- replace all series of dots or slashes with a single slash
-    if #formatted_name > 0 then
-      if formatted_name[1] == "/" then
-        formatted_name = formatted_name:sub(2)
-      end
-      if formatted_name[#formatted_name] == "/" then
-        formatted_name = formatted_name:sub(1, #formatted_name - 1)
-      end
-    end
+  --   local formatted_name = name:gsub("[%./\\]+", "/") -- replace all series of dots or slashes with a single slash
+  --   if #formatted_name > 0 then
+  --     if formatted_name[1] == "/" then
+  --       formatted_name = formatted_name:sub(2)
+  --     end
+  --     if formatted_name[#formatted_name] == "/" then
+  --       formatted_name = formatted_name:sub(1, #formatted_name - 1)
+  --     end
+  --   end
+    local path, err = package.searchpath(name, env.package.path)
+    if err then error(err) end
 
-    if modules[formatted_name] then return modules[formatted_name] end
+    if env.package.loaded[path] then return env.package.loaded[path] end
 
-    local path = env.Mod.RealPath .. "/" .. formatted_name .. ".lua"
     local f = loadfile(path, "t", env)
 
-    modules[formatted_name] = f()
-    return modules[formatted_name]
+    env.package.loaded[path] = f()
+    return env.package.loaded[path]
   end
 end
