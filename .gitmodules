@@ -13,3 +13,6 @@
 [submodule "ETGModResources/lua/libs/json"]
 	path = ETGModResources/lua/libs/json
 	url = https://github.com/rxi/json.lua
+[submodule "libs/Eluant"]
+	path = libs/Eluant
+	url = https://github.com/modthegungeon/Eluant

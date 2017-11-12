@@ -9,34 +9,34 @@ local env = {
   Events = {}
 }
 
-luanet.load_assembly("Assembly-CSharp")
-luanet.load_assembly("UnityEngine")
+local gungeon = clr.assembly "Assembly-CSharp"
+local unity = clr.assembly "UnityEngine" 
 
 
-local ns_etgmod = luanet.namespace {'ETGMod'}
-local function namespace(name, tab)
+local ns_etgmod = clr.namespace(gungeon, 'ETGMod')
+local function namespace(ass, name, tab)
   return setmetatable(tab, {
-    __index = luanet.namespace {name}
+    __index = clr.namespace(ass, name)
   })
 end
 
-local _GAME = namespace("", {
-  ETGMod = namespace("ETGMod", {
-    GUI = luanet.namespace {'ETGMod.GUI'},
-    Lua = luanet.namespace {'ETGMod.Lua'},
-    Console = namespace("ETGMod.Console", {
-      Parser = luanet.namespace {'ETGMod.Console'}
+local _GAME = namespace(gungeon, "", {
+  ETGMod = namespace(gungeon, "ETGMod", {
+    GUI = clr.namespace(gungeon, 'ETGMod.GUI'),
+    Lua = clr.namespace(gungeon, 'ETGMod.Lua'),
+    Console = namespace(gungeon, "ETGMod.Console", {
+      Parser = clr.namespace(gungeon, 'ETGMod.Console')
     }),
-    TexMod = luanet.namespace {'ETGMod.TexMod'}
+    TexMod = clr.namespace(gungeon, 'ETGMod.TexMod')
   })
 })
 env._GAME = _GAME
 
-for k, v in pairs(luanet.namespace {'ETGMod.Lua'}) do
-  env[k] = v
-end
+-- for k, v in pairs(luanet.namespace {'ETGMod.Lua'}) do
+--   env[k] = v
+-- end
 
-local lua = luanet.namespace {'ETGMod.Lua'}
+local lua = clr.namespace(gungeon, 'ETGMod.Lua')
 env = setmetatable(env, {
   __index = function(self, k)
     if k == "PrimaryPlayer" then
@@ -47,8 +47,8 @@ env = setmetatable(env, {
   end
 })
 
-local gui = luanet.namespace {'ETGMod.GUI'}
-local etgmod = luanet.namespace {'ETGMod'}
+local gui = clr.namespace(gungeon, 'ETGMod.GUI')
+local etgmod = clr.namespace(gungeon, 'ETGMod')
 
 function env.Color(r, g, b, a)
   if a == nil then

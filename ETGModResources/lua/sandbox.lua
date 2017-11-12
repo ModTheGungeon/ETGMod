@@ -1,3 +1,16 @@
+local sep = package.config:sub(1,1)
+local function searchpath (mod,path)
+    mod = mod:gsub('%.',sep)
+    for m in path:gmatch('[^;]+') do
+        local nm = m:gsub('?',mod)
+        local f = io.open(nm,'r')
+        if f then f:close(); return nm end
+    end
+end
+-- https://github.com/stevedonovan/Penlight/blob/master/lua/pl/compat.lua
+-- penlight is licensed under the MIT license
+-- https://github.com/stevedonovan/Penlight/blob/master/LICENSE.md
+
 return function(env)
   local function include(name)
     env[name] = _G[name]
@@ -69,7 +82,7 @@ return function(env)
     sort = table.sort
   }
 
-  local system = luanet.namespace {'System'}
+  local system = clr.namespace(clr.assembly('mscorlib'), 'System')
   local rng = system.Random()
 
   env.math = {
@@ -136,7 +149,7 @@ return function(env)
   --       formatted_name = formatted_name:sub(1, #formatted_name - 1)
   --     end
   --   end
-    local path, err = package.searchpath(name, env.package.path)
+    local path, err = searchpath(name, env.package.path)
     if err then error(err) end
 
     if env.package.loaded[path] then return env.package.loaded[path] end
