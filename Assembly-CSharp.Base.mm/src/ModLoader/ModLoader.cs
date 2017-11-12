@@ -8,7 +8,7 @@ using YamlDotNet.Serialization;
 using Mono.Cecil;
 using System.Security.Cryptography;
 using System.Linq;
-using NLua;
+using Eluant;
 using ETGMod.Lua;
 
 namespace ETGMod {
@@ -19,7 +19,7 @@ namespace ETGMod {
 
         const string METADATA_FILE_NAME = "mod.yml";
 
-        public NLua.Lua LuaState { get; internal set; }
+        public LuaRuntime LuaState { get; internal set; }
 
         public Deserializer Deserializer = new DeserializerBuilder().Build();
         public string CachePath;
@@ -78,32 +78,41 @@ namespace ETGMod {
             RefreshLuaState();
         }
 
-        private LuaTable _InitializeLuaState() {
-            var f = LuaState.LoadFile(Path.Combine(Paths.ResourcesFolder, "lua/env.lua"));
+        private LuaTable _CreateNewEnvironment() {
+            var f = LuaState.CompileFile(Path.Combine(Paths.ResourcesFolder, "lua/env.lua"));
 
-            var prev_path = ((LuaTable)LuaState["package"])["path"];
-            ((LuaTable)LuaState["package"])["path"] = Path.Combine(Paths.ResourcesFolder, "lua/?.lua");
+            string prev_path;
+            using (var t = LuaState.Globals["package"] as LuaTable) {
+                prev_path = t["path"].ToString();
+                t["path"] = Path.Combine(Paths.ResourcesFolder, "lua/?.lua");
+            }
 
-            var ret = f.Call();
+            LuaTable env;
+            using (var ret = f.Call()) {
 
-            if (ret.Length == 1) Logger.Debug($"Ran env.lua, got an environment");
-            else if (ret.Length == 0) Logger.Error($"env.lua did not return anything", @throw: true);
-            else Logger.Warn($"env.lua returned more than 1 result");
+                if (ret.Count == 1) Logger.Debug($"Ran env.lua, got an environment");
+                else if (ret.Count == 0) Logger.Error($"env.lua did not return anything", @throw: true);
+                else Logger.Warn($"env.lua returned more than 1 result");
 
-            ((LuaTable)LuaState["package"])["path"] = prev_path;
+                using (var t = LuaState.Globals["package"] as LuaTable) {
+                    t["path"] = prev_path;
+                }
 
-            return (LuaTable)(ret[0]);
+                env = ret[0] as LuaTable;
+            }
+
+            return env;
         }
 
         private void _SetupSandbox(LuaTable env) {
-            var f = LuaState.LoadFile(Path.Combine(Paths.ResourcesFolder, "lua/sandbox.lua"));
+            using (var sandbox = LuaState.CompileFile(Path.Combine(Paths.ResourcesFolder, "lua/sandbox.lua"))) {
+                sandbox.Call(env).Dispose();
+            }
         }
 
-        public void RefreshLuaState() {
+        internal void RefreshLuaState() {
             if (LuaState != null) LuaState.Dispose();
-            LuaState = new NLua.Lua();
-            LuaState.LoadCLRPackage();
-            //_InitializeLuaState();
+            LuaState = new LuaRuntime();
         }
 
         public ModInfo Load(string path) {
@@ -146,61 +155,66 @@ namespace ETGMod {
             return mod;
         }
 
+        private static Action<LuaTable, string, LuaValue> _FakePackageNewindex = (self, key, value) => {
+            throw new LuaException("I'm sorry, Dave.");
+        };
+
+        private static Func<LuaTable, string> _FakePackageMetatable = (self) => {
+            return "I'm afraid I can't let you do that.";
+        };
+
         private void _RunModScript(ModInfo info, ModInfo parent = null) {
             info.ScriptPath = Path.Combine(info.RealPath, info.ModMetadata.Script);
             Logger.Info($"Running Lua script at '{info.ScriptPath}'");
 
             if (parent != null) info.Parent = parent;
 
-            var func = LuaState.LoadFile(info.ScriptPath);
-            var env = _InitializeLuaState();
+            var env = _CreateNewEnvironment();
+            env["Mod"] = new LuaTransparentClrObject(info, autobind: true);
+            env["Logger"] = new LuaTransparentClrObject(info.Logger, autobind: true);
 
-            env["Mod"] = info;
-            env["Logger"] = info.Logger;
 
-            env["package"] = LuaState.NewTable();
-            var mt = LuaState.NewTable();
-            var real_package = LuaState.NewTable();
-                
-            LuaState.DoString(@"
-                local __etgmod_fake_package_mt = {}
-                __etgmod_real_package = {
-                    loaded = {}
+            using (var func = LuaState.CompileFile(info.ScriptPath)) {
+                using (var real_package = LuaState.CreateTable())
+                using (var fake_package = LuaState.CreateTable())
+                using (var mt = LuaState.CreateTable()) {
+                    func.Environment = env;
+
+                    /* Setup the metatable */
+                    Func<LuaTable, string, LuaValue> fake_package_index = (self, key) => {
+                        using (var val = real_package[key]) return val;
+                    };
+
+                    using (var index = LuaState.CreateFunctionFromDelegate(fake_package_index)) {
+                        mt["__index"] = index;
+                    }
+
+                    using (var newindex = LuaState.CreateFunctionFromDelegate(_FakePackageNewindex)) {
+                        mt["__newindex"] = newindex;
+                    }
+
+                    using (var metatable = LuaState.CreateFunctionFromDelegate(_FakePackageMetatable)) {
+                        mt["__metatable"] = metatable;
+                    }
+
+                    fake_package.Metatable = mt;
+
+                    /* Setup the real package table */
+                    using (var loaded = LuaState.CreateTable()) real_package["loaded"] = loaded;
+                    real_package["path"] = Path.Combine(Paths.ResourcesFolder, "lua/libs/?.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/init.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/?.lua") + ";" + info.RealPath + "/?.lua";
+                    real_package["cpath"] = "Really makes you think";
+
+                    /* Add the fake package with a locked metatable to the env */
+                    env["package"] = fake_package;
+
                 }
-                __etgmod_fake_package = setmetatable({}, __etgmod_fake_package_mt)
 
-                local real = __etgmod_real_package
-                local _error = error
+                info.LuaEnvironment = env;
+                info.RunLua(func, "the main script");
 
-                function __etgmod_fake_package_mt.__index(self, key)
-                    return real[key]
-                end
-
-                function __etgmod_fake_package_mt.__newindex(self, key, value)
-                    _error('Modifying the package table is forbidden.')
-                end
-
-                function __etgmod_fake_package_mt.__metatable(self, key)
-                    return nil
-                end
-            ");
-
-            ((LuaTable)LuaState["__etgmod_real_package"])["path"] = Path.Combine(Paths.ResourcesFolder, "lua/libs/?.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/init.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/?.lua") + ";" + info.RealPath + "/?.lua";
-            ((LuaTable)LuaState["__etgmod_real_package"])["cpath"] = "";
-
-            env["package"] = LuaState["__etgmod_fake_package"];
-
-            LuaState.DoString(@"
-                __etgmod_real_package = nil
-                __etgmod_fake_package = nil
-            ");
-
-            info.LuaEnvironment = env;
-
-            info.RunLua(func, "the main script");
-
-            info.Events = new EventContainer(info.LuaEnvironment, info);
-            info.Events.SetupExternalHooks();
+                info.Events = new EventContainer(info.LuaEnvironment, info);
+                info.Events.SetupExternalHooks();
+            }
         }
 
         private string _HashPath(string path) {
@@ -311,6 +325,7 @@ namespace ETGMod {
                     }
                 }
             }
+            info.LuaEnvironment.Dispose();
             info.EmbeddedMods = new List<ModInfo>();
             PostUnloadMod.Invoke(info);
         }

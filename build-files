@@ -5,7 +5,7 @@ libs/MonoMod/bin/{TARGET}/MonoMod.exe
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.dll
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.Mdb.dll
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.Pdb.dll
-libs/NLua/bin/{TARGET}/NLua.dll
+libs/Eluant/Eluant/bin/{TARGET}/Eluant.dll
 
 # internal [Assembly-CSharp]
 Assembly-CSharp.Core.mm/bin/{TARGET}/Assembly-CSharp.Core.mm.dll

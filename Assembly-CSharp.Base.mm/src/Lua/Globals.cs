@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using NLua;
 
 namespace ETGMod.Lua {
     public static class Globals {

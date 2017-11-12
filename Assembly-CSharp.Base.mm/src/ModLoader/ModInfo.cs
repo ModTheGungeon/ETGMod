@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using ETGMod.Lua;
-using NLua;
+using Eluant;
 
 namespace ETGMod {
     public partial class ModLoader {
@@ -77,35 +77,22 @@ namespace ETGMod {
                 }
             }
 
-            public object[] RunLua(LuaFunction func, string name = "[unknown]", params object[] args) {
-                object[] ret = null;
+            public LuaVararg RunLua(LuaFunction func, string name = "[unknown]", params LuaValue[] args) {
+                LuaVararg ret = null;
 
                 try {
                     func.Environment = LuaEnvironment;
 
                     ret = func.Call(args);
-                } catch (Exception e) {
-                    Logger.Error($"{e.GetType().Name} thrown while running {name} of mod {Name}");
-
-                    Logger.ErrorIndent($"Lua error:");
-                    Logger.ErrorIndent("  " + e.Message);
+                } catch (LuaException e) {
                     ETGMod.ModLoader.LuaError.Invoke(this, LuaEventMethod.Loaded, e);
-                    if (e is NLua.Exceptions.LuaScriptException && ((NLua.Exceptions.LuaScriptException)e).Traceback != null) {
-                        var luaex = (NLua.Exceptions.LuaScriptException)e;
-                        Logger.ErrorIndent($"Lua stack trace:");
-                        foreach (var l in luaex.Traceback) {
-                            Logger.ErrorIndent("  " + l);
-                        }
-                    }
+                    Logger.Error($"{e.GetType().Name} thrown while running {name} of mod {Name}: {e.Message}");
 
-                    Logger.ErrorIndent($"C# stack trace: ");
-                    foreach (var l in e.StackTrace.Split('\n')) Logger.ErrorIndent(l);
-
-                    if (e.InnerException != null) {
-                        Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
-                        foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+                    for (int i = 0; i < e.TracebackArray.Length; i++) {
+                        Logger.ErrorIndent("  " + e.TracebackArray[i]);
                     }
                 }
+
                 return ret;
             }
         }

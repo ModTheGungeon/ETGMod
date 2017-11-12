@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using NLua;
+using Eluant;
 
 namespace ETGMod.Lua {
     public static class LuaTool {
@@ -10,7 +10,7 @@ namespace ETGMod.Lua {
 
         public static T AssertType<T>(object o, string name) {
             if (!(o is T)) {
-                throw new NLua.Exceptions.LuaException($"Expected type {typeof(T).Name} for {name}, got {o.GetType().Name}");
+                throw new LuaException($"Expected type {typeof(T).Name} for {name}, got {o.GetType().Name}");
             }
             return (T)o;
         }

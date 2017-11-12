@@ -2,7 +2,6 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using NLua;
 
 namespace ETGMod {
     public partial class ETGMod : Backend {
