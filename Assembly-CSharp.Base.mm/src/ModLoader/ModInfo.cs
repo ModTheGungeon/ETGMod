@@ -6,7 +6,7 @@ using Eluant;
 
 namespace ETGMod {
     public partial class ModLoader {
-        public partial class ModInfo {
+        public partial class ModInfo : IDisposable {
             public Logger Logger = new Logger("Unnamed Mod");
             private string _NameOverride;
 
@@ -28,6 +28,7 @@ namespace ETGMod {
             } = new List<ModInfo>();
 
             public LuaTable LuaEnvironment;
+            internal LuaTable RealPackageTable;
 
             public EventContainer Events;
 
@@ -94,6 +95,12 @@ namespace ETGMod {
                 }
 
                 return ret;
+            }
+
+            public void Dispose() {
+                LuaEnvironment?.Dispose();
+                RealPackageTable?.Dispose();
+                Events?.Dispose();
             }
         }
     }

@@ -34,8 +34,8 @@ namespace ETGMod.Lua {
         }
 
         public void Dispose() {
-            MainMenuLoadedFirstTime.Dispose();
-            Unloaded.Dispose();
+            MainMenuLoadedFirstTime?.Dispose();
+            Unloaded?.Dispose();
         }
 
         public void SetupExternalHooks() {

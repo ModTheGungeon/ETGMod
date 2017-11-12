@@ -88,17 +88,21 @@ namespace ETGMod {
             }
 
             LuaTable env;
-            using (var ret = f.Call()) {
+            var ret = f.Call();
 
-                if (ret.Count == 1) Logger.Debug($"Ran env.lua, got an environment");
-                else if (ret.Count == 0) Logger.Error($"env.lua did not return anything", @throw: true);
-                else Logger.Warn($"env.lua returned more than 1 result");
+            if (ret.Count == 1) Logger.Debug($"Ran env.lua, got an environment");
+            else if (ret.Count == 0) Logger.Error($"env.lua did not return anything", @throw: true);
+            else Logger.Warn($"env.lua returned more than 1 result");
 
-                using (var t = LuaState.Globals["package"] as LuaTable) {
-                    t["path"] = prev_path;
+            using (var t = LuaState.Globals["package"] as LuaTable) {
+                t["path"] = prev_path;
+            }
+
+            env = ret[0] as LuaTable;
+            if (ret.Count > 1) {
+                for (int i = 1; i < ret.Count; i++) {
+                    ret[i].Dispose();
                 }
-
-                env = ret[0] as LuaTable;
             }
 
             return env;
@@ -113,6 +117,7 @@ namespace ETGMod {
         internal void RefreshLuaState() {
             if (LuaState != null) LuaState.Dispose();
             LuaState = new LuaRuntime();
+            LuaState.InitializeClrPackage();
         }
 
         public ModInfo Load(string path) {
@@ -175,14 +180,15 @@ namespace ETGMod {
 
 
             using (var func = LuaState.CompileFile(info.ScriptPath)) {
-                using (var real_package = LuaState.CreateTable())
+                info.RealPackageTable = LuaState.CreateTable();
+
                 using (var fake_package = LuaState.CreateTable())
                 using (var mt = LuaState.CreateTable()) {
                     func.Environment = env;
 
                     /* Setup the metatable */
                     Func<LuaTable, string, LuaValue> fake_package_index = (self, key) => {
-                        using (var val = real_package[key]) return val;
+                        return info.RealPackageTable[key];
                     };
 
                     using (var index = LuaState.CreateFunctionFromDelegate(fake_package_index)) {
@@ -200,9 +206,9 @@ namespace ETGMod {
                     fake_package.Metatable = mt;
 
                     /* Setup the real package table */
-                    using (var loaded = LuaState.CreateTable()) real_package["loaded"] = loaded;
-                    real_package["path"] = Path.Combine(Paths.ResourcesFolder, "lua/libs/?.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/init.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/?.lua") + ";" + info.RealPath + "/?.lua";
-                    real_package["cpath"] = "Really makes you think";
+                    using (var loaded = LuaState.CreateTable()) info.RealPackageTable["loaded"] = loaded;
+                    info.RealPackageTable["path"] = Path.Combine(Paths.ResourcesFolder, "lua/libs/?.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/init.lua") + ";" + Path.Combine(Paths.ResourcesFolder, "lua/libs/?/?.lua") + ";" + info.RealPath + "/?.lua";
+                    info.RealPackageTable["cpath"] = "Really makes you think";
 
                     /* Add the fake package with a locked metatable to the env */
                     env["package"] = fake_package;
@@ -314,18 +320,18 @@ namespace ETGMod {
             if (info.HasScript) {
                 try {
                     info.Events?.Unloaded?.Call();
-                } catch (Exception e) {
+                } catch (LuaException e) {
                     Logger.Error($"Error while calling the Unloaded method in Lua mod: [{e.GetType().Name}] {e.Message}");
                     LuaError.Invoke(info, LuaEventMethod.Unloaded, e);
-                    foreach (var l in e.StackTrace.Split('\n')) Logger.ErrorIndent(l);
 
-                    if (e.InnerException != null) {
-                        Logger.ErrorIndent($"Inner exception: [{e.InnerException.GetType().Name}] {e.InnerException.Message}");
-                        foreach (var l in e.InnerException.StackTrace.Split('\n')) Logger.ErrorIndent(l);
+                    for (int i = 0; i < e.TracebackArray.Length; i++) {
+                        Logger.ErrorIndent("  " + e.TracebackArray[i]);
                     }
                 }
             }
-            info.LuaEnvironment.Dispose();
+
+            info.Dispose();
+
             info.EmbeddedMods = new List<ModInfo>();
             PostUnloadMod.Invoke(info);
         }
