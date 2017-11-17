@@ -47,6 +47,12 @@
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\libs\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
