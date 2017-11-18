@@ -225,8 +225,8 @@ namespace ETGMod {
                 info.LuaEnvironment = env;
                 info.RunLua(func, "the main script");
 
-                info.Events = new EventContainer(info.LuaEnvironment, info);
-                info.Events.SetupExternalHooks();
+                info.Triggers = new TriggerContainer(info.LuaEnvironment, info);
+                info.Triggers.SetupExternalHooks();
             }
         }
 
@@ -324,11 +324,13 @@ namespace ETGMod {
 
         public void Unload(ModInfo info) {
             UnloadAll(info.EmbeddedMods);
+
+            Logger.Info($"Unloading mod {info.Name}");
             if (info.HasScript) {
                 try {
-                    info.Events?.Unloaded?.Call();
+                    info.Triggers?.Unloaded?.Call();
                 } catch (LuaException e) {
-                    Logger.Error($"Error while calling the Unloaded method in Lua mod: [{e.GetType().Name}] {e.Message}");
+                    Logger.Error(e.Message);
                     LuaError.Invoke(info, LuaEventMethod.Unloaded, e);
 
                     for (int i = 0; i < e.TracebackArray.Length; i++) {

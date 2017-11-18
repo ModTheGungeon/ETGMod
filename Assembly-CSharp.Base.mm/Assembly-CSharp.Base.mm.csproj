@@ -79,7 +79,7 @@
     <Compile Include="src\API\PickupObject.cs" />
     <Compile Include="src\API\Prefab.cs" />
     <Compile Include="src\ETGMod\API.cs" />
-    <Compile Include="src\Lua\Events.cs" />
+    <Compile Include="src\Lua\Triggers.cs" />
     <Compile Include="src\Lua\LuaTool.cs" />
     <Compile Include="src\Lua\Globals.cs" />
     <Compile Include="src\Hooks\RuntimeHooks.cs" />

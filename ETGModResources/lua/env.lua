@@ -7,7 +7,7 @@
 
 local _MOD = MOD -- make it an upvalue
 local env = {
-  Events = {},
+  Triggers = {},
   Mod = MOD,
   Logger = MOD.Logger,
   Assemblies = {}

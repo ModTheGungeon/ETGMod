@@ -30,7 +30,7 @@ namespace ETGMod {
             public LuaTable LuaEnvironment;
             internal LuaTable RealPackageTable;
 
-            public EventContainer Events;
+            public TriggerContainer Triggers;
             public HookManager Hooks;
 
             private Metadata _ModMetadata;
@@ -108,7 +108,7 @@ namespace ETGMod {
             public void Dispose() {
                 LuaEnvironment?.Dispose();
                 RealPackageTable?.Dispose();
-                Events?.Dispose();
+                Triggers?.Dispose();
                 Hooks?.Dispose();
             }
         }
