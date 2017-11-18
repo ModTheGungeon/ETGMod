@@ -127,10 +127,15 @@ namespace ETGMod.Lua {
             LuaFunction fun;
             if (Hooks.TryGetValue(token, out fun)) {
                 _Logger.Debug($"Hook found");
-                var objs = new LuaValue[args.Length + 1];
-                objs[0] = runtime.AsLuaValue(target);
+                // target == null --> static
+
+                var objs_offs = 1;
+                if (target == null) objs_offs = 0;
+
+                var objs = new LuaValue[args.Length + objs_offs];
+                if (target != null) objs[0] = runtime.AsLuaValue(target);
                 for (int i = 0; i < args.Length; i++) {
-                    objs[i + 1] = runtime.AsLuaValue(args[i]);
+                    objs[i + objs_offs] = runtime.AsLuaValue(args[i]);
                 }
 
                 var result = fun.Call(args: objs);

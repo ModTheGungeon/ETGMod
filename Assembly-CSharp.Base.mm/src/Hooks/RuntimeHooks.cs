@@ -14,6 +14,7 @@ namespace ETGMod {
         private static HashSet<long> _DispatchHandlers = new HashSet<long>();
 
         private static Logger _Logger = new Logger("RuntimeHooks");
+        private static MethodInfo _HandleDispatchMethod = typeof(RuntimeHooks).GetMethod("_HandleDispatch", BindingFlags.Static | BindingFlags.NonPublic);
 
         public static long MethodToken(MethodBase method)
             => (long)((ulong)method.MetadataToken) << 32 | (
@@ -28,10 +29,14 @@ namespace ETGMod {
             }
 
             var parms = method.GetParameters();
-            var ptypes = new Type[parms.Length + 1];
-            ptypes[0] = method.DeclaringType;
+
+            int ptypes_offs = 1;
+            if (method.IsStatic) ptypes_offs = 0;
+
+            var ptypes = new Type[parms.Length + ptypes_offs];
+            if (!method.IsStatic) ptypes[0] = method.DeclaringType;
             for (int i = 0; i < parms.Length; i++) {
-                ptypes[i + 1] = parms[i].ParameterType;
+                ptypes[i + ptypes_offs] = parms[i].ParameterType;
             }
 
             var method_returns = false;
@@ -55,30 +60,35 @@ namespace ETGMod {
             var loc_target = il.DeclareLocal(typeof(object));
             loc_target.SetLocalSymInfo("target");
 
-            il.Emit(OpCodes.Ldarg_0);
+            if (method.IsStatic) {
+                il.Emit(OpCodes.Ldnull);
+            } else {
+                il.Emit(OpCodes.Ldarg_0);
+            }
             il.Emit(OpCodes.Stloc, loc_target);
 
-            il.Emit(OpCodes.Ldc_I4, ptypes.Length - 1);
+            int ary_size = ptypes.Length - 1;
+            if (method.IsStatic) ary_size = ptypes.Length;
+
+            il.Emit(OpCodes.Ldc_I4, ary_size);
             il.Emit(OpCodes.Newarr, typeof(object));
             il.Emit(OpCodes.Stloc, loc_args);
 
-            for (int i = 0; i < ptypes.Length - 1; i++) {
+            for (int i = 0; i < ary_size; i++) {
                 il.Emit(OpCodes.Ldloc, loc_args);
                 il.Emit(OpCodes.Ldc_I4, i);
-                il.Emit(OpCodes.Ldarg, i + 1);
-                if (ptypes[i + 1].IsValueType) {
-                    il.Emit(OpCodes.Box, ptypes[i + 1]);
+                il.Emit(OpCodes.Ldarg, i + ptypes_offs);
+                if (ptypes[i + ptypes_offs].IsValueType) {
+                    il.Emit(OpCodes.Box, ptypes[i + ptypes_offs]);
                 }
                 il.Emit(OpCodes.Stelem, typeof(object));
             }
-
-            var callback = typeof(RuntimeHooks).GetMethod("_HandleDispatch", BindingFlags.Static | BindingFlags.NonPublic);
 
             il.Emit(OpCodes.Ldc_I8, method_token);
             il.Emit(OpCodes.Ldloc, loc_target);
             il.Emit(OpCodes.Ldloc, loc_args);
 
-            il.Emit(OpCodes.Call, callback);
+            il.Emit(OpCodes.Call, _HandleDispatchMethod);
 
             if (!method_returns) il.Emit(OpCodes.Pop);
             if (method_returns && method is MethodInfo && ((MethodInfo)method).ReturnType.IsValueType) {

@@ -5,6 +5,7 @@
 -- There's a MOD global available in here
 -- with the current mod's ModInfo
 
+local _MOD = MOD -- make it an upvalue
 local env = {
   Events = {},
   Mod = MOD,
@@ -92,7 +93,7 @@ function env.Notify(data)
 end
 
 function env.Hook(method, func)
-  MOD.Hooks:Add(method, func)
+  _MOD.Hooks:Add(method, func)
 end
 
 require("sandbox")(env)

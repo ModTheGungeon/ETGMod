@@ -258,7 +258,7 @@ namespace ETGMod {
             return x * 2;
         }
 
-        public int HookDebug(string x) {
+        private static int HookDebug(string x) {
             return x.Length;
         }
 
