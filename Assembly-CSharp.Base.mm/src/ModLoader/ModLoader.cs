@@ -121,7 +121,9 @@ namespace ETGMod {
         internal void RefreshLuaState() {
             if (LuaState != null) LuaState.Dispose();
             LuaState = new LuaRuntime();
-            LuaState.UnityEngineSpecificWorkarounds = true;
+            LuaState.MonoStackTraceWorkaround = true;
+            // The version of Unity that Gungeon uses uses Mono 2.6.5, released in 2009
+            // Read the comment on MonoStackTraceWorkaround to learn more
             LuaState.InitializeClrPackage();
         }
 

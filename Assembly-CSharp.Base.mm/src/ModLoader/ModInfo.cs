@@ -86,12 +86,19 @@ namespace ETGMod {
                     func.Environment = LuaEnvironment;
 
                     ret = func.Call(args);
-                } catch (LuaException e) {
+                } catch (Exception e) {
                     ETGMod.ModLoader.LuaError.Invoke(this, LuaEventMethod.Loaded, e);
-                    Logger.Error($"{e.GetType().Name} thrown while running {name} of mod {Name}: {e.Message}");
+                    Logger.Error(e.Message);
 
-                    for (int i = 0; i < e.TracebackArray.Length; i++) {
-                        Logger.ErrorIndent("  " + e.TracebackArray[i]);
+                    if (e is LuaException) {
+                        for (int i = 0; i < ((LuaException)e).TracebackArray.Length; i++) {
+                            Logger.ErrorIndent("  " + ((LuaException)e).TracebackArray[i]);
+                        }
+                    } else {
+                        var lines = e.StackTrace.Split('\n');
+                        for (int i = 0; i < lines.Length; i++) {
+                            Logger.ErrorIndent(lines[i]);
+                        }
                     }
                 }
 

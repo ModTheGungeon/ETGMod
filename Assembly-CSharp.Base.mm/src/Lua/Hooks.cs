@@ -50,7 +50,7 @@ namespace ETGMod.Lua {
                 }
                 var nsbegin = ForbiddenNamespaces[i] + '.';
                 if (@namespace.StartsWithInvariant(nsbegin)) {
-                    throw new LuaException($"Tried to hook a method in a type in namespace '{@namespace}', but hooking methods in the sub-namespaces of '{forbidden_namespace}' is forbidden.");
+                    throw new LuaException($"Tried to hook a method in a type in namespace '{@namespace}', but hooking methods in sub-namespaces of '{forbidden_namespace}' is forbidden.");
                 }
             }
 
