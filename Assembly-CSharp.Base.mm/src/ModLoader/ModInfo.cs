@@ -31,6 +31,7 @@ namespace ETGMod {
             internal LuaTable RealPackageTable;
 
             public EventContainer Events;
+            public HookManager Hooks;
 
             private Metadata _ModMetadata;
             public Metadata ModMetadata {
@@ -101,6 +102,7 @@ namespace ETGMod {
                 LuaEnvironment?.Dispose();
                 RealPackageTable?.Dispose();
                 Events?.Dispose();
+                Hooks?.Dispose();
             }
         }
     }

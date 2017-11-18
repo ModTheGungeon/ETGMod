@@ -2,16 +2,23 @@
 -- and it's used to setup a base environment for mods
 -- editing this file has a high chance of breaking mods
 
--- There's a Mod global available in here
+-- There's a MOD global available in here
 -- with the current mod's ModInfo
 
 local env = {
-  Events = {}
+  Events = {},
+  Mod = MOD,
+  Logger = MOD.Logger,
+  Assemblies = {}
 }
 
 local gungeon = clr.assembly "Assembly-CSharp"
-local unity = clr.assembly "UnityEngine" 
+local unity = clr.assembly "UnityEngine"
 
+env.Assemblies.Gungeon = gungeon;
+env.Assemblies.UnityEngine = unity;
+env.Assemblies.System = clr.assembly "System";
+env.Assemblies.Mscorlib = clr.assembly "mscorlib";
 
 local ns_etgmod = clr.namespace(gungeon, 'ETGMod')
 local function namespace(ass, name, tab)
@@ -82,6 +89,10 @@ function env.Notify(data)
   end
 
   gui.GUI.NotificationController:Notify(notif)
+end
+
+function env.Hook(method, func)
+  MOD.Hooks:Add(method, func)
 end
 
 require("sandbox")(env)

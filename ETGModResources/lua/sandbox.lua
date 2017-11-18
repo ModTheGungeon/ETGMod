@@ -136,6 +136,15 @@ return function(env)
     time = os.time,
   }
 
+  env.clr = {
+    -- assembly = clr.assembly,
+    type = clr.type,
+    namespace = clr.namespace,
+    metatype = clr.metatype,
+    statictype = clr.statictype,
+    unrestricted = clr.unrestricted
+  }
+
   local _require = require
   
 

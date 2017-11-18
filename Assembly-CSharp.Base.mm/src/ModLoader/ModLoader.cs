@@ -78,8 +78,10 @@ namespace ETGMod {
             RefreshLuaState();
         }
 
-        private LuaTable _CreateNewEnvironment() {
+        private LuaTable _CreateNewEnvironment(ModInfo info) {
             var f = LuaState.CompileFile(Path.Combine(Paths.ResourcesFolder, "lua/env.lua"));
+
+            LuaState.Globals["MOD"] = new LuaTransparentClrObject(info, autobind: true);
 
             string prev_path;
             using (var t = LuaState.Globals["package"] as LuaTable) {
@@ -97,6 +99,8 @@ namespace ETGMod {
             using (var t = LuaState.Globals["package"] as LuaTable) {
                 t["path"] = prev_path;
             }
+
+            LuaState.Globals["MOD"] = null;
 
             env = ret[0] as LuaTable;
             if (ret.Count > 1) {
@@ -118,6 +122,7 @@ namespace ETGMod {
             if (LuaState != null) LuaState.Dispose();
             LuaState = new LuaRuntime();
             LuaState.InitializeClrPackage();
+
         }
 
         public ModInfo Load(string path) {
@@ -174,9 +179,9 @@ namespace ETGMod {
 
             if (parent != null) info.Parent = parent;
 
-            var env = _CreateNewEnvironment();
-            env["Mod"] = new LuaTransparentClrObject(info, autobind: true);
-            env["Logger"] = new LuaTransparentClrObject(info.Logger, autobind: true);
+            info.Hooks = new HookManager();
+
+            var env = _CreateNewEnvironment(info);
 
 
             using (var func = LuaState.CompileFile(info.ScriptPath)) {

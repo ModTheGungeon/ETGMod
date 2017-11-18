@@ -254,8 +254,18 @@ namespace ETGMod {
             ModsReloaded.Invoke(manual);
         }
 
+        public int HookDebug(int x) {
+            return x * 2;
+        }
+
+        public int HookDebug(string x) {
+            return x.Length;
+        }
+
         private static object[] _EmptyObjectArray = { };
         public void Update() {
+            Console.WriteLine($"HOOK DEBUG INT {HookDebug(3)}");
+            Console.WriteLine($"HOOK DEBUG STRING {HookDebug("Hello")}");
             if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods(manual: true);
         }
     }
