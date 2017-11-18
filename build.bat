@@ -5,7 +5,7 @@ setlocal ENABLEDELAYEDEXPANSION
 where xbuild >nul 2>nul
 if not %errorlevel%==0 (
   where msbuild >nul 2>nul
-  if not %errorlevel%==0 (
+  if not !errorlevel!==0 (
     echo ERROR: Neither xbuild nor msbuild were found. Make sure you have Mono or .NET Framework installed and the binaries are available in the PATH.
     goto _exit
   )
