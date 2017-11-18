@@ -3,13 +3,20 @@ using System.Reflection;
 using System.Collections.Generic;
 using Eluant;
 
-using HookMap = System.Collections.Generic.Dictionary<long, Eluant.LuaFunction>;
-using ReturnMap = System.Collections.Generic.Dictionary<long, System.Type>;
-
 namespace ETGMod.Lua {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class ForbidLuaHookingAttribute : Attribute {}
+
     public class HookManager : IDisposable {
-        public HookMap Hooks = new HookMap();
-        public ReturnMap HookReturns = new ReturnMap();
+        public Dictionary<long, LuaFunction> Hooks = new Dictionary<long, LuaFunction>();
+        public Dictionary<long, System.Type> HookReturns = new Dictionary<long, System.Type>();
+
+        public static List<string> ForbiddenNamespaces = new List<string> {
+            "ETGMod",
+            "System",
+            "TexMod"
+        };
+
         private static Logger _Logger = new Logger("HookManager");
 
         public void Dispose() {
@@ -32,7 +39,34 @@ namespace ETGMod.Lua {
             else return type.GetMethod(name, binding_flags, null, argtypes, null);
 
         }
-            
+
+
+        private void _CheckForbidden(MethodInfo method) {
+            var @namespace = method.DeclaringType.Namespace;
+            for (int i = 0; i < ForbiddenNamespaces.Count; i++) {
+                var forbidden_namespace = ForbiddenNamespaces[i];
+                if (@namespace == forbidden_namespace) {
+                    throw new LuaException($"Tried to hook a method in a type in namespace '{@namespace}', but hooking methods in this namespace is forbidden");
+                }
+                var nsbegin = ForbiddenNamespaces[i] + '.';
+                if (@namespace.StartsWithInvariant(nsbegin)) {
+                    throw new LuaException($"Tried to hook a method in a type in namespace '{@namespace}', but hooking methods in the sub-namespaces of '{forbidden_namespace}' is forbidden.");
+                }
+            }
+
+            var attrs = method.GetCustomAttributes(typeof(ForbidLuaHookingAttribute), true);
+            if (attrs.Length > 0 && attrs[0] is ForbidLuaHookingAttribute) {
+                throw new LuaException($"Hooking method '{method.Name}' in type '{method.DeclaringType.FullName}' is explicitly forbidden");
+            }
+
+            var impl = method.GetMethodImplementationFlags();
+
+            if ((impl & MethodImplAttributes.InternalCall) != 0) {
+                throw new LuaException($"Hooking method '{method.Name}' in type '{method.DeclaringType.FullName}' is forbidden by default as it is an extern method");
+            }
+
+            // all good if it gets here (hopefully!)
+        }
 
         public void Add(LuaTable details, LuaFunction fn) {
             Type criteria_type;
@@ -104,7 +138,8 @@ namespace ETGMod.Lua {
             if (method_info == null) {
                 throw new LuaException($"Method '{criteria_methodname}' in '{criteria_type.FullName}' not found.");
             }
-
+            _CheckForbidden(method_info);
+            
             RuntimeHooks.InstallDispatchHandler(method_info);
 
             var token = RuntimeHooks.MethodToken(method_info);

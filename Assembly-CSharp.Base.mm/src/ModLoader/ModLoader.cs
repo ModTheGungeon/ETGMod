@@ -121,8 +121,8 @@ namespace ETGMod {
         internal void RefreshLuaState() {
             if (LuaState != null) LuaState.Dispose();
             LuaState = new LuaRuntime();
+            LuaState.UnityEngineSpecificWorkarounds = true;
             LuaState.InitializeClrPackage();
-
         }
 
         public ModInfo Load(string path) {
