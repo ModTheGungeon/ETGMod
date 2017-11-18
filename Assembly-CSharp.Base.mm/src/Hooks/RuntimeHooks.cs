@@ -11,6 +11,7 @@ using Eluant;
 namespace ETGMod {
     public class RuntimeHooks {
         private static TrampolineMap _Trampolines = new TrampolineMap();
+        private static HashSet<long> _DispatchHandlers = new HashSet<long>();
 
         private static Logger _Logger = new Logger("RuntimeHooks");
 
@@ -20,13 +21,18 @@ namespace ETGMod {
                 (uint)method.Module.Assembly.FullName.GetHashCode());
 
         public static void InstallDispatchHandler(MethodBase method) {
+            var method_token = MethodToken(method);
+            if (_DispatchHandlers.Contains(method_token)) {
+                _Logger.Debug($"Not installing dispatch handler for {method.Name} ({method_token}) - it's already installed");
+                return;
+            }
+
             var parms = method.GetParameters();
             var ptypes = new Type[parms.Length + 1];
             ptypes[0] = method.DeclaringType;
             for (int i = 0; i < parms.Length; i++) {
                 ptypes[i + 1] = parms[i].ParameterType;
             }
-            var method_token = MethodToken(method);
 
             var method_returns = false;
             if (method is MethodInfo) {
@@ -86,6 +92,7 @@ namespace ETGMod {
             );
 
             _Trampolines[method_token] = RuntimeDetour.CreateOrigTrampoline(method);
+            _DispatchHandlers.Add(method_token);
 
             _Logger.Debug($"Installed dispatch handler for {method.Name} (token {method_token})");
         }

@@ -115,7 +115,7 @@ namespace ETGMod.Lua {
                 HookReturns[token] = method_info.ReturnType;
             }
 
-            _Logger.Debug($"Added Lua hook for method '{criteria_methodname}'");
+            _Logger.Debug($"Added Lua hook for method '{criteria_methodname}' ({token})");
         }
 
         internal object TryRun(LuaRuntime runtime, long token, object target, object[] args, out bool returned) {
