@@ -41,13 +41,13 @@
     <Folder Include="src\Patches\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Assembly-CSharp.Core.mm\Assembly-CSharp.Core.mm.csproj">
-      <Project>{4473AD38-DAF1-449A-A850-4296D3368413}</Project>
-      <Name>Assembly-CSharp.Core.mm</Name>
-    </ProjectReference>
     <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
       <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
       <Name>MonoMod</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\Logger\Logger.csproj">
+      <Project>{1C734127-AC83-4ECB-ABCA-32B98DFE49C7}</Project>
+      <Name>Logger</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -35,4 +35,3 @@ pushd $BUILD
 zip -r "$zip_name" *
 popd
 mv "$BUILD/$zip_name" "$BUILD_ZIP"
-zenity --info --title "Ey" --text="Hey faggot, install ETGMod"

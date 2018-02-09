@@ -11,8 +11,11 @@
 	path = Assembly-CSharp.GUI.mm/src/External/SGUI
 	url = https://github.com/ModTheGungeon/SGUI
 [submodule "ETGModResources/lua/libs/json"]
-	path = ETGModResources/lua/libs/json
+	path = Resources/lua/libs/json
 	url = https://github.com/rxi/json.lua
 [submodule "libs/Eluant"]
 	path = libs/Eluant
 	url = https://github.com/modthegungeon/Eluant
+[submodule "libs/Logger"]
+	path = libs/Logger
+	url = https://github.com/modthegungeon/Logger

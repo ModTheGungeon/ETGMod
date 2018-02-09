@@ -1,0 +1,14 @@
+name: ETGMod
+install_in_managed:
+  - LICENSE_ETGMOD
+  - LICENSE_MONO
+ 
+ordered_targets:
+  - UnityEngine
+  - Assembly-CSharp
+
+#relink_map:
+#  Assembly-CSharp:
+#    UnityEngine.Core.mm: UnityEngine.dll
+#    UnityEngine.Base.mm: UnityEngine.dll
+
