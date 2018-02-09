@@ -219,27 +219,6 @@ namespace ETGMod {
             _LoadMods();
         }
 
-        public void Awake() {
-            System.Console.WriteLine("ENEMY OBJECTS");
-            for (int i = 0; i < EnemyDatabase.Instance.Entries.Count; i++) {
-                var e = EnemyDatabase.Instance.Entries[i];
-
-                var name = "[ERROR]";
-
-                if (e == null) {
-                    name = "[NULL OBJECT]";
-                } else {
-                    try {
-                        var o = EnemyDatabase.GetOrLoadByGuid(e.myGuid);
-                        var pdn = o.encounterTrackable?.journalData?.PrimaryDisplayName;
-                        name = pdn != null ? StringTableManager.GetEnemiesString(pdn) : o.ActorName ?? "[NULL NAME]"; 
-                    } catch { }
-                }
-
-                Console.WriteLine($"{e.myGuid} {name}");
-            }
-        }
-
         private void _ReloadMods(bool manual) {
             Logger.Info($"Reloading all backends and mods");
 
@@ -267,6 +246,28 @@ namespace ETGMod {
             Console.WriteLine($"HOOK DEBUG INT {HookDebug(3)}");
             Console.WriteLine($"HOOK DEBUG STRING {HookDebug("Hello")}");
             if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods(manual: true);
+
+            if (GameManager.Instance.PrimaryPlayer != null) {
+                Console.WriteLine($"primaryplayerdump");
+                var player = GameManager.Instance.PrimaryPlayer;
+                Console.WriteLine(player);
+                var animator = player.spriteAnimator;
+                Console.WriteLine(animator);
+                var obj = animator.gameObject;
+                Console.WriteLine(obj);
+                var basesprite = animator.GetComponent<tk2dBaseSprite>();
+                Console.WriteLine(basesprite);
+                var coll = basesprite.Collection;
+                Console.WriteLine(coll);
+                Console.WriteLine("{");
+                Console.WriteLine(Animation.Collection.Dump(coll).SerializeCollection());
+                Console.WriteLine("}");
+                Application.Quit();
+                Application.Quit();
+                Application.Quit();
+                Application.Quit();
+                Application.Quit();
+            }
         }
     }
 }

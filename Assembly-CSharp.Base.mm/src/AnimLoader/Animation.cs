@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using YamlDotNet.Serialization;
+using System.Reflection;
 
 namespace ETGMod {
     public partial class Animation {
@@ -123,6 +124,7 @@ namespace ETGMod {
             target.materialInst = source.materialInst;
             target.metadata = source.metadata;
             target.normals = source.normals;
+            target.name = source.name;
             target.physicsEngine = source.physicsEngine;
             target.position0 = source.position0;
             target.position1 = source.position1;
@@ -294,6 +296,8 @@ namespace ETGMod {
             _Logger.Debug($"Patching clips - clips length after: {target.clips.Length}");
         }
 
+        private static FieldInfo _clipFps = typeof(tk2dSpriteAnimator).GetField("clipFps", BindingFlags.Instance | BindingFlags.NonPublic);
+
         public tk2dSpriteAnimator PatchAnimator(tk2dSpriteAnimator animator, Action<tk2dSpriteAnimationClip> each_clip = null) {
             _Logger.Debug($"Patching animator on GameObject '{animator.gameObject.name}'");
 
@@ -302,7 +306,9 @@ namespace ETGMod {
             int sprite_id_offset = _Collection.PatchCollection(collection);
             _PatchClipsInAnimation(_Clips, animator.Library, collection, sprite_id_offset, each_clip);
 
-            if (_FPS != null) animator.ClipFps = _FPS.Value;
+            if (_FPS != null) {
+                _clipFps.SetValue(animator, _FPS.Value);
+            }
 
             return animator;
         }

@@ -84,6 +84,8 @@
     <Compile Include="src\Lua\Globals.cs" />
     <Compile Include="src\Hooks\RuntimeHooks.cs" />
     <Compile Include="src\Lua\Hooks.cs" />
+    <Compile Include="src\AnimDumper\CollectionDumper.cs" />
+    <Compile Include="src\AnimDumper\GridPacker.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -95,23 +97,16 @@
     <Folder Include="src\Patches\" />
     <Folder Include="src\Lua\" />
     <Folder Include="src\Hooks\" />
+    <Folder Include="src\AnimDumper\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.BasePre.mm\Assembly-CSharp.BasePre.mm.csproj">
       <Project>{EC6C2E23-2BFD-494B-8D02-637314C4B0BB}</Project>
       <Name>Assembly-CSharp.BasePre.mm</Name>
     </ProjectReference>
-    <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
-      <Project>{BCD03ACB-E715-4A3D-A4C2-C5717A5D41E4}</Project>
-      <Name>UnityEngine.Base.mm</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp.Core.mm\Assembly-CSharp.Core.mm.csproj">
       <Project>{4473AD38-DAF1-449A-A850-4296D3368413}</Project>
       <Name>Assembly-CSharp.Core.mm</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\UnityEngine.Core.mm\UnityEngine.Core.mm.csproj">
-      <Project>{85EEF778-D1A0-4DFD-8B6C-AF6BE334DB92}</Project>
-      <Name>UnityEngine.Core.mm</Name>
     </ProjectReference>
     <ProjectReference Include="..\libs\YamlDotNet\YamlDotNet\YamlDotNet.csproj">
       <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
@@ -124,6 +119,18 @@
     <ProjectReference Include="..\libs\Eluant\Eluant\Eluant.csproj">
       <Project>{D4CFD952-4EDC-421D-84A5-998688815124}</Project>
       <Name>Eluant</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\Logger\Logger.csproj">
+      <Project>{1C734127-AC83-4ECB-ABCA-32B98DFE49C7}</Project>
+      <Name>Logger</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
+      <Project>{BCD03ACB-E715-4A3D-A4C2-C5717A5D41E4}</Project>
+      <Name>UnityEngine.Base.mm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.Core.mm\UnityEngine.Core.mm.csproj">
+      <Project>{85EEF778-D1A0-4DFD-8B6C-AF6BE334DB92}</Project>
+      <Name>UnityEngine.Core.mm</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

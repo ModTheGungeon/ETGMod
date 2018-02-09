@@ -38,8 +38,6 @@ public class patch_dfTextureSprite : dfTextureSprite {
     }
 
     public void TexModPatch() {
-        // TODO fix cropping and offsets here
-
         if (_texmod_init) return;
         if (_texmod_fake_collname == null || _texmod_fake_defname == null) return;
         _texmod_init = true;
@@ -68,14 +66,14 @@ public class patch_dfTextureSprite : dfTextureSprite {
                 Texture = def.material.mainTexture;
                 Material = def.material;
 
-                Width = def.ETGModCropWidth * def.ETGModScaleW;
-                Height = def.ETGModCropHeight * def.ETGModScaleH;
+                Width = def.GetCropWidth(Texture) * def.GetScaleW(Texture);
+                Height = def.GetCropHeight(Texture) * def.GetScaleH(Texture);
 
                 CropRect = new Rect(
-                    def.ETGModCropX,
-                    def.ETGModCropY,
-                    def.ETGModCropWidth,
-                    def.ETGModCropHeight
+                    def.GetCropX(Texture),
+                    def.GetCropY(Texture),
+                    def.GetCropWidth(Texture),
+                    def.GetCropHeight(Texture)
                 );
                 CropTexture = true;
             }

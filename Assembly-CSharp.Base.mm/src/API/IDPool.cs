@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace ETGMod {
@@ -72,7 +71,14 @@ namespace ETGMod {
             VerifyID(id);
             var entry = Split(id);
             if (_LockedNamespaces.Contains(entry.Namespace)) throw new LockedNamespaceException(entry.Namespace);
-            if (id.Any(char.IsWhiteSpace)) throw new BadIDElementException("name");
+            var ws = false;
+            for (int i = 0; i < id.Length; i++) {
+                if (char.IsWhiteSpace(id[i])) {
+                    ws = true;
+                    break;
+                }
+            }
+            if (ws) throw new BadIDElementException("name");
             _Storage[id] = obj;
             if (!_Namespaces.Contains(entry.Namespace))
             {
@@ -89,7 +95,6 @@ namespace ETGMod {
 
         public T Get(string id)
         {
-            Console.WriteLine($"GETTING {id}");
             id = Resolve(id);
             if (!_Storage.ContainsKey(id)) throw new NonExistantIDException(id);
             return _Storage[id];
@@ -173,7 +178,13 @@ namespace ETGMod {
         {
             get
             {
-                return _Storage.Keys.ToArray();
+                var ary = new string[_Storage.Count];
+                var i = 0;
+                foreach (var k in _Storage.Keys) {
+                    ary[i] = k;
+                    i += 1;
+                }
+                return ary;
             }
         }
 
@@ -217,7 +228,14 @@ namespace ETGMod {
             {
                 var count = _Storage.Count;
                 var idx = UnityEngine.Random.Range(0, count - 1);
-                return _Storage.Values.ToList()[idx];
+
+                var i = 0;
+                foreach (var v in _Storage.Values) {
+                    if (idx == i) return v;
+                    i += 1;
+                }
+
+                throw new Exception("shouldn't happen");
             }
         }
 
@@ -225,7 +243,14 @@ namespace ETGMod {
             get {
                 var count = _Storage.Count;
                 var idx = UnityEngine.Random.Range(0, count - 1);
-                return _Storage.Keys.ToList()[idx];
+
+                var i = 0;
+                foreach (var k in _Storage.Keys) {
+                    if (idx == i) return k;
+                    i += 1;
+                }
+
+                throw new Exception("shouldn't happen");
             }
         }
 
@@ -233,8 +258,14 @@ namespace ETGMod {
             get {
                 var count = _Storage.Count;
                 var idx = UnityEngine.Random.Range(0, count - 1);
-                var key = _Storage.Keys.ToList()[idx];
-                return new KeyValuePair<string, T>(key, _Storage[key]);
+
+                var i = 0;
+                foreach (var pair in _Storage) {
+                    if (idx == i) return pair;
+                    i += 1;
+                }
+
+                throw new Exception("shouldn't happen");
             }
         }
     }

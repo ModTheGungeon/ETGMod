@@ -7,7 +7,7 @@ using System.IO;
 namespace ETGMod {
     public partial class Animation {
         public class AnimatorGenerator {
-            public static Logger Logger = new Logger("AnimatorGenerator");
+            public static Logger _Logger = new Logger("AnimatorGenerator");
 
             public ModLoader.ModInfo ModInfo;
             public YAML.Animation Mapping;
@@ -59,6 +59,8 @@ namespace ETGMod {
                         if (mclip.Value.OffGround.Contains(i)) frame.groundedFrame = false;
                     }
 
+                    _Logger.Debug($"Clip has {frames.Length} frames");
+
                     clips.Add(clip);
                 }
 
@@ -93,9 +95,11 @@ namespace ETGMod {
                 for (int i = 0; i < clip.Frames.Count; i++) {
                     var mframe = clip.Frames[i];
 
+                    _Logger.Debug($"Frame {i}: spritedef {mframe.Definition}");
+
                     var sprite_id = Collection.GetSpriteDefinitionIndex(mframe.Definition);
                     if (sprite_id == null) {
-                        Logger.Error($"Definition '{mframe.Definition}' doesn't exist!");
+                        _Logger.Error($"Definition '{mframe.Definition}' doesn't exist!");
                         continue;
                     }
 

@@ -24,10 +24,7 @@ namespace ETGMod {
                 public Scale DefScale { set; get; }
 
                 [YamlMember(Alias = "offset")]
-                public Position Offset { set; get; } = new Position {
-                    X = 0,
-                    Y = 0
-                };
+                public Position Offset { set; get; }
             }
 
             public class Definition {
@@ -47,10 +44,10 @@ namespace ETGMod {
                 public int? H { set; get; } = null;
 
                 [YamlMember(Alias = "offsx")]
-                public int? OffsetX { set; get; } = null;
+                public float? OffsetX { set; get; } = null;
 
                 [YamlMember(Alias = "offsy")]
-                public int? OffsetY { set; get; } = null;
+                public float? OffsetY { set; get; } = null;
 
                 [YamlMember(Alias = "scalew")]
                 public float? ScaleW { set; get; } = null;
@@ -63,6 +60,7 @@ namespace ETGMod {
             }
 
             public static Deserializer Deserializer = new DeserializerBuilder().Build();
+            public static Serializer Serializer = new SerializerBuilder().Build();
 
             public class FidgetDuration {
                 [YamlMember(Alias = "max")]

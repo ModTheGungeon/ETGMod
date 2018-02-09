@@ -5,7 +5,10 @@ libs/MonoMod/bin/{TARGET}/MonoMod.exe
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.dll
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.Mdb.dll
 libs/MonoMod/packages/Mono.Cecil.0.10.0-beta5/lib/net35/Mono.Cecil.Pdb.dll
+
+# in-house but technically external
 libs/Eluant/Eluant/bin/{TARGET}/Eluant.dll
+libs/Logger/bin/{TARGET}/Logger.dll
 
 # internal [Assembly-CSharp]
 Assembly-CSharp.Core.mm/bin/{TARGET}/Assembly-CSharp.Core.mm.dll
@@ -23,4 +26,7 @@ LICENSE_ETGMOD
 LICENSE_MONO
 
 # resources
-ETGModResources
+Resources
+
+# for the installer
+metadata.yml

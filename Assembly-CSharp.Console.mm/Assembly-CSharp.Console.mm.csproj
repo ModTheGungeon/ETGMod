@@ -70,6 +70,10 @@
       <Project>{34E81F62-F88C-44EF-96D9-DBBD2C46DF34}</Project>
       <Name>Assembly-CSharp.Base.mm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\libs\Logger\Logger.csproj">
+      <Project>{1C734127-AC83-4ECB-ABCA-32B98DFE49C7}</Project>
+      <Name>Logger</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -24,7 +24,7 @@ namespace ETGMod {
         public static string ResourcesFolder {
             get {
                 if (_ResourcesFolder != null) return _ResourcesFolder;
-                return _ResourcesFolder = Path.Combine(ManagedFolder, "ETGModResources");
+                return _ResourcesFolder = Path.Combine(ManagedFolder, "ETGMod/Resources");
             }
         }
 

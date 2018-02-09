@@ -35,7 +35,6 @@
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\Core\Backend.cs" />
     <Compile Include="src\Core\Core.cs" />
-    <Compile Include="src\Core\Logger.cs" />
     <Compile Include="src\Extensions\String.cs" />
     <Compile Include="src\Core\Paths.cs" />
     <Compile Include="src\Core\UnityUtil.cs" />
@@ -57,6 +56,10 @@
     <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
       <Project>{8A17C958-5C33-4035-AF76-F94A3AA2DC4F}</Project>
       <Name>MonoMod</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libs\Logger\Logger.csproj">
+      <Project>{1C734127-AC83-4ECB-ABCA-32B98DFE49C7}</Project>
+      <Name>Logger</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
