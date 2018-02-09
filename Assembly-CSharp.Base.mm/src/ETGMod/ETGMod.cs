@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using ETGMod.API;
 
 namespace ETGMod {
     public partial class ETGMod : Backend {
@@ -267,6 +268,10 @@ namespace ETGMod {
             Console.WriteLine($"HOOK DEBUG INT {HookDebug(3)}");
             Console.WriteLine($"HOOK DEBUG STRING {HookDebug("Hello")}");
             if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods(manual: true);
+
+            if (Input.GetKeyDown(KeyCode.T)) {
+                CustomPickupObject.Test();
+            }
         }
     }
 }

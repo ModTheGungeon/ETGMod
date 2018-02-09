@@ -35,10 +35,12 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Patches\patch_Logger.cs" />
+    <Compile Include="src\Extensions\UnityExt.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\Patches\" />
+    <Folder Include="src\Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\libs\MonoMod\MonoMod.csproj">
