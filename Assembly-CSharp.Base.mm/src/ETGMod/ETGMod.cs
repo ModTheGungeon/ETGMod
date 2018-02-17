@@ -265,12 +265,19 @@ namespace ETGMod {
 
         private static object[] _EmptyObjectArray = { };
         public void Update() {
-            Console.WriteLine($"HOOK DEBUG INT {HookDebug(3)}");
-            Console.WriteLine($"HOOK DEBUG STRING {HookDebug("Hello")}");
+            //Console.WriteLine($"HOOK DEBUG INT {HookDebug(3)}");
+            //Console.WriteLine($"HOOK DEBUG STRING {HookDebug("Hello")}");
             if (Input.GetKeyDown(MOD_RELOAD_KEY)) _ReloadMods(manual: true);
 
-            if (Input.GetKeyDown(KeyCode.T)) {
-                CustomPickupObject.Test();
+            foreach (var key in Enum.GetValues(typeof(KeyCode))) {
+                if (Input.GetKeyDown((KeyCode)key)) {
+                    for (int i = 0; i < ModLoader.LoadedMods.Count; i++) {
+                        var mod = ModLoader.LoadedMods[i];
+
+                        Logger.Debug($"Key pressed: {(KeyCode)key}, trying to run debug hotkey in {mod.Name}");
+                        mod.DebugHotkeys?.Trigger((KeyCode)key);
+                    }
+                }
             }
         }
     }

@@ -76,7 +76,7 @@
     <Compile Include="src\Patches\patch_MainMenuFoyerController.cs" />
     <Compile Include="src\Patches\patch_tk2dSpriteDefinition.cs" />
     <Compile Include="src\ETGMod\IDMaps.cs" />
-    <Compile Include="src\API\PickupObject.cs" />
+    <Compile Include="src\API\CustomPickupObject.cs" />
     <Compile Include="src\API\Prefab.cs" />
     <Compile Include="src\ETGMod\API.cs" />
     <Compile Include="src\Lua\Triggers.cs" />
@@ -84,6 +84,11 @@
     <Compile Include="src\Lua\Globals.cs" />
     <Compile Include="src\Hooks\RuntimeHooks.cs" />
     <Compile Include="src\Lua\Hooks.cs" />
+    <Compile Include="src\Lua\DebugHotkeys.cs" />
+    <Compile Include="src\Lua\Items\ItemsDB.cs" />
+    <Compile Include="src\Lua\Items\LuaPassiveItem.cs" />
+    <Compile Include="src\API\AmmonomiconEntry.cs" />
+    <Compile Include="src\API\I18N.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
@@ -95,6 +100,7 @@
     <Folder Include="src\Patches\" />
     <Folder Include="src\Lua\" />
     <Folder Include="src\Hooks\" />
+    <Folder Include="src\Lua\Items\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp.BasePre.mm\Assembly-CSharp.BasePre.mm.csproj">

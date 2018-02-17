@@ -30,13 +30,15 @@ end
 
 local _GAME = namespace(gungeon, "", {
   ETGMod = namespace(gungeon, "ETGMod", {
+    API = clr.namespace(gungeon, 'ETGMod.API'),
     GUI = clr.namespace(gungeon, 'ETGMod.GUI'),
     Lua = clr.namespace(gungeon, 'ETGMod.Lua'),
     Console = namespace(gungeon, "ETGMod.Console", {
       Parser = clr.namespace(gungeon, 'ETGMod.Console')
     }),
     TexMod = clr.namespace(gungeon, 'ETGMod.TexMod')
-  })
+  }),
+  UnityEngine = clr.namespace(unity, "UnityEngine")
 })
 env._GAME = _GAME
 
@@ -95,6 +97,12 @@ end
 function env.Hook(method, func)
   _MOD.Hooks:Add(method, func)
 end
+
+package.loaded = {}
+
+require("api.debug_hotkeys")(_MOD, _GAME, env)
+require("api.items")(_MOD, _GAME, env)
+print("This should be here: " .. tostring(env.TestItem))
 
 require("sandbox")(env)
 

@@ -8,10 +8,9 @@ namespace ETGMod {
     public partial class ModLoader {
         public partial class ModInfo : IDisposable {
             public Logger Logger = new Logger("Unnamed Mod");
-            private string _NameOverride;
-
             public ModInfo Parent;
 
+            private string _NameOverride;
             public string Name {
                 get {
                     if (_NameOverride == null) return ModMetadata.Name;
@@ -22,6 +21,16 @@ namespace ETGMod {
                     Logger.ID = value;
                 }
             }
+
+            private string _Namespace = null;
+            public string Namespace {
+                get {
+                    if (_Namespace != null) return _Namespace;
+                    if (ModMetadata.Namespace != null) return ModMetadata.Namespace;
+                    return _Namespace = Name.ToLowerInvariant().Replace(" ", "_");
+                }
+            }
+
             public List<ModInfo> EmbeddedMods {
                 get;
                 internal set;
@@ -32,6 +41,8 @@ namespace ETGMod {
 
             public TriggerContainer Triggers;
             public HookManager Hooks;
+            public DebugHotkeyManager DebugHotkeys;
+            public ItemsDB ItemsDB;
 
             private Metadata _ModMetadata;
             public Metadata ModMetadata {
@@ -110,6 +121,8 @@ namespace ETGMod {
                 RealPackageTable?.Dispose();
                 Triggers?.Dispose();
                 Hooks?.Dispose();
+                DebugHotkeys?.Dispose();
+                ItemsDB?.Dispose();
             }
         }
     }

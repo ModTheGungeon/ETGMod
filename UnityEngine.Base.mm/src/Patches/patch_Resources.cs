@@ -1,13 +1,15 @@
 ﻿#pragma warning disable 0626
 #pragma warning disable 0649
+#pragma warning disable 0436
 
 using System.Diagnostics;
 using MonoMod;
+using UnityEngine;
 
-namespace UnityEngine {
+namespace UnityEnginePatches {
     [MonoModPatch("UnityEngine.Resources")]
-    internal sealed class Resources {
-        // TODO
+    internal sealed class ResourcesPatch {
+        // hijacking resources.load and such (not actually used right now)
 
         [MonoModOriginal]
         public static extern Object Ooad(string path, System.Type systemTypeInstance);
@@ -50,6 +52,5 @@ namespace UnityEngine {
         public static AsyncOperation UnloadUnusedAssets() {
             return OnloadUnusedAssets();
         }
-
     }
 }

@@ -182,6 +182,9 @@ namespace ETGMod {
             if (parent != null) info.Parent = parent;
 
             info.Hooks = new HookManager();
+            info.DebugHotkeys = new DebugHotkeyManager();
+
+            info.ItemsDB = new ItemsDB();
 
             var env = _CreateNewEnvironment(info);
 

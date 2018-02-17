@@ -89,7 +89,6 @@ namespace ETGMod {
 
         public T Get(string id)
         {
-            Console.WriteLine($"GETTING {id}");
             id = Resolve(id);
             if (!_Storage.ContainsKey(id)) throw new NonExistantIDException(id);
             return _Storage[id];

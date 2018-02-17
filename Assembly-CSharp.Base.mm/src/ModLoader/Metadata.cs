@@ -21,6 +21,9 @@ namespace ETGMod {
                 [YamlMember(Alias = "name")]
                 public string Name { set; get; } = "Unknown";
 
+                [YamlMember(Alias = "namespace")]
+                public string Namespace { set; get; } = null;
+
                 [YamlMember(Alias = "version")]
                 public Version Version { set; get; } = new Version(1, 0, 0);
 
