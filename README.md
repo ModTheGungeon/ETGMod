@@ -1,4 +1,5 @@
 # Enter the Gungeon Base API Mod pre-rewrite fork
+# Compatible with Advanced Gungeons & Draguns update
 
 ### License: MIT
 
