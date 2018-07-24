@@ -1,4 +1,4 @@
-# Enter the Gungeon Base API Mod
+# Enter the Gungeon Base API Mod pre-rewrite fork
 
 ### License: MIT
 
