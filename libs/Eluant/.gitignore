@@ -1,0 +1,9 @@
+bin
+obj
+*.userprefs
+*.usertasks
+*.suo
+*.swp
+test-results
+/packages
+/TestResult.xml

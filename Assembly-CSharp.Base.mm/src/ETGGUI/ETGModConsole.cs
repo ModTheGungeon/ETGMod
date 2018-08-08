@@ -10,7 +10,7 @@ using Gungeon;
 
 public class ETGModConsole : ETGModMenu {
 
-    public const int REVISION = 2;
+    public const int REVISION = 3;
 
     public static ETGModConsole Instance { get; protected set; }
     public ETGModConsole() {
@@ -89,12 +89,12 @@ public class ETGModConsole : ETGModMenu {
                         new SLabel("THIS CONSOLE IS <color=#ff0000ff>WORK IN PROGRESS</color>."),
                         new SLabel("Use <color=#ffffffff>help</color> to find out how to use the console.") { Foreground = Color.gray },
                         new SLabel(),
-                        new SLabel("Wee this text gets randomized in order!") {
-                            With = {
-                                new SRandomLabelModifier()
-                            }
-                        },
-                        new SLabel(),
+                        //new SLabel("Wee this text gets randomized in order!") {
+                         //   With = {
+                         //       new SRandomLabelModifier()
+                         //   }
+                        //},
+                       // new SLabel(),
                     }
                 },
                 new STextField {
@@ -145,9 +145,10 @@ public class ETGModConsole : ETGModMenu {
                 .AddUnit("tp", Teleport)
                 .AddUnit("character", SwitchCharacter)
                 .AddUnit("clear", (string[] args) => GUI[0].Children.Clear())
-                .AddUnit("godmode", delegate (string[] args) {
-                    GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
-                })
+                .AddUnit("godmode", godmode)// {
+                 //   GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable);
+            // GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = SetBool(args, GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable); delegate(string[] args
+       // })
                 .AddGroup("spawn", Spawn, _SpawnAutocompletionSettings);
 
         // SPAWN NAMESAPCE
@@ -552,41 +553,46 @@ public class ETGModConsole : ETGModMenu {
         }
     }
 
+    void godmode(string[] args)
+    {
+        GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable = !GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable;
+        Log("Godmode is " + (GameManager.Instance.PrimaryPlayer.healthHaver.IsVulnerable ? "off" : "on"));
+    }
+
     void SpawnChest(string[] args) {
         if (!ArgCount(args, 1, 2)) return;
         Dungeonator.RoomHandler currentRoom = GameManager.Instance.PrimaryPlayer.CurrentRoom;
-        RewardManager rewardManager = GameManager.Instance.RewardManager;
         Chest chest;
         bool glitched = false;
         string name = args[0].ToLower();
         switch (name) {
             case "brown":
             case "d":
-                chest = rewardManager.D_Chest;
+                chest = GameManager.Instance.RewardManager.D_Chest;
                 break;
             case "blue":
             case "c":
-                chest = rewardManager.C_Chest;
+                chest = GameManager.Instance.RewardManager.C_Chest;
                 break;
             case "green":
             case "b":
-                chest = rewardManager.B_Chest;
+                chest = GameManager.Instance.RewardManager.B_Chest;
                 break;
             case "red":
             case "a":
-                chest = rewardManager.A_Chest;
+                chest = GameManager.Instance.RewardManager.A_Chest;
                 break;
             case "black":
             case "s":
-                chest = rewardManager.S_Chest;
+                chest = GameManager.Instance.RewardManager.S_Chest;
                 break;
             case "rainbow":
             case "r":
-                chest = rewardManager.Rainbow_Chest;
+                chest = GameManager.Instance.RewardManager.Rainbow_Chest;
                 break;
             case "glitched":
             case "g":
-                chest = rewardManager.B_Chest;
+                chest = GameManager.Instance.RewardManager.B_Chest;
                 glitched = true;
                 break;
             default:
@@ -594,7 +600,7 @@ public class ETGModConsole : ETGModMenu {
                 return;
         }
         WeightedGameObject wGameObject = new WeightedGameObject();
-        wGameObject.gameObject = chest.gameObject;
+        wGameObject.rawGameObject = chest.gameObject;
         WeightedGameObjectCollection wGameObjectCollection = new WeightedGameObjectCollection();
         wGameObjectCollection.Add(wGameObject);
         int count = 1;
@@ -616,6 +622,8 @@ public class ETGModConsole : ETGModMenu {
         }
         chest.overrideMimicChance = origMimicChance;
     }
+
+    
 
     void SpawnAll(string[] args) {
         if (!ArgCount(args, 0)) return;
@@ -764,8 +772,10 @@ public class ETGModConsole : ETGModMenu {
     }
 
     void SwitchCharacter(string[] args) {
+        Log("Trying to switch costume");
+        
         if (!ArgCount(args, 1, 2)) return;
-        var prefab = (GameObject)Resources.Load("CHARACTERDB:" + args[0]);
+        var prefab = (GameObject)BraveResources.Load("Player" + args[0], ".prefab");//Resources.Load("Assets/Resources/CHARACTERDB:" + args[0] + ".prefab");
         if (prefab == null) {
             Debug.Log(args[0] + " is not a mod character, checking if it's one of the standard characters");
             prefab = (GameObject)Resources.Load("Player" + args[0]);
@@ -795,7 +805,7 @@ public class ETGModConsole : ETGModMenu {
         gameObject.SetActive(true);
         playerController = gameObject.GetComponent<PlayerController>();
         if (args.Length == 2) {
-            playerController.SwapToAlternateCostume();
+            component.SwapToAlternateCostume(null);
         }
         GameManager.Instance.PrimaryPlayer = playerController;
         playerController.PlayerIDX = 0;
@@ -821,8 +831,8 @@ public class ETGModConsole : ETGModMenu {
         var db = GameManager.Instance.SynergyManager;
         Console.WriteLine("synergies:");
         foreach (var entry in db.synergies) {
-            Console.WriteLine("  - items_or: " + entry.ItemsOR.ToString().ToLowerInvariant());
-            Console.WriteLine("    guns_or: " + entry.GunsOR.ToString().ToLowerInvariant());
+            Console.WriteLine("  - items_or: " + entry.OptionalGunIDs.ToString().ToLowerInvariant());
+            Console.WriteLine("    guns_or: " + entry.OptionalItemIDs.ToString().ToLowerInvariant());
             if (entry.statModifiers.Count == 0) {
                 Console.WriteLine("    stat_mods: [] ");
             } else {
@@ -833,21 +843,21 @@ public class ETGModConsole : ETGModMenu {
                     Console.WriteLine("        amount: " + mod.amount.ToStringInvariant());
                 }
             }
-            if (entry.itemIDs.Count == 0) {
+            if (entry.OptionalItemIDs.Count == 0) {
                 Console.WriteLine("    items: []");
             } else {
                 Console.WriteLine("    items:");
-                foreach (var item in entry.itemIDs) {
+                foreach (var item in entry.OptionalItemIDs) {
                     var pickupobject = PickupObjectDatabase.Instance.InternalGetById(item);
                     Console.WriteLine("      - name: " + pickupobject.EncounterNameOrDisplayName ?? "null");
                     Console.WriteLine("        id: " + item);
                 }
             }
-            if (entry.gunIDs.Count == 0) {
+            if (entry.OptionalGunIDs.Count == 0) {
                 Console.WriteLine("    guns: []");
             } else {
                 Console.WriteLine("    guns:");
-                foreach (var item in entry.gunIDs) {
+                foreach (var item in entry.OptionalGunIDs) {
                     var pickupobject = PickupObjectDatabase.Instance.InternalGetById(item);
                     Console.WriteLine("      - name: " + pickupobject.EncounterNameOrDisplayName ?? "null");
                     Console.WriteLine("        id: " + item);
@@ -864,22 +874,31 @@ public class ETGModConsole : ETGModMenu {
         }
     }
 
-    void DumpPickups(string[] args) {
+    void DumpPickups(string[] args)
+    {
         if (!ArgCount(args, 0, 0)) return;
 
-        foreach (var entry in PickupObjectDatabase.Instance.Objects) {
-            if (entry != null) {
+        foreach (var entry in PickupObjectDatabase.Instance.Objects)
+        {
+            if (entry != null)
+            {
                 var id = entry.PickupObjectId;
                 string name = null;
                 string desc = null;
-                try {
+                try
+                {
                     name = entry.EncounterNameOrDisplayName ?? "[null]";
-                } catch {
+                }
+                catch
+                {
                     name = "[error]";
                 }
-                try {
+                try
+                {
                     desc = entry.encounterTrackable?.journalData?.GetNotificationPanelDescription() ?? "[null]";
-                } catch {
+                }
+                catch
+                {
                     desc = "[error]";
                 }
                 Console.WriteLine($"{id}: {name}: {desc}");

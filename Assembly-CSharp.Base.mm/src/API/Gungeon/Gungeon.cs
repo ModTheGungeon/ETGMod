@@ -22,7 +22,7 @@ namespace Gungeon {
                     }
                 }
             }
-            pool.LockNamespace("gunegon");
+            pool.LockNamespace("gungeon");
         }
 
         public static void Initialize() {

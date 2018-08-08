@@ -114,6 +114,9 @@ public class ETGModGUI : MonoBehaviour {
             } else {
                 CurrentMenu = MenuOpened.Console;
             }
+
+            UpdateTimeScale();
+            UpdatePlayerState();
         }
 
         if (Input.GetKeyDown(KeyCode.F3)) {

@@ -82,12 +82,14 @@ public sealed class ItemDB {
             edbEntry.myGuid = value.encounterTrackable.EncounterGuid;
             edbEntry.path = "Assets/Resources/ITEMDB:" + value.name + ".prefab";
             EncounterDatabase.Instance.Entries.Add(edbEntry);
+            
 
             WeightedGameObject lootGameObject = new WeightedGameObject() {
-                gameObject = value.gameObject,
+               // gameObject = value.gameObject,
                 weight = 1f,
                 additionalPrerequisites = new DungeonPrerequisite[0]
             };
+            lootGameObject.SetGameObject(value.gameObject);
             if (value is Gun) {
                 GameManager.Instance.RewardManager.GunsLootTable.defaultItemDrops.Add(lootGameObject);
             } else {

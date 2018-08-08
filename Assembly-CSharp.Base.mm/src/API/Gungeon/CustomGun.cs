@@ -88,7 +88,7 @@ namespace Gungeon {
             base.OnFinishAttack += OnFinishAttack;
             base.OnPostFired += OnPostFired;
             base.OnAmmoChanged += OnAmmoChanged;
-            base.OnPreFireProjectileModifier += OnPreFireProjectileModifier;
+            //base.OnPreFireProjectileModifier += OnPreFireProjectileModifier;
 
             encounterTrackable.EncounterGuid = id;
         }

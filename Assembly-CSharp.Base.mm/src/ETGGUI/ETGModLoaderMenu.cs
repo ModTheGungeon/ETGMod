@@ -29,10 +29,10 @@ public class ETGModLoaderMenu : ETGModMenu {
     public override void Start() {
         KeepSinging();
 
-        IconMod = Resources.Load<Texture2D>("ETGMod/GUI/icon_mod");
-        IconAPI = Resources.Load<Texture2D>("ETGMod/GUI/icon_api");
-        IconZip = Resources.Load<Texture2D>("ETGMod/GUI/icon_zip");
-        IconDir = Resources.Load<Texture2D>("ETGMod/GUI/icon_dir");
+        IconMod = Resources.Load<Texture2D>("etgmod/gui/icon_mod");
+        IconAPI = Resources.Load<Texture2D>("etgmod/gui/icon_api");
+        IconZip = Resources.Load<Texture2D>("etgmod/gui/icon_zip");
+        IconDir = Resources.Load<Texture2D>("etgmod/gui/icon_dir");
 
         GUI = new SGroup {
             Visible = false,
@@ -81,7 +81,7 @@ public class ETGModLoaderMenu : ETGModMenu {
                     },
                 },
 
-                (ModOnlineListGroup = new SGroup {
+              /*  (ModOnlineListGroup = new SGroup {
                     Background = new Color(0f, 0f, 0f, 0f),
                     AutoLayout = (SGroup g) => g.AutoLayoutVertical,
                     ScrollDirection = SGroup.EDirection.Vertical,
@@ -98,7 +98,7 @@ public class ETGModLoaderMenu : ETGModMenu {
                     OnUpdateStyle = delegate (SElement elem) {
                         elem.Position = new Vector2(ModOnlineListGroup.Position.x, ModListGroup.Position.y - elem.Backend.LineHeight - 4f);
                     },
-                },
+                },*/
             }
         };
     }

@@ -15,7 +15,7 @@ using ETGMultiplayer;
 /// </summary>
 public static partial class ETGMod {
     
-    public readonly static Version BaseVersion = new Version(0, 3, 0);
+    public readonly static Version BaseVersion = new Version(0, 3, 2);
     // The following line will be replaced by Travis.
     public readonly static int BaseTravisBuild = 0;
     /// <summary>
@@ -26,9 +26,9 @@ public static partial class ETGMod {
         #if TRAVIS
         new Profile(2, "travis");
         #elif DEBUG
-        new Profile(1, "b2-debug");
+        new Profile(1, "b3-debug");
         #else
-        new Profile(0, "b2"); // no tag
+        new Profile(0, "b1"); // no tag
         #endif
 
     public static string BaseUIVersion {
@@ -347,7 +347,7 @@ public static partial class ETGMod {
 
             // ... then check if the mod runs on this profile ...
             if (!metadata.Profile.RunsOn(BaseProfile)) {
-                Debug.LogWarning("http://www.windoof.org/sites/default/files/unsupported.gif");
+               // Debug.LogWarning("http://www.windoof.org/sites/default/files/unsupported.gif");
                 return;
             }
 

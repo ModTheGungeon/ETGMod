@@ -23,7 +23,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -32,8 +32,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp-firstpass">
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\libs\Ionic.Zip.dll</HintPath>
@@ -43,18 +50,32 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Security" />
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -268,7 +289,7 @@
       <LogicalName>Content/sprites/Foyer_Collection/top_floor_001.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Content\sprites\Ammonomicon Encounter Icon Collection\gshbd_fire_002.png">
-      <LogicalName>Content/sprites/Ammonomicon Encounter Icon Collection/gshbd_fire_002.png</LogicalName>
+      <LogicalName>Content/sprites/Ammonomicon_Encounter_Icon_Collection/gshbd_fire_002.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Content\sprites\WeaponCollection\gshbd_fire_001.json">
       <LogicalName>Content/sprites/WeaponCollection/gshbd_fire_001.json</LogicalName>
@@ -363,17 +384,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Content\etgmod\gui\" />
-    <Folder Include="src\SGUI\Modifiers\" />
-    <Folder Include="src\Guns\" />
-    <Folder Include="src\ETGGUI\Repo\" />
-    <Folder Include="src\Core\Databases\" />
-    <Folder Include="src\SGUI\Animations\" />
-    <Folder Include="src\Core\Assets\" />
-    <Folder Include="src\API\" />
-    <Folder Include="src\API\Gungeon\" />
-    <Folder Include="src\Core\Extensions\" />
-    <Folder Include="src\API\Gungeon\AnimLoader\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

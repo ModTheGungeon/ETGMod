@@ -14,7 +14,7 @@ public class GunBehaviour : MonoBehaviour {
         gun.OnFinishAttack += OnFinishAttack;
         gun.OnPostFired += OnPostFired;
         gun.OnAmmoChanged += OnAmmoChanged;
-        gun.OnPreFireProjectileModifier += OnPreFireProjectileModifier;
+        //gun.OnPreFireProjectileModifier += OnPreFireProjectileModifier;
     }
 
     public virtual void OnInitializedWithOwner(GameActor actor) {
