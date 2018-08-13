@@ -190,7 +190,6 @@ public class ETGModLoaderMenu : ETGModMenu {
         while (GameManager.Instance.PrimaryPlayer == null) {
             yield return new WaitForSeconds(1f);
         }
-        GameManager.Instance.PrimaryPlayer.spriteAnimator = Gungeon.AnimLoader.FromResource("sprites/test_anim.yml");
 
         if (!ETGMod.KeptSinging) {
             if (!PlatformInterfaceSteam.IsSteamBuild()) {
