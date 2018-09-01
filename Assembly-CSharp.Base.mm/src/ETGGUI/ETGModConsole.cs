@@ -317,7 +317,7 @@ public class ETGModConsole : ETGModMenu {
 		*/
 
         string matchkeyword = string.Empty;
-        if (!inputtext.EndsWithInvariant(" ")) {
+        if (!inputtext.EndsWithInvariant(" ") && inputtext.Length > 0) {
             matchindex--;
             matchkeyword = input[input.Length - 1];
         }
