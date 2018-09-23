@@ -1,5 +1,4 @@
-# Enter the Gungeon Base API Mod pre-rewrite fork
-# Compatible with Advanced Gungeons & Draguns update
+# Enter the Gungeon Base API Mod
 
 ### License: MIT
 
@@ -12,18 +11,6 @@ The "base backend" will be installed before anything else in [the ETGMod.Install
 It is still in its early phases. Do not expect anything usable for end-users here for quite a while.
 
 For compatibility reasons, it contains its own copy of Mono.Cecil (it's not a submodule).  
-
-# Mod installation (tutorial by gOOLY)
-
-1. Download the [latest mod build](https://github.com/katzsmile/ETGMod/releases/latest), and put it on your desktop
-2. Download the [latest MtG installer build](https://github.com/ModTheGungeon/ETGMod.Installer/releases/latest) from the website
-3. Open the ETGMod.Installer
-4. Look on the Installer. Look towards the middle and you will see 2 Tabs, "Backends" and "Advanced"
-5. Select the Advanced Tab
-6. On the Advanced Tab you will need to scroll down until you see> "Offline mode-only use APIs here". Check that box 
-7. Now, if you remember that ETGMOD.zip file you were supposed to download earlier, you will need to for the last step. Scroll back up on the Advanced Tab, and drag-and-drop that .zip file until it indicates that there is a file there (Mine says C:\Users\Admin\Desktop\ETGMOD.zip , but yours may say something else) It is important to note that you should NOT UNZIP ETGMOD.zip, just put it in there exactly the way you found it
-8. Select "Step 3: Install ETGMod" on the installer
-9. Run Enter the Gungeon and see if it worked. 
 
 # Before contributing
 
