@@ -227,13 +227,13 @@
     <Compile Include="src\Core\Gun.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.Base.mm.csproj">
-      <Project>{3C105AF3-D405-4536-B45E-C764D6ED84C7}</Project>
-      <Name>UnityEngine.Base.mm</Name>
-    </ProjectReference>
     <ProjectReference Include="..\libs\YamlDotNet\YamlDotNet\YamlDotNet.csproj">
       <Project>{BF32DE1B-6276-4341-B212-F8862ADBBA7A}</Project>
       <Name>YamlDotNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.Base.mm\UnityEngine.CoreModule.Base.mm.csproj">
+      <Project>{3C105AF3-D405-4536-B45E-C764D6ED84C7}</Project>
+      <Name>UnityEngine.CoreModule.Base.mm</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

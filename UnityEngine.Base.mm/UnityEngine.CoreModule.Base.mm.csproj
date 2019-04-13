@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnityEngine</RootNamespace>
-    <AssemblyName>UnityEngine.Base.mm</AssemblyName>
+    <AssemblyName>UnityEngine.CoreModule.Base.mm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

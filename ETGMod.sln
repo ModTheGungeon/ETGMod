@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp.Base.mm", "Assembly-CSharp.Base.mm\Assembly-CSharp.Base.mm.csproj", "{363A46E8-D9DD-4F31-9307-73B664E71D45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityEngine.Base.mm", "UnityEngine.Base.mm\UnityEngine.Base.mm.csproj", "{3C105AF3-D405-4536-B45E-C764D6ED84C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityEngine.CoreModule.Base.mm", "UnityEngine.Base.mm\UnityEngine.CoreModule.Base.mm.csproj", "{3C105AF3-D405-4536-B45E-C764D6ED84C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDebugDummy", "MonoDebugDummy\MonoDebugDummy.csproj", "{F1235018-66D7-4365-AAB1-1CE170132B4A}"
 EndProject

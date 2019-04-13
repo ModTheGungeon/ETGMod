@@ -38,7 +38,7 @@ public static partial class ETGMod {
         }
 
         private static void _HookDFSprite(Component c) {
-            ((dfSprite) c).Atlas.HandleAuto();
+            try { ((dfSprite)c).Atlas.HandleAuto(); } catch { }
         }
 
         public static void HookUnity() {
