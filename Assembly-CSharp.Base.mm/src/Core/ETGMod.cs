@@ -440,7 +440,19 @@ public static partial class ETGMod {
                 return;
             }
         }
+        Texture2D icon = null;
+        string iconPath = Path.Combine(dir, "icon.png");
+        if (File.Exists(iconPath))
+        {
+            icon = new Texture2D(2, 2);
+            icon.name = "icon";
 
+            icon.LoadImage(File.ReadAllBytes(iconPath));
+            icon.filterMode = FilterMode.Point;
+
+        }
+        if (icon != null)
+            metadata.Icon = icon;
         // ... then add an AssemblyResolve handler for all the .zip-ped libraries
         AppDomain.CurrentDomain.AssemblyResolve += metadata._GenerateModAssemblyResolver();
 
